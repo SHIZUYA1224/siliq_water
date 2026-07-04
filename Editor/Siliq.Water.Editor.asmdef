@@ -1,7 +1,9 @@
 {
-    "name": "Siliq.WaterNormalMap.Editor",
-    "rootNamespace": "Siliq.WaterNormalMap",
-    "references": [],
+    "name": "Siliq.Water.Editor",
+    "rootNamespace": "Siliq.Water.Editor",
+    "references": [
+        "Siliq.Water.Runtime"
+    ],
     "includePlatforms": [
         "Editor"
     ],

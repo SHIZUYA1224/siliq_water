@@ -1,0 +1,14 @@
+{
+    "name": "Siliq.Water.Runtime",
+    "rootNamespace": "Siliq.Water",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

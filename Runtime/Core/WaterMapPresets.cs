@@ -1,39 +1,41 @@
-using System.Collections.Generic;
-
-namespace Siliq.WaterNormalMap
+namespace Siliq.Water
 {
     /// <summary>
     /// 代表的な水表現のプリセット集。ここから選んで微調整するのが基本ワークフロー。
     /// </summary>
-    public static class WaterNormalMapPresets
+    public static class WaterMapPresets
     {
         public static readonly string[] Names =
         {
             "穏やかな湖",
             "海のうねり",
+            "外洋 (多波スペクトル)",
             "川の流れ",
             "雨の水面",
             "さざ波",
             "トゥーン / スタイライズ",
+            "溶岩 / 粘性流体",
         };
 
-        public static WaterNormalMapSettings Create(int index)
+        public static WaterMapSettings Create(int index)
         {
             switch (index)
             {
                 case 0: return CalmLake();
                 case 1: return OceanSwell();
-                case 2: return RiverStream();
-                case 3: return RainSurface();
-                case 4: return GentleRipples();
-                case 5: return StylizedToon();
+                case 2: return OpenOcean();
+                case 3: return RiverStream();
+                case 4: return RainSurface();
+                case 5: return GentleRipples();
+                case 6: return StylizedToon();
+                case 7: return Lava();
                 default: return CalmLake();
             }
         }
 
-        static WaterNormalMapSettings Base(float strength)
+        static WaterMapSettings Base(float strength)
         {
-            return new WaterNormalMapSettings
+            return new WaterMapSettings
             {
                 resolution = 1024,
                 strength = strength,
@@ -45,7 +47,7 @@ namespace Siliq.WaterNormalMap
             };
         }
 
-        static WaterNormalMapSettings CalmLake()
+        static WaterMapSettings CalmLake()
         {
             var s = Base(0.6f);
             s.layers = new[]
@@ -64,9 +66,11 @@ namespace Siliq.WaterNormalMap
             return s;
         }
 
-        static WaterNormalMapSettings OceanSwell()
+        static WaterMapSettings OceanSwell()
         {
             var s = Base(1.4f);
+            s.foamThreshold = 0.72f;
+            s.foamSlopeBoost = 0.8f;
             s.layers = new[]
             {
                 new WaveLayer
@@ -77,7 +81,7 @@ namespace Siliq.WaterNormalMap
                 new WaveLayer
                 {
                     name = "波の乱れ", type = WaveLayerType.PerlinWaves, blend = WaveBlendMode.Add,
-                    amplitude = 0.5f, scale = 8, octaves = 5, persistence = 0.55f, speed = 1, seed = 3,
+                    amplitude = 0.5f, scale = 8, octaves = 5, persistence = 0.55f, speed = 1, seed = 3, warpAmount = 0.3f, warpScale = 4,
                 },
                 new WaveLayer
                 {
@@ -88,9 +92,37 @@ namespace Siliq.WaterNormalMap
             return s;
         }
 
-        static WaterNormalMapSettings RiverStream()
+        static WaterMapSettings OpenOcean()
+        {
+            var s = Base(1.6f);
+            s.foamThreshold = 0.68f;
+            s.foamSlopeBoost = 1f;
+            s.layers = new[]
+            {
+                new WaveLayer
+                {
+                    name = "スペクトル波", type = WaveLayerType.DirectionalWaves, blend = WaveBlendMode.Add,
+                    amplitude = 1f, scale = 6, sharpness = 3f, directionDeg = 0f, spreadDeg = 60f, waveCount = 32, speed = 1,
+                },
+                new WaveLayer
+                {
+                    name = "うねりの歪み", type = WaveLayerType.PerlinWaves, blend = WaveBlendMode.Multiply,
+                    amplitude = 0.4f, scale = 3, octaves = 3, speed = 1, seed = 21, maskAmount = 0.5f, maskScale = 2,
+                },
+                new WaveLayer
+                {
+                    name = "細波", type = WaveLayerType.RidgedWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.25f, scale = 24, octaves = 3, sharpness = 1.5f, speed = 2, seed = 13,
+                },
+            };
+            return s;
+        }
+
+        static WaterMapSettings RiverStream()
         {
             var s = Base(1f);
+            s.flowSwirl = 0.35f;
+            s.flowStrength = 0.8f;
             s.layers = new[]
             {
                 new WaveLayer
@@ -107,7 +139,7 @@ namespace Siliq.WaterNormalMap
             return s;
         }
 
-        static WaterNormalMapSettings RainSurface()
+        static WaterMapSettings RainSurface()
         {
             var s = Base(1.2f);
             s.layers = new[]
@@ -126,7 +158,7 @@ namespace Siliq.WaterNormalMap
             return s;
         }
 
-        static WaterNormalMapSettings GentleRipples()
+        static WaterMapSettings GentleRipples()
         {
             var s = Base(0.8f);
             s.layers = new[]
@@ -145,9 +177,10 @@ namespace Siliq.WaterNormalMap
             return s;
         }
 
-        static WaterNormalMapSettings StylizedToon()
+        static WaterMapSettings StylizedToon()
         {
             var s = Base(1.6f);
+            s.causticsSharpness = 4f;
             s.layers = new[]
             {
                 new WaveLayer
@@ -159,6 +192,27 @@ namespace Siliq.WaterNormalMap
                 {
                     name = "丸い盛り上がり", type = WaveLayerType.VoronoiCells, blend = WaveBlendMode.Add,
                     amplitude = 0.35f, scale = 8, sharpness = 2f, jitter = 0.85f, speed = 1, seed = 6,
+                },
+            };
+            return s;
+        }
+
+        static WaterMapSettings Lava()
+        {
+            var s = Base(2.2f);
+            s.baseRoughness = 0.5f;
+            s.layers = new[]
+            {
+                new WaveLayer
+                {
+                    name = "粘性の流れ", type = WaveLayerType.RidgedWaves, blend = WaveBlendMode.Add,
+                    amplitude = 1f, scale = 5, octaves = 5, persistence = 0.55f, sharpness = 1.5f, stretch = 2,
+                    speed = 1, warpAmount = 0.8f, warpScale = 3,
+                },
+                new WaveLayer
+                {
+                    name = "プレート割れ目", type = WaveLayerType.VoronoiCaustics, blend = WaveBlendMode.Add,
+                    amplitude = 0.6f, scale = 5, sharpness = 4f, jitter = 0.7f, speed = 0, seed = 8, invert = true,
                 },
             };
             return s;

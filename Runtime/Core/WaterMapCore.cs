@@ -2,101 +2,14 @@ using System;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Siliq.WaterNormalMap
+namespace Siliq.Water
 {
     /// <summary>
-    /// 波レイヤーの種類。
+    /// ハイトフィールド生成と各種マップ変換のコア。
+    /// 全ノイズはトーラス上で定義され、生成結果は必ずシームレスにタイリングし、
+    /// t ∈ [0,1) で完全ループする。UnityEditor 非依存のためランタイム生成にも使える。
     /// </summary>
-    public enum WaveLayerType
-    {
-        PerlinWaves,      // fBm パーリンノイズ(穏やかな揺らぎ)
-        RidgedWaves,      // リッジノイズ(尖ったうねり)
-        VoronoiCells,     // ボロノイ・セル(丸い盛り上がり)
-        VoronoiCaustics,  // ボロノイ・エッジ(コースティクス風の網目)
-        DirectionalWaves, // 指向性のある波(ゲルストナー風)
-        RainRipples,      // 雨の波紋(広がるリング)
-    }
-
-    /// <summary>
-    /// レイヤー合成モード。
-    /// </summary>
-    public enum WaveBlendMode
-    {
-        Add,
-        Multiply,
-        Max,
-        Min,
-    }
-
-    [Serializable]
-    public class WaveLayer
-    {
-        public bool enabled = true;
-        public string name = "波レイヤー";
-        public WaveLayerType type = WaveLayerType.PerlinWaves;
-        public WaveBlendMode blend = WaveBlendMode.Add;
-
-        [Range(0f, 2f)] public float amplitude = 1f;
-
-        // 共通: テクスチャ 1 枚あたりの繰り返し数(整数にすることでシームレスを保証)
-        [Range(1, 64)] public int scale = 8;
-
-        // ノイズ系
-        [Range(1, 8)] public int octaves = 4;
-        [Range(0.1f, 0.9f)] public float persistence = 0.5f;
-
-        // 形状の鋭さ(波の頂点の尖り / ボロノイの減衰 / 波紋のリング幅)
-        [Range(0.25f, 8f)] public float sharpness = 1f;
-
-        // 指向性波・流れ
-        [Range(0f, 360f)] public float directionDeg = 0f;
-        [Range(0f, 90f)] public float spreadDeg = 30f;
-        [Range(1, 24)] public int waveCount = 6;
-
-        // ノイズを流れ方向 (X 軸) に引き伸ばす(川など)。整数でタイリング維持
-        [Range(1, 8)] public int stretch = 1;
-
-        // 雨の波紋
-        [Range(1, 128)] public int dropCount = 24;
-
-        // ボロノイのゆらぎ量
-        [Range(0f, 1f)] public float jitter = 0.9f;
-
-        // アニメーション速度(整数にすることで完全ループを保証)
-        [Range(0, 8)] public int speed = 1;
-
-        public int seed = 0;
-        public bool invert = false;
-
-        public WaveLayer Clone()
-        {
-            return (WaveLayer)MemberwiseClone();
-        }
-    }
-
-    [Serializable]
-    public class WaterNormalMapSettings
-    {
-        public int resolution = 1024;
-        [Range(0.05f, 5f)] public float strength = 1f;
-        public bool autoNormalize = true;
-        public bool flipY = false; // DirectX 系ツールに合わせたい場合のみ true
-        public int globalSeed = 1234;
-
-        // アニメーション書き出し
-        [Range(2, 64)] public int frameCount = 16;
-
-        // Quest / モバイル向けインポート設定を自動適用
-        public bool applyMobileImportSettings = true;
-
-        public WaveLayer[] layers = new WaveLayer[0];
-    }
-
-    /// <summary>
-    /// ハイトフィールド → ノーマルマップ生成のコア。全ノイズはトーラス上で定義され、
-    /// 生成結果は必ずシームレスにタイリングし、t ∈ [0,1) で完全ループする。
-    /// </summary>
-    public static class WaterNormalMapCore
+    public static class WaterMapCore
     {
         const float TwoPi = Mathf.PI * 2f;
 
@@ -212,6 +125,7 @@ namespace Siliq.WaterNormalMap
             int cy = Mathf.FloorToInt(y);
             f1 = float.MaxValue;
             f2 = float.MaxValue;
+            float ang = t * speed * TwoPi;
 
             for (int dy = -1; dy <= 1; dy++)
             {
@@ -223,7 +137,6 @@ namespace Siliq.WaterNormalMap
                     int wy = Mod(iy, cellsY);
 
                     float ph = Hash01(wx, wy, seed + 71) * TwoPi;
-                    float ang = t * speed * TwoPi;
                     float ox = 0.5f + jitter * 0.45f * Mathf.Sin(ang + ph);
                     float oy = 0.5f + jitter * 0.45f * Mathf.Cos(ang + ph * 1.7f + Hash01(wx, wy, seed + 913) * TwoPi);
 
@@ -255,6 +168,17 @@ namespace Siliq.WaterNormalMap
         public static float EvaluateLayer(WaveLayer layer, float u, float v, float t, int globalSeed)
         {
             int seed = layer.seed * 7919 + globalSeed;
+
+            // ドメインワープ: 周期関数によるオフセットなのでタイリングは保たれる
+            if (layer.warpAmount > 0f)
+            {
+                int wp = Mathf.Max(1, layer.warpScale);
+                float wu = PerlinTileable(u * wp, v * wp, wp, wp, seed + 7771) * layer.warpAmount * 0.25f;
+                float wv = PerlinTileable(u * wp + 31.7f, v * wp + 17.3f, wp, wp, seed + 8887) * layer.warpAmount * 0.25f;
+                u += wu;
+                v += wv;
+            }
+
             float h;
 
             switch (layer.type)
@@ -277,13 +201,7 @@ namespace Siliq.WaterNormalMap
 
                     bool ridged = layer.type == WaveLayerType.RidgedWaves;
                     h = FbmTileable(uu, vv, perX, perY, layer.octaves, layer.persistence, seed, ridged);
-                    if (ridged)
-                    {
-                        // [-1,1] へ整えつつ尖りを制御
-                        float n01 = Mathf.Clamp01(h * 0.5f + 0.5f);
-                        h = Mathf.Pow(n01, layer.sharpness) * 2f - 1f;
-                    }
-                    else if (Mathf.Abs(layer.sharpness - 1f) > 0.01f)
+                    if (ridged || Mathf.Abs(layer.sharpness - 1f) > 0.01f)
                     {
                         float n01 = Mathf.Clamp01(h * 0.5f + 0.5f);
                         h = Mathf.Pow(n01, layer.sharpness) * 2f - 1f;
@@ -380,6 +298,14 @@ namespace Siliq.WaterNormalMap
                     break;
             }
 
+            // マスク: 低周波ノイズで効きにムラを作る (時間非依存なのでループ・タイリング維持)
+            if (layer.maskAmount > 0f)
+            {
+                int mp = Mathf.Max(1, layer.maskScale);
+                float m01 = Mathf.Clamp01(PerlinTileable(u * mp, v * mp, mp, mp, seed + 5551) * 0.5f + 0.5f);
+                h *= Mathf.Lerp(1f, m01, layer.maskAmount);
+            }
+
             if (layer.invert) h = -h;
             return h;
         }
@@ -388,7 +314,7 @@ namespace Siliq.WaterNormalMap
         // ハイトフィールド生成
         // ---------------------------------------------------------------
 
-        public static float[] GenerateHeightField(WaterNormalMapSettings settings, int size, float t)
+        public static float[] GenerateHeightField(WaterMapSettings settings, int size, float t)
         {
             var heights = new float[size * size];
             var layers = settings.layers;
@@ -468,7 +394,30 @@ namespace Siliq.WaterNormalMap
         }
 
         // ---------------------------------------------------------------
-        // ノーマルマップ / ハイトマップへの変換
+        // 勾配 / ラプラシアン (ラップあり)
+        // ---------------------------------------------------------------
+
+        static void GradientAt(float[] h, int size, int x, int y, out float dx, out float dy)
+        {
+            int xm = (x - 1 + size) % size;
+            int xp = (x + 1) % size;
+            int ym = (y - 1 + size) % size;
+            int yp = (y + 1) % size;
+            dx = (h[y * size + xp] - h[y * size + xm]) * 0.5f;
+            dy = (h[yp * size + x] - h[ym * size + x]) * 0.5f;
+        }
+
+        static float LaplacianAt(float[] h, int size, int x, int y)
+        {
+            int xm = (x - 1 + size) % size;
+            int xp = (x + 1) % size;
+            int ym = (y - 1 + size) % size;
+            int yp = (y + 1) % size;
+            return h[y * size + xp] + h[y * size + xm] + h[yp * size + x] + h[ym * size + x] - 4f * h[y * size + x];
+        }
+
+        // ---------------------------------------------------------------
+        // 各マップへの変換
         // ---------------------------------------------------------------
 
         public static Color32[] HeightsToNormalPixels(float[] heights, int size, float strength, bool flipY)
@@ -479,28 +428,20 @@ namespace Siliq.WaterNormalMap
 
             Parallel.For(0, size, y =>
             {
-                int ym = (y - 1 + size) % size;
-                int yp = (y + 1) % size;
                 int row = y * size;
-                int rowM = ym * size;
-                int rowP = yp * size;
-
                 for (int x = 0; x < size; x++)
                 {
-                    int xm = (x - 1 + size) % size;
-                    int xp = (x + 1) % size;
-
-                    float dx = (heights[row + xp] - heights[row + xm]) * 0.5f * k;
-                    float dy = (heights[rowP + x] - heights[rowM + x]) * 0.5f * k;
+                    GradientAt(heights, size, x, y, out float dx, out float dy);
+                    dx *= k;
+                    dy *= k;
                     if (flipY) dy = -dy;
 
                     float nx = -dx;
                     float ny = -dy;
-                    float nz = 1f;
                     float invLen = 1f / Mathf.Sqrt(nx * nx + ny * ny + 1f);
+                    float nz = invLen;
                     nx *= invLen;
                     ny *= invLen;
-                    nz *= invLen;
 
                     pixels[row + x] = new Color32(
                         (byte)Mathf.RoundToInt((nx * 0.5f + 0.5f) * 255f),
@@ -528,16 +469,214 @@ namespace Siliq.WaterNormalMap
             return pixels;
         }
 
-        /// <summary>設定からノーマルマップの Texture2D を生成(呼び出し側で破棄すること)。</summary>
-        public static Texture2D GenerateNormalMapTexture(WaterNormalMapSettings settings, int size, float t)
+        /// <summary>フォームマスク: 波頭 (高さしきい値) + 急斜面 (砕け波) を白く。</summary>
+        public static Color32[] HeightsToFoamPixels(float[] heights, int size, WaterMapSettings s)
+        {
+            var pixels = new Color32[size * size];
+            float slopeK = size * 0.02f * s.strength;
+
+            Parallel.For(0, size, y =>
+            {
+                int row = y * size;
+                for (int x = 0; x < size; x++)
+                {
+                    float h01 = Mathf.Clamp01(heights[row + x] * 0.5f + 0.5f);
+                    float crest = Mathf.Clamp01((h01 - s.foamThreshold) / Mathf.Max(1e-4f, s.foamSoftness));
+                    crest = crest * crest * (3f - 2f * crest); // smoothstep
+
+                    GradientAt(heights, size, x, y, out float dx, out float dy);
+                    float slope = Mathf.Sqrt(dx * dx + dy * dy) * slopeK;
+                    float breaking = Mathf.Clamp01(slope * s.foamSlopeBoost);
+
+                    byte g = (byte)Mathf.RoundToInt(Mathf.Clamp01(Mathf.Max(crest, breaking)) * 255f);
+                    pixels[row + x] = new Color32(g, g, g, 255);
+                }
+            });
+            return pixels;
+        }
+
+        /// <summary>ラフネス: ベース + 傾斜 + フォーム部分。exportSmoothness なら反転。</summary>
+        public static Color32[] HeightsToRoughnessPixels(float[] heights, int size, WaterMapSettings s)
+        {
+            var pixels = new Color32[size * size];
+            float slopeK = size * 0.02f * s.strength;
+
+            Parallel.For(0, size, y =>
+            {
+                int row = y * size;
+                for (int x = 0; x < size; x++)
+                {
+                    float h01 = Mathf.Clamp01(heights[row + x] * 0.5f + 0.5f);
+                    float crest = Mathf.Clamp01((h01 - s.foamThreshold) / Mathf.Max(1e-4f, s.foamSoftness));
+
+                    GradientAt(heights, size, x, y, out float dx, out float dy);
+                    float slope = Mathf.Sqrt(dx * dx + dy * dy) * slopeK;
+
+                    float r = s.baseRoughness + slope * s.slopeRoughness + crest * s.foamRoughness;
+                    r = Mathf.Clamp01(r);
+                    if (s.exportSmoothness) r = 1f - r;
+
+                    byte g = (byte)Mathf.RoundToInt(r * 255f);
+                    pixels[row + x] = new Color32(g, g, g, 255);
+                }
+            });
+            return pixels;
+        }
+
+        /// <summary>DUDV / ディストーション: RG = 屈折オフセット (ノーマル XY と同等)。</summary>
+        public static Color32[] HeightsToDudvPixels(float[] heights, int size, WaterMapSettings s)
+        {
+            var pixels = new Color32[size * size];
+            float k = s.strength * s.dudvStrength * size * 0.02f;
+
+            Parallel.For(0, size, y =>
+            {
+                int row = y * size;
+                for (int x = 0; x < size; x++)
+                {
+                    GradientAt(heights, size, x, y, out float dx, out float dy);
+                    float ox = Mathf.Clamp(-dx * k, -1f, 1f);
+                    float oy = Mathf.Clamp(-dy * k, -1f, 1f);
+
+                    pixels[row + x] = new Color32(
+                        (byte)Mathf.RoundToInt((ox * 0.5f + 0.5f) * 255f),
+                        (byte)Mathf.RoundToInt((oy * 0.5f + 0.5f) * 255f),
+                        128, 255);
+                }
+            });
+            return pixels;
+        }
+
+        /// <summary>
+        /// フローマップ: RG = 流れベクトル。レイヤーの進行方向と
+        /// ハイトフィールドの回転成分 (等高線に沿う渦) を flowSwirl で合成。
+        /// </summary>
+        public static Color32[] HeightsToFlowPixels(float[] heights, int size, WaterMapSettings s)
+        {
+            // レイヤー方向の加重平均 (スクロール・進行方向を持つレイヤーのみ)
+            Vector2 baseDir = Vector2.zero;
+            foreach (var layer in s.layers)
+            {
+                if (!layer.enabled || layer.amplitude <= 0f) continue;
+                bool directional = layer.type == WaveLayerType.DirectionalWaves ||
+                                   ((layer.type == WaveLayerType.PerlinWaves || layer.type == WaveLayerType.RidgedWaves) && layer.speed > 0);
+                if (!directional) continue;
+                float rad = layer.directionDeg * Mathf.Deg2Rad;
+                baseDir += new Vector2(Mathf.Cos(rad), Mathf.Sin(rad)) * layer.amplitude;
+            }
+            if (baseDir.sqrMagnitude > 1e-6f) baseDir.Normalize();
+            else baseDir = Vector2.right;
+
+            var pixels = new Color32[size * size];
+            float curlK = size * 0.02f;
+
+            Parallel.For(0, size, y =>
+            {
+                int row = y * size;
+                for (int x = 0; x < size; x++)
+                {
+                    GradientAt(heights, size, x, y, out float dx, out float dy);
+                    // 勾配の直交ベクトル = 等高線に沿った渦成分
+                    var curl = new Vector2(dy, -dx) * curlK;
+                    if (curl.sqrMagnitude > 1f) curl.Normalize();
+
+                    Vector2 flow = Vector2.Lerp(baseDir, curl, s.flowSwirl) * s.flowStrength;
+                    flow.x = Mathf.Clamp(flow.x, -1f, 1f);
+                    flow.y = Mathf.Clamp(flow.y, -1f, 1f);
+
+                    pixels[row + x] = new Color32(
+                        (byte)Mathf.RoundToInt((flow.x * 0.5f + 0.5f) * 255f),
+                        (byte)Mathf.RoundToInt((flow.y * 0.5f + 0.5f) * 255f),
+                        0, 255);
+                }
+            });
+            return pixels;
+        }
+
+        /// <summary>
+        /// コースティクス近似: 光が収束する場所 (ラプラシアンが負 = 凸レンズ状) を明るく。
+        /// </summary>
+        public static Color32[] HeightsToCausticsPixels(float[] heights, int size, WaterMapSettings s)
+        {
+            int n = size * size;
+            var focus = new float[n];
+
+            Parallel.For(0, size, y =>
+            {
+                int row = y * size;
+                for (int x = 0; x < size; x++)
+                {
+                    // 負のラプラシアン = 収束 (明るい筋)
+                    focus[row + x] = -LaplacianAt(heights, size, x, y);
+                }
+            });
+
+            // レンジを正規化してから鋭さを適用
+            float min = float.MaxValue, max = float.MinValue;
+            for (int i = 0; i < n; i++)
+            {
+                if (focus[i] < min) min = focus[i];
+                if (focus[i] > max) max = focus[i];
+            }
+            float range = Mathf.Max(max - min, 1e-6f);
+
+            var pixels = new Color32[n];
+            Parallel.For(0, size, y =>
+            {
+                int row = y * size;
+                for (int x = 0; x < size; x++)
+                {
+                    float c01 = (focus[row + x] - min) / range;
+                    float c = Mathf.Pow(c01, s.causticsSharpness);
+                    byte g = (byte)Mathf.RoundToInt(Mathf.Clamp01(c) * 255f);
+                    pixels[row + x] = new Color32(g, g, g, 255);
+                }
+            });
+            return pixels;
+        }
+
+        /// <summary>指定マップ種のピクセルを生成。</summary>
+        public static Color32[] GeneratePixels(WaterMapSettings settings, WaterMapType mapType, int size, float t)
         {
             float[] heights = GenerateHeightField(settings, size, t);
-            Color32[] pixels = HeightsToNormalPixels(heights, size, settings.strength, settings.flipY);
+            return PixelsFromHeights(heights, settings, mapType, size);
+        }
 
-            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false, true);
-            tex.wrapMode = TextureWrapMode.Repeat;
+        /// <summary>生成済みハイトフィールドから指定マップ種のピクセルへ変換。</summary>
+        public static Color32[] PixelsFromHeights(float[] heights, WaterMapSettings settings, WaterMapType mapType, int size)
+        {
+            switch (mapType)
+            {
+                case WaterMapType.Normal: return HeightsToNormalPixels(heights, size, settings.strength, settings.flipY);
+                case WaterMapType.Height: return HeightsToGrayscalePixels(heights, size);
+                case WaterMapType.Foam: return HeightsToFoamPixels(heights, size, settings);
+                case WaterMapType.Roughness: return HeightsToRoughnessPixels(heights, size, settings);
+                case WaterMapType.Flow: return HeightsToFlowPixels(heights, size, settings);
+                case WaterMapType.Dudv: return HeightsToDudvPixels(heights, size, settings);
+                case WaterMapType.Caustics: return HeightsToCausticsPixels(heights, size, settings);
+                default: throw new ArgumentOutOfRangeException(nameof(mapType));
+            }
+        }
+
+        // ---------------------------------------------------------------
+        // ランタイム / エディタ共通のテクスチャベイク API
+        // ---------------------------------------------------------------
+
+        /// <summary>
+        /// 指定マップの Texture2D を生成する (ランタイム可)。呼び出し側で破棄すること。
+        /// ロード時の動的生成やシード違いのバリエーション生成などに使える。
+        /// </summary>
+        public static Texture2D BakeTexture(WaterMapSettings settings, WaterMapType mapType, int size, float t = 0f)
+        {
+            Color32[] pixels = GeneratePixels(settings, mapType, size, t);
+            bool linear = mapType != WaterMapType.Height; // データ系マップは linear 扱い
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, true, linear)
+            {
+                wrapMode = TextureWrapMode.Repeat,
+                name = $"SiliqWater_{mapType}",
+            };
             tex.SetPixels32(pixels);
-            tex.Apply(false, false);
+            tex.Apply(true, false);
             return tex;
         }
     }
