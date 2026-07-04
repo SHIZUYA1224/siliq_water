@@ -63,6 +63,11 @@ namespace Siliq.Water.Editor
         void OnEnable()
         {
             LoadSettings();
+            if (exportMapFlags == null || exportMapFlags.Length != MapTypes.Length)
+            {
+                exportMapFlags = new bool[MapTypes.Length];
+                exportMapFlags[0] = true;
+            }
             previewDirty = true;
             EditorApplication.update += OnEditorUpdate;
         }
@@ -273,6 +278,11 @@ namespace Siliq.Water.Editor
             settings.applyMobileImportSettings = EditorGUILayout.Toggle(
                 new GUIContent("モバイル向けインポート設定を自動適用", "書き出し時に Repeat / Android=ASTC 6x6 (最大 1024px) を自動設定します (VRChat Quest 向け)。"),
                 settings.applyMobileImportSettings);
+
+            EditorGUILayout.LabelField("品質", EditorStyles.miniBoldLabel);
+            bool ss = EditorGUILayout.Toggle(new GUIContent("スーパーサンプリング (2×)", "2 倍解像度で生成してから縮小し、鋭いエッジのジャギーを抑えます。生成時間は約 4 倍。生成解像度が 4096 を超える場合は自動的に無効になります。"), settings.supersample > 1);
+            settings.supersample = ss ? 2 : 1;
+            settings.exportExr = EditorGUILayout.Toggle(new GUIContent("16bit EXR で書き出し", "PNG (8bit) の代わりに EXR (16bit float) で書き出します。穏やかな水面のバンディング (縞) を根絶できます。"), settings.exportExr);
         }
 
         void DrawMapSettingsSection()
@@ -286,6 +296,7 @@ namespace Siliq.Water.Editor
             settings.foamThreshold = EditorGUILayout.Slider(new GUIContent("波頭しきい値", "この高さより上にフォームが出ます。"), settings.foamThreshold, 0f, 1f);
             settings.foamSoftness = EditorGUILayout.Slider(new GUIContent("境界のやわらかさ"), settings.foamSoftness, 0.01f, 0.5f);
             settings.foamSlopeBoost = EditorGUILayout.Slider(new GUIContent("砕け波ブースト", "急斜面にもフォームを追加します。"), settings.foamSlopeBoost, 0f, 2f);
+            settings.foamBlur = EditorGUILayout.IntSlider(new GUIContent("ぼかし回数", "フォームをやわらかくします (3×3 ボックスブラー)。"), settings.foamBlur, 0, 4);
 
             EditorGUILayout.LabelField("ラフネス", EditorStyles.miniBoldLabel);
             settings.baseRoughness = EditorGUILayout.Slider(new GUIContent("ベースラフネス"), settings.baseRoughness, 0f, 1f);
@@ -299,6 +310,7 @@ namespace Siliq.Water.Editor
 
             EditorGUILayout.LabelField("DUDV / コースティクス", EditorStyles.miniBoldLabel);
             settings.dudvStrength = EditorGUILayout.Slider(new GUIContent("DUDV 強度"), settings.dudvStrength, 0f, 2f);
+            settings.causticsIntensity = EditorGUILayout.Slider(new GUIContent("コースティクスの強さ", "曲率から明るさへの変換強度。模様が真っ白 / 真っ黒になる場合はここを調整。"), settings.causticsIntensity, 0.05f, 8f);
             settings.causticsSharpness = EditorGUILayout.Slider(new GUIContent("コースティクスの鋭さ"), settings.causticsSharpness, 0.5f, 8f);
 
             EditorGUI.indentLevel--;
@@ -477,7 +489,7 @@ namespace Siliq.Water.Editor
             EditorGUILayout.LabelField("プレビュー", EditorStyles.boldLabel);
 
             EditorGUI.BeginChangeCheck();
-            previewMapIndex = GUILayout.Toolbar(previewMapIndex, MapTabLabels);
+            previewMapIndex = GUILayout.SelectionGrid(previewMapIndex, MapTabLabels, 4);
             if (EditorGUI.EndChangeCheck())
             {
                 previewDirty = true;
@@ -528,7 +540,10 @@ namespace Siliq.Water.Editor
             DestroyPreview();
 
             var mapType = MapTypes[Mathf.Clamp(previewMapIndex, 0, MapTypes.Length - 1)];
-            Color32[] pixels = WaterMapCore.GeneratePixels(settings, mapType, PreviewResolution, previewTime);
+            // プレビューはアニメ再生の応答性を優先して SSAA なしで生成
+            var previewSettings = settings.Clone();
+            previewSettings.supersample = animatePreview ? 1 : settings.supersample;
+            Color32[] pixels = WaterMapCore.GeneratePixels(previewSettings, mapType, PreviewResolution, previewTime);
             previewTexture = new Texture2D(PreviewResolution, PreviewResolution, TextureFormat.RGBA32, false, true)
             {
                 wrapMode = TextureWrapMode.Repeat,
@@ -576,7 +591,7 @@ namespace Siliq.Water.Editor
 
             using (new EditorGUI.DisabledScope(!AnyExportSelected()))
             {
-                if (GUILayout.Button("選択したマップを一括書き出し (PNG)", GUILayout.Height(32f)))
+                if (GUILayout.Button($"選択したマップを一括書き出し ({FileExtension.ToUpperInvariant()})", GUILayout.Height(32f)))
                 {
                     ExportSelectedMaps();
                 }
@@ -616,29 +631,34 @@ namespace Siliq.Water.Editor
             return false;
         }
 
+        string FileExtension => settings.exportExr ? "exr" : "png";
+
         void ExportSelectedMaps()
         {
-            string path = EditorUtility.SaveFilePanelInProject("一括書き出し", "Water", "png", "ベース名を指定してください (マップ別のサフィックスが付きます)");
+            string path = EditorUtility.SaveFilePanelInProject("一括書き出し", "Water", FileExtension, "ベース名を指定してください (マップ別のサフィックスが付きます)");
             if (string.IsNullOrEmpty(path)) return;
 
             string dir = Path.GetDirectoryName(path)?.Replace('\\', '/');
             string baseName = Path.GetFileNameWithoutExtension(path);
             int size = settings.resolution;
+            int ss = WaterMapCore.EffectiveSupersample(settings, size);
+            int genSize = size * ss;
             var exported = new List<(string path, WaterMapType type)>();
 
             try
             {
                 EditorUtility.DisplayProgressBar("水面マップ生成", "ハイトフィールド生成中...", 0.1f);
-                float[] heights = WaterMapCore.GenerateHeightField(settings, size, previewTime);
+                float[] heights = WaterMapCore.GenerateHeightField(settings, genSize, previewTime);
 
                 for (int i = 0; i < MapTypes.Length; i++)
                 {
                     if (!exportMapFlags[i]) continue;
                     EditorUtility.DisplayProgressBar("水面マップ生成", $"{MapTabLabels[i]} を書き出し中...", 0.2f + 0.7f * i / MapTypes.Length);
 
-                    Color32[] pixels = WaterMapCore.PixelsFromHeights(heights, settings, MapTypes[i], size);
-                    string mapPath = $"{dir}/{baseName}_{MapSuffixes[i]}.png";
-                    WritePng(mapPath, pixels, size);
+                    Color[] colors = WaterMapCore.ColorsFromHeights(heights, settings, MapTypes[i], genSize);
+                    colors = WaterMapCore.Downsample(colors, genSize, ss, MapTypes[i] == WaterMapType.Normal);
+                    string mapPath = $"{dir}/{baseName}_{MapSuffixes[i]}.{FileExtension}";
+                    WriteImage(mapPath, colors, size);
                     ApplyImportSettings(mapPath, MapTypes[i]);
                     exported.Add((mapPath, MapTypes[i]));
                 }
@@ -662,34 +682,43 @@ namespace Siliq.Water.Editor
 
         void ExportSequence()
         {
-            string path = EditorUtility.SaveFilePanelInProject("連番アニメを書き出し", "Water_anim", "png", "ベース名を指定してください (マップ別サフィックスと連番が付きます)");
+            string path = EditorUtility.SaveFilePanelInProject("連番アニメを書き出し", "Water_anim", FileExtension, "ベース名を指定してください (マップ別サフィックスと連番が付きます)");
             if (string.IsNullOrEmpty(path)) return;
 
             string dir = Path.GetDirectoryName(path)?.Replace('\\', '/');
             string baseName = Path.GetFileNameWithoutExtension(path);
             int frames = settings.frameCount;
             int size = settings.resolution;
+            int ss = WaterMapCore.EffectiveSupersample(settings, size);
+            int genSize = size * ss;
             var exported = new List<(string path, WaterMapType type)>();
 
             try
             {
-                AssetDatabase.StartAssetEditing();
-                for (int f = 0; f < frames; f++)
+                try
                 {
-                    EditorUtility.DisplayProgressBar("連番アニメ書き出し", $"フレーム {f + 1} / {frames}", (float)f / frames);
-                    float t = (float)f / frames;
-                    float[] heights = WaterMapCore.GenerateHeightField(settings, size, t);
-
-                    for (int i = 0; i < MapTypes.Length; i++)
+                    AssetDatabase.StartAssetEditing();
+                    for (int f = 0; f < frames; f++)
                     {
-                        if (!exportMapFlags[i]) continue;
-                        Color32[] pixels = WaterMapCore.PixelsFromHeights(heights, settings, MapTypes[i], size);
-                        string framePath = $"{dir}/{baseName}_{MapSuffixes[i]}_{f:D3}.png";
-                        WritePng(framePath, pixels, size, refresh: false);
-                        exported.Add((framePath, MapTypes[i]));
+                        EditorUtility.DisplayProgressBar("連番アニメ書き出し", $"フレーム {f + 1} / {frames}", (float)f / frames);
+                        float t = (float)f / frames;
+                        float[] heights = WaterMapCore.GenerateHeightField(settings, genSize, t);
+
+                        for (int i = 0; i < MapTypes.Length; i++)
+                        {
+                            if (!exportMapFlags[i]) continue;
+                            Color[] colors = WaterMapCore.ColorsFromHeights(heights, settings, MapTypes[i], genSize);
+                            colors = WaterMapCore.Downsample(colors, genSize, ss, MapTypes[i] == WaterMapType.Normal);
+                            string framePath = $"{dir}/{baseName}_{MapSuffixes[i]}_{f:D3}.{FileExtension}";
+                            WriteImage(framePath, colors, size, refresh: false);
+                            exported.Add((framePath, MapTypes[i]));
+                        }
                     }
                 }
-                AssetDatabase.StopAssetEditing();
+                finally
+                {
+                    AssetDatabase.StopAssetEditing();
+                }
                 AssetDatabase.Refresh();
                 foreach (var (p, type) in exported)
                 {
@@ -711,33 +740,36 @@ namespace Siliq.Water.Editor
             int atlasW = cols * cellSize;
             int atlasH = rows * cellSize;
 
-            if (Mathf.Max(atlasW, atlasH) > 8192)
+            int sizeLimit = settings.exportExr ? 4096 : 8192; // EXR はメモリ使用量が大きいため控えめに
+            if (Mathf.Max(atlasW, atlasH) > sizeLimit)
             {
                 EditorUtility.DisplayDialog("アトラスが大きすぎます",
-                    $"アトラスサイズが {atlasW}×{atlasH} になり 8192 を超えます。\n解像度またはフレーム数を下げてください。", "OK");
+                    $"アトラスサイズが {atlasW}×{atlasH} になり上限 ({sizeLimit}) を超えます。\n解像度またはフレーム数を下げてください。", "OK");
                 return;
             }
 
-            string path = EditorUtility.SaveFilePanelInProject("アトラスを書き出し", $"Water_atlas_{cols}x{rows}", "png", "ベース名を指定してください");
+            string path = EditorUtility.SaveFilePanelInProject("アトラスを書き出し", $"Water_atlas_{cols}x{rows}", FileExtension, "ベース名を指定してください");
             if (string.IsNullOrEmpty(path)) return;
 
             string dir = Path.GetDirectoryName(path)?.Replace('\\', '/');
             string baseName = Path.GetFileNameWithoutExtension(path);
+            int ss = WaterMapCore.EffectiveSupersample(settings, cellSize);
+            int genSize = cellSize * ss;
 
             try
             {
                 // フレームごとにハイトフィールドを生成し、選択された全マップのアトラスへ書き込む
-                var atlases = new Dictionary<int, Color32[]>();
+                var atlases = new Dictionary<int, Color[]>();
                 for (int i = 0; i < MapTypes.Length; i++)
                 {
-                    if (exportMapFlags[i]) atlases[i] = new Color32[atlasW * atlasH];
+                    if (exportMapFlags[i]) atlases[i] = new Color[atlasW * atlasH];
                 }
 
                 for (int f = 0; f < frames; f++)
                 {
                     EditorUtility.DisplayProgressBar("アトラス書き出し", $"フレーム {f + 1} / {frames}", (float)f / frames);
                     float t = (float)f / frames;
-                    float[] heights = WaterMapCore.GenerateHeightField(settings, cellSize, t);
+                    float[] heights = WaterMapCore.GenerateHeightField(settings, genSize, t);
 
                     int col = f % cols;
                     int row = f / cols;
@@ -746,20 +778,21 @@ namespace Siliq.Water.Editor
 
                     foreach (var kv in atlases)
                     {
-                        Color32[] pixels = WaterMapCore.PixelsFromHeights(heights, settings, MapTypes[kv.Key], cellSize);
+                        Color[] colors = WaterMapCore.ColorsFromHeights(heights, settings, MapTypes[kv.Key], genSize);
+                        colors = WaterMapCore.Downsample(colors, genSize, ss, MapTypes[kv.Key] == WaterMapType.Normal);
                         for (int y = 0; y < cellSize; y++)
                         {
-                            Array.Copy(pixels, y * cellSize, kv.Value, (dstY + y) * atlasW + dstX, cellSize);
+                            Array.Copy(colors, y * cellSize, kv.Value, (dstY + y) * atlasW + dstX, cellSize);
                         }
                     }
                 }
 
-                EditorUtility.DisplayProgressBar("アトラス書き出し", "PNG 書き出し中...", 0.95f);
+                EditorUtility.DisplayProgressBar("アトラス書き出し", "画像書き出し中...", 0.95f);
                 string firstPath = null;
                 foreach (var kv in atlases)
                 {
-                    string mapPath = $"{dir}/{baseName}_{MapSuffixes[kv.Key]}.png";
-                    WriteAtlasPng(mapPath, kv.Value, atlasW, atlasH);
+                    string mapPath = $"{dir}/{baseName}_{MapSuffixes[kv.Key]}.{FileExtension}";
+                    WriteImage(mapPath, kv.Value, atlasW, atlasH);
                     ApplyImportSettings(mapPath, MapTypes[kv.Key]);
                     firstPath = firstPath ?? mapPath;
                 }
@@ -776,27 +809,34 @@ namespace Siliq.Water.Editor
             }
         }
 
-        static void WritePng(string path, Color32[] pixels, int size, bool refresh = true)
+        void WriteImage(string path, Color[] colors, int size, bool refresh = true)
         {
-            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false, true);
-            tex.SetPixels32(pixels);
-            tex.Apply(false, false);
-            File.WriteAllBytes(path, tex.EncodeToPNG());
-            DestroyImmediate(tex);
+            WriteImage(path, colors, size, size, refresh);
+        }
+
+        void WriteImage(string path, Color[] colors, int w, int h, bool refresh = true)
+        {
+            if (settings.exportExr)
+            {
+                var tex = new Texture2D(w, h, TextureFormat.RGBAFloat, false, true);
+                tex.SetPixels(colors);
+                tex.Apply(false, false);
+                File.WriteAllBytes(path, tex.EncodeToEXR(Texture2D.EXRFlags.CompressZIP));
+                DestroyImmediate(tex);
+            }
+            else
+            {
+                var tex = new Texture2D(w, h, TextureFormat.RGBA32, false, true);
+                tex.SetPixels32(WaterMapCore.Quantize(colors));
+                tex.Apply(false, false);
+                File.WriteAllBytes(path, tex.EncodeToPNG());
+                DestroyImmediate(tex);
+            }
+
             if (refresh)
             {
                 AssetDatabase.ImportAsset(path);
             }
-        }
-
-        static void WriteAtlasPng(string path, Color32[] pixels, int w, int h)
-        {
-            var tex = new Texture2D(w, h, TextureFormat.RGBA32, false, true);
-            tex.SetPixels32(pixels);
-            tex.Apply(false, false);
-            File.WriteAllBytes(path, tex.EncodeToPNG());
-            DestroyImmediate(tex);
-            AssetDatabase.ImportAsset(path);
         }
 
         void ApplyImportSettings(string path, WaterMapType mapType)

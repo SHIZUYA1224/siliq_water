@@ -13,9 +13,9 @@ namespace Siliq.Water
         public WaterMapSettings settings = new WaterMapSettings();
 
         /// <summary>指定マップをこのプロファイル設定でベイクする (ランタイム可)。</summary>
-        public Texture2D Bake(WaterMapType mapType, int size, float t = 0f)
+        public Texture2D Bake(WaterMapType mapType, int size, float t = 0f, bool highPrecision = false)
         {
-            return WaterMapCore.BakeTexture(settings, mapType, size, t);
+            return WaterMapCore.BakeTexture(settings, mapType, size, t, highPrecision);
         }
     }
 }

@@ -60,6 +60,7 @@ Shader "Siliq/Water URP"
             #pragma shader_feature_local _USE_FLOWMAP
             #pragma shader_feature_local _SHORE_EFFECTS
             #pragma multi_compile_fog
+            #pragma multi_compile_instancing
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"

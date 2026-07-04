@@ -38,6 +38,7 @@ Shader "Siliq/Water Mobile (Quest)"
             #pragma fragment frag
             #pragma shader_feature_local USE_REFLECTION_CUBE
             #pragma multi_compile_fog
+            #pragma multi_compile_instancing
             #include "UnityCG.cginc"
             #include "Lighting.cginc"
 

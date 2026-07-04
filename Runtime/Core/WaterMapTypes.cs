@@ -111,10 +111,15 @@ namespace Siliq.Water
         public bool flipY = false; // DirectX 系ツールに合わせたい場合のみ true
         public int globalSeed = 1234;
 
+        // --- 品質 ---
+        [Range(1, 2)] public int supersample = 1;             // 2 でスーパーサンプリング (エッジのジャギー低減)
+        public bool exportExr = false;                        // 16bit EXR で書き出し (バンディング防止)
+
         // --- フォームマスク ---
         [Range(0f, 1f)] public float foamThreshold = 0.7f;    // この高さ以上の波頭にフォーム
         [Range(0.01f, 0.5f)] public float foamSoftness = 0.12f;
         [Range(0f, 2f)] public float foamSlopeBoost = 0.5f;   // 急斜面 (砕け波) への追加フォーム
+        [Range(0, 4)] public int foamBlur = 1;                // フォームのぼかし回数 (3x3 ボックス)
 
         // --- ラフネス ---
         [Range(0f, 1f)] public float baseRoughness = 0.06f;
@@ -130,6 +135,7 @@ namespace Siliq.Water
         [Range(0f, 2f)] public float dudvStrength = 1f;
 
         // --- コースティクス ---
+        [Range(0.05f, 8f)] public float causticsIntensity = 1f; // 曲率 → 明るさの変換強度
         [Range(0.5f, 8f)] public float causticsSharpness = 2.5f;
 
         // --- アニメーション書き出し ---

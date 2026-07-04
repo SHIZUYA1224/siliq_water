@@ -20,6 +20,9 @@ namespace Siliq.Water
         [Tooltip("ON にすると起動ごとにシードをランダム化して毎回違う水面にする")]
         public bool randomizeSeed = false;
 
+        [Tooltip("16bit float テクスチャでベイクしてバンディングを防ぐ (メモリ 2 倍)")]
+        public bool highPrecision = false;
+
         [Header("マテリアルプロパティ名")]
         [Tooltip("ノーマルマップの割り当て先 (Standard/URP Lit は _BumpMap、Siliq 水シェーダーは _NormalMap)")]
         public string normalMapProperty = "_NormalMap";
@@ -62,7 +65,7 @@ namespace Siliq.Water
 
             if (!string.IsNullOrEmpty(normalMapProperty))
             {
-                bakedNormal = WaterMapCore.BakeTexture(settings, WaterMapType.Normal, size);
+                bakedNormal = WaterMapCore.BakeTexture(settings, WaterMapType.Normal, size, 0f, highPrecision);
                 mat.SetTexture(normalMapProperty, bakedNormal);
                 // Standard / URP Lit の _BumpMap を使う場合はキーワードも必要
                 if (normalMapProperty == "_BumpMap")
