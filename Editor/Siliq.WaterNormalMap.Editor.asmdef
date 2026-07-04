@@ -1,0 +1,16 @@
+{
+    "name": "Siliq.WaterNormalMap.Editor",
+    "rootNamespace": "Siliq.WaterNormalMap",
+    "references": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

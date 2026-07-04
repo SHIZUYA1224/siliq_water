@@ -1,0 +1,17 @@
+{
+  "name": "com.siliq.water-normalmap",
+  "displayName": "Siliq Water Normal Map Generator",
+  "version": "1.0.0",
+  "unity": "2019.4",
+  "description": "水面・水表現向けのシームレスなノーマルマップを Unity エディタ上で手続き生成するツール。VRChat モバイル (Quest) 向けのインポート設定の自動適用、ループアニメ連番書き出し、軽量水シェーダー付き。",
+  "keywords": [
+    "water",
+    "normalmap",
+    "vrchat",
+    "quest",
+    "editor-tool"
+  ],
+  "author": {
+    "name": "siliq"
+  }
+}
