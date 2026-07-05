@@ -144,6 +144,10 @@ namespace Siliq.Water
         // --- Quest / モバイル向けインポート設定を自動適用 (エディタ書き出し時) ---
         public bool applyMobileImportSettings = true;
 
+        // --- 自動作成マテリアル ---
+        public bool createTransparentMaterial = false;
+        [Range(0.05f, 1f)] public float materialOpacity = 0.30f;
+
         public WaveLayer[] layers = new WaveLayer[0];
 
         public WaterMapSettings Clone()

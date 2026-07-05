@@ -1,6 +1,6 @@
 // Quest (VRChat モバイル) ワールド向けの軽量水面シェーダー。
-// 1 パス / 不透明 / GrabPass なし。1 枚のノーマルマップをスケール違いで
-// 2 回スクロールサンプリングして波の動きを作ります。
+// 1 パス / GrabPass なし。通常は不透明、透明マテリアル作成時だけ alpha blend へ
+// 切り替えます。1 枚のノーマルマップをスケール違いで 2 回スクロールサンプリングして波の動きを作ります。
 // ※ VRChat のモバイルアバターではカスタムシェーダーが使えないため、
 //    アバターでは VRChat/Mobile/Standard Lite にノーマルマップを設定してください。
 Shader "Siliq/Water Mobile (Quest)"
@@ -10,6 +10,17 @@ Shader "Siliq/Water Mobile (Quest)"
         _ShallowColor ("浅い水の色", Color) = (0.16, 0.55, 0.60, 1)
         _DeepColor ("深い水の色", Color) = (0.02, 0.15, 0.25, 1)
         _HorizonColor ("反射 (空) の色", Color) = (0.65, 0.80, 0.90, 1)
+        _Opacity ("正面の不透明度", Range(0, 1)) = 1
+        _AlphaFresnel ("斜め視線の不透明度加算", Range(0, 1)) = 0
+        _AlphaPower ("透明フレネルの鋭さ", Range(0.5, 8)) = 3
+        _EdgeReflection ("斜め視線の反射強調", Range(0, 1)) = 0
+        _TransmissionColor ("透過光の色", Color) = (0.28, 0.75, 0.95, 1)
+        _TransmissionStrength ("透過光の強さ", Range(0, 1)) = 0
+        _GlimmerColor ("細い光の色", Color) = (0.85, 0.97, 1, 1)
+        _GlimmerIntensity ("細い光の揺らぎ", Range(0, 1)) = 0
+        _GlimmerSharpness ("細い光の鋭さ", Range(2, 32)) = 12
+        _GlintIntensity ("きらめきの強さ", Range(0, 2)) = 0
+        _GlintPower ("きらめきの鋭さ", Range(16, 512)) = 180
         [NoScaleOffset] _NormalMap ("水面ノーマルマップ", 2D) = "bump" {}
         _NormalStrength ("ノーマル強度", Range(0, 2)) = 1
         _Tiling1 ("レイヤー1 タイリング", Float) = 1
@@ -28,6 +39,11 @@ Shader "Siliq/Water Mobile (Quest)"
         _RippleWidth ("波紋の幅", Range(0.05, 2)) = 0.35
         _RippleLifetime ("波紋の持続時間 (秒)", Range(0.5, 10)) = 3
         _RippleAmplitude ("波紋の強さ", Range(0, 3)) = 1
+        _RippleChannel ("波紋チャンネル", Float) = 0
+
+        [HideInInspector] _SrcBlend ("Source Blend", Float) = 1
+        [HideInInspector] _DstBlend ("Destination Blend", Float) = 0
+        [HideInInspector] _ZWrite ("ZWrite", Float) = 1
     }
 
     SubShader
@@ -38,6 +54,8 @@ Shader "Siliq/Water Mobile (Quest)"
         Pass
         {
             Tags { "LightMode" = "ForwardBase" }
+            Blend [_SrcBlend] [_DstBlend]
+            ZWrite [_ZWrite]
 
             CGPROGRAM
             #pragma vertex vert
@@ -53,6 +71,17 @@ Shader "Siliq/Water Mobile (Quest)"
             half4 _ShallowColor;
             half4 _DeepColor;
             half4 _HorizonColor;
+            half _Opacity;
+            half _AlphaFresnel;
+            half _AlphaPower;
+            half _EdgeReflection;
+            half4 _TransmissionColor;
+            half _TransmissionStrength;
+            half4 _GlimmerColor;
+            half _GlimmerIntensity;
+            half _GlimmerSharpness;
+            half _GlintIntensity;
+            half _GlintPower;
             half _NormalStrength;
             float _Tiling1;
             float _Tiling2;
@@ -71,6 +100,7 @@ Shader "Siliq/Water Mobile (Quest)"
             half _RippleWidth;
             half _RippleLifetime;
             half _RippleAmplitude;
+            half _RippleChannel;
 
             // アバターが触れた/水に入った場所からスクリプト (WaterRippleSource / Udon版) が
             // 都度書き込むグローバル配列。xy=ワールドXZ座標, z=発生時刻, w=未使用。
@@ -86,7 +116,9 @@ Shader "Siliq/Water Mobile (Quest)"
                 {
                     float2 center = _SiliqRipplePoints[i].xy;
                     float startTime = _SiliqRipplePoints[i].z;
+                    float channel = _SiliqRipplePoints[i].w;
                     float age = _Time.y - startTime;
+                    if (abs(channel - _RippleChannel) > 0.5) continue;
                     if (startTime <= 0 || age <= 0 || age >= _RippleLifetime) continue;
 
                     float d = distance(worldXZ, center);
@@ -182,12 +214,21 @@ Shader "Siliq/Water Mobile (Quest)"
                 reflCol = lerp(reflCol, texCUBE(_ReflCube, reflDir).rgb, _ReflStrength);
                 #endif
 
-                half fresnel = pow(1.0h - saturate(dot(worldN, viewDir)), _FresnelPower);
+                half viewFacing = saturate(dot(worldN, viewDir));
+                half fresnel = pow(1.0h - viewFacing, _FresnelPower);
+                half alphaFresnel = pow(1.0h - viewFacing, _AlphaPower);
                 half spec = pow(saturate(dot(worldN, halfDir)), _SpecPower) * _SpecIntensity;
+                half glint = pow(saturate(dot(reflect(-lightDir, worldN), viewDir)), _GlintPower) * _GlintIntensity;
+
+                half interference = saturate(1.0h - abs(n1.x * 0.72h + n1.y * 0.31h - n2.x * 0.46h + n2.y * 0.58h));
+                half glimmer = pow(interference, _GlimmerSharpness) * _GlimmerIntensity * saturate(0.45h + halfLambert);
+                half3 transmission = _TransmissionColor.rgb * _TransmissionStrength * viewFacing * saturate(0.25h + halfLambert);
 
                 half4 col;
-                col.rgb = lerp(baseCol, reflCol, fresnel) + spec * _LightColor0.rgb;
-                col.a = 1.0h;
+                col.rgb = lerp(baseCol + transmission, reflCol, fresnel) + (spec + glint) * _LightColor0.rgb;
+                col.rgb += _GlimmerColor.rgb * glimmer;
+                col.rgb = lerp(col.rgb, reflCol + (spec + glint) * _LightColor0.rgb, alphaFresnel * _EdgeReflection);
+                col.a = saturate(_Opacity + alphaFresnel * _AlphaFresnel + glimmer * 0.08h);
 
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;

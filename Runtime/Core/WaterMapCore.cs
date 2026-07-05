@@ -772,7 +772,12 @@ namespace Siliq.Water
         public static Texture2D BakeTexture(WaterMapSettings settings, WaterMapType mapType, int size, float t = 0f, bool highPrecision = false)
         {
             Color[] colors = GenerateColors(settings, mapType, size, t);
+            return CreateTexture(colors, mapType, size, highPrecision);
+        }
 
+        /// <summary>生成済み float ピクセルから Texture2D を作る。Texture2D 作成はメインスレッドで呼ぶこと。</summary>
+        public static Texture2D CreateTexture(Color[] colors, WaterMapType mapType, int size, bool highPrecision = false)
+        {
             var format = highPrecision ? TextureFormat.RGBAHalf : TextureFormat.RGBA32;
             var tex = new Texture2D(size, size, format, true, true)
             {

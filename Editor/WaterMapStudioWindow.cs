@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Siliq.Water.Editor
 {
@@ -31,7 +32,7 @@ namespace Siliq.Water.Editor
             "作成しない",
             "Standard (ビルトイン)",
             "Universal Render Pipeline/Lit (URP)",
-            "Siliq/Water Mobile (Quest)",
+            "Siliq/Water Mobile (Quest / iOS)",
             "Siliq/Water URP",
         };
 
@@ -588,6 +589,18 @@ namespace Siliq.Water.Editor
             }
 
             materialShaderIndex = EditorGUILayout.Popup(new GUIContent("マテリアルを自動作成", "書き出したマップを割り当てたマテリアルを一緒に作成します。"), materialShaderIndex, MaterialShaderLabels);
+            if (materialShaderIndex > 0)
+            {
+                settings.createTransparentMaterial = EditorGUILayout.Toggle(
+                    new GUIContent("透明マテリアルとして作成", "PC / URP / iOS 向け。Standard / URP Lit / Siliq Mobile は Transparent Blend に、Siliq URP は _Opacity に反映します。Quest 向け不透明運用では OFF 推奨です。"),
+                    settings.createTransparentMaterial);
+                if (settings.createTransparentMaterial)
+                {
+                    settings.materialOpacity = EditorGUILayout.Slider(
+                        new GUIContent("透明度", "1 に近いほど不透明、低いほど透けます。"),
+                        settings.materialOpacity, 0.05f, 1f);
+                }
+            }
 
             using (new EditorGUI.DisabledScope(!AnyExportSelected()))
             {
@@ -658,10 +671,12 @@ namespace Siliq.Water.Editor
                     Color[] colors = WaterMapCore.ColorsFromHeights(heights, settings, MapTypes[i], genSize);
                     colors = WaterMapCore.Downsample(colors, genSize, ss, MapTypes[i] == WaterMapType.Normal);
                     string mapPath = $"{dir}/{baseName}_{MapSuffixes[i]}.{FileExtension}";
-                    WriteImage(mapPath, colors, size);
-                    ApplyImportSettings(mapPath, MapTypes[i]);
+                    WriteImage(mapPath, colors, size, refresh: false);
                     exported.Add((mapPath, MapTypes[i]));
                 }
+
+                AssetDatabase.Refresh();
+                ApplyImportSettingsBulk(exported, size);
 
                 if (materialShaderIndex > 0 && exported.Count > 0)
                 {
@@ -720,10 +735,7 @@ namespace Siliq.Water.Editor
                     AssetDatabase.StopAssetEditing();
                 }
                 AssetDatabase.Refresh();
-                foreach (var (p, type) in exported)
-                {
-                    ApplyImportSettings(p, type);
-                }
+                ApplyImportSettingsBulk(exported, size);
             }
             finally
             {
@@ -745,6 +757,17 @@ namespace Siliq.Water.Editor
             {
                 EditorUtility.DisplayDialog("アトラスが大きすぎます",
                     $"アトラスサイズが {atlasW}×{atlasH} になり上限 ({sizeLimit}) を超えます。\n解像度またはフレーム数を下げてください。", "OK");
+                return;
+            }
+
+            int selectedMapCount = CountSelectedExportMaps();
+            long atlasPixels = (long)atlasW * atlasH;
+            long estimatedBytes = atlasPixels * 16L * selectedMapCount;
+            const long maxAtlasWorkingBytes = 768L * 1024L * 1024L;
+            if (estimatedBytes > maxAtlasWorkingBytes)
+            {
+                EditorUtility.DisplayDialog("アトラスのメモリ使用量が大きすぎます",
+                    $"選択中のマップ数では作業メモリが約 {estimatedBytes / (1024L * 1024L)} MB 必要です。\n解像度・フレーム数・書き出しマップ数を下げてください。", "OK");
                 return;
             }
 
@@ -789,13 +812,17 @@ namespace Siliq.Water.Editor
 
                 EditorUtility.DisplayProgressBar("アトラス書き出し", "画像書き出し中...", 0.95f);
                 string firstPath = null;
+                var exported = new List<(string path, WaterMapType type)>();
                 foreach (var kv in atlases)
                 {
                     string mapPath = $"{dir}/{baseName}_{MapSuffixes[kv.Key]}.{FileExtension}";
-                    WriteImage(mapPath, kv.Value, atlasW, atlasH);
-                    ApplyImportSettings(mapPath, MapTypes[kv.Key]);
+                    WriteImage(mapPath, kv.Value, atlasW, atlasH, refresh: false);
+                    exported.Add((mapPath, MapTypes[kv.Key]));
                     firstPath = firstPath ?? mapPath;
                 }
+
+                AssetDatabase.Refresh();
+                ApplyImportSettingsBulk(exported, Mathf.Max(atlasW, atlasH));
 
                 if (firstPath != null)
                 {
@@ -818,7 +845,7 @@ namespace Siliq.Water.Editor
         {
             if (settings.exportExr)
             {
-                var tex = new Texture2D(w, h, TextureFormat.RGBAFloat, false, true);
+                var tex = new Texture2D(w, h, TextureFormat.RGBAHalf, false, true);
                 tex.SetPixels(colors);
                 tex.Apply(false, false);
                 File.WriteAllBytes(path, tex.EncodeToEXR(Texture2D.EXRFlags.CompressZIP));
@@ -839,7 +866,35 @@ namespace Siliq.Water.Editor
             }
         }
 
-        void ApplyImportSettings(string path, WaterMapType mapType)
+        int CountSelectedExportMaps()
+        {
+            int count = 0;
+            for (int i = 0; i < exportMapFlags.Length; i++)
+            {
+                if (exportMapFlags[i]) count++;
+            }
+            return count;
+        }
+
+        void ApplyImportSettingsBulk(List<(string path, WaterMapType type)> exported, int maxTextureSize)
+        {
+            if (exported == null || exported.Count == 0) return;
+
+            try
+            {
+                AssetDatabase.StartAssetEditing();
+                foreach (var (p, type) in exported)
+                {
+                    ApplyImportSettings(p, type, maxTextureSize);
+                }
+            }
+            finally
+            {
+                AssetDatabase.StopAssetEditing();
+            }
+        }
+
+        void ApplyImportSettings(string path, WaterMapType mapType, int maxTextureSize)
         {
             var importer = AssetImporter.GetAtPath(path) as TextureImporter;
             if (importer == null) return;
@@ -855,7 +910,8 @@ namespace Siliq.Water.Editor
             }
             importer.wrapMode = TextureWrapMode.Repeat;
             importer.mipmapEnabled = true;
-            importer.maxTextureSize = Mathf.Max(settings.resolution, 256);
+            int importMaxSize = Mathf.Clamp(Mathf.NextPowerOfTwo(Mathf.Max(maxTextureSize, 256)), 256, 8192);
+            importer.maxTextureSize = importMaxSize;
 
             if (settings.applyMobileImportSettings)
             {
@@ -863,16 +919,21 @@ namespace Siliq.Water.Editor
                 {
                     name = "Android",
                     overridden = true,
-                    maxTextureSize = Mathf.Min(settings.resolution, 1024), // Quest では 1024 以下を推奨
+                    maxTextureSize = Mathf.Min(importMaxSize, 1024), // Quest では 1024 以下を推奨
                     format = TextureImporterFormat.ASTC_6x6,
                 });
                 importer.SetPlatformTextureSettings(new TextureImporterPlatformSettings
                 {
                     name = "iPhone",
                     overridden = true,
-                    maxTextureSize = Mathf.Min(settings.resolution, 1024), // iOS も ASTC 6x6 (Metal 対応)
+                    maxTextureSize = Mathf.Min(importMaxSize, 1024), // iOS も ASTC 6x6 (Metal 対応)
                     format = TextureImporterFormat.ASTC_6x6,
                 });
+            }
+            else
+            {
+                importer.ClearPlatformTextureSettings("Android");
+                importer.ClearPlatformTextureSettings("iPhone");
             }
 
             importer.SaveAndReimport();
@@ -914,6 +975,8 @@ namespace Siliq.Water.Editor
 
             var normal = Find(WaterMapType.Normal);
             var height = Find(WaterMapType.Height);
+            var foam = Find(WaterMapType.Foam);
+            var flow = Find(WaterMapType.Flow);
 
             switch (materialShaderIndex)
             {
@@ -927,9 +990,14 @@ namespace Siliq.Water.Editor
                     {
                         mat.SetTexture("_ParallaxMap", height);
                         mat.EnableKeyword("_PARALLAXMAP");
+                        mat.SetFloat("_Parallax", 0.02f);
                     }
                     mat.SetColor("_Color", new Color(0.1f, 0.35f, 0.45f, 1f));
                     mat.SetFloat("_Glossiness", 0.9f);
+                    if (settings.createTransparentMaterial)
+                    {
+                        SetupStandardTransparent(mat, settings.materialOpacity);
+                    }
                     break;
 
                 case 2: // URP Lit
@@ -938,8 +1006,18 @@ namespace Siliq.Water.Editor
                         mat.SetTexture("_BumpMap", normal);
                         mat.EnableKeyword("_NORMALMAP");
                     }
-                    mat.SetColor("_BaseColor", new Color(0.1f, 0.35f, 0.45f, 1f));
+                    if (height != null && mat.HasProperty("_ParallaxMap"))
+                    {
+                        mat.SetTexture("_ParallaxMap", height);
+                        mat.EnableKeyword("_PARALLAXMAP");
+                    }
+                    Color baseColor = new Color(0.1f, 0.35f, 0.45f, settings.createTransparentMaterial ? settings.materialOpacity : 1f);
+                    mat.SetColor("_BaseColor", baseColor);
                     mat.SetFloat("_Smoothness", 0.9f);
+                    if (settings.createTransparentMaterial)
+                    {
+                        SetupUrpLitTransparent(mat, settings.materialOpacity);
+                    }
                     break;
 
                 case 3: // Siliq Mobile
@@ -948,11 +1026,103 @@ namespace Siliq.Water.Editor
                     {
                         mat.SetTexture("_NormalMap", normal);
                     }
+                    if (materialShaderIndex == 4)
+                    {
+                        if (flow != null)
+                        {
+                            mat.SetTexture("_FlowMap", flow);
+                            mat.EnableKeyword("_USE_FLOWMAP");
+                            mat.SetFloat("_UseFlowMap", 1f);
+                        }
+                        if (foam != null)
+                        {
+                            mat.SetTexture("_FoamMap", foam);
+                            mat.EnableKeyword("_SHORE_EFFECTS");
+                            mat.SetFloat("_UseShore", 1f);
+                        }
+                        if (settings.createTransparentMaterial)
+                        {
+                            mat.SetFloat("_Opacity", settings.materialOpacity);
+                        }
+                    }
+                    else if (settings.createTransparentMaterial)
+                    {
+                        mat.SetColor("_ShallowColor", new Color(0.62f, 0.96f, 1f, 1f));
+                        mat.SetColor("_DeepColor", new Color(0.005f, 0.09f, 0.16f, 1f));
+                        mat.SetColor("_HorizonColor", new Color(0.82f, 0.94f, 1f, 1f));
+                        if (mat.HasProperty("_TransmissionColor")) mat.SetColor("_TransmissionColor", new Color(0.35f, 0.9f, 1f, 1f));
+                        if (mat.HasProperty("_GlimmerColor")) mat.SetColor("_GlimmerColor", new Color(0.92f, 0.99f, 1f, 1f));
+                        SetupSiliqMobileTransparent(mat, settings.materialOpacity);
+                    }
                     break;
             }
 
             AssetDatabase.CreateAsset(mat, path);
             AssetDatabase.SaveAssets();
+        }
+
+        static void SetupStandardTransparent(Material mat, float opacity)
+        {
+            if (mat.HasProperty("_Mode")) mat.SetFloat("_Mode", 3f);
+            if (mat.HasProperty("_SrcBlend")) mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
+            if (mat.HasProperty("_DstBlend")) mat.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
+            if (mat.HasProperty("_ZWrite")) mat.SetFloat("_ZWrite", 0f);
+            if (mat.HasProperty("_Color"))
+            {
+                Color c = mat.GetColor("_Color");
+                c.a = Mathf.Clamp01(opacity);
+                mat.SetColor("_Color", c);
+            }
+
+            mat.SetOverrideTag("RenderType", "Transparent");
+            mat.renderQueue = (int)RenderQueue.Transparent;
+            mat.DisableKeyword("_ALPHATEST_ON");
+            mat.EnableKeyword("_ALPHABLEND_ON");
+            mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+        }
+
+        static void SetupUrpLitTransparent(Material mat, float opacity)
+        {
+            if (mat.HasProperty("_Surface")) mat.SetFloat("_Surface", 1f);
+            if (mat.HasProperty("_Blend")) mat.SetFloat("_Blend", 0f);
+            if (mat.HasProperty("_AlphaClip")) mat.SetFloat("_AlphaClip", 0f);
+            if (mat.HasProperty("_SrcBlend")) mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
+            if (mat.HasProperty("_DstBlend")) mat.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
+            if (mat.HasProperty("_ZWrite")) mat.SetFloat("_ZWrite", 0f);
+            if (mat.HasProperty("_BaseColor"))
+            {
+                Color c = mat.GetColor("_BaseColor");
+                c.a = Mathf.Clamp01(opacity);
+                mat.SetColor("_BaseColor", c);
+            }
+
+            mat.SetOverrideTag("RenderType", "Transparent");
+            mat.renderQueue = (int)RenderQueue.Transparent;
+            mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            mat.DisableKeyword("_ALPHATEST_ON");
+        }
+
+        static void SetupSiliqMobileTransparent(Material mat, float opacity)
+        {
+            if (mat.HasProperty("_Opacity")) mat.SetFloat("_Opacity", Mathf.Clamp01(opacity));
+            if (mat.HasProperty("_AlphaFresnel")) mat.SetFloat("_AlphaFresnel", 0.62f);
+            if (mat.HasProperty("_AlphaPower")) mat.SetFloat("_AlphaPower", 2.15f);
+            if (mat.HasProperty("_EdgeReflection")) mat.SetFloat("_EdgeReflection", 0.55f);
+            if (mat.HasProperty("_TransmissionStrength")) mat.SetFloat("_TransmissionStrength", 0.52f);
+            if (mat.HasProperty("_GlimmerIntensity")) mat.SetFloat("_GlimmerIntensity", 0.22f);
+            if (mat.HasProperty("_GlimmerSharpness")) mat.SetFloat("_GlimmerSharpness", 14f);
+            if (mat.HasProperty("_GlintIntensity")) mat.SetFloat("_GlintIntensity", 0.45f);
+            if (mat.HasProperty("_GlintPower")) mat.SetFloat("_GlintPower", 220f);
+            if (mat.HasProperty("_FresnelPower")) mat.SetFloat("_FresnelPower", 2.65f);
+            if (mat.HasProperty("_ReflStrength")) mat.SetFloat("_ReflStrength", 0.9f);
+            if (mat.HasProperty("_SpecIntensity")) mat.SetFloat("_SpecIntensity", 1.15f);
+            if (mat.HasProperty("_SpecPower")) mat.SetFloat("_SpecPower", 220f);
+            if (mat.HasProperty("_SrcBlend")) mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
+            if (mat.HasProperty("_DstBlend")) mat.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
+            if (mat.HasProperty("_ZWrite")) mat.SetFloat("_ZWrite", 0f);
+
+            mat.SetOverrideTag("RenderType", "Transparent");
+            mat.renderQueue = (int)RenderQueue.Transparent;
         }
     }
 }

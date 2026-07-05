@@ -1,5 +1,68 @@
 # Changelog
 
+## [2.3.5] - 2026-07-05
+
+### 改善: iOS/Mobile 透明水の高品質化
+- `Siliq/Water Mobile (Quest)` の透明表現に透過光、細い光の揺らぎ、
+  角度依存のきらめきを追加。alpha だけで薄くする見え方から、
+  水面内部の光と輪郭反射で透明感を作る方向へ改善
+- iOS/Mobile 透明プリセットのデフォルトを、正面はより透け、
+  斜め視線では Fresnel alpha と反射が戻る設定に再調整
+- Quick Apply と水面マップスタジオの自動作成マテリアルで、
+  新しい透過光・グリマー・グリント設定を同じ値で適用するよう統一
+
+## [2.3.4] - 2026-07-05
+
+### 改善: 透明水の品質向上
+- `Siliq/Water Mobile (Quest)` の透明時の見え方を固定 alpha から
+  Fresnel 連動 alpha へ変更。正面は透け、斜め視線では反射と不透明感が増す
+  水らしい挙動にした
+- `_AlphaFresnel` / `_AlphaPower` / `_EdgeReflection` を追加し、
+  iOS/Mobile 透明マテリアル作成時に反射・スペキュラ・透明度を水向けに調整
+- iOS/Mobile 透明プリセットの色を、薄い板に見えにくい浅瀬色/深水色/空反射色へ再調整
+
+## [2.3.3] - 2026-07-05
+
+### 追加: iOS / Mobile 透明水
+- `Siliq/Water Mobile (Quest)` に `_Opacity` と Blend / ZWrite 用プロパティを追加。
+  デフォルトは従来通り不透明、透明マテリアル作成時だけ alpha blend に切り替わる
+- 右クリックメニューに `透明な水マテリアルを適用 (iOS/Mobile)` を追加。
+  Prebaked ノーマルを `Siliq/Water Mobile (Quest)` の `_NormalMap` に割り当て、
+  iOS 向けにも軽い透明水として使えるマテリアルを生成する
+- 水面マップスタジオで `Siliq/Water Mobile (Quest / iOS)` を選び、
+  `透明マテリアルとして作成` を ON にした場合も `_Opacity` と alpha blend を設定する
+
+## [2.3.2] - 2026-07-05
+
+### 追加: PC 向け透明マテリアル
+- 右クリックメニューに `透明な水マテリアルを適用 (PC)` を追加。
+  Prebaked のノーマルマップを使いながら、Standard Transparent 設定済みの
+  マテリアルを `Assets/SiliqWater/GeneratedMaterials/` に生成して適用する
+- 水面マップスタジオの自動作成マテリアルに
+  `透明マテリアルとして作成` と `透明度` を追加。
+  Standard / URP Lit は Transparent Blend、Siliq URP は `_Opacity` に反映する
+- README に「ノーマルマップだけでは透明感は出ず、マテリアル Blend / Alpha が必要」
+  であることを明記
+
+## [2.3.1] - 2026-07-05
+
+### 修正: 水面アニメーションの反映を確実化
+- `WaterSurfaceAnimator` を `MaterialPropertyBlock` ベースに変更し、
+  共有マテリアルを汚さずに `_BumpMap_ST` / `_BumpScale` を更新するよう修正
+- 同梱 Siliq 水シェーダーでは `_Scroll1` / `_Scroll2` / `_NormalStrength` /
+  `_Tiling*` を直接制御し、`_NormalMap` の `[NoScaleOffset]` でも
+  「動き」「見た目」の調整が効くようにした
+- 右クリック適用時の初期速度・強さ・タイリングを見えやすい値へ調整
+
+### 改善
+- ランタイム生成に非同期生成とテクスチャキャッシュを追加
+- 波紋の接触位置を水面 Y へ投影する方式に変更し、複数水面向けの
+  `_RippleChannel` を追加
+- 書き出し処理の import をまとめ、アトラス import サイズとメモリ上限チェックを修正
+- 自動作成マテリアルで Siliq URP の Flow / Foam マップを割り当てるよう改善
+- QuickApply の Prebaked マテリアル検索に GUID 以外の fallback を追加
+- `WaterSurfaceAnimator` の PropertyBlock 反映を EditMode テストで検証
+
 ## [2.3.0] - 2026-07-05
 
 ### 追加: iOS 対応

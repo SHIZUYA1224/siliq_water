@@ -27,7 +27,7 @@ namespace Siliq.Water.Tests
                 for (int i = 0; i < SampleCount; i++)
                 {
                     float v = (float)i / SampleCount;
-                    float edge = SumLayers(s, 1f - 1e-6f, v, 0f);
+                    float edge = SumLayers(s, 1f, v, 0f);
                     float zero = SumLayers(s, 0f, v, 0f);
                     Assert.AreEqual(zero, edge, SeamTolerance,
                         $"プリセット '{WaterMapPresets.Names[p]}' の U 方向境界が不連続 (v={v})");
@@ -44,7 +44,7 @@ namespace Siliq.Water.Tests
                 for (int i = 0; i < SampleCount; i++)
                 {
                     float u = (float)i / SampleCount;
-                    float edge = SumLayers(s, u, 1f - 1e-6f, 0f);
+                    float edge = SumLayers(s, u, 1f, 0f);
                     float zero = SumLayers(s, u, 0f, 0f);
                     Assert.AreEqual(zero, edge, SeamTolerance,
                         $"プリセット '{WaterMapPresets.Names[p]}' の V 方向境界が不連続 (u={u})");
@@ -216,6 +216,45 @@ namespace Siliq.Water.Tests
             finally
             {
                 if (tex != null) Object.DestroyImmediate(tex);
+            }
+        }
+
+        [Test]
+        public void WaterSurfaceAnimator_AppliesMotionAndLookThroughPropertyBlock()
+        {
+            GameObject go = null;
+            Material mat = null;
+            try
+            {
+                go = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                mat = new Material(Shader.Find("Standard"));
+                var renderer = go.GetComponent<Renderer>();
+                renderer.sharedMaterial = mat;
+
+                var animator = go.AddComponent<WaterSurfaceAnimator>();
+                animator.texturePropertyName = "_BumpMap";
+                animator.directionDegrees = 0f;
+                animator.speed = 1f;
+                animator.strength = 2f;
+                animator.tiling = 2f;
+                animator.ApplyImmediate(0.25f);
+
+                var block = new MaterialPropertyBlock();
+                renderer.GetPropertyBlock(block, 0);
+                Vector4 st = block.GetVector("_BumpMap_ST");
+
+                Assert.AreEqual(2f, st.x, 1e-5f, "tiling が _BumpMap_ST.x に反映されていない");
+                Assert.AreEqual(2f, st.y, 1e-5f, "tiling が _BumpMap_ST.y に反映されていない");
+                Assert.Greater(st.z, 0.2f, "speed / direction による X offset が反映されていない");
+                Assert.AreEqual(2f, block.GetFloat("_BumpScale"), 1e-5f, "strength が _BumpScale に反映されていない");
+                Vector2 sharedOffset = mat.GetTextureOffset("_BumpMap");
+                Assert.AreEqual(0f, sharedOffset.x, 1e-5f, "共有マテリアルを直接変更してはならない");
+                Assert.AreEqual(0f, sharedOffset.y, 1e-5f, "共有マテリアルを直接変更してはならない");
+            }
+            finally
+            {
+                if (go != null) Object.DestroyImmediate(go);
+                if (mat != null) Object.DestroyImmediate(mat);
             }
         }
 

@@ -36,7 +36,7 @@ Unity エディタ上(またはランタイム)で、水面・流体表現向け
 - **プリセット 8 種** — 湖 / 海 / 外洋 (スペクトル) / 川 / 雨 / さざ波 / トゥーン / 溶岩
 - **プロファイル (ScriptableObject)** — 設定をアセットとして保存・共有。JSON コピー & ペーストにも対応
 - **マテリアル自動作成** — 書き出したマップを Standard / URP Lit / 同梱水シェーダーへ割り当て済みのマテリアルを生成
-- **モバイル向けインポート設定の自動適用** — Repeat / NormalMap タイプ / Android=ASTC 6x6 (VRChat Quest 向け)
+- **モバイル向けインポート設定の自動適用** — Repeat / NormalMap タイプ / Android・iOS=ASTC 6x6
 
 ## 焼き済みパック (PrebakedPack) — ツール不要ですぐ使える 5 種
 
@@ -50,7 +50,7 @@ Unity エディタ上(またはランタイム)で、水面・流体表現向け
 | `Water_Normal_Pool_01.png` | プール・浅い水 (光の網目) | `M_Water_Pool` |
 | `Water_Normal_Cyber_01.png` | 近未来・人工水面 | `M_Water_Cyber` |
 
-すべて **1024×1024 PNG / シームレス / インポート設定済み (NormalMap・Repeat・Android は ASTC 6x6)**。
+すべて **1024×1024 PNG / シームレス / インポート設定済み (NormalMap・Repeat・Android/iOS は ASTC 6x6)**。
 マテリアルは Standard シェーダー(Metallic 0 / Smoothness 高め / 不透明)なので、
 ビルトイン RP と VRChat (PC / Quest ワールド) でそのまま使えます。
 
@@ -59,6 +59,13 @@ Unity エディタ上(またはランタイム)で、水面・流体表現向け
 1. **右クリック一発**: Hierarchy でオブジェクトを選択 → 右クリック →
    `Siliq Water > 水マテリアルを適用 > 好きな水` — マテリアル適用と同時に
    `WaterSurfaceAnimator` コンポーネントも自動で付き、**再生すると波が流れます**
+   PC 向けに透ける水が欲しい場合は
+   `Siliq Water > 透明な水マテリアルを適用 (PC) > 好きな水` を使ってください。
+   `Assets/SiliqWater/GeneratedMaterials/` に透明設定済みのマテリアルを生成して適用します。
+   iOS / モバイル向けに軽い透明水が欲しい場合は
+   `Siliq Water > 透明な水マテリアルを適用 (iOS/Mobile) > 好きな水` を使ってください。
+   同梱の `Siliq/Water Mobile (Quest)` を alpha blend 設定にしたマテリアルを生成します。
+   正面は透け、斜め視線では Fresnel で反射と不透明感が増え、透過光・細い光・きらめきで水らしさが出るように調整済みです。
 2. **ドラッグ & ドロップ**: `PrebakedPack/Materials/` の `M_Water_*` をシーンのオブジェクトへドラッグ
    (この方法では静止したままなので、動かしたい場合は次項のコンポーネントを手動で追加してください)
 3. **サンプルシーンで見比べる**: `PrebakedPack/SampleScene/SC_WaterNormalMap_Preview.unity` を開くと
@@ -81,8 +88,11 @@ Unity エディタ上(またはランタイム)で、水面・流体表現向け
 | **強さ** | 凹凸の強さ (シェーダーに `_BumpScale` がある場合) |
 | **模様の大きさ** | 1 が元のサイズ、大きいほど模様が細かく見える |
 
-**Play ボタンを押さなくても、値を変えるとシーンビュー上でその場に反映**されます
-(エディタ編集中もアニメーションし続けるため、確認しながら調整できます)。
+**Play ボタンを押さなくても、値を変えるとシーンビュー上でその場に反映**されます。
+Standard / URP Lit / VRChat Mobile 系では `_BumpMap` の UV と `_BumpScale` を、
+同梱の Siliq 水シェーダーでは `_Scroll1` / `_Scroll2` / `_NormalStrength` / `_Tiling*` を
+`MaterialPropertyBlock` 経由で動かすため、共有マテリアルを汚さずに調整できます。
+右クリック適用時は、静止して見えない問題を避けるため水の種類ごとに少し強めの初期値が入ります。
 
 より本格的な (2 レイヤースクロール・反射・岸辺フォームなどを含む) 動く水面が欲しい場合は、
 下記の同梱シェーダー `Siliq/Water Mobile (Quest)` や `Siliq/Water URP` を使ってください。
@@ -112,8 +122,14 @@ Compression  : Normal Quality (Quest は Android オーバーライドで ASTC 6
 ### 透明な水にしたい場合 (PC 向け)
 
 Quest / モバイルでは不透明のまま使うことを推奨します。PC 専用で透明にする場合は
-マテリアルを複製して `M_Water_Calm_PC_Transparent` のように別名にし、
-Rendering Mode を Transparent へ変更してください (Quest 用と混ぜないこと)。
+右クリックメニューの `透明な水マテリアルを適用 (PC)` / `透明な水マテリアルを適用 (iOS/Mobile)` を使うか、水面マップスタジオの
+自動作成マテリアルで **透明マテリアルとして作成** を ON にしてください。
+ノーマルマップ単体は凹凸だけを表すため、透明感はマテリアルの Blend / Alpha / `_Opacity`
+と Fresnel 連動の `_AlphaFresnel` / `_EdgeReflection` で作ります。
+iOS 透明版はさらに `_TransmissionStrength` / `_GlimmerIntensity` / `_GlintIntensity` で
+透過光、細い光の揺らぎ、強いハイライトを足し、透明なだけの板に見えにくい設定にしています。
+iOS 透明版は GrabPass や深度依存なしの alpha blend なので軽量ですが、
+透明描画はソート順と重なりに弱い点に注意してください。Quest 用の不透明運用と混ぜないこと。
 
 ## インストール
 
@@ -156,6 +172,8 @@ Texture2D foam = WaterMapCore.BakeTexture(settings, WaterMapType.Foam, 512);
 
 `RuntimeWaterMapApplier` コンポーネントを Renderer に付ければ、コード無しで
 「起動時にプロファイルからベイクしてマテリアルへ適用」まで行えます(シードのランダム化対応)。
+起動時の停止を避けたい場合は `generateAsync` を ON にすると、色計算をバックグラウンドで行い、
+同じ設定・解像度の生成結果は `useTextureCache` によりシーン内で使い回されます。
 
 ## 同梱シェーダー
 
@@ -167,15 +185,19 @@ SRP Batcher 対応・1 パス。最新 Unity での本命です。
 - リフレクションプローブによる映り込み + フレネル + スペキュラ
 - **深度ベースの岸辺エフェクト**(浅瀬の色変化・岸辺フォームライン・水際の透明化) — URP 設定で Depth Texture を ON にして使用
 
-### `Siliq/Water Mobile (Quest)` (ビルトイン RP 用)
+### `Siliq/Water Mobile (Quest / iOS)` (ビルトイン RP 用)
 
-1 パス・不透明・GrabPass なしの Quest セーフ設計。VRChat ワールドに最適。
+1 パス・GrabPass なしのモバイル向け設計。通常は不透明、透明マテリアル作成時は
+`_Opacity` / `_AlphaFresnel` / `_EdgeReflection` / `_SrcBlend` / `_DstBlend` / `_ZWrite` を
+切り替えて iOS でも透ける水面にできます。
 
 - ノーマルマップ 1 枚を 2 回スクロールサンプリング
-- 深い色 ⇔ 浅い色 + フレネル + スペキュラ + 任意のキューブマップ反射
+- 深い色 ⇔ 浅い色 + フレネル + 透過光 + 細い光の揺らぎ + スペキュラ + 任意のキューブマップ反射
 
 両シェーダーとも、マテリアルの **「触れた時の波紋を有効化」** を ON にすると、
 下記のインタラクティブな波紋機能が使えるようになります。
+複数の水面を独立させたい場合は、水面マテリアルの `_RippleChannel` と
+`WaterRippleSource` の `rippleChannel` を同じ番号にしてください。
 
 ## インタラクティブな波紋 (アバターが入ると水面が変わる)
 
@@ -209,10 +231,9 @@ VRChat ワールドで全プレイヤーの水面インタラクションを再�
 中身をコピーして UdonSharp スクリプトとして作り直す必要があります。手順はファイル冒頭のコメントに
 記載しています。VRChat の全プレイヤー位置は SDK 側で既に同期済みのため、追加のネットワーク同期は不要です。
 
-> **正直な注意点:** 私 (Claude) の制作環境には VRChat SDK / UdonSharp が無く、
-> この Udon スクリプトは実際のコンパイル・ClientSim・実機での動作確認ができていません。
-> API 名や引数が実際のものと食い違っている可能性があります。試してエラーが出た場合は
-> 内容を教えてください、修正します。
+> **VRChat 向け注意点:** Udon 版は `.cs.txt` のテンプレートとして同梱しています。
+> VRChat SDK / UdonSharp 導入済みプロジェクトで `.cs` として配置し、
+> ClientSim または実機で確認してからワールドへ組み込んでください。
 
 ## VRChat モバイル (Quest) での使い方
 

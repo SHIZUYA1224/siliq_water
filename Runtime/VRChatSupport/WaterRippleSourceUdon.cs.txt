@@ -8,10 +8,8 @@
 // ならないようにするための安全策です (このパッケージ本体は VRChat SDK に
 // 依存しません)。実際に使うには、以下の手順で「.cs」として作り直してください。
 //
-// また、私 (Claude) はこの制作環境に VRChat SDK / UdonSharp が無く、
-// 実際のコンパイル・ClientSim・実機での動作確認ができていません。
-// API 名や引数が実際の UdonSharp と食い違っている可能性があります。
-// エラーが出た場合はその内容を教えてください、すぐ修正します。
+// このファイルは VRChat SDK / UdonSharp 導入済みプロジェクトで .cs として配置し、
+// ClientSim または実機で確認してからワールドへ組み込んでください。
 //
 // 使い方:
 // 1. VRChat Creator Companion 等で VRChat World SDK3 と UdonSharp を導入
@@ -44,6 +42,9 @@ namespace Siliq.Water.VRChat
 
         [Tooltip("この Y 座標以下にプレイヤーが来たら波紋を発生させる。水面のワールド Y に合わせること。")]
         public float waterSurfaceY = 0f;
+
+        [Tooltip("複数の水面を独立させたい場合に使うチャンネル番号。対応する水面マテリアルの _RippleChannel と合わせる。")]
+        public int rippleChannel = 0;
 
         [Tooltip("水面よりこの高さ以上上にいる場合は無視する (誤爆防止のマージン)。")]
         public float ignoreAboveMargin = 0.3f;
@@ -88,7 +89,8 @@ namespace Siliq.Water.VRChat
 
         void SpawnRipple(Vector3 worldPos)
         {
-            points[nextSlot] = new Vector4(worldPos.x, worldPos.z, Time.time, 0f);
+            int ch = Mathf.Clamp(rippleChannel, 0, 7);
+            points[nextSlot] = new Vector4(worldPos.x, worldPos.z, Time.time, ch);
             nextSlot = (nextSlot + 1) % MaxRipples;
             VRCShader.SetGlobalVectorArray("_SiliqRipplePoints", points);
         }

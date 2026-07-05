@@ -39,6 +39,7 @@ Shader "Siliq/Water URP"
         _RippleWidth ("波紋の幅", Range(0.05, 2)) = 0.35
         _RippleLifetime ("波紋の持続時間 (秒)", Range(0.5, 10)) = 3
         _RippleAmplitude ("波紋の強さ", Range(0, 3)) = 1
+        _RippleChannel ("波紋チャンネル", Float) = 0
     }
 
     SubShader
@@ -103,6 +104,7 @@ Shader "Siliq/Water URP"
                 half _RippleWidth;
                 half _RippleLifetime;
                 half _RippleAmplitude;
+                half _RippleChannel;
             CBUFFER_END
 
             #ifdef _USE_RIPPLES
@@ -120,7 +122,9 @@ Shader "Siliq/Water URP"
                 {
                     float2 center = _SiliqRipplePoints[i].xy;
                     float startTime = _SiliqRipplePoints[i].z;
+                    float channel = _SiliqRipplePoints[i].w;
                     float age = _Time.y - startTime;
+                    if (abs(channel - _RippleChannel) > 0.5) continue;
                     if (startTime <= 0 || age <= 0 || age >= _RippleLifetime) continue;
 
                     float d = distance(worldXZ, center);
