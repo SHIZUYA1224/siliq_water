@@ -22,6 +22,12 @@ Shader "Siliq/Water Mobile (Quest)"
         [Toggle(USE_REFLECTION_CUBE)] _UseCube ("キューブマップ反射を使う", Float) = 0
         [NoScaleOffset] _ReflCube ("反射キューブマップ", Cube) = "" {}
         _ReflStrength ("反射の強さ", Range(0, 1)) = 0.6
+
+        [Toggle(_USE_RIPPLES)] _UseRipples ("触れた時の波紋を有効化", Float) = 0
+        _RippleSpeed ("波紋の広がる速さ", Range(0.1, 10)) = 2.5
+        _RippleWidth ("波紋の幅", Range(0.05, 2)) = 0.35
+        _RippleLifetime ("波紋の持続時間 (秒)", Range(0.5, 10)) = 3
+        _RippleAmplitude ("波紋の強さ", Range(0, 3)) = 1
     }
 
     SubShader
@@ -37,6 +43,7 @@ Shader "Siliq/Water Mobile (Quest)"
             #pragma vertex vert
             #pragma fragment frag
             #pragma shader_feature_local USE_REFLECTION_CUBE
+            #pragma shader_feature_local _USE_RIPPLES
             #pragma multi_compile_fog
             #pragma multi_compile_instancing
             #include "UnityCG.cginc"
@@ -57,6 +64,42 @@ Shader "Siliq/Water Mobile (Quest)"
             half _ReflStrength;
             #ifdef USE_REFLECTION_CUBE
             samplerCUBE _ReflCube;
+            #endif
+
+            #ifdef _USE_RIPPLES
+            half _RippleSpeed;
+            half _RippleWidth;
+            half _RippleLifetime;
+            half _RippleAmplitude;
+
+            // アバターが触れた/水に入った場所からスクリプト (WaterRippleSource / Udon版) が
+            // 都度書き込むグローバル配列。xy=ワールドXZ座標, z=発生時刻, w=未使用。
+            // 複数の水面マテリアルで共有されるためマテリアル固有バッファの外で定義する。
+            #define SILIQ_MAX_RIPPLES 8
+            float4 _SiliqRipplePoints[SILIQ_MAX_RIPPLES];
+
+            half2 SiliqComputeRippleOffset(float2 worldXZ)
+            {
+                half2 total = 0;
+                UNITY_UNROLL
+                for (int i = 0; i < SILIQ_MAX_RIPPLES; i++)
+                {
+                    float2 center = _SiliqRipplePoints[i].xy;
+                    float startTime = _SiliqRipplePoints[i].z;
+                    float age = _Time.y - startTime;
+                    if (startTime <= 0 || age <= 0 || age >= _RippleLifetime) continue;
+
+                    float d = distance(worldXZ, center);
+                    float radius = age * _RippleSpeed;
+                    float width = max(_RippleWidth, 1e-3);
+                    float ringPhase = (d - radius) / width;
+                    float envelope = exp(-ringPhase * ringPhase) * saturate(1.0 - age / _RippleLifetime);
+                    half2 dir = d > 1e-4 ? (worldXZ - center) / d : half2(0, 0);
+                    float wave = sin((d - radius) * (UNITY_TWO_PI / width));
+                    total += dir * (wave * envelope * _RippleAmplitude);
+                }
+                return total;
+            }
             #endif
 
             struct appdata
@@ -113,6 +156,11 @@ Shader "Siliq/Water Mobile (Quest)"
                 half3 n2 = UnpackNormal(tex2D(_NormalMap, uv2));
                 half3 tn = normalize(half3(n1.xy + n2.xy, n1.z * n2.z));
                 tn.xy *= _NormalStrength;
+
+                #ifdef _USE_RIPPLES
+                tn.xy += SiliqComputeRippleOffset(i.worldPos.xz);
+                #endif
+
                 tn = normalize(tn);
 
                 half3 worldN;

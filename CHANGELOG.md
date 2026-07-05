@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.3.0] - 2026-07-05
+
+### 追加: iOS 対応
+- PrebakedPack のテクスチャ、および水面マップスタジオの書き出しに
+  iOS (iPhone) 向けインポート設定 (ASTC 6x6, 最大 1024px) を追加。
+  Android と同様に自動適用される
+- 同梱シェーダーは標準的な CG/HLSL のみで書かれており Metal (iOS) でも動作する旨を明記
+
+### 追加: 触れたら波紋が広がるインタラクティブな水面
+- `Siliq/Water Mobile (Quest)` `Siliq/Water URP` 両シェーダーに
+  「触れた時の波紋を有効化」(`_USE_RIPPLES`) を追加。ワールド空間座標を中心に
+  実時間で広がる波紋 (速さ/幅/持続時間/強さを調整可能) をノーマルに合成する
+- `Runtime/Components/WaterRippleSource.cs` を追加。Trigger コライダーに
+  アバター等が接触するとその位置から波紋を発生させる (エディタ/一般 Unity アプリ向け)
+- `Runtime/VRChatSupport/WaterRippleSourceUdon.cs.txt` を追加。VRChat ワールドで
+  全プレイヤーの接触を反映する UdonSharp 版のソース (要 VRChat SDK3 + UdonSharp、
+  コンパイル事故を避けるため意図的に `.cs.txt` として同梱。**未検証、要動作確認**)
+
 ## [2.2.3] - 2026-07-05
 
 ### 改善: WaterSurfaceAnimator を調整しやすく

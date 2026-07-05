@@ -33,6 +33,12 @@ Shader "Siliq/Water URP"
         [NoScaleOffset] _FoamMap ("フォームマスク (R)", 2D) = "white" {}
         _FoamTiling ("フォームのタイリング", Float) = 2
         _FoamColor ("フォームの色", Color) = (1, 1, 1, 1)
+
+        [Toggle(_USE_RIPPLES)] _UseRipples ("触れた時の波紋を有効化", Float) = 0
+        _RippleSpeed ("波紋の広がる速さ", Range(0.1, 10)) = 2.5
+        _RippleWidth ("波紋の幅", Range(0.05, 2)) = 0.35
+        _RippleLifetime ("波紋の持続時間 (秒)", Range(0.5, 10)) = 3
+        _RippleAmplitude ("波紋の強さ", Range(0, 3)) = 1
     }
 
     SubShader
@@ -59,6 +65,7 @@ Shader "Siliq/Water URP"
             #pragma fragment frag
             #pragma shader_feature_local _USE_FLOWMAP
             #pragma shader_feature_local _SHORE_EFFECTS
+            #pragma shader_feature_local _USE_RIPPLES
             #pragma multi_compile_fog
             #pragma multi_compile_instancing
 
@@ -92,7 +99,42 @@ Shader "Siliq/Water URP"
                 half _ShoreFoamWidth;
                 float _FoamTiling;
                 half4 _FoamColor;
+                half _RippleSpeed;
+                half _RippleWidth;
+                half _RippleLifetime;
+                half _RippleAmplitude;
             CBUFFER_END
+
+            #ifdef _USE_RIPPLES
+            // アバターが触れた/水に入った場所からスクリプト (WaterRippleSource / Udon版) が
+            // 都度書き込むグローバル配列。xy=ワールドXZ座標, z=発生時刻, w=未使用。
+            // 複数の水面マテリアルで共有されるため UnityPerMaterial の外で定義する (SRP Batcher 互換)。
+            #define SILIQ_MAX_RIPPLES 8
+            float4 _SiliqRipplePoints[SILIQ_MAX_RIPPLES];
+
+            half2 SiliqComputeRippleOffset(float2 worldXZ)
+            {
+                half2 total = 0;
+                UNITY_UNROLL
+                for (int i = 0; i < SILIQ_MAX_RIPPLES; i++)
+                {
+                    float2 center = _SiliqRipplePoints[i].xy;
+                    float startTime = _SiliqRipplePoints[i].z;
+                    float age = _Time.y - startTime;
+                    if (startTime <= 0 || age <= 0 || age >= _RippleLifetime) continue;
+
+                    float d = distance(worldXZ, center);
+                    float radius = age * _RippleSpeed;
+                    float width = max(_RippleWidth, 1e-3);
+                    float ringPhase = (d - radius) / width;
+                    float envelope = exp(-ringPhase * ringPhase) * saturate(1.0 - age / _RippleLifetime);
+                    half2 dir = d > 1e-4 ? (worldXZ - center) / d : half2(0, 0);
+                    float wave = sin((d - radius) * (TWO_PI / width));
+                    total += dir * (wave * envelope * _RippleAmplitude);
+                }
+                return total;
+            }
+            #endif
 
             struct Attributes
             {
@@ -171,6 +213,11 @@ Shader "Siliq/Water URP"
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
 
                 half3 normalTS = SampleWaterNormal(input.uv);
+
+                #if defined(_USE_RIPPLES)
+                normalTS.xy += SiliqComputeRippleOffset(input.positionWS.xz);
+                normalTS = normalize(normalTS);
+                #endif
 
                 half3 bitangentWS = cross(input.normalWS, input.tangentWS.xyz) * input.tangentWS.w;
                 half3x3 tbn = half3x3(input.tangentWS.xyz, bitangentWS, input.normalWS);

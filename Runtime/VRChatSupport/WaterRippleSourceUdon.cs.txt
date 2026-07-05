@@ -1,0 +1,96 @@
+// ============================================================================
+// Siliq Water - VRChat ワールド向け Udon 波紋トリガー (要 VRChat World SDK3 + UdonSharp)
+// ============================================================================
+//
+// 【重要な注意】
+// このファイルはあえて「.cs」ではなく「.cs.txt」にしてあります。
+// VRChat SDK / UdonSharp が入っていないプロジェクトでもコンパイルエラーに
+// ならないようにするための安全策です (このパッケージ本体は VRChat SDK に
+// 依存しません)。実際に使うには、以下の手順で「.cs」として作り直してください。
+//
+// また、私 (Claude) はこの制作環境に VRChat SDK / UdonSharp が無く、
+// 実際のコンパイル・ClientSim・実機での動作確認ができていません。
+// API 名や引数が実際の UdonSharp と食い違っている可能性があります。
+// エラーが出た場合はその内容を教えてください、すぐ修正します。
+//
+// 使い方:
+// 1. VRChat Creator Companion 等で VRChat World SDK3 と UdonSharp を導入
+// 2. このファイルの中身を全てコピー
+// 3. Project ウィンドウで右クリック → Create > VRChat > Udon Sharp Program Asset
+//    (または単に新規 .cs ファイルを作成) し、中身を貼り付けて保存
+//    (UdonSharp が入っていれば自動で Udon 用として認識されます)
+// 4. 水面のコライダー (Is Trigger を ON) を持つ GameObject にこのスクリプトをアタッチ
+// 5. Siliq/Water Mobile (Quest) または Siliq/Water URP のマテリアルで
+//    「触れた時の波紋を有効化」(_USE_RIPPLES) を ON にする
+// 6. waterSurfaceY を水面の実際のワールド Y 座標に合わせる
+//
+// これで、ワールド内の全プレイヤー (自分を含む) が水面より低い位置に来ると、
+// その場所から波紋が広がるようになります (VRChat のプレイヤー位置は
+// SDK 側で既に全クライアントに同期済みのため、追加の同期処理は不要です)。
+// ============================================================================
+
+using UdonSharp;
+using UnityEngine;
+using VRC.SDKBase;
+using VRC.Udon;
+using VRC.SDK3.Rendering; // VRCShader (Udon から global shader property を書くための VRChat 提供 API)
+
+namespace Siliq.Water.VRChat
+{
+    public class WaterRippleSourceUdon : UdonSharpBehaviour
+    {
+        const int MaxRipples = 8;
+        const int MaxTrackedPlayers = 82; // VRChat の1インスタンス最大人数を目安にした簡易テーブルサイズ
+
+        [Tooltip("この Y 座標以下にプレイヤーが来たら波紋を発生させる。水面のワールド Y に合わせること。")]
+        public float waterSurfaceY = 0f;
+
+        [Tooltip("水面よりこの高さ以上上にいる場合は無視する (誤爆防止のマージン)。")]
+        public float ignoreAboveMargin = 0.3f;
+
+        [Tooltip("同じプレイヤーが連続で波紋を発生させる最短間隔 (秒)")]
+        public float minIntervalPerPlayer = 0.4f;
+
+        [Tooltip("何秒ごとに全プレイヤーの位置をチェックするか (負荷とレスポンスのバランス)")]
+        public float checkInterval = 0.15f;
+
+        Vector4[] points = new Vector4[MaxRipples];
+        int nextSlot = 0;
+        float[] lastSplashTime = new float[MaxTrackedPlayers];
+        float timer = 0f;
+        VRCPlayerApi[] playerBuffer = new VRCPlayerApi[MaxTrackedPlayers];
+
+        void Update()
+        {
+            timer += Time.deltaTime;
+            if (timer < checkInterval) return;
+            timer = 0f;
+
+            int count = VRCPlayerApi.GetPlayers(playerBuffer);
+            for (int i = 0; i < count; i++)
+            {
+                VRCPlayerApi p = playerBuffer[i];
+                if (p == null || !Utilities.IsValid(p)) continue;
+
+                Vector3 pos = p.GetPosition();
+                if (pos.y > waterSurfaceY + ignoreAboveMargin) continue;
+
+                int id = p.playerId;
+                if (id >= 0 && id < lastSplashTime.Length)
+                {
+                    if (Time.time - lastSplashTime[id] < minIntervalPerPlayer) continue;
+                    lastSplashTime[id] = Time.time;
+                }
+
+                SpawnRipple(pos);
+            }
+        }
+
+        void SpawnRipple(Vector3 worldPos)
+        {
+            points[nextSlot] = new Vector4(worldPos.x, worldPos.z, Time.time, 0f);
+            nextSlot = (nextSlot + 1) % MaxRipples;
+            VRCShader.SetGlobalVectorArray("_SiliqRipplePoints", points);
+        }
+    }
+}

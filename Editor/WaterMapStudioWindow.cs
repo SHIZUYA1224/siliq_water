@@ -276,7 +276,7 @@ namespace Siliq.Water.Editor
             }
 
             settings.applyMobileImportSettings = EditorGUILayout.Toggle(
-                new GUIContent("モバイル向けインポート設定を自動適用", "書き出し時に Repeat / Android=ASTC 6x6 (最大 1024px) を自動設定します (VRChat Quest 向け)。"),
+                new GUIContent("モバイル向けインポート設定を自動適用", "書き出し時に Repeat / Android・iOS 共に ASTC 6x6 (最大 1024px) を自動設定します (VRChat Quest / iOS 向け)。"),
                 settings.applyMobileImportSettings);
 
             EditorGUILayout.LabelField("品質", EditorStyles.miniBoldLabel);
@@ -864,6 +864,13 @@ namespace Siliq.Water.Editor
                     name = "Android",
                     overridden = true,
                     maxTextureSize = Mathf.Min(settings.resolution, 1024), // Quest では 1024 以下を推奨
+                    format = TextureImporterFormat.ASTC_6x6,
+                });
+                importer.SetPlatformTextureSettings(new TextureImporterPlatformSettings
+                {
+                    name = "iPhone",
+                    overridden = true,
+                    maxTextureSize = Mathf.Min(settings.resolution, 1024), // iOS も ASTC 6x6 (Metal 対応)
                     format = TextureImporterFormat.ASTC_6x6,
                 });
             }
