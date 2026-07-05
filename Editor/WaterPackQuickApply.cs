@@ -10,12 +10,12 @@ namespace Siliq.Water.Editor
     /// </summary>
     public static class WaterPackQuickApply
     {
-        // 各水の雰囲気に合わせたスクロール速度 (1秒あたりのUVオフセット)
-        static readonly Vector2 CalmSpeed = new Vector2(0.015f, 0.010f);
-        static readonly Vector2 RippleSpeed = new Vector2(0.008f, 0.006f);
-        static readonly Vector2 StreamSpeed = new Vector2(0.05f, 0.01f);
-        static readonly Vector2 PoolSpeed = new Vector2(0.012f, 0.009f);
-        static readonly Vector2 CyberSpeed = new Vector2(0.03f, 0.03f);
+        // 各水の雰囲気に合わせた動き (方向degと速さ)
+        static readonly (float dir, float speed) CalmMotion = (35f, 0.15f);
+        static readonly (float dir, float speed) RippleMotion = (60f, 0.08f);
+        static readonly (float dir, float speed) StreamMotion = (0f, 0.5f);
+        static readonly (float dir, float speed) PoolMotion = (50f, 0.12f);
+        static readonly (float dir, float speed) CyberMotion = (45f, 0.3f);
 
         // PrebakedPack/Materials/*.mat.meta の固定 GUID
         const string CalmGuid = "a171aabb01c34e01a1b2c3d4e5f60201";
@@ -27,19 +27,19 @@ namespace Siliq.Water.Editor
         const string MenuRoot = "GameObject/Siliq Water/水マテリアルを適用/";
 
         [MenuItem(MenuRoot + "静かな水面 (Calm)", false, 10)]
-        static void ApplyCalm() => Apply(CalmGuid, "Calm", CalmSpeed);
+        static void ApplyCalm() => Apply(CalmGuid, "Calm", CalmMotion);
 
         [MenuItem(MenuRoot + "波紋 (Ripple)", false, 11)]
-        static void ApplyRipple() => Apply(RippleGuid, "Ripple", RippleSpeed);
+        static void ApplyRipple() => Apply(RippleGuid, "Ripple", RippleMotion);
 
         [MenuItem(MenuRoot + "流れ (Stream)", false, 12)]
-        static void ApplyStream() => Apply(StreamGuid, "Stream", StreamSpeed);
+        static void ApplyStream() => Apply(StreamGuid, "Stream", StreamMotion);
 
         [MenuItem(MenuRoot + "プール (Pool)", false, 13)]
-        static void ApplyPool() => Apply(PoolGuid, "Pool", PoolSpeed);
+        static void ApplyPool() => Apply(PoolGuid, "Pool", PoolMotion);
 
         [MenuItem(MenuRoot + "サイバー (Cyber)", false, 14)]
-        static void ApplyCyber() => Apply(CyberGuid, "Cyber", CyberSpeed);
+        static void ApplyCyber() => Apply(CyberGuid, "Cyber", CyberMotion);
 
         [MenuItem(MenuRoot + "静かな水面 (Calm)", true)]
         [MenuItem(MenuRoot + "波紋 (Ripple)", true)]
@@ -55,7 +55,7 @@ namespace Siliq.Water.Editor
             return false;
         }
 
-        static void Apply(string guid, string label, Vector2 scrollSpeed)
+        static void Apply(string guid, string label, (float dir, float speed) motion)
         {
             string path = AssetDatabase.GUIDToAssetPath(guid);
             var mat = string.IsNullOrEmpty(path) ? null : AssetDatabase.LoadAssetAtPath<Material>(path);
@@ -80,7 +80,8 @@ namespace Siliq.Water.Editor
                     animator = Undo.AddComponent<WaterSurfaceAnimator>(go);
                 }
                 animator.texturePropertyName = "_BumpMap";
-                animator.scrollSpeed = scrollSpeed;
+                animator.directionDegrees = motion.dir;
+                animator.speed = motion.speed;
 
                 applied++;
             }
