@@ -15,6 +15,8 @@ namespace Siliq.Water
             "さざ波",
             "トゥーン / スタイライズ",
             "溶岩 / 粘性流体",
+            "プール (光の網目)",
+            "サイバー (人工水面)",
         };
 
         public static WaterMapSettings Create(int index)
@@ -29,6 +31,8 @@ namespace Siliq.Water
                 case 5: return GentleRipples();
                 case 6: return StylizedToon();
                 case 7: return Lava();
+                case 8: return Pool();
+                case 9: return Cyber();
                 default: return CalmLake();
             }
         }
@@ -213,6 +217,52 @@ namespace Siliq.Water
                 {
                     name = "プレート割れ目", type = WaveLayerType.VoronoiCaustics, blend = WaveBlendMode.Add,
                     amplitude = 0.6f, scale = 5, sharpness = 4f, jitter = 0.7f, speed = 0, seed = 8, invert = true,
+                },
+            };
+            return s;
+        }
+
+        /// <summary>PrebakedPack の Water_Normal_Pool_01 と同一レシピ。</summary>
+        static WaterMapSettings Pool()
+        {
+            var s = Base(0.95f);
+            s.layers = new[]
+            {
+                new WaveLayer
+                {
+                    name = "光の網目", type = WaveLayerType.VoronoiCaustics, blend = WaveBlendMode.Add,
+                    amplitude = 0.8f, scale = 9, sharpness = 1.6f, jitter = 0.95f, speed = 1,
+                    warpAmount = 0.6f, warpScale = 5,
+                },
+                new WaveLayer
+                {
+                    name = "下地の揺らぎ", type = WaveLayerType.PerlinWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.55f, scale = 6, octaves = 4, speed = 1, seed = 4,
+                },
+            };
+            return s;
+        }
+
+        /// <summary>PrebakedPack の Water_Normal_Cyber_01 と同一レシピ。</summary>
+        static WaterMapSettings Cyber()
+        {
+            var s = Base(1.4f);
+            s.layers = new[]
+            {
+                new WaveLayer
+                {
+                    name = "格子波 (横)", type = WaveLayerType.DirectionalWaves, blend = WaveBlendMode.Add,
+                    amplitude = 1f, scale = 12, sharpness = 3.5f, directionDeg = 0f, spreadDeg = 0f, waveCount = 1, speed = 1, seed = 1,
+                },
+                new WaveLayer
+                {
+                    name = "格子波 (縦)", type = WaveLayerType.DirectionalWaves, blend = WaveBlendMode.Add,
+                    amplitude = 1f, scale = 12, sharpness = 3.5f, directionDeg = 90f, spreadDeg = 0f, waveCount = 1, speed = 1, seed = 2,
+                },
+                new WaveLayer
+                {
+                    name = "規則ドット", type = WaveLayerType.VoronoiCells, blend = WaveBlendMode.Add,
+                    amplitude = 0.4f, scale = 24, sharpness = 5f, jitter = 0.15f, speed = 1, seed = 3,
                 },
             };
             return s;

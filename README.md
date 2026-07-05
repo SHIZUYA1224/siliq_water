@@ -37,6 +37,57 @@ Unity エディタ上(またはランタイム)で、水面・流体表現向け
 - **マテリアル自動作成** — 書き出したマップを Standard / URP Lit / 同梱水シェーダーへ割り当て済みのマテリアルを生成
 - **モバイル向けインポート設定の自動適用** — Repeat / NormalMap タイプ / Android=ASTC 6x6 (VRChat Quest 向け)
 
+## 焼き済みパック (PrebakedPack) — ツール不要ですぐ使える 5 種
+
+ツールを触らなくても、`PrebakedPack/` に**すぐ使える水ノーマルマップ 5 種 + 設定済みマテリアル + サンプルシーン**が入っています。
+
+| ファイル | 用途 | マテリアル |
+|---|---|---|
+| `Water_Normal_Calm_01.png` | 静かな湖・穏やかな水面 | `M_Water_Calm` |
+| `Water_Normal_Ripple_01.png` | 雨の波紋 | `M_Water_Ripple` |
+| `Water_Normal_Stream_01.png` | 川・一方向に流れる水 | `M_Water_Stream` |
+| `Water_Normal_Pool_01.png` | プール・浅い水 (光の網目) | `M_Water_Pool` |
+| `Water_Normal_Cyber_01.png` | 近未来・人工水面 | `M_Water_Cyber` |
+
+すべて **1024×1024 PNG / シームレス / インポート設定済み (NormalMap・Repeat・Android は ASTC 6x6)**。
+マテリアルは Standard シェーダー(Metallic 0 / Smoothness 高め / 不透明)なので、
+ビルトイン RP と VRChat (PC / Quest ワールド) でそのまま使えます。
+
+### 一瞬で水面にする 3 つの方法
+
+1. **右クリック一発**: Hierarchy でオブジェクトを選択 → 右クリック →
+   `Siliq Water > 水マテリアルを適用 > 好きな水` — これだけで完了
+2. **ドラッグ & ドロップ**: `PrebakedPack/Materials/` の `M_Water_*` をシーンのオブジェクトへドラッグ
+3. **サンプルシーンで見比べる**: `PrebakedPack/SampleScene/SC_WaterNormalMap_Preview.unity` を開くと
+   5 種の水面が Plane に貼られた状態で比較できます
+
+見た目は `PrebakedPack/Preview/` のプレビュー画像 (Plane に貼って光を当てた状態) で事前確認できます。
+
+### 手動でインポート設定する場合
+
+パックの .meta を使わず PNG だけコピーした場合は、以下を設定してください。
+
+```
+Texture Type : Normal map
+Wrap Mode    : Repeat
+sRGB         : Off (Normal map タイプなら自動)
+Filter Mode  : Bilinear または Trilinear
+Max Size     : 1024
+Compression  : Normal Quality (Quest は Android オーバーライドで ASTC 6x6)
+```
+
+### 改変方法
+
+各パック画像は本ツールのプリセットと 1:1 対応しています。水面マップスタジオで
+「プール (光の網目)」「サイバー (人工水面)」等のプリセットを適用 → パラメータやシードを
+変更して書き出せば、同系統のバリエーションを自作できます。
+
+### 透明な水にしたい場合 (PC 向け)
+
+Quest / モバイルでは不透明のまま使うことを推奨します。PC 専用で透明にする場合は
+マテリアルを複製して `M_Water_Calm_PC_Transparent` のように別名にし、
+Rendering Mode を Transparent へ変更してください (Quest 用と混ぜないこと)。
+
 ## インストール
 
 ### UPM (Git URL) — 推奨
@@ -124,6 +175,11 @@ Editor/
   WaterMapStudioWindow.cs   エディタウィンドウ (プレビュー / 書き出し / プロファイル)
 Tests/
   WaterMapCoreTests.cs      Unity Test Runner (EditMode) 用の自動テスト
+PrebakedPack/
+  Textures/                 焼き済みノーマルマップ 5 種 (1024px, インポート設定済み)
+  Materials/                設定済み Standard マテリアル 5 種
+  SampleScene/              SC_WaterNormalMap_Preview.unity (5 種比較シーン)
+  Preview/                  Plane に貼った状態のプレビュー画像
 ```
 
 ## テスト
