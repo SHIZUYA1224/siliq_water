@@ -56,10 +56,25 @@ Unity エディタ上(またはランタイム)で、水面・流体表現向け
 ### 一瞬で水面にする 3 つの方法
 
 1. **右クリック一発**: Hierarchy でオブジェクトを選択 → 右クリック →
-   `Siliq Water > 水マテリアルを適用 > 好きな水` — これだけで完了
+   `Siliq Water > 水マテリアルを適用 > 好きな水` — マテリアル適用と同時に
+   `WaterSurfaceAnimator` コンポーネントも自動で付き、**再生すると波が流れます**
 2. **ドラッグ & ドロップ**: `PrebakedPack/Materials/` の `M_Water_*` をシーンのオブジェクトへドラッグ
+   (この方法では静止したままなので、動かしたい場合は次項のコンポーネントを手動で追加してください)
 3. **サンプルシーンで見比べる**: `PrebakedPack/SampleScene/SC_WaterNormalMap_Preview.unity` を開くと
-   5 種の水面が Plane に貼られた状態で比較できます
+   5 種の水面が Plane に貼られた状態で比較できます (このシーンは静止状態です)
+
+### 水面を動かす (WaterSurfaceAnimator)
+
+`PrebakedPack` のマテリアルは Standard シェーダーで UV アニメーション機能を持たないため、
+静止画のままだと波が流れません。**右クリック適用なら自動で付与**されますが、
+手動でドラッグ&ドロップした場合は `Runtime/Components/WaterSurfaceAnimator.cs` を
+対象オブジェクトにアタッチしてください。プロパティ名 (`_BumpMap` など) とスクロール速度
+(`scrollSpeed`) を設定するだけで、再生中は常にノーマルマップが流れ続けます。
+Standard / URP Lit / VRChat Mobile など、対象プロパティを持つシェーダーであれば動作します。
+
+より本格的な (2 レイヤースクロール・反射・岸辺フォームなどを含む) 動く水面が欲しい場合は、
+下記の同梱シェーダー `Siliq/Water Mobile (Quest)` や `Siliq/Water URP` を使ってください。
+これらは最初から UV スクロールが組み込まれているため `WaterSurfaceAnimator` は不要です。
 
 見た目は `PrebakedPack/Preview/` のプレビュー画像 (Plane に貼って光を当てた状態) で事前確認できます。
 
