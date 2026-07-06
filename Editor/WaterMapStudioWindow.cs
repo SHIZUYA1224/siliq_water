@@ -85,9 +85,11 @@ namespace Siliq.Water.Editor
                 exportMapFlags[0] = true;
             }
             previewDirty = true;
-            if (materialShaderIndex == 4 && Shader.Find("Siliq/Water URP") == null)
+            string selectedShaderName = ShaderNameForMaterialIndex(materialShaderIndex);
+            if (materialShaderIndex > 0 &&
+                (string.IsNullOrEmpty(selectedShaderName) || !IsUsableShader(Shader.Find(selectedShaderName))))
             {
-                materialShaderIndex = 3;
+                materialShaderIndex = BestFallbackMaterialShaderIndex();
             }
             EditorApplication.update += OnEditorUpdate;
         }
@@ -426,7 +428,10 @@ namespace Siliq.Water.Editor
 
         int BestSiliqMaterialShaderIndex()
         {
-            return IsUniversalPipelineActive() && Shader.Find("Siliq/Water URP") != null ? 4 : 3;
+            if (IsUniversalPipelineActive() && IsUsableShader(Shader.Find("Siliq/Water URP"))) return 4;
+            if (IsUsableShader(Shader.Find("Siliq/Water Mobile (Quest)"))) return 3;
+            if (IsUniversalPipelineActive() && IsUsableShader(Shader.Find("Universal Render Pipeline/Lit"))) return 2;
+            return 1;
         }
 
         static bool IsUniversalPipelineActive()
@@ -1196,26 +1201,25 @@ namespace Siliq.Water.Editor
 
         void CreateMaterial(string path, List<(string path, WaterMapType type)> maps)
         {
-            string shaderName;
-            switch (materialShaderIndex)
-            {
-                case 1: shaderName = "Standard"; break;
-                case 2: shaderName = "Universal Render Pipeline/Lit"; break;
-                case 3: shaderName = "Siliq/Water Mobile (Quest)"; break;
-                case 4: shaderName = "Siliq/Water URP"; break;
-                default: return;
-            }
+            int resolvedShaderIndex = materialShaderIndex;
+            string requestedShaderName = ShaderNameForMaterialIndex(resolvedShaderIndex);
+            if (string.IsNullOrEmpty(requestedShaderName)) return;
 
-            Shader shader = Shader.Find(shaderName);
-            if (shader == null)
+            Shader shader = Shader.Find(requestedShaderName);
+            if (!IsUsableShader(shader))
             {
-                if (shaderName == "Siliq/Water URP")
+                int fallbackIndex = BestFallbackMaterialShaderIndex();
+                string fallbackShaderName = ShaderNameForMaterialIndex(fallbackIndex);
+                Shader fallbackShader = Shader.Find(fallbackShaderName);
+                if (!IsUsableShader(fallbackShader))
                 {
-                    Debug.LogWarning("[Siliq Water] URP シェーダーは通常導入では読み込まれません。Package Manager > Siliq Water Maps Studio > Samples > URP Shader から Sample を Import した URP プロジェクトでのみ使用できます。Built-in / VRChat / iOS では Siliq/Water Mobile (Quest) を選んでください。");
+                    Debug.LogWarning($"[Siliq Water] シェーダー '{requestedShaderName}' が見つからない、または現在の環境でサポートされていないためマテリアル作成をスキップしました。");
                     return;
                 }
-                Debug.LogWarning($"[Siliq Water] シェーダー '{shaderName}' が見つからないためマテリアル作成をスキップしました。");
-                return;
+
+                Debug.LogWarning($"[Siliq Water] シェーダー '{requestedShaderName}' は現在の環境で使用できないため、ピンク表示を避けるため '{fallbackShaderName}' でマテリアルを作成しました。");
+                resolvedShaderIndex = fallbackIndex;
+                shader = fallbackShader;
             }
 
             var mat = new Material(shader);
@@ -1234,7 +1238,7 @@ namespace Siliq.Water.Editor
             var foam = Find(WaterMapType.Foam);
             var flow = Find(WaterMapType.Flow);
 
-            switch (materialShaderIndex)
+            switch (resolvedShaderIndex)
             {
                 case 1: // Standard
                     if (normal != null)
@@ -1283,7 +1287,7 @@ namespace Siliq.Water.Editor
                         mat.SetTexture("_NormalMap", normal);
                     }
                     SetupMacroVariation(mat, 0.42f, 0.10f, 0.36f, 0.18f);
-                    if (materialShaderIndex == 4)
+                    if (resolvedShaderIndex == 4)
                     {
                         if (flow != null)
                         {
@@ -1316,6 +1320,29 @@ namespace Siliq.Water.Editor
 
             AssetDatabase.CreateAsset(mat, path);
             AssetDatabase.SaveAssets();
+        }
+
+        static string ShaderNameForMaterialIndex(int index)
+        {
+            switch (index)
+            {
+                case 1: return "Standard";
+                case 2: return "Universal Render Pipeline/Lit";
+                case 3: return "Siliq/Water Mobile (Quest)";
+                case 4: return "Siliq/Water URP";
+                default: return null;
+            }
+        }
+
+        static bool IsUsableShader(Shader shader)
+        {
+            return shader != null && shader.isSupported;
+        }
+
+        static int BestFallbackMaterialShaderIndex()
+        {
+            if (IsUniversalPipelineActive() && IsUsableShader(Shader.Find("Universal Render Pipeline/Lit"))) return 2;
+            return 1;
         }
 
         static void SetupStandardTransparent(Material mat, float opacity)

@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.20] - 2026-07-06
+
+### 修正: Tool から作成したマテリアルがピンクになる問題を回避
+- 水面マップスタジオの自動マテリアル作成で、選択中 shader が見つからない、または `isSupported == false` の場合は使用しないよう変更
+- `Siliq/Water Mobile (Quest)` や `Siliq/Water URP` が環境に合わない場合、ピンク material を作らず URP Lit / Standard へ自動 fallback するようにした
+- 以前の EditorPrefs で使えない shader が選択されたままでも、起動時に安全な shader へ補正するようにした
+- Quick Apply 側も unsupported shader を material に設定しないようにし、ピンク化を避けるようにした
+
 ## [2.3.19] - 2026-07-06
 
 ### 修正: Edit Mode 操作中の CPU / GPU 負荷を低減

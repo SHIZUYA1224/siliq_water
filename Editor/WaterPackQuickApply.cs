@@ -459,7 +459,7 @@ namespace Siliq.Water.Editor
         static Material GetOrCreateExpandingRippleMaterial(Material colorSource, Material normalSource, bool transparent, bool mobileTransparent)
         {
             Shader shader = Shader.Find("Siliq/Water Mobile (Quest)");
-            if (shader == null) return null;
+            if (!IsUsableShader(shader)) return null;
 
             const string root = "Assets/SiliqWater";
             const string folder = root + "/GeneratedMaterials";
@@ -511,7 +511,7 @@ namespace Siliq.Water.Editor
             Shader waterShader = IsUniversalPipelineActive()
                 ? Shader.Find("Siliq/Water URP")
                 : Shader.Find("Siliq/Water Mobile (Quest)");
-            if (waterShader != null)
+            if (IsUsableShader(waterShader))
             {
                 if (mat == null)
                 {
@@ -534,7 +534,7 @@ namespace Siliq.Water.Editor
             }
 
             Shader urpLit = IsUniversalPipelineActive() ? Shader.Find("Universal Render Pipeline/Lit") : null;
-            if (urpLit != null)
+            if (IsUsableShader(urpLit))
             {
                 if (mat == null)
                 {
@@ -574,7 +574,7 @@ namespace Siliq.Water.Editor
         static Material GetOrCreateMobileTransparentMaterial(Material source, string label)
         {
             Shader shader = Shader.Find("Siliq/Water Mobile (Quest)");
-            if (shader == null) return null;
+            if (!IsUsableShader(shader)) return null;
 
             const string root = "Assets/SiliqWater";
             const string folder = root + "/GeneratedMaterials";
@@ -607,7 +607,7 @@ namespace Siliq.Water.Editor
         static Material GetOrCreateLookMaterial(LookPreset preset, Material source)
         {
             Shader shader = FindBestSiliqLookShader();
-            if (shader == null) return null;
+            if (!IsUsableShader(shader)) return null;
 
             const string root = "Assets/SiliqWater";
             const string folder = root + "/GeneratedMaterials";
@@ -638,12 +638,17 @@ namespace Siliq.Water.Editor
             if (IsUniversalPipelineActive())
             {
                 Shader urp = Shader.Find("Siliq/Water URP");
-                if (urp != null) return urp;
+                if (IsUsableShader(urp)) return urp;
             }
 
             Shader mobile = Shader.Find("Siliq/Water Mobile (Quest)");
-            if (mobile != null) return mobile;
-            return Shader.Find("Siliq/Water URP");
+            if (IsUsableShader(mobile)) return mobile;
+            return null;
+        }
+
+        static bool IsUsableShader(Shader shader)
+        {
+            return shader != null && shader.isSupported;
         }
 
         static bool IsUniversalPipelineActive()

@@ -334,6 +334,12 @@ Built-in / VRChat プロジェクトに URP package が入っていない状態�
 - Built-in / VRChat / Quest / iOS: `Siliq/Water Mobile (Quest)` を使う
 - URP: Universal Render Pipeline を導入した上で `Samples > URP Shader` を Import する
 
+### Tool から作成したマテリアルがピンクになる
+
+ピンクは Unity がその shader を現在の環境でコンパイル・表示できない時に出ます。`2.3.20` 以降は、水面マップスタジオの自動マテリアル作成時に shader の `isSupported` を確認し、使えない shader の場合は URP Lit または Standard へ自動 fallback します。
+
+既に作成済みのピンク material は、最新 package に更新してから水面マップスタジオで再生成してください。
+
 ## 構成
 
 ```
