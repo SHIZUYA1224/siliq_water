@@ -38,6 +38,8 @@ Unity エディタ上(またはランタイム)で、水面・流体表現向け
 - **マテリアル自動作成** — 書き出したマップを Standard / URP Lit / 同梱水シェーダーへ割り当て済みのマテリアルを生成
 - **モバイル向けインポート設定の自動適用** — Repeat / NormalMap タイプ / Android・iOS=ASTC 6x6
 
+共通 Editor ツール UI の設計方針は [Docs/CommonEditorToolLayoutSpec.md](Docs/CommonEditorToolLayoutSpec.md) にまとめています。
+
 ## 焼き済みパック (PrebakedPack) — ツール不要ですぐ使える 5 種
 
 ツールを触らなくても、`PrebakedPack/` に**すぐ使える水ノーマルマップ 5 種 + 設定済みマテリアル + サンプルシーン**が入っています。
