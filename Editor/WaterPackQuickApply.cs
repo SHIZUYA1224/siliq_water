@@ -79,7 +79,7 @@ namespace Siliq.Water.Editor
             sourceLabel = "Calm",
             motion = new MotionPreset(22f, 0.34f, 0.92f, 1.45f),
             transparent = true,
-            opacity = 0.42f,
+            opacity = 0.52f,
             shallow = new Color(0.22f, 0.82f, 0.94f, 1f),
             deep = new Color(0.005f, 0.12f, 0.34f, 1f),
             horizon = new Color(0.72f, 0.92f, 1f, 1f),
@@ -115,7 +115,7 @@ namespace Siliq.Water.Editor
             sourceLabel = "Pool",
             motion = new MotionPreset(50f, 0.18f, 0.38f, 1.0f),
             transparent = true,
-            opacity = 0.30f,
+            opacity = 0.42f,
             shallow = new Color(0.70f, 0.98f, 1f, 1f),
             deep = new Color(0.08f, 0.42f, 0.62f, 1f),
             horizon = new Color(0.86f, 0.98f, 1f, 1f),
@@ -226,8 +226,9 @@ namespace Siliq.Water.Editor
         const string TransparentMenuRoot = "GameObject/Siliq Water/透明な水マテリアルを適用 (PC)/";
         const string MobileTransparentMenuRoot = "GameObject/Siliq Water/透明な水マテリアルを適用 (iOS/Mobile)/";
         const string LookMenuRoot = "GameObject/Siliq Water/用途別マテリアルを適用/";
-        const float TransparentOpacity = 0.5f;
-        const float MobileTransparentOpacity = 0.30f;
+        const float PcSiliqTransparentOpacity = 0.52f;
+        const float StandardTransparentFallbackOpacity = 0.68f;
+        const float MobileTransparentOpacity = 0.38f;
 
         [MenuItem(MenuRoot + "静かな水面 (Calm)", false, 10)]
         static void ApplyCalm() => Apply(CalmGuid, "Calm", CalmMotion);
@@ -328,7 +329,8 @@ namespace Siliq.Water.Editor
                 mat = GetOrCreateTransparentMaterial(mat, label);
             }
 
-            ApplyMaterialToSelection(mat, motion, "_BumpMap");
+            string texturePropertyName = mat != null && mat.HasProperty("_NormalMap") ? "_NormalMap" : "_BumpMap";
+            ApplyMaterialToSelection(mat, motion, texturePropertyName);
         }
 
         static void ApplyRipplePreset(bool transparent, bool mobileTransparent)
@@ -483,7 +485,7 @@ namespace Siliq.Water.Editor
 
             if (transparent)
             {
-                SetupSiliqMobileTransparent(mat, mobileTransparent ? MobileTransparentOpacity : TransparentOpacity);
+                SetupSiliqMobileTransparent(mat, mobileTransparent ? MobileTransparentOpacity : PcSiliqTransparentOpacity);
             }
             else
             {
@@ -505,18 +507,64 @@ namespace Siliq.Water.Editor
 
             string path = $"{folder}/M_Water_{label}_Transparent.mat";
             var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+            Shader waterShader = IsUniversalPipelineActive()
+                ? Shader.Find("Siliq/Water URP")
+                : Shader.Find("Siliq/Water Mobile (Quest)");
+            if (waterShader != null)
+            {
+                if (mat == null)
+                {
+                    mat = new Material(waterShader);
+                    AssetDatabase.CreateAsset(mat, path);
+                }
+                else
+                {
+                    mat.shader = waterShader;
+                }
+
+                mat.name = $"M_Water_{label}_Transparent";
+                ApplySiliqNormal(mat, source);
+                ApplySiliqWaterPalette(mat, source);
+                SetupMacroVariation(mat, 0.42f, 0.10f, 0.36f, 0.18f);
+                SetupSiliqMobileTransparent(mat, PcSiliqTransparentOpacity);
+                EditorUtility.SetDirty(mat);
+                AssetDatabase.SaveAssets();
+                return mat;
+            }
+
+            Shader urpLit = IsUniversalPipelineActive() ? Shader.Find("Universal Render Pipeline/Lit") : null;
+            if (urpLit != null)
+            {
+                if (mat == null)
+                {
+                    mat = new Material(urpLit);
+                    AssetDatabase.CreateAsset(mat, path);
+                }
+                else
+                {
+                    mat.shader = urpLit;
+                }
+
+                mat.name = $"M_Water_{label}_Transparent";
+                ApplyLitNormalAndColor(mat, source, StandardTransparentFallbackOpacity);
+                SetupUrpLitTransparent(mat, StandardTransparentFallbackOpacity);
+                EditorUtility.SetDirty(mat);
+                AssetDatabase.SaveAssets();
+                return mat;
+            }
+
             if (mat == null)
             {
                 mat = new Material(source);
                 AssetDatabase.CreateAsset(mat, path);
             }
-            else
+            else if (source != null)
             {
                 EditorUtility.CopySerialized(source, mat);
             }
 
             mat.name = $"M_Water_{label}_Transparent";
-            SetupStandardTransparent(mat, TransparentOpacity);
+            SetupStandardTransparent(mat, StandardTransparentFallbackOpacity);
             EditorUtility.SetDirty(mat);
             AssetDatabase.SaveAssets();
             return mat;
@@ -637,6 +685,57 @@ namespace Siliq.Water.Editor
             mat.EnableKeyword("_ALPHABLEND_ON");
             mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
             mat.EnableKeyword("_NORMALMAP");
+        }
+
+        static void ApplyLitNormalAndColor(Material mat, Material source, float opacity)
+        {
+            if (mat == null) return;
+
+            if (source != null && source.HasProperty("_BumpMap") && mat.HasProperty("_BumpMap"))
+            {
+                mat.SetTexture("_BumpMap", source.GetTexture("_BumpMap"));
+                mat.EnableKeyword("_NORMALMAP");
+            }
+            if (source != null && source.HasProperty("_BumpScale") && mat.HasProperty("_BumpScale"))
+            {
+                mat.SetFloat("_BumpScale", Mathf.Max(1f, source.GetFloat("_BumpScale")));
+            }
+
+            Color color = new Color(0.08f, 0.34f, 0.45f, Mathf.Clamp01(opacity));
+            if (source != null && source.HasProperty("_Color"))
+            {
+                Color sourceColor = source.GetColor("_Color");
+                color = new Color(sourceColor.r, sourceColor.g, sourceColor.b, Mathf.Clamp01(opacity));
+            }
+
+            if (mat.HasProperty("_Color")) mat.SetColor("_Color", color);
+            if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", color);
+            if (mat.HasProperty("_Glossiness")) mat.SetFloat("_Glossiness", 0.92f);
+            if (mat.HasProperty("_Smoothness")) mat.SetFloat("_Smoothness", 0.92f);
+            if (mat.HasProperty("_Metallic")) mat.SetFloat("_Metallic", 0f);
+        }
+
+        static void SetupUrpLitTransparent(Material mat, float opacity)
+        {
+            if (mat == null) return;
+
+            if (mat.HasProperty("_Surface")) mat.SetFloat("_Surface", 1f);
+            if (mat.HasProperty("_Blend")) mat.SetFloat("_Blend", 0f);
+            if (mat.HasProperty("_AlphaClip")) mat.SetFloat("_AlphaClip", 0f);
+            if (mat.HasProperty("_SrcBlend")) mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
+            if (mat.HasProperty("_DstBlend")) mat.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
+            if (mat.HasProperty("_ZWrite")) mat.SetFloat("_ZWrite", 0f);
+            if (mat.HasProperty("_BaseColor"))
+            {
+                Color c = mat.GetColor("_BaseColor");
+                c.a = Mathf.Clamp01(opacity);
+                mat.SetColor("_BaseColor", c);
+            }
+
+            mat.SetOverrideTag("RenderType", "Transparent");
+            mat.renderQueue = (int)RenderQueue.Transparent;
+            mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            mat.DisableKeyword("_ALPHATEST_ON");
         }
 
         static void SetupSiliqOpaque(Material mat)

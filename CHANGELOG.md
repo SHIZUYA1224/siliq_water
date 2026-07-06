@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.3.17] - 2026-07-06
+
+### 改善: PC 透明水の初期見た目を濃く、失敗しにくく調整
+- `透明な水マテリアルを適用 (PC)` は、可能な場合 Standard Transparent ではなく
+  `Siliq/Water Mobile (Quest)` を使い、Fresnel、反射、透過光、細いきらめき込みの水面として生成するよう変更
+- 既存の `M_Water_*_Transparent` も再適用時に Siliq 水シェーダーへ更新され、Animator の対象も `_NormalMap` に切り替わる
+- PC / iOS 透明、用途別の `美しい海` / `透明プール` の初期 `Opacity` を上げ、
+  白い Scene View や一枚板の検証でも透明すぎる見え方になりにくくした
+- 水面マップスタジオのスライダー表示を `透明度` から `不透明度` に変更し、
+  1 に近いほど濃いという挙動が分かるようにした
+
 ## [2.3.16] - 2026-07-06
 
 ### 修正: Built-in / VRChat プロジェクトでの URP シェーダー import error

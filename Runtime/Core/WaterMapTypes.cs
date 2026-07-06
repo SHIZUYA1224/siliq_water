@@ -146,7 +146,7 @@ namespace Siliq.Water
 
         // --- 自動作成マテリアル ---
         public bool createTransparentMaterial = false;
-        [Range(0.05f, 1f)] public float materialOpacity = 0.30f;
+        [Range(0.05f, 1f)] public float materialOpacity = 0.55f;
 
         public WaveLayer[] layers = new WaveLayer[0];
 

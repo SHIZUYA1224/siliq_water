@@ -76,6 +76,7 @@ Unity エディタ上(またはランタイム)で、水面・流体表現向け
    PC 向けに透ける水が欲しい場合は
    `Siliq Water > 透明な水マテリアルを適用 (PC) > 好きな水` を使ってください。
    `Assets/SiliqWater/GeneratedMaterials/` に透明設定済みのマテリアルを生成して適用します。
+   通常は `Siliq/Water Mobile (Quest)` を使い、Fresnel で斜め視線の反射と不透明感が戻る設定になります。
    iOS / モバイル向けに軽い透明水が欲しい場合は
    `Siliq Water > 透明な水マテリアルを適用 (iOS/Mobile) > 好きな水` を使ってください。
    同梱の `Siliq/Water Mobile (Quest)` を alpha blend 設定にしたマテリアルを生成します。
@@ -146,9 +147,11 @@ Quest / モバイルでは不透明のまま使うことを推奨します。PC 
 自動作成マテリアルで **透明マテリアルとして作成** を ON にしてください。
 綺麗な海、透明プール、血の海、液体金属のような用途が決まっている場合は、
 `Siliq Water > 用途別マテリアルを適用` から見た目プリセットを選ぶと、
-ノーマル、色、透明度、反射、動きまでまとめて設定できます。
+ノーマル、色、不透明度、反射、動きまでまとめて設定できます。
 ノーマルマップ単体は凹凸だけを表すため、透明感はマテリアルの Blend / Alpha / `_Opacity`
 と Fresnel 連動の `_AlphaFresnel` / `_EdgeReflection` で作ります。
+一枚の Plane を明るい Scene View 背景に置くだけだと、水の厚みや底面色が無いため薄く見えやすいです。
+薄すぎる場合は水面マップスタジオの **不透明度** を 0.5 以上に上げるか、用途別の `美しい海` / `透明プール` を使ってください。
 iOS 透明版はさらに `_TransmissionStrength` / `_GlimmerIntensity` / `_GlintIntensity` で
 透過光、細い光の揺らぎ、強いハイライトを足し、透明なだけの板に見えにくい設定にしています。
 iOS 透明版は GrabPass や深度依存なしの alpha blend なので軽量ですが、

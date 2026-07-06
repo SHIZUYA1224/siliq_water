@@ -28,8 +28,8 @@ Siliq Water は、ノーマルマップ単体ではなく「用途別の見た�
 
 ## 調整の目安
 
-- 綺麗な海: `Normal Strength` を 0.8-1.1、`Opacity` を 0.35-0.55
-- プール: `Normal Strength` を 0.25-0.5、`Opacity` を 0.2-0.4
+- 綺麗な海: `Normal Strength` を 0.8-1.1、`Opacity` を 0.5-0.7
+- プール: `Normal Strength` を 0.25-0.5、`Opacity` を 0.38-0.55
 - 血の海: `Opacity` を 0.6 以上、`Reflection` は控えめ
 - 液体金属: `Opacity` は 1、`Refl Strength` と `Smoothness` は高め
 

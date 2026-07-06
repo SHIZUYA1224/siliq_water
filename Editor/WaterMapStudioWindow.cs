@@ -340,7 +340,7 @@ namespace Siliq.Water.Editor
                     settings.exportExr = false;
                     settings.frameCount = 32;
                     settings.createTransparentMaterial = true;
-                    settings.materialOpacity = 0.42f;
+                    settings.materialOpacity = 0.52f;
                     materialShaderIndex = BestSiliqMaterialShaderIndex();
                     previewMapIndex = 0;
                     SetExportMaps(WaterMapType.Normal, WaterMapType.Roughness, WaterMapType.Flow, WaterMapType.Dudv, WaterMapType.Caustics);
@@ -355,7 +355,7 @@ namespace Siliq.Water.Editor
                     settings.exportExr = false;
                     settings.frameCount = 24;
                     settings.createTransparentMaterial = true;
-                    settings.materialOpacity = 0.30f;
+                    settings.materialOpacity = 0.42f;
                     materialShaderIndex = BestSiliqMaterialShaderIndex();
                     previewMapIndex = 0;
                     SetExportMaps(WaterMapType.Normal, WaterMapType.Roughness, WaterMapType.Caustics);
@@ -821,7 +821,7 @@ namespace Siliq.Water.Editor
                 if (settings.createTransparentMaterial)
                 {
                     settings.materialOpacity = EditorGUILayout.Slider(
-                        new GUIContent("透明度", "1 に近いほど不透明、低いほど透けます。"),
+                        new GUIContent("不透明度", "1 に近いほど濃く不透明、低いほど透けます。薄すぎる場合は 0.5 以上に上げてください。"),
                         settings.materialOpacity, 0.05f, 1f);
                 }
             }
