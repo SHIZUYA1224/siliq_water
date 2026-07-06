@@ -13,6 +13,14 @@ namespace Siliq.Water.Editor
     /// </summary>
     public class WaterMapStudioWindow : EditorWindow
     {
+        enum GoalPreset
+        {
+            ClearSea,
+            ClearPool,
+            BloodSea,
+            LiquidMetal,
+        }
+
         const string PrefsKey = "Siliq.Water.Settings.v2";
         const int PreviewResolution = 256;
         const float WideLayoutThreshold = 820f;
@@ -219,6 +227,33 @@ namespace Siliq.Water.Editor
         void DrawPresetAndProfileSection()
         {
             EditorGUILayout.LabelField("1. プリセット", EditorStyles.boldLabel);
+
+            EditorGUILayout.LabelField("目的から始める", EditorStyles.miniBoldLabel);
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                if (GUILayout.Button(new GUIContent("綺麗な海", "透明感のある海向け。海の揺らぎ、透明 Siliq マテリアル、高品質書き出しをまとめて設定します。")))
+                {
+                    ApplyGoalPreset(GoalPreset.ClearSea);
+                }
+                if (GUILayout.Button(new GUIContent("透明プール", "浅い水と控えめな光網向け。弱い凹凸、透明度高め、プール用出力に設定します。")))
+                {
+                    ApplyGoalPreset(GoalPreset.ClearPool);
+                }
+            }
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                if (GUILayout.Button(new GUIContent("血の海", "重い赤い液体向け。粘度感のある流れ、濃い透明度、ラフネス/フロー出力に設定します。")))
+                {
+                    ApplyGoalPreset(GoalPreset.BloodSea);
+                }
+                if (GUILayout.Button(new GUIContent("液体金属", "水銀や SF 金属液向け。不透明、高反射、細い流線系の normal に設定します。")))
+                {
+                    ApplyGoalPreset(GoalPreset.LiquidMetal);
+                }
+            }
+
+            GUILayout.Space(4f);
+            EditorGUILayout.LabelField("生成レシピを直接選ぶ", EditorStyles.miniBoldLabel);
             using (new EditorGUILayout.HorizontalScope())
             {
                 presetIndex = EditorGUILayout.Popup(presetIndex, WaterMapPresets.Names);
@@ -288,6 +323,111 @@ namespace Siliq.Water.Editor
             }
         }
 
+        void ApplyGoalPreset(GoalPreset goal)
+        {
+            switch (goal)
+            {
+                case GoalPreset.ClearSea:
+                    presetIndex = 1;
+                    settings = WaterMapPresets.Create(presetIndex);
+                    settings.resolution = 2048;
+                    settings.strength = 0.82f;
+                    settings.supersample = 2;
+                    settings.exportExr = false;
+                    settings.frameCount = 32;
+                    settings.createTransparentMaterial = true;
+                    settings.materialOpacity = 0.42f;
+                    materialShaderIndex = BestSiliqMaterialShaderIndex();
+                    previewMapIndex = 0;
+                    SetExportMaps(WaterMapType.Normal, WaterMapType.Roughness, WaterMapType.Flow, WaterMapType.Dudv, WaterMapType.Caustics);
+                    break;
+
+                case GoalPreset.ClearPool:
+                    presetIndex = 8;
+                    settings = WaterMapPresets.Create(presetIndex);
+                    settings.resolution = 2048;
+                    settings.strength = 0.42f;
+                    settings.supersample = 2;
+                    settings.exportExr = false;
+                    settings.frameCount = 24;
+                    settings.createTransparentMaterial = true;
+                    settings.materialOpacity = 0.30f;
+                    materialShaderIndex = BestSiliqMaterialShaderIndex();
+                    previewMapIndex = 0;
+                    SetExportMaps(WaterMapType.Normal, WaterMapType.Roughness, WaterMapType.Caustics);
+                    break;
+
+                case GoalPreset.BloodSea:
+                    presetIndex = 7;
+                    settings = WaterMapPresets.Create(presetIndex);
+                    settings.resolution = 2048;
+                    settings.strength = 0.78f;
+                    settings.supersample = 2;
+                    settings.exportExr = false;
+                    settings.frameCount = 32;
+                    settings.createTransparentMaterial = true;
+                    settings.materialOpacity = 0.68f;
+                    materialShaderIndex = BestSiliqMaterialShaderIndex();
+                    previewMapIndex = 0;
+                    SetExportMaps(WaterMapType.Normal, WaterMapType.Roughness, WaterMapType.Flow, WaterMapType.Dudv);
+                    break;
+
+                case GoalPreset.LiquidMetal:
+                    presetIndex = 9;
+                    settings = WaterMapPresets.Create(presetIndex);
+                    settings.resolution = 2048;
+                    settings.strength = 0.62f;
+                    settings.supersample = 2;
+                    settings.exportExr = false;
+                    settings.frameCount = 32;
+                    settings.createTransparentMaterial = false;
+                    settings.materialOpacity = 1f;
+                    materialShaderIndex = BestSiliqMaterialShaderIndex();
+                    previewMapIndex = 0;
+                    SetExportMaps(WaterMapType.Normal, WaterMapType.Roughness, WaterMapType.Flow);
+                    break;
+            }
+
+            mapSettingsFoldout = false;
+            layerFoldouts.Clear();
+            previewDirty = true;
+            SaveSettings();
+            GUI.FocusControl(null);
+        }
+
+        int BestSiliqMaterialShaderIndex()
+        {
+            return IsUniversalPipelineActive() ? 4 : 3;
+        }
+
+        static bool IsUniversalPipelineActive()
+        {
+            var pipeline = GraphicsSettings.renderPipelineAsset;
+            if (pipeline == null) return false;
+
+            string typeName = pipeline.GetType().Name;
+            return typeName.Contains("Universal") || typeName.Contains("URP");
+        }
+
+        void SetExportMaps(params WaterMapType[] selectedTypes)
+        {
+            if (exportMapFlags == null || exportMapFlags.Length != MapTypes.Length)
+            {
+                exportMapFlags = new bool[MapTypes.Length];
+            }
+
+            for (int i = 0; i < exportMapFlags.Length; i++)
+            {
+                exportMapFlags[i] = false;
+            }
+
+            foreach (WaterMapType type in selectedTypes)
+            {
+                int index = Array.IndexOf(MapTypes, type);
+                if (index >= 0) exportMapFlags[index] = true;
+            }
+        }
+
         void SaveProfileAsNew()
         {
             string path = EditorUtility.SaveFilePanelInProject("プロファイルを保存", "WaterMapProfile", "asset", "保存先を選択してください");
@@ -332,9 +472,32 @@ namespace Siliq.Water.Editor
                 settings.applyMobileImportSettings);
 
             EditorGUILayout.LabelField("品質", EditorStyles.miniBoldLabel);
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                if (GUILayout.Button(new GUIContent("軽量", "1024px / 通常生成。試作やモバイル確認向け。")))
+                {
+                    ApplyQualityShortcut(1024, 1, false);
+                }
+                if (GUILayout.Button(new GUIContent("高品質", "2048px / 2x スーパーサンプリング。通常の本番向け。")))
+                {
+                    ApplyQualityShortcut(2048, 2, false);
+                }
+                if (GUILayout.Button(new GUIContent("最高品質 EXR", "4096px / 2x スーパーサンプリング / 16bit EXR。重いが階調が最も綺麗。")))
+                {
+                    ApplyQualityShortcut(4096, 2, true);
+                }
+            }
             bool ss = EditorGUILayout.Toggle(new GUIContent("スーパーサンプリング (2×)", "2 倍解像度で生成してから縮小し、鋭いエッジのジャギーを抑えます。生成時間は約 4 倍。生成解像度が 4096 を超える場合は自動的に無効になります。"), settings.supersample > 1);
             settings.supersample = ss ? 2 : 1;
             settings.exportExr = EditorGUILayout.Toggle(new GUIContent("16bit EXR で書き出し", "PNG (8bit) の代わりに EXR (16bit float) で書き出します。穏やかな水面のバンディング (縞) を根絶できます。"), settings.exportExr);
+        }
+
+        void ApplyQualityShortcut(int resolution, int supersample, bool exportExr)
+        {
+            settings.resolution = resolution;
+            settings.supersample = supersample;
+            settings.exportExr = exportExr;
+            previewDirty = true;
         }
 
         void DrawMapSettingsSection()

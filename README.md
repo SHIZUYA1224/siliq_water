@@ -40,6 +40,7 @@ Unity エディタ上(またはランタイム)で、水面・流体表現向け
 
 共通 Editor ツール UI の設計方針は [Docs/CommonEditorToolLayoutSpec.md](Docs/CommonEditorToolLayoutSpec.md) にまとめています。
 用途別マテリアルプリセットの使い分けは [Docs/MaterialLookPresetGuide.md](Docs/MaterialLookPresetGuide.md) を参照してください。
+水面マップスタジオでは `目的から始める` から、綺麗な海 / 透明プール / 血の海 / 液体金属の推奨生成設定を一括適用できます。
 
 ## 焼き済みパック (PrebakedPack) — ツール不要ですぐ使える 5 種
 
