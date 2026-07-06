@@ -23,6 +23,8 @@ namespace Siliq.Water.Editor
 
         const string PrefsKey = "Siliq.Water.Settings.v2";
         const int PreviewResolution = 256;
+        const float PreviewAnimationFps = 12f;
+        const float PreviewRegenerateMinInterval = 0.12f;
         const float WideLayoutThreshold = 820f;
         const float LeftPaneMinWidth = 360f;
         const float LeftPaneMaxWidth = 520f;
@@ -60,6 +62,7 @@ namespace Siliq.Water.Editor
         float previewTime;
         bool animatePreview;
         double lastAnimTime;
+        double nextPreviewRegenerateTime;
 
         int presetIndex;
         Vector2 scroll;
@@ -98,14 +101,34 @@ namespace Siliq.Water.Editor
 
         void OnEditorUpdate()
         {
-            if (!animatePreview) return;
             double now = EditorApplication.timeSinceStartup;
-            if (lastAnimTime <= 0) lastAnimTime = now;
-            float dt = (float)(now - lastAnimTime);
-            lastAnimTime = now;
-            previewTime = (previewTime + dt * 0.15f) % 1f;
-            previewDirty = true;
-            Repaint();
+            bool shouldRepaint = false;
+
+            if (animatePreview)
+            {
+                double interval = 1.0 / PreviewAnimationFps;
+                if (lastAnimTime <= 0 || now - lastAnimTime >= interval)
+                {
+                    float dt = lastAnimTime > 0 ? Mathf.Min((float)(now - lastAnimTime), (float)interval * 2f) : (float)interval;
+                    lastAnimTime = now;
+                    previewTime = (previewTime + dt * 0.15f) % 1f;
+                    previewDirty = true;
+                    shouldRepaint = true;
+                }
+            }
+            else
+            {
+                lastAnimTime = 0;
+                if (previewDirty && now >= nextPreviewRegenerateTime)
+                {
+                    shouldRepaint = true;
+                }
+            }
+
+            if (shouldRepaint)
+            {
+                Repaint();
+            }
         }
 
         // ---------------------------------------------------------------
@@ -160,7 +183,9 @@ namespace Siliq.Water.Editor
                 DrawCompactLayout();
             }
 
-            if (previewDirty && Event.current.type == EventType.Repaint)
+            if (previewDirty &&
+                Event.current.type == EventType.Repaint &&
+                EditorApplication.timeSinceStartup >= nextPreviewRegenerateTime)
             {
                 RegeneratePreview();
             }
@@ -762,6 +787,8 @@ namespace Siliq.Water.Editor
         void RegeneratePreview()
         {
             previewDirty = false;
+            double now = EditorApplication.timeSinceStartup;
+            nextPreviewRegenerateTime = now + (animatePreview ? 1.0 / PreviewAnimationFps : PreviewRegenerateMinInterval);
             DestroyPreview();
 
             var mapType = MapTypes[Mathf.Clamp(previewMapIndex, 0, MapTypes.Length - 1)];

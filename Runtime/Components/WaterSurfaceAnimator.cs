@@ -20,6 +20,7 @@ namespace Siliq.Water
     public class WaterSurfaceAnimator : MonoBehaviour
     {
         const float MaxSurfaceSpeed = 0.6f;
+        const int DefaultEditModePreviewFps = 10;
 
         [Tooltip("スクロールさせるテクスチャのプロパティ名。Standard/URP Lit/VRChat Mobile は _BumpMap、Siliq 独自シェーダーは _NormalMap。")]
         public string texturePropertyName = "_BumpMap";
@@ -29,6 +30,9 @@ namespace Siliq.Water
 
         [Tooltip("編集モードでもシーンビュー上でスクロールをプレビューする。")]
         public bool animateInEditMode = true;
+
+        [Tooltip("編集モードでのプレビュー更新回数。低いほど軽く、10fps 前後で調整しやすい。Play中の速度には影響しません。")]
+        [Range(1, 30)] public int editModePreviewFps = DefaultEditModePreviewFps;
 
         [Header("動き")]
         [Tooltip("波が流れる向き (度)。0=右、90=上、180=左、270=下。")]
@@ -98,6 +102,7 @@ namespace Siliq.Water
 
 #if UNITY_EDITOR
         double lastEditorTime;
+        double lastEditorPreviewStepTime;
 #endif
 
         void OnEnable()
@@ -156,14 +161,42 @@ namespace Siliq.Water
         void EditorTick()
         {
             if (this == null || Application.isPlaying || !animateInEditMode) return;
+            float effectiveSpeed = Mathf.Clamp(speed, 0f, MaxSurfaceSpeed);
+            if (effectiveSpeed <= 0f) return;
+            if (!IsSelectedForEditModePreview())
+            {
+                lastEditorTime = 0;
+                lastEditorPreviewStepTime = 0;
+                return;
+            }
+
             double now = EditorApplication.timeSinceStartup;
-            float dt = lastEditorTime > 0 ? (float)(now - lastEditorTime) : 0f;
+            float interval = 1f / Mathf.Max(1, editModePreviewFps);
+            if (lastEditorPreviewStepTime > 0 && now - lastEditorPreviewStepTime < interval)
+            {
+                return;
+            }
+
+            float dt = lastEditorTime > 0 ? Mathf.Min((float)(now - lastEditorTime), interval * 2f) : interval;
             lastEditorTime = now;
+            lastEditorPreviewStepTime = now;
             Animate(dt);
-            if (Mathf.Clamp(speed, 0f, MaxSurfaceSpeed) > 0f && SceneView.lastActiveSceneView != null)
+            if (SceneView.lastActiveSceneView != null)
             {
                 SceneView.RepaintAll();
             }
+        }
+
+        bool IsSelectedForEditModePreview()
+        {
+            if (Selection.activeGameObject == gameObject) return true;
+            var selected = Selection.gameObjects;
+            if (selected == null) return false;
+            for (int i = 0; i < selected.Length; i++)
+            {
+                if (selected[i] == gameObject) return true;
+            }
+            return false;
         }
 #endif
 
@@ -171,6 +204,7 @@ namespace Siliq.Water
         {
             if (texturePropertyName == null) texturePropertyName = string.Empty;
             speed = Mathf.Clamp(speed, 0f, MaxSurfaceSpeed);
+            editModePreviewFps = Mathf.Clamp(editModePreviewFps, 1, 30);
             opacity = Mathf.Clamp(opacity, 0.05f, 1f);
             edgeReflection = Mathf.Clamp01(edgeReflection);
             reflectionStrength = Mathf.Clamp01(reflectionStrength);
