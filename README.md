@@ -39,6 +39,7 @@ Unity エディタ上(またはランタイム)で、水面・流体表現向け
 - **モバイル向けインポート設定の自動適用** — Repeat / NormalMap タイプ / Android・iOS=ASTC 6x6
 
 共通 Editor ツール UI の設計方針は [Docs/CommonEditorToolLayoutSpec.md](Docs/CommonEditorToolLayoutSpec.md) にまとめています。
+用途別マテリアルプリセットの使い分けは [Docs/MaterialLookPresetGuide.md](Docs/MaterialLookPresetGuide.md) を参照してください。
 
 ## 焼き済みパック (PrebakedPack) — ツール不要ですぐ使える 5 種
 
@@ -133,6 +134,9 @@ Compression  : Normal Quality (Quest は Android オーバーライドで ASTC 6
 Quest / モバイルでは不透明のまま使うことを推奨します。PC 専用で透明にする場合は
 右クリックメニューの `透明な水マテリアルを適用 (PC)` / `透明な水マテリアルを適用 (iOS/Mobile)` を使うか、水面マップスタジオの
 自動作成マテリアルで **透明マテリアルとして作成** を ON にしてください。
+綺麗な海、透明プール、血の海、液体金属のような用途が決まっている場合は、
+`Siliq Water > 用途別マテリアルを適用` から見た目プリセットを選ぶと、
+ノーマル、色、透明度、反射、動きまでまとめて設定できます。
 ノーマルマップ単体は凹凸だけを表すため、透明感はマテリアルの Blend / Alpha / `_Opacity`
 と Fresnel 連動の `_AlphaFresnel` / `_EdgeReflection` で作ります。
 iOS 透明版はさらに `_TransmissionStrength` / `_GlimmerIntensity` / `_GlintIntensity` で

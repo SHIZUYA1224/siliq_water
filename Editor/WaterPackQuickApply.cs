@@ -28,12 +28,192 @@ namespace Siliq.Water.Editor
             }
         }
 
+        struct LookPreset
+        {
+            public string assetName;
+            public string displayName;
+            public string sourceGuid;
+            public string sourceLabel;
+            public MotionPreset motion;
+            public bool transparent;
+            public float opacity;
+            public Color shallow;
+            public Color deep;
+            public Color horizon;
+            public Color transmission;
+            public Color glimmer;
+            public float normalStrength;
+            public float tiling1;
+            public float tiling2;
+            public float alphaFresnel;
+            public float alphaPower;
+            public float edgeReflection;
+            public float transmissionStrength;
+            public float glimmerIntensity;
+            public float glimmerSharpness;
+            public float glintIntensity;
+            public float glintPower;
+            public float specPower;
+            public float specIntensity;
+            public float fresnelPower;
+            public float reflStrength;
+            public float smoothness;
+            public float macroVariation;
+            public float macroScale;
+            public float macroDirectionBreakup;
+            public float macroColorVariation;
+        }
+
         // 各水の雰囲気に合わせた動き。Standard のノーマルだけでも見えるよう少し強めにしている。
         static readonly MotionPreset CalmMotion = new MotionPreset(35f, 0.35f, 1.35f, 1.35f);
         static readonly MotionPreset RippleMotion = new MotionPreset(0f, 0f, 0.55f, 1.15f);
         static readonly MotionPreset StreamMotion = new MotionPreset(0f, 1.0f, 1.45f, 1.8f);
         static readonly MotionPreset PoolMotion = new MotionPreset(50f, 0.24f, 0.55f, 1.08f);
         static readonly MotionPreset CyberMotion = new MotionPreset(18f, 0.52f, 0.78f, 1.24f);
+
+        static readonly LookPreset ClearSeaLook = new LookPreset
+        {
+            assetName = "ClearSea",
+            displayName = "美しい海",
+            sourceGuid = CalmGuid,
+            sourceLabel = "Calm",
+            motion = new MotionPreset(22f, 0.34f, 0.92f, 1.45f),
+            transparent = true,
+            opacity = 0.42f,
+            shallow = new Color(0.22f, 0.82f, 0.94f, 1f),
+            deep = new Color(0.005f, 0.12f, 0.34f, 1f),
+            horizon = new Color(0.72f, 0.92f, 1f, 1f),
+            transmission = new Color(0.36f, 0.94f, 1f, 1f),
+            glimmer = new Color(0.92f, 0.99f, 1f, 1f),
+            normalStrength = 0.92f,
+            tiling1 = 1.35f,
+            tiling2 = 3.1f,
+            alphaFresnel = 0.68f,
+            alphaPower = 2.35f,
+            edgeReflection = 0.58f,
+            transmissionStrength = 0.58f,
+            glimmerIntensity = 0.20f,
+            glimmerSharpness = 13f,
+            glintIntensity = 0.55f,
+            glintPower = 220f,
+            specPower = 220f,
+            specIntensity = 1.05f,
+            fresnelPower = 2.8f,
+            reflStrength = 0.92f,
+            smoothness = 0.96f,
+            macroVariation = 0.46f,
+            macroScale = 0.10f,
+            macroDirectionBreakup = 0.40f,
+            macroColorVariation = 0.18f,
+        };
+
+        static readonly LookPreset ClearPoolLook = new LookPreset
+        {
+            assetName = "ClearPool",
+            displayName = "透明プール",
+            sourceGuid = PoolGuid,
+            sourceLabel = "Pool",
+            motion = new MotionPreset(50f, 0.18f, 0.38f, 1.0f),
+            transparent = true,
+            opacity = 0.30f,
+            shallow = new Color(0.70f, 0.98f, 1f, 1f),
+            deep = new Color(0.08f, 0.42f, 0.62f, 1f),
+            horizon = new Color(0.86f, 0.98f, 1f, 1f),
+            transmission = new Color(0.54f, 0.98f, 1f, 1f),
+            glimmer = new Color(0.98f, 1f, 1f, 1f),
+            normalStrength = 0.40f,
+            tiling1 = 0.95f,
+            tiling2 = 2.15f,
+            alphaFresnel = 0.62f,
+            alphaPower = 2.0f,
+            edgeReflection = 0.45f,
+            transmissionStrength = 0.64f,
+            glimmerIntensity = 0.16f,
+            glimmerSharpness = 18f,
+            glintIntensity = 0.36f,
+            glintPower = 260f,
+            specPower = 260f,
+            specIntensity = 0.82f,
+            fresnelPower = 3.0f,
+            reflStrength = 0.72f,
+            smoothness = 0.94f,
+            macroVariation = 0.24f,
+            macroScale = 0.08f,
+            macroDirectionBreakup = 0.22f,
+            macroColorVariation = 0.10f,
+        };
+
+        static readonly LookPreset BloodSeaLook = new LookPreset
+        {
+            assetName = "BloodSea",
+            displayName = "血の海",
+            sourceGuid = StreamGuid,
+            sourceLabel = "Stream",
+            motion = new MotionPreset(6f, 0.22f, 0.82f, 1.18f),
+            transparent = true,
+            opacity = 0.68f,
+            shallow = new Color(0.48f, 0.02f, 0.025f, 1f),
+            deep = new Color(0.055f, 0.0f, 0.006f, 1f),
+            horizon = new Color(0.36f, 0.04f, 0.035f, 1f),
+            transmission = new Color(0.72f, 0.06f, 0.035f, 1f),
+            glimmer = new Color(1f, 0.28f, 0.16f, 1f),
+            normalStrength = 0.78f,
+            tiling1 = 1.15f,
+            tiling2 = 2.35f,
+            alphaFresnel = 0.18f,
+            alphaPower = 2.9f,
+            edgeReflection = 0.30f,
+            transmissionStrength = 0.18f,
+            glimmerIntensity = 0.08f,
+            glimmerSharpness = 9f,
+            glintIntensity = 0.18f,
+            glintPower = 130f,
+            specPower = 120f,
+            specIntensity = 0.52f,
+            fresnelPower = 4.2f,
+            reflStrength = 0.35f,
+            smoothness = 0.86f,
+            macroVariation = 0.52f,
+            macroScale = 0.09f,
+            macroDirectionBreakup = 0.42f,
+            macroColorVariation = 0.28f,
+        };
+
+        static readonly LookPreset LiquidMetalLook = new LookPreset
+        {
+            assetName = "LiquidMetal",
+            displayName = "液体金属",
+            sourceGuid = CyberGuid,
+            sourceLabel = "Cyber",
+            motion = new MotionPreset(18f, 0.32f, 0.72f, 1.38f),
+            transparent = false,
+            opacity = 1f,
+            shallow = new Color(0.86f, 0.88f, 0.90f, 1f),
+            deep = new Color(0.16f, 0.17f, 0.18f, 1f),
+            horizon = new Color(0.95f, 0.97f, 1f, 1f),
+            transmission = new Color(0.70f, 0.76f, 0.82f, 1f),
+            glimmer = new Color(1f, 1f, 1f, 1f),
+            normalStrength = 0.72f,
+            tiling1 = 1.1f,
+            tiling2 = 2.45f,
+            alphaFresnel = 0f,
+            alphaPower = 3.4f,
+            edgeReflection = 0.95f,
+            transmissionStrength = 0f,
+            glimmerIntensity = 0.12f,
+            glimmerSharpness = 22f,
+            glintIntensity = 1.2f,
+            glintPower = 360f,
+            specPower = 380f,
+            specIntensity = 1.65f,
+            fresnelPower = 1.6f,
+            reflStrength = 1f,
+            smoothness = 0.99f,
+            macroVariation = 0.40f,
+            macroScale = 0.12f,
+            macroDirectionBreakup = 0.24f,
+            macroColorVariation = 0.08f,
+        };
 
         // PrebakedPack/Materials/*.mat.meta の固定 GUID
         const string CalmGuid = "a171aabb01c34e01a1b2c3d4e5f60201";
@@ -45,6 +225,7 @@ namespace Siliq.Water.Editor
         const string MenuRoot = "GameObject/Siliq Water/水マテリアルを適用/";
         const string TransparentMenuRoot = "GameObject/Siliq Water/透明な水マテリアルを適用 (PC)/";
         const string MobileTransparentMenuRoot = "GameObject/Siliq Water/透明な水マテリアルを適用 (iOS/Mobile)/";
+        const string LookMenuRoot = "GameObject/Siliq Water/用途別マテリアルを適用/";
         const float TransparentOpacity = 0.5f;
         const float MobileTransparentOpacity = 0.30f;
 
@@ -93,6 +274,18 @@ namespace Siliq.Water.Editor
         [MenuItem(MobileTransparentMenuRoot + "サイバー (Cyber)", false, 34)]
         static void ApplyMobileTransparentCyber() => ApplyMobileTransparent(CyberGuid, "Cyber", CyberMotion);
 
+        [MenuItem(LookMenuRoot + "美しい海 (Clear Sea)", false, 40)]
+        static void ApplyClearSeaLook() => ApplyLook(ClearSeaLook);
+
+        [MenuItem(LookMenuRoot + "透明プール (Clear Pool)", false, 41)]
+        static void ApplyClearPoolLook() => ApplyLook(ClearPoolLook);
+
+        [MenuItem(LookMenuRoot + "血の海 (Blood Sea)", false, 42)]
+        static void ApplyBloodSeaLook() => ApplyLook(BloodSeaLook);
+
+        [MenuItem(LookMenuRoot + "液体金属 (Liquid Metal)", false, 43)]
+        static void ApplyLiquidMetalLook() => ApplyLook(LiquidMetalLook);
+
         [MenuItem(MenuRoot + "静かな水面 (Calm)", true)]
         [MenuItem(MenuRoot + "波紋 (Ripple)", true)]
         [MenuItem(MenuRoot + "流れ (Stream)", true)]
@@ -108,6 +301,10 @@ namespace Siliq.Water.Editor
         [MenuItem(MobileTransparentMenuRoot + "流れ (Stream)", true)]
         [MenuItem(MobileTransparentMenuRoot + "プール (Pool)", true)]
         [MenuItem(MobileTransparentMenuRoot + "サイバー (Cyber)", true)]
+        [MenuItem(LookMenuRoot + "美しい海 (Clear Sea)", true)]
+        [MenuItem(LookMenuRoot + "透明プール (Clear Pool)", true)]
+        [MenuItem(LookMenuRoot + "血の海 (Blood Sea)", true)]
+        [MenuItem(LookMenuRoot + "液体金属 (Liquid Metal)", true)]
         static bool ValidateSelection()
         {
             foreach (var go in Selection.gameObjects)
@@ -175,6 +372,27 @@ namespace Siliq.Water.Editor
             }
 
             ApplyMaterialToSelection(mat, motion, "_NormalMap");
+        }
+
+        static void ApplyLook(LookPreset preset)
+        {
+            var source = LoadPrebakedMaterial(preset.sourceGuid, $"M_Water_{preset.sourceLabel}");
+            if (source == null)
+            {
+                EditorUtility.DisplayDialog("Siliq Water",
+                    $"M_Water_{preset.sourceLabel} が見つかりませんでした。\nPrebakedPack フォルダがプロジェクトに含まれているか確認してください。", "OK");
+                return;
+            }
+
+            var mat = GetOrCreateLookMaterial(preset, source);
+            if (mat == null)
+            {
+                EditorUtility.DisplayDialog("Siliq Water",
+                    "Siliq 水シェーダーが見つかりませんでした。パッケージが正しく読み込まれているか確認してください。", "OK");
+                return;
+            }
+
+            ApplyMaterialToSelection(mat, preset.motion, "_NormalMap");
         }
 
         static void ApplyMaterialToSelection(Material mat, MotionPreset motion, string texturePropertyName, bool expandingRipples = false)
@@ -337,6 +555,57 @@ namespace Siliq.Water.Editor
             return mat;
         }
 
+        static Material GetOrCreateLookMaterial(LookPreset preset, Material source)
+        {
+            Shader shader = FindBestSiliqLookShader();
+            if (shader == null) return null;
+
+            const string root = "Assets/SiliqWater";
+            const string folder = root + "/GeneratedMaterials";
+            EnsureFolder("Assets", "SiliqWater");
+            EnsureFolder(root, "GeneratedMaterials");
+
+            string path = $"{folder}/M_Water_Look_{preset.assetName}.mat";
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (mat == null)
+            {
+                mat = new Material(shader);
+                AssetDatabase.CreateAsset(mat, path);
+            }
+            else
+            {
+                mat.shader = shader;
+            }
+
+            mat.name = $"M_Water_Look_{preset.assetName}";
+            SetupSiliqLook(mat, preset, source);
+            EditorUtility.SetDirty(mat);
+            AssetDatabase.SaveAssets();
+            return mat;
+        }
+
+        static Shader FindBestSiliqLookShader()
+        {
+            if (IsUniversalPipelineActive())
+            {
+                Shader urp = Shader.Find("Siliq/Water URP");
+                if (urp != null) return urp;
+            }
+
+            Shader mobile = Shader.Find("Siliq/Water Mobile (Quest)");
+            if (mobile != null) return mobile;
+            return Shader.Find("Siliq/Water URP");
+        }
+
+        static bool IsUniversalPipelineActive()
+        {
+            var pipeline = GraphicsSettings.renderPipelineAsset;
+            if (pipeline == null) return false;
+
+            string typeName = pipeline.GetType().Name;
+            return typeName.Contains("Universal") || typeName.Contains("URP");
+        }
+
         static void EnsureFolder(string parent, string child)
         {
             string path = parent + "/" + child;
@@ -410,6 +679,35 @@ namespace Siliq.Water.Editor
             mat.renderQueue = (int)RenderQueue.Transparent;
         }
 
+        static void SetupSiliqBlend(Material mat, bool transparent, float opacity)
+        {
+            if (mat == null) return;
+
+            if (mat.HasProperty("_Opacity")) mat.SetFloat("_Opacity", Mathf.Clamp01(opacity));
+
+            if (!mat.HasProperty("_SrcBlend") || !mat.HasProperty("_DstBlend") || !mat.HasProperty("_ZWrite"))
+            {
+                return;
+            }
+
+            if (transparent)
+            {
+                mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
+                mat.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
+                mat.SetFloat("_ZWrite", 0f);
+                mat.SetOverrideTag("RenderType", "Transparent");
+                mat.renderQueue = (int)RenderQueue.Transparent;
+            }
+            else
+            {
+                mat.SetFloat("_SrcBlend", (float)BlendMode.One);
+                mat.SetFloat("_DstBlend", (float)BlendMode.Zero);
+                mat.SetFloat("_ZWrite", 1f);
+                mat.SetOverrideTag("RenderType", "Opaque");
+                mat.renderQueue = (int)RenderQueue.Geometry;
+            }
+        }
+
         static void SetupExpandingRippleMaterial(Material mat)
         {
             if (mat == null) return;
@@ -469,6 +767,63 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_HorizonColor")) mat.SetColor("_HorizonColor", new Color(0.82f, 0.94f, 1f, 1f));
             if (mat.HasProperty("_TransmissionColor")) mat.SetColor("_TransmissionColor", new Color(0.35f, 0.9f, 1f, 1f));
             if (mat.HasProperty("_GlimmerColor")) mat.SetColor("_GlimmerColor", new Color(0.92f, 0.99f, 1f, 1f));
+        }
+
+        static void SetupSiliqLook(Material mat, LookPreset preset, Material source)
+        {
+            if (mat == null) return;
+
+            ApplySiliqNormal(mat, source);
+            SetupSiliqBlend(mat, preset.transparent, preset.opacity);
+
+            if (mat.HasProperty("_ShallowColor")) mat.SetColor("_ShallowColor", preset.shallow);
+            if (mat.HasProperty("_DeepColor")) mat.SetColor("_DeepColor", preset.deep);
+            if (mat.HasProperty("_HorizonColor")) mat.SetColor("_HorizonColor", preset.horizon);
+            if (mat.HasProperty("_TransmissionColor")) mat.SetColor("_TransmissionColor", preset.transmission);
+            if (mat.HasProperty("_GlimmerColor")) mat.SetColor("_GlimmerColor", preset.glimmer);
+
+            if (mat.HasProperty("_Opacity")) mat.SetFloat("_Opacity", Mathf.Clamp01(preset.opacity));
+            if (mat.HasProperty("_NormalStrength")) mat.SetFloat("_NormalStrength", preset.normalStrength);
+            if (mat.HasProperty("_Tiling1")) mat.SetFloat("_Tiling1", preset.tiling1);
+            if (mat.HasProperty("_Tiling2")) mat.SetFloat("_Tiling2", preset.tiling2);
+            if (mat.HasProperty("_AlphaFresnel")) mat.SetFloat("_AlphaFresnel", preset.alphaFresnel);
+            if (mat.HasProperty("_AlphaPower")) mat.SetFloat("_AlphaPower", preset.alphaPower);
+            if (mat.HasProperty("_EdgeReflection")) mat.SetFloat("_EdgeReflection", preset.edgeReflection);
+            if (mat.HasProperty("_TransmissionStrength")) mat.SetFloat("_TransmissionStrength", preset.transmissionStrength);
+            if (mat.HasProperty("_GlimmerIntensity")) mat.SetFloat("_GlimmerIntensity", preset.glimmerIntensity);
+            if (mat.HasProperty("_GlimmerSharpness")) mat.SetFloat("_GlimmerSharpness", preset.glimmerSharpness);
+            if (mat.HasProperty("_GlintIntensity")) mat.SetFloat("_GlintIntensity", preset.glintIntensity);
+            if (mat.HasProperty("_GlintPower")) mat.SetFloat("_GlintPower", preset.glintPower);
+            if (mat.HasProperty("_SpecPower")) mat.SetFloat("_SpecPower", preset.specPower);
+            if (mat.HasProperty("_SpecIntensity")) mat.SetFloat("_SpecIntensity", preset.specIntensity);
+            if (mat.HasProperty("_FresnelPower")) mat.SetFloat("_FresnelPower", preset.fresnelPower);
+            if (mat.HasProperty("_ReflStrength")) mat.SetFloat("_ReflStrength", preset.reflStrength);
+            if (mat.HasProperty("_Smoothness")) mat.SetFloat("_Smoothness", preset.smoothness);
+
+            if (mat.HasProperty("_Scroll1"))
+            {
+                Vector2 primary = MotionVector(preset.motion.dir, preset.motion.speed);
+                mat.SetVector("_Scroll1", new Vector4(primary.x, primary.y, 0f, 0f));
+            }
+            if (mat.HasProperty("_Scroll2"))
+            {
+                Vector2 primary = MotionVector(preset.motion.dir + 92f, preset.motion.speed * 0.73f);
+                mat.SetVector("_Scroll2", new Vector4(primary.x, primary.y, 0f, 0f));
+            }
+
+            SetupMacroVariation(mat, preset.macroVariation, preset.macroScale, preset.macroDirectionBreakup, preset.macroColorVariation);
+
+            if (mat.HasProperty("_UseFlowMap")) mat.SetFloat("_UseFlowMap", 0f);
+            if (mat.HasProperty("_UseShore")) mat.SetFloat("_UseShore", 0f);
+            mat.DisableKeyword("_USE_FLOWMAP");
+            mat.DisableKeyword("_SHORE_EFFECTS");
+            mat.DisableKeyword("_USE_RIPPLES");
+        }
+
+        static Vector2 MotionVector(float directionDegrees, float speed)
+        {
+            float rad = directionDegrees * Mathf.Deg2Rad;
+            return new Vector2(Mathf.Cos(rad), Mathf.Sin(rad)) * speed;
         }
 
         static void ConfigureRippleEmitter(GameObject go, Renderer renderer, bool enabled)
