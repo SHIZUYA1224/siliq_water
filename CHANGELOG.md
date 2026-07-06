@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.22] - 2026-07-06
+
+### 修正: URP / Built-in の不一致でマテリアルがピンクになる経路を遮断
+- Tool / Quick Apply の shader 選択を Render Pipeline 対応で判定し、URP では Built-in 用 `Standard` / `Siliq/Water Mobile (Quest)` を自動適用しないようにした
+- URP で `Siliq/Water URP` sample が未導入または使えない場合は `Universal Render Pipeline/Lit` へ fallback し、ピンク material を作らないようにした
+- 通常の右クリック適用でも Prebaked の Standard material をそのまま貼らず、現在の Render Pipeline に合う generated material へ変換するようにした
+- 既存の generated material も再適用時に安全な shader へ上書きされるようにした
+
 ## [2.3.21] - 2026-07-06
 
 ### 修正: 暗い場所で水面だけ銀色に浮く見え方を抑制

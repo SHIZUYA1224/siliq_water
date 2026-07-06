@@ -340,9 +340,14 @@ Built-in / VRChat プロジェクトに URP package が入っていない状態�
 
 ### Tool から作成したマテリアルがピンクになる
 
-ピンクは Unity がその shader を現在の環境でコンパイル・表示できない時に出ます。`2.3.20` 以降は、水面マップスタジオの自動マテリアル作成時に shader の `isSupported` を確認し、使えない shader の場合は URP Lit または Standard へ自動 fallback します。
+ピンクは Unity がその shader を現在の Render Pipeline でコンパイル・表示できない時に出ます。
+`2.3.22` 以降は、水面マップスタジオと Quick Apply の両方で Render Pipeline 互換性を確認します。
+URP では Built-in 用の `Standard` / `Siliq/Water Mobile (Quest)` を直接貼らず、
+`Siliq/Water URP` が使える場合はそれを、使えない場合は `Universal Render Pipeline/Lit` へ自動 fallback します。
+Built-in / VRChat では `Siliq/Water Mobile (Quest)` または `Standard` を使います。
 
-既に作成済みのピンク material は、最新 package に更新してから水面マップスタジオで再生成してください。
+既に作成済みのピンク material は、最新 package に更新してから同じ Quick Apply または水面マップスタジオで再適用してください。
+`Assets/SiliqWater/GeneratedMaterials/` の既存 material も安全な shader へ上書きされます。
 
 ## 構成
 

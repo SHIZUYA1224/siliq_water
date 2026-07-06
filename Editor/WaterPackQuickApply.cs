@@ -324,9 +324,15 @@ namespace Siliq.Water.Editor
                     $"M_Water_{label} が見つかりませんでした。\nPrebakedPack フォルダがプロジェクトに含まれているか確認してください。", "OK");
                 return;
             }
-            if (transparent)
+            if (transparent || !WaterShaderUtility.IsMaterialCompatibleWithCurrentPipeline(mat))
             {
-                mat = GetOrCreateTransparentMaterial(mat, label);
+                mat = GetOrCreatePipelineMaterial(mat, label, transparent, transparent ? PcSiliqTransparentOpacity : 1f);
+                if (mat == null)
+                {
+                    EditorUtility.DisplayDialog("Siliq Water",
+                        "現在の Render Pipeline で安全に使える水マテリアルを作成できませんでした。URP の場合は Universal Render Pipeline package と Pipeline Asset を確認してください。", "OK");
+                    return;
+                }
             }
 
             string texturePropertyName = mat != null && mat.HasProperty("_NormalMap") ? "_NormalMap" : "_BumpMap";
@@ -348,11 +354,12 @@ namespace Siliq.Water.Editor
             if (mat == null)
             {
                 EditorUtility.DisplayDialog("Siliq Water",
-                    "Siliq/Water Mobile (Quest) シェーダーが見つかりませんでした。パッケージが正しく読み込まれているか確認してください。", "OK");
+                    "現在の Render Pipeline で安全に使える水マテリアルを作成できませんでした。", "OK");
                 return;
             }
 
-            ApplyMaterialToSelection(mat, RippleMotion, "_NormalMap", true);
+            string texturePropertyName = mat.HasProperty("_NormalMap") ? "_NormalMap" : "_BumpMap";
+            ApplyMaterialToSelection(mat, RippleMotion, texturePropertyName, mat.HasProperty("_UseRipples"));
         }
 
         static void ApplyMobileTransparent(string guid, string label, MotionPreset motion)
@@ -365,15 +372,16 @@ namespace Siliq.Water.Editor
                 return;
             }
 
-            var mat = GetOrCreateMobileTransparentMaterial(source, label);
+            var mat = GetOrCreatePipelineMaterial(source, label, true, MobileTransparentOpacity, "_iOS_Transparent");
             if (mat == null)
             {
                 EditorUtility.DisplayDialog("Siliq Water",
-                    "Siliq/Water Mobile (Quest) シェーダーが見つかりませんでした。パッケージが正しく読み込まれているか確認してください。", "OK");
+                    "現在の Render Pipeline で安全に使える透明水マテリアルを作成できませんでした。", "OK");
                 return;
             }
 
-            ApplyMaterialToSelection(mat, motion, "_NormalMap");
+            string texturePropertyName = mat.HasProperty("_NormalMap") ? "_NormalMap" : "_BumpMap";
+            ApplyMaterialToSelection(mat, motion, texturePropertyName);
         }
 
         static void ApplyLook(LookPreset preset)
@@ -394,7 +402,8 @@ namespace Siliq.Water.Editor
                 return;
             }
 
-            ApplyMaterialToSelection(mat, preset.motion, "_NormalMap");
+            string texturePropertyName = mat.HasProperty("_NormalMap") ? "_NormalMap" : "_BumpMap";
+            ApplyMaterialToSelection(mat, preset.motion, texturePropertyName);
         }
 
         static void ApplyMaterialToSelection(Material mat, MotionPreset motion, string texturePropertyName, bool expandingRipples = false)
@@ -458,8 +467,12 @@ namespace Siliq.Water.Editor
 
         static Material GetOrCreateExpandingRippleMaterial(Material colorSource, Material normalSource, bool transparent, bool mobileTransparent)
         {
-            Shader shader = Shader.Find("Siliq/Water Mobile (Quest)");
-            if (!IsUsableShader(shader)) return null;
+            int shaderIndex = WaterShaderUtility.BestSiliqMaterialShaderIndex();
+            if (shaderIndex == WaterShaderUtility.NoMaterialIndex) return null;
+
+            string shaderName = WaterShaderUtility.ShaderNameForMaterialIndex(shaderIndex);
+            Shader shader = WaterShaderUtility.FindUsableShaderForCurrentPipeline(shaderName);
+            if (shader == null) return null;
 
             const string root = "Assets/SiliqWater";
             const string folder = root + "/GeneratedMaterials";
@@ -480,108 +493,37 @@ namespace Siliq.Water.Editor
             }
 
             mat.name = $"M_Water_Ripple{suffix}";
-            ApplySiliqNormal(mat, normalSource);
-            ApplySiliqWaterPalette(mat, colorSource);
-            SetupMacroVariation(mat, 0.48f, 0.11f, 0.42f, 0.20f);
-
-            if (transparent)
+            float opacity = transparent ? (mobileTransparent ? MobileTransparentOpacity : PcSiliqTransparentOpacity) : 1f;
+            SetupGeneratedWaterMaterial(mat, shaderIndex, colorSource, normalSource, transparent, opacity, 0.48f, 0.11f, 0.42f, 0.20f);
+            if (mat.HasProperty("_UseRipples"))
             {
-                SetupSiliqMobileTransparent(mat, mobileTransparent ? MobileTransparentOpacity : PcSiliqTransparentOpacity);
+                SetupExpandingRippleMaterial(mat);
             }
-            else
-            {
-                SetupSiliqOpaque(mat);
-            }
-
-            SetupExpandingRippleMaterial(mat);
             EditorUtility.SetDirty(mat);
             AssetDatabase.SaveAssets();
             return mat;
         }
 
-        static Material GetOrCreateTransparentMaterial(Material source, string label)
+        static Material GetOrCreatePipelineMaterial(Material source, string label, bool transparent, float opacity, string suffixOverride = null)
         {
             const string root = "Assets/SiliqWater";
             const string folder = root + "/GeneratedMaterials";
             EnsureFolder("Assets", "SiliqWater");
             EnsureFolder(root, "GeneratedMaterials");
 
-            string path = $"{folder}/M_Water_{label}_Transparent.mat";
-            var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
-            Shader waterShader = IsUniversalPipelineActive()
-                ? Shader.Find("Siliq/Water URP")
-                : Shader.Find("Siliq/Water Mobile (Quest)");
-            if (IsUsableShader(waterShader))
+            int shaderIndex = WaterShaderUtility.BestSiliqMaterialShaderIndex();
+            if (shaderIndex == WaterShaderUtility.NoMaterialIndex)
             {
-                if (mat == null)
-                {
-                    mat = new Material(waterShader);
-                    AssetDatabase.CreateAsset(mat, path);
-                }
-                else
-                {
-                    mat.shader = waterShader;
-                }
-
-                mat.name = $"M_Water_{label}_Transparent";
-                ApplySiliqNormal(mat, source);
-                ApplySiliqWaterPalette(mat, source);
-                SetupMacroVariation(mat, 0.42f, 0.10f, 0.36f, 0.18f);
-                SetupSiliqMobileTransparent(mat, PcSiliqTransparentOpacity);
-                EditorUtility.SetDirty(mat);
-                AssetDatabase.SaveAssets();
-                return mat;
+                shaderIndex = WaterShaderUtility.BestFallbackMaterialShaderIndex();
             }
+            if (shaderIndex == WaterShaderUtility.NoMaterialIndex) return null;
 
-            Shader urpLit = IsUniversalPipelineActive() ? Shader.Find("Universal Render Pipeline/Lit") : null;
-            if (IsUsableShader(urpLit))
-            {
-                if (mat == null)
-                {
-                    mat = new Material(urpLit);
-                    AssetDatabase.CreateAsset(mat, path);
-                }
-                else
-                {
-                    mat.shader = urpLit;
-                }
+            string shaderName = WaterShaderUtility.ShaderNameForMaterialIndex(shaderIndex);
+            Shader shader = WaterShaderUtility.FindUsableShaderForCurrentPipeline(shaderName);
+            if (shader == null) return null;
 
-                mat.name = $"M_Water_{label}_Transparent";
-                ApplyLitNormalAndColor(mat, source, StandardTransparentFallbackOpacity);
-                SetupUrpLitTransparent(mat, StandardTransparentFallbackOpacity);
-                EditorUtility.SetDirty(mat);
-                AssetDatabase.SaveAssets();
-                return mat;
-            }
-
-            if (mat == null)
-            {
-                mat = new Material(source);
-                AssetDatabase.CreateAsset(mat, path);
-            }
-            else if (source != null)
-            {
-                EditorUtility.CopySerialized(source, mat);
-            }
-
-            mat.name = $"M_Water_{label}_Transparent";
-            SetupStandardTransparent(mat, StandardTransparentFallbackOpacity);
-            EditorUtility.SetDirty(mat);
-            AssetDatabase.SaveAssets();
-            return mat;
-        }
-
-        static Material GetOrCreateMobileTransparentMaterial(Material source, string label)
-        {
-            Shader shader = Shader.Find("Siliq/Water Mobile (Quest)");
-            if (!IsUsableShader(shader)) return null;
-
-            const string root = "Assets/SiliqWater";
-            const string folder = root + "/GeneratedMaterials";
-            EnsureFolder("Assets", "SiliqWater");
-            EnsureFolder(root, "GeneratedMaterials");
-
-            string path = $"{folder}/M_Water_{label}_iOS_Transparent.mat";
+            string suffix = suffixOverride ?? (transparent ? "_Transparent" : "_Compatible");
+            string path = $"{folder}/M_Water_{label}{suffix}.mat";
             var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
             if (mat == null)
             {
@@ -593,12 +535,8 @@ namespace Siliq.Water.Editor
                 mat.shader = shader;
             }
 
-            mat.name = $"M_Water_{label}_iOS_Transparent";
-            ApplySiliqNormal(mat, source);
-            ApplySiliqWaterPalette(mat, source);
-            SetupMacroVariation(mat, 0.42f, 0.10f, 0.36f, 0.18f);
-
-            SetupSiliqMobileTransparent(mat, MobileTransparentOpacity);
+            mat.name = $"M_Water_{label}{suffix}";
+            SetupGeneratedWaterMaterial(mat, shaderIndex, source, source, transparent, opacity, 0.42f, 0.10f, 0.36f, 0.18f);
             EditorUtility.SetDirty(mat);
             AssetDatabase.SaveAssets();
             return mat;
@@ -606,8 +544,16 @@ namespace Siliq.Water.Editor
 
         static Material GetOrCreateLookMaterial(LookPreset preset, Material source)
         {
-            Shader shader = FindBestSiliqLookShader();
-            if (!IsUsableShader(shader)) return null;
+            int shaderIndex = WaterShaderUtility.BestSiliqMaterialShaderIndex();
+            if (shaderIndex == WaterShaderUtility.NoMaterialIndex)
+            {
+                shaderIndex = WaterShaderUtility.BestFallbackMaterialShaderIndex();
+            }
+            if (shaderIndex == WaterShaderUtility.NoMaterialIndex) return null;
+
+            string shaderName = WaterShaderUtility.ShaderNameForMaterialIndex(shaderIndex);
+            Shader shader = WaterShaderUtility.FindUsableShaderForCurrentPipeline(shaderName);
+            if (shader == null) return null;
 
             const string root = "Assets/SiliqWater";
             const string folder = root + "/GeneratedMaterials";
@@ -627,37 +573,17 @@ namespace Siliq.Water.Editor
             }
 
             mat.name = $"M_Water_Look_{preset.assetName}";
-            SetupSiliqLook(mat, preset, source);
+            if (shaderIndex == WaterShaderUtility.SiliqMobileIndex || shaderIndex == WaterShaderUtility.SiliqUrpIndex)
+            {
+                SetupSiliqLook(mat, preset, source);
+            }
+            else
+            {
+                SetupFallbackLook(mat, preset, source, shaderIndex);
+            }
             EditorUtility.SetDirty(mat);
             AssetDatabase.SaveAssets();
             return mat;
-        }
-
-        static Shader FindBestSiliqLookShader()
-        {
-            if (IsUniversalPipelineActive())
-            {
-                Shader urp = Shader.Find("Siliq/Water URP");
-                if (IsUsableShader(urp)) return urp;
-            }
-
-            Shader mobile = Shader.Find("Siliq/Water Mobile (Quest)");
-            if (IsUsableShader(mobile)) return mobile;
-            return null;
-        }
-
-        static bool IsUsableShader(Shader shader)
-        {
-            return shader != null && shader.isSupported;
-        }
-
-        static bool IsUniversalPipelineActive()
-        {
-            var pipeline = GraphicsSettings.renderPipelineAsset;
-            if (pipeline == null) return false;
-
-            string typeName = pipeline.GetType().Name;
-            return typeName.Contains("Universal") || typeName.Contains("URP");
         }
 
         static void EnsureFolder(string parent, string child)
@@ -693,6 +619,29 @@ namespace Siliq.Water.Editor
             mat.EnableKeyword("_NORMALMAP");
         }
 
+        static void SetupStandardOpaque(Material mat)
+        {
+            if (mat == null) return;
+
+            if (mat.HasProperty("_Mode")) mat.SetFloat("_Mode", 0f);
+            if (mat.HasProperty("_SrcBlend")) mat.SetFloat("_SrcBlend", (float)BlendMode.One);
+            if (mat.HasProperty("_DstBlend")) mat.SetFloat("_DstBlend", (float)BlendMode.Zero);
+            if (mat.HasProperty("_ZWrite")) mat.SetFloat("_ZWrite", 1f);
+            if (mat.HasProperty("_Color"))
+            {
+                Color c = mat.GetColor("_Color");
+                c.a = 1f;
+                mat.SetColor("_Color", c);
+            }
+
+            mat.SetOverrideTag("RenderType", "Opaque");
+            mat.renderQueue = (int)RenderQueue.Geometry;
+            mat.DisableKeyword("_ALPHATEST_ON");
+            mat.DisableKeyword("_ALPHABLEND_ON");
+            mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+            mat.EnableKeyword("_NORMALMAP");
+        }
+
         static void ApplyLitNormalAndColor(Material mat, Material source, float opacity)
         {
             if (mat == null) return;
@@ -721,6 +670,78 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_Metallic")) mat.SetFloat("_Metallic", 0f);
         }
 
+        static void SetupGeneratedWaterMaterial(
+            Material mat,
+            int shaderIndex,
+            Material colorSource,
+            Material normalSource,
+            bool transparent,
+            float opacity,
+            float macroVariation,
+            float macroScale,
+            float macroDirectionBreakup,
+            float macroColorVariation)
+        {
+            if (mat == null) return;
+
+            if (shaderIndex == WaterShaderUtility.SiliqMobileIndex || shaderIndex == WaterShaderUtility.SiliqUrpIndex)
+            {
+                ApplySiliqNormal(mat, normalSource);
+                ApplySiliqWaterPalette(mat, colorSource);
+                SetupMacroVariation(mat, macroVariation, macroScale, macroDirectionBreakup, macroColorVariation);
+                if (transparent)
+                {
+                    SetupSiliqMobileTransparent(mat, opacity);
+                }
+                else
+                {
+                    SetupSiliqOpaque(mat);
+                }
+                return;
+            }
+
+            ApplyLitNormalAndColor(mat, normalSource ?? colorSource, opacity);
+            if (shaderIndex == WaterShaderUtility.UrpLitIndex)
+            {
+                if (transparent) SetupUrpLitTransparent(mat, opacity);
+                else SetupUrpLitOpaque(mat);
+                return;
+            }
+
+            if (transparent) SetupStandardTransparent(mat, opacity);
+            else SetupStandardOpaque(mat);
+        }
+
+        static void SetupFallbackLook(Material mat, LookPreset preset, Material source, int shaderIndex)
+        {
+            if (mat == null) return;
+
+            float opacity = preset.transparent ? preset.opacity : 1f;
+            ApplyLitNormalAndColor(mat, source, opacity);
+
+            Color color = Color.Lerp(preset.deep, preset.shallow, 0.55f);
+            color.a = opacity;
+            if (mat.HasProperty("_Color")) mat.SetColor("_Color", color);
+            if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", color);
+            if (mat.HasProperty("_Glossiness")) mat.SetFloat("_Glossiness", preset.smoothness);
+            if (mat.HasProperty("_Smoothness")) mat.SetFloat("_Smoothness", preset.smoothness);
+            if (mat.HasProperty("_Metallic"))
+            {
+                mat.SetFloat("_Metallic", preset.assetName == "LiquidMetal" ? 1f : 0f);
+            }
+
+            if (shaderIndex == WaterShaderUtility.UrpLitIndex)
+            {
+                if (preset.transparent) SetupUrpLitTransparent(mat, opacity);
+                else SetupUrpLitOpaque(mat);
+            }
+            else
+            {
+                if (preset.transparent) SetupStandardTransparent(mat, opacity);
+                else SetupStandardOpaque(mat);
+            }
+        }
+
         static void SetupUrpLitTransparent(Material mat, float opacity)
         {
             if (mat == null) return;
@@ -742,6 +763,30 @@ namespace Siliq.Water.Editor
             mat.renderQueue = (int)RenderQueue.Transparent;
             mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
             mat.DisableKeyword("_ALPHATEST_ON");
+        }
+
+        static void SetupUrpLitOpaque(Material mat)
+        {
+            if (mat == null) return;
+
+            if (mat.HasProperty("_Surface")) mat.SetFloat("_Surface", 0f);
+            if (mat.HasProperty("_Blend")) mat.SetFloat("_Blend", 0f);
+            if (mat.HasProperty("_AlphaClip")) mat.SetFloat("_AlphaClip", 0f);
+            if (mat.HasProperty("_SrcBlend")) mat.SetFloat("_SrcBlend", (float)BlendMode.One);
+            if (mat.HasProperty("_DstBlend")) mat.SetFloat("_DstBlend", (float)BlendMode.Zero);
+            if (mat.HasProperty("_ZWrite")) mat.SetFloat("_ZWrite", 1f);
+            if (mat.HasProperty("_BaseColor"))
+            {
+                Color c = mat.GetColor("_BaseColor");
+                c.a = 1f;
+                mat.SetColor("_BaseColor", c);
+            }
+
+            mat.SetOverrideTag("RenderType", "Opaque");
+            mat.renderQueue = (int)RenderQueue.Geometry;
+            mat.DisableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            mat.DisableKeyword("_ALPHATEST_ON");
+            mat.EnableKeyword("_NORMALMAP");
         }
 
         static void SetupSiliqOpaque(Material mat)

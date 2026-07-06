@@ -1,5 +1,7 @@
 using NUnit.Framework;
+using Siliq.Water.Editor;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Siliq.Water.Tests
 {
@@ -368,6 +370,26 @@ namespace Siliq.Water.Tests
         }
 
         [Test]
+        public void ShaderUtility_UniversalPipelineWithoutUrpPackage_DoesNotChooseBuiltInShaders()
+        {
+            var originalPipeline = GraphicsSettings.renderPipelineAsset;
+            var fakePipeline = ScriptableObject.CreateInstance<UniversalFakePipelineAsset>();
+            try
+            {
+                GraphicsSettings.renderPipelineAsset = fakePipeline;
+
+                Assert.IsTrue(WaterShaderUtility.IsUniversalPipelineActive());
+                Assert.AreNotEqual(WaterShaderUtility.SiliqMobileIndex, WaterShaderUtility.BestSiliqMaterialShaderIndex());
+                Assert.AreNotEqual(WaterShaderUtility.StandardIndex, WaterShaderUtility.BestFallbackMaterialShaderIndex());
+            }
+            finally
+            {
+                GraphicsSettings.renderPipelineAsset = originalPipeline;
+                Object.DestroyImmediate(fakePipeline);
+            }
+        }
+
+        [Test]
         public void PoolPreset_UsesSubtleNormalRecipe()
         {
             var settings = WaterMapPresets.Create(8);
@@ -421,6 +443,14 @@ namespace Siliq.Water.Tests
                 sum += WaterMapCore.EvaluateLayer(layer, u, v, t, s.globalSeed) * layer.amplitude;
             }
             return sum;
+        }
+
+        sealed class UniversalFakePipelineAsset : RenderPipelineAsset
+        {
+            protected override RenderPipeline CreatePipeline()
+            {
+                return null;
+            }
         }
     }
 }

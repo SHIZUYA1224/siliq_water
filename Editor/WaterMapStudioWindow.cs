@@ -428,19 +428,12 @@ namespace Siliq.Water.Editor
 
         int BestSiliqMaterialShaderIndex()
         {
-            if (IsUniversalPipelineActive() && IsUsableShader(Shader.Find("Siliq/Water URP"))) return 4;
-            if (IsUsableShader(Shader.Find("Siliq/Water Mobile (Quest)"))) return 3;
-            if (IsUniversalPipelineActive() && IsUsableShader(Shader.Find("Universal Render Pipeline/Lit"))) return 2;
-            return 1;
+            return WaterShaderUtility.BestSiliqMaterialShaderIndex();
         }
 
         static bool IsUniversalPipelineActive()
         {
-            var pipeline = GraphicsSettings.renderPipelineAsset;
-            if (pipeline == null) return false;
-
-            string typeName = pipeline.GetType().Name;
-            return typeName.Contains("Universal") || typeName.Contains("URP");
+            return WaterShaderUtility.IsUniversalPipelineActive();
         }
 
         void SetExportMaps(params WaterMapType[] selectedTypes)
@@ -1205,19 +1198,25 @@ namespace Siliq.Water.Editor
             string requestedShaderName = ShaderNameForMaterialIndex(resolvedShaderIndex);
             if (string.IsNullOrEmpty(requestedShaderName)) return;
 
-            Shader shader = Shader.Find(requestedShaderName);
-            if (!IsUsableShader(shader))
+            Shader shader = WaterShaderUtility.FindUsableShaderForCurrentPipeline(requestedShaderName);
+            if (shader == null)
             {
-                int fallbackIndex = BestFallbackMaterialShaderIndex();
-                string fallbackShaderName = ShaderNameForMaterialIndex(fallbackIndex);
-                Shader fallbackShader = Shader.Find(fallbackShaderName);
-                if (!IsUsableShader(fallbackShader))
+                int fallbackIndex = WaterShaderUtility.ResolveSafeMaterialShaderIndex(resolvedShaderIndex);
+                if (fallbackIndex == WaterShaderUtility.NoMaterialIndex)
                 {
-                    Debug.LogWarning($"[Siliq Water] シェーダー '{requestedShaderName}' が見つからない、または現在の環境でサポートされていないためマテリアル作成をスキップしました。");
+                    Debug.LogWarning($"[Siliq Water] シェーダー '{requestedShaderName}' は現在の Render Pipeline では使用できないためマテリアル作成をスキップしました。");
                     return;
                 }
 
-                Debug.LogWarning($"[Siliq Water] シェーダー '{requestedShaderName}' は現在の環境で使用できないため、ピンク表示を避けるため '{fallbackShaderName}' でマテリアルを作成しました。");
+                string fallbackShaderName = ShaderNameForMaterialIndex(fallbackIndex);
+                Shader fallbackShader = WaterShaderUtility.FindUsableShaderForCurrentPipeline(fallbackShaderName);
+                if (fallbackShader == null)
+                {
+                    Debug.LogWarning($"[Siliq Water] fallback shader '{fallbackShaderName}' も現在の Render Pipeline では使用できないためマテリアル作成をスキップしました。");
+                    return;
+                }
+
+                Debug.LogWarning($"[Siliq Water] シェーダー '{requestedShaderName}' は現在の Render Pipeline では使用できないため、ピンク表示を避けるため '{fallbackShaderName}' でマテリアルを作成しました。");
                 resolvedShaderIndex = fallbackIndex;
                 shader = fallbackShader;
             }
@@ -1325,25 +1324,17 @@ namespace Siliq.Water.Editor
 
         static string ShaderNameForMaterialIndex(int index)
         {
-            switch (index)
-            {
-                case 1: return "Standard";
-                case 2: return "Universal Render Pipeline/Lit";
-                case 3: return "Siliq/Water Mobile (Quest)";
-                case 4: return "Siliq/Water URP";
-                default: return null;
-            }
+            return WaterShaderUtility.ShaderNameForMaterialIndex(index);
         }
 
         static bool IsUsableShader(Shader shader)
         {
-            return shader != null && shader.isSupported;
+            return WaterShaderUtility.IsUsableShaderForCurrentPipeline(shader);
         }
 
         static int BestFallbackMaterialShaderIndex()
         {
-            if (IsUniversalPipelineActive() && IsUsableShader(Shader.Find("Universal Render Pipeline/Lit"))) return 2;
-            return 1;
+            return WaterShaderUtility.BestFallbackMaterialShaderIndex();
         }
 
         static void SetupStandardTransparent(Material mat, float opacity)

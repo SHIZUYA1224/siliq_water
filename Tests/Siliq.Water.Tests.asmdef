@@ -3,6 +3,7 @@
     "rootNamespace": "Siliq.Water.Tests",
     "references": [
         "Siliq.Water.Runtime",
+        "Siliq.Water.Editor",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],
