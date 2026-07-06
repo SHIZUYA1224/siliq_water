@@ -41,6 +41,14 @@ Unity エディタ上(またはランタイム)で、水面・流体表現向け
 共通 Editor ツール UI の設計方針は [Docs/CommonEditorToolLayoutSpec.md](Docs/CommonEditorToolLayoutSpec.md) にまとめています。
 用途別マテリアルプリセットの使い分けは [Docs/MaterialLookPresetGuide.md](Docs/MaterialLookPresetGuide.md) を参照してください。
 水面マップスタジオでは `目的から始める` から、綺麗な海 / 透明プール / 血の海 / 液体金属の推奨生成設定を一括適用できます。
+公開・リリース前の確認項目は [Docs/PublicReleaseChecklist.md](Docs/PublicReleaseChecklist.md) にまとめています。
+
+## 公開リポジトリとしての状態
+
+- `LICENSE.md`: 現時点では製品向けの All rights reserved。配布条件を変える場合は公開前に差し替えてください。
+- `SECURITY.md`: 脆弱性や secret 露出の非公開報告ルール。
+- `CONTRIBUTING.md`: 変更時の品質基準と検証手順。
+- `.gitignore` / `.gitattributes`: Unity 生成物の混入防止と text/binary 管理。
 
 ## 焼き済みパック (PrebakedPack) — ツール不要ですぐ使える 5 種
 

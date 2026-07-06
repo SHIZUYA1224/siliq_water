@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.15] - 2026-07-06
+
+### 追加: 公開リポジトリ向けの製品品質ファイル
+- `.gitignore` / `.gitattributes` を追加し、Unity 生成物、IDE ファイル、バイナリアセットの扱いを整理
+- `LICENSE.md` / `SECURITY.md` / `CONTRIBUTING.md` を追加し、公開時の権利表記、脆弱性報告、変更ルールを明文化
+- `Docs/PublicReleaseChecklist.md` を追加し、public 化・リリース前に確認する項目を整理
+- `package.json` に license / repository / documentation / changelog / license URL を追加
+
 ## [2.3.14] - 2026-07-06
 
 ### 改善: 目的ベースの高品質ワークフローを追加
