@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.10] - 2026-07-06
+
+### 修正: PC 透明マテリアルのアニメーションと package meta 警告
+- `WaterSurfaceAnimator` が Standard / URP Lit の normal map でも見た目が動くよう、
+  `_BumpMap_ST` に加えて `_MainTex_ST` / `_BaseMap_ST` も更新するように修正
+- `package.json.meta` を同梱し、Git / UPM で immutable package として読み込んだ時の
+  `package.json has no meta file` 警告を解消
+
 ## [2.3.9] - 2026-07-06
 
 ### 改善: Cyber プリセットを実用的な SF 水面へ変更

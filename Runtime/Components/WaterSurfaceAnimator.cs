@@ -54,10 +54,20 @@ namespace Siliq.Water
         int tiling2PropertyId;
         int scroll1PropertyId;
         int scroll2PropertyId;
+        int mainTexPropertyId;
+        int mainTexStPropertyId;
+        int baseMapPropertyId;
+        int baseMapStPropertyId;
         string cachedPropertyName;
         Vector2 baseTextureScale = Vector2.one;
         Vector2 baseTextureOffset = Vector2.zero;
+        Vector2 mainTexBaseScale = Vector2.one;
+        Vector2 mainTexBaseOffset = Vector2.zero;
+        Vector2 baseMapBaseScale = Vector2.one;
+        Vector2 baseMapBaseOffset = Vector2.zero;
         bool hasTextureTransform;
+        bool hasMainTexTransform;
+        bool hasBaseMapTransform;
         bool hasSiliqScrollControls;
 
 #if UNITY_EDITOR
@@ -97,6 +107,10 @@ namespace Siliq.Water
             tiling2PropertyId = Shader.PropertyToID("_Tiling2");
             scroll1PropertyId = Shader.PropertyToID("_Scroll1");
             scroll2PropertyId = Shader.PropertyToID("_Scroll2");
+            mainTexPropertyId = Shader.PropertyToID("_MainTex");
+            mainTexStPropertyId = Shader.PropertyToID("_MainTex_ST");
+            baseMapPropertyId = Shader.PropertyToID("_BaseMap");
+            baseMapStPropertyId = Shader.PropertyToID("_BaseMap_ST");
         }
 
         void Update()
@@ -149,9 +163,15 @@ namespace Siliq.Water
 
             targetMaterial = null;
             hasTextureTransform = false;
+            hasMainTexTransform = false;
+            hasBaseMapTransform = false;
             hasSiliqScrollControls = false;
             baseTextureScale = Vector2.one;
             baseTextureOffset = Vector2.zero;
+            mainTexBaseScale = Vector2.one;
+            mainTexBaseOffset = Vector2.zero;
+            baseMapBaseScale = Vector2.one;
+            baseMapBaseOffset = Vector2.zero;
 
             if (targetRenderer == null) return;
             var materials = targetRenderer.sharedMaterials;
@@ -168,10 +188,29 @@ namespace Siliq.Water
                 baseTextureOffset = targetMaterial.GetTextureOffset(texturePropertyName);
             }
 
+            // Standard / URP Lit は normal map 固有の ST ではなく、
+            // 主テクスチャの ST で normal map の UV も動かす実装がある。
+            if (texturePropertyName == "_BumpMap")
+            {
+                hasMainTexTransform = TryCacheTextureTransform("_MainTex", mainTexPropertyId, out mainTexBaseScale, out mainTexBaseOffset);
+                hasBaseMapTransform = TryCacheTextureTransform("_BaseMap", baseMapPropertyId, out baseMapBaseScale, out baseMapBaseOffset);
+            }
+
             hasSiliqScrollControls = targetMaterial.HasProperty(scroll1PropertyId) ||
                                      targetMaterial.HasProperty(scroll2PropertyId) ||
                                      targetMaterial.HasProperty(tiling1PropertyId) ||
                                      targetMaterial.HasProperty(normalStrengthPropertyId);
+        }
+
+        bool TryCacheTextureTransform(string propertyName, int propertyId, out Vector2 scale, out Vector2 offset)
+        {
+            scale = Vector2.one;
+            offset = Vector2.zero;
+            if (targetMaterial == null || !targetMaterial.HasProperty(propertyId)) return false;
+
+            scale = targetMaterial.GetTextureScale(propertyName);
+            offset = targetMaterial.GetTextureOffset(propertyName);
+            return true;
         }
 
         void Animate(float dt)
@@ -216,6 +255,14 @@ namespace Siliq.Water
                 Vector2 finalOffset = baseTextureOffset + offset;
                 propertyBlock.SetVector(texStPropertyId, new Vector4(scale.x, scale.y, finalOffset.x, finalOffset.y));
             }
+            if (hasMainTexTransform)
+            {
+                SetTextureSt(mainTexStPropertyId, mainTexBaseScale, mainTexBaseOffset);
+            }
+            if (hasBaseMapTransform)
+            {
+                SetTextureSt(baseMapStPropertyId, baseMapBaseScale, baseMapBaseOffset);
+            }
             if (targetMaterial.HasProperty(bumpScalePropertyId))
             {
                 propertyBlock.SetFloat(bumpScalePropertyId, strength);
@@ -250,6 +297,13 @@ namespace Siliq.Water
             }
 
             targetRenderer.SetPropertyBlock(propertyBlock, index);
+        }
+
+        void SetTextureSt(int propertyId, Vector2 baseScale, Vector2 baseOffset)
+        {
+            Vector2 scale = new Vector2(baseScale.x * tiling, baseScale.y * tiling);
+            Vector2 finalOffset = baseOffset + offset;
+            propertyBlock.SetVector(propertyId, new Vector4(scale.x, scale.y, finalOffset.x, finalOffset.y));
         }
     }
 }

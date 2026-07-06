@@ -242,10 +242,14 @@ namespace Siliq.Water.Tests
                 var block = new MaterialPropertyBlock();
                 renderer.GetPropertyBlock(block, 0);
                 Vector4 st = block.GetVector("_BumpMap_ST");
+                Vector4 mainSt = block.GetVector("_MainTex_ST");
 
                 Assert.AreEqual(2f, st.x, 1e-5f, "tiling が _BumpMap_ST.x に反映されていない");
                 Assert.AreEqual(2f, st.y, 1e-5f, "tiling が _BumpMap_ST.y に反映されていない");
                 Assert.Greater(st.z, 0.2f, "speed / direction による X offset が反映されていない");
+                Assert.AreEqual(2f, mainSt.x, 1e-5f, "Standard の normal UV 用 _MainTex_ST.x に tiling が反映されていない");
+                Assert.AreEqual(2f, mainSt.y, 1e-5f, "Standard の normal UV 用 _MainTex_ST.y に tiling が反映されていない");
+                Assert.Greater(mainSt.z, 0.2f, "Standard の normal UV 用 _MainTex_ST に offset が反映されていない");
                 Assert.AreEqual(2f, block.GetFloat("_BumpScale"), 1e-5f, "strength が _BumpScale に反映されていない");
                 Vector2 sharedOffset = mat.GetTextureOffset("_BumpMap");
                 Assert.AreEqual(0f, sharedOffset.x, 1e-5f, "共有マテリアルを直接変更してはならない");
