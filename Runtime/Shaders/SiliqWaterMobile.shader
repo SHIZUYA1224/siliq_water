@@ -27,6 +27,10 @@ Shader "Siliq/Water Mobile (Quest)"
         _Tiling2 ("レイヤー2 タイリング", Float) = 2.7
         _Scroll1 ("レイヤー1 スクロール (XY)", Vector) = (0.02, 0.013, 0, 0)
         _Scroll2 ("レイヤー2 スクロール (XY)", Vector) = (-0.017, 0.021, 0, 0)
+        _MacroVariation ("大きなムラ", Range(0, 1)) = 0.35
+        _MacroScale ("大きなムラのスケール", Range(0.01, 1)) = 0.12
+        _MacroDirectionBreakup ("方向の崩し", Range(0, 1)) = 0.28
+        _MacroColorVariation ("色と光のムラ", Range(0, 1)) = 0.16
         _SpecPower ("ハイライトの鋭さ", Range(8, 512)) = 160
         _SpecIntensity ("ハイライトの強さ", Range(0, 2)) = 0.8
         _FresnelPower ("フレネルの鋭さ", Range(0.5, 8)) = 4
@@ -87,6 +91,10 @@ Shader "Siliq/Water Mobile (Quest)"
             float _Tiling2;
             float4 _Scroll1;
             float4 _Scroll2;
+            half _MacroVariation;
+            half _MacroScale;
+            half _MacroDirectionBreakup;
+            half _MacroColorVariation;
             half _SpecPower;
             half _SpecIntensity;
             half _FresnelPower;
@@ -94,6 +102,21 @@ Shader "Siliq/Water Mobile (Quest)"
             #ifdef USE_REFLECTION_CUBE
             samplerCUBE _ReflCube;
             #endif
+
+            half SiliqMacroNoise(float2 p)
+            {
+                half a = sin(dot(p, float2(1.27, 2.31)) + _Time.y * 0.07);
+                half b = sin(dot(p, float2(-2.14, 1.43)) - _Time.y * 0.05);
+                half c = sin(dot(p, float2(0.63, -1.19)) + _Time.y * 0.03);
+                return a * 0.5h + b * 0.32h + c * 0.18h;
+            }
+
+            float2 SiliqRotate2D(float2 v, half angle)
+            {
+                half s = sin(angle);
+                half c = cos(angle);
+                return float2(v.x * c - v.y * s, v.x * s + v.y * c);
+            }
 
             #ifdef _USE_RIPPLES
             half _RippleSpeed;
@@ -186,13 +209,24 @@ Shader "Siliq/Water Mobile (Quest)"
 
             half4 frag(v2f i) : SV_Target
             {
-                float2 uv1 = i.uv * _Tiling1 + _Scroll1.xy * _Time.y;
-                float2 uv2 = i.uv * _Tiling2 + _Scroll2.xy * _Time.y;
+                float macroScale = max(_MacroScale, 0.0001h);
+                half macroA = SiliqMacroNoise(i.worldPos.xz * macroScale);
+                half macroB = SiliqMacroNoise(i.worldPos.xz * macroScale * 1.71 + float2(13.1, 7.7));
+                half macro01 = saturate(0.5h + macroA * 0.5h);
+                float2 centeredUv = i.uv - 0.5;
+                float2 macroWarp = float2(macroA, macroB) * (_MacroVariation * 0.075h);
+                half layer2Angle = macroB * _MacroDirectionBreakup * 0.9h;
+                float tiling1 = _Tiling1 * (1.0 + macroA * _MacroVariation * 0.18);
+                float tiling2 = _Tiling2 * (1.0 + macroB * _MacroVariation * 0.22);
+
+                float2 uv1 = centeredUv * tiling1 + 0.5 + macroWarp + _Scroll1.xy * _Time.y;
+                float2 uv2 = SiliqRotate2D(centeredUv, layer2Angle) * tiling2 + 0.5 - macroWarp * 1.35 + _Scroll2.xy * _Time.y;
 
                 half3 n1 = UnpackNormal(tex2D(_NormalMap, uv1));
                 half3 n2 = UnpackNormal(tex2D(_NormalMap, uv2));
                 half3 tn = normalize(half3(n1.xy + n2.xy, n1.z * n2.z));
-                tn.xy *= _NormalStrength;
+                half macroStrength = lerp(1.0h - _MacroVariation * 0.45h, 1.0h + _MacroVariation * 0.55h, macro01);
+                tn.xy *= _NormalStrength * macroStrength;
 
                 half rippleLight = 0;
                 #ifdef _USE_RIPPLES
@@ -214,7 +248,8 @@ Shader "Siliq/Water Mobile (Quest)"
                 half3 halfDir = normalize(lightDir + viewDir);
 
                 half halfLambert = saturate(dot(worldN, lightDir)) * 0.5h + 0.5h;
-                half3 baseCol = lerp(_DeepColor.rgb, _ShallowColor.rgb, halfLambert);
+                half colorLift = (macro01 - 0.5h) * _MacroColorVariation;
+                half3 baseCol = lerp(_DeepColor.rgb, _ShallowColor.rgb, saturate(halfLambert + colorLift));
 
                 half3 reflCol = _HorizonColor.rgb;
                 #ifdef USE_REFLECTION_CUBE
@@ -226,10 +261,12 @@ Shader "Siliq/Water Mobile (Quest)"
                 half fresnel = pow(1.0h - viewFacing, _FresnelPower);
                 half alphaFresnel = pow(1.0h - viewFacing, _AlphaPower);
                 half spec = pow(saturate(dot(worldN, halfDir)), _SpecPower) * _SpecIntensity;
+                spec *= lerp(0.72h, 1.28h, macro01);
                 half glint = pow(saturate(dot(reflect(-lightDir, worldN), viewDir)), _GlintPower) * _GlintIntensity;
 
                 half interference = saturate(1.0h - abs(n1.x * 0.72h + n1.y * 0.31h - n2.x * 0.46h + n2.y * 0.58h));
                 half glimmer = pow(interference, _GlimmerSharpness) * _GlimmerIntensity * saturate(0.45h + halfLambert);
+                glimmer *= lerp(0.65h, 1.35h, macro01);
                 half3 transmission = _TransmissionColor.rgb * _TransmissionStrength * viewFacing * saturate(0.25h + halfLambert);
 
                 half4 col;

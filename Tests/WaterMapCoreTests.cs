@@ -297,6 +297,68 @@ namespace Siliq.Water.Tests
             }
         }
 
+        [Test]
+        public void SiliqMobileShader_ExposesMacroVariationControls()
+        {
+            Material mat = null;
+            try
+            {
+                Shader shader = Shader.Find("Siliq/Water Mobile (Quest)");
+                Assert.IsNotNull(shader, "Siliq/Water Mobile (Quest) シェーダーが見つからない");
+                mat = new Material(shader);
+
+                Assert.IsTrue(mat.HasProperty("_MacroVariation"));
+                Assert.IsTrue(mat.HasProperty("_MacroScale"));
+                Assert.IsTrue(mat.HasProperty("_MacroDirectionBreakup"));
+                Assert.IsTrue(mat.HasProperty("_MacroColorVariation"));
+            }
+            finally
+            {
+                if (mat != null) Object.DestroyImmediate(mat);
+            }
+        }
+
+        [Test]
+        public void PoolPreset_UsesSubtleNormalRecipe()
+        {
+            var settings = WaterMapPresets.Create(8);
+            Assert.LessOrEqual(settings.strength, 0.45f, "Pool は強い凹凸ではなく浅い光網として扱う");
+
+            bool foundCaustics = false;
+            foreach (var layer in settings.layers)
+            {
+                if (layer.type != WaveLayerType.VoronoiCaustics) continue;
+                foundCaustics = true;
+                Assert.LessOrEqual(layer.amplitude, 0.18f, "Pool の光網を法線で太く盛りすぎている");
+                Assert.GreaterOrEqual(layer.scale, 18, "Pool の光網が粗すぎると太いリボン状に見える");
+            }
+            Assert.IsTrue(foundCaustics, "Pool には控えめな光網レイヤーが必要");
+        }
+
+        [Test]
+        public void CyberPreset_UsesThinFlowRecipe()
+        {
+            var settings = WaterMapPresets.Create(9);
+            Assert.LessOrEqual(settings.strength, 0.8f, "Cyber は太い床模様ではなく薄い SF 水面として扱う");
+
+            bool foundDirectionalFlow = false;
+            foreach (var layer in settings.layers)
+            {
+                Assert.AreNotEqual(WaveLayerType.VoronoiCaustics, layer.type,
+                    "Cyber にセル境界の網目を戻すと床タイル状に見える");
+                Assert.AreNotEqual(WaveLayerType.VoronoiCells, layer.type,
+                    "Cyber に太い規則ドットやブロック状セルを戻してはならない");
+
+                if (layer.type != WaveLayerType.DirectionalWaves) continue;
+                foundDirectionalFlow = true;
+                Assert.Greater(layer.waveCount, 1, "Cyber は単独グリッド波ではなく複数の細い流れで作る");
+                Assert.Greater(layer.spreadDeg, 0f, "Cyber の方向が完全固定だと床格子に見える");
+                Assert.LessOrEqual(layer.sharpness, 1.5f, "Cyber の線を太く尖らせすぎている");
+            }
+
+            Assert.IsTrue(foundDirectionalFlow, "Cyber には細いデータ流の方向波レイヤーが必要");
+        }
+
         // ---------------------------------------------------------------
         // ヘルパー
         // ---------------------------------------------------------------

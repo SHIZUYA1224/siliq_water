@@ -1026,6 +1026,7 @@ namespace Siliq.Water.Editor
                     {
                         mat.SetTexture("_NormalMap", normal);
                     }
+                    SetupMacroVariation(mat, 0.42f, 0.10f, 0.36f, 0.18f);
                     if (materialShaderIndex == 4)
                     {
                         if (flow != null)
@@ -1123,6 +1124,14 @@ namespace Siliq.Water.Editor
 
             mat.SetOverrideTag("RenderType", "Transparent");
             mat.renderQueue = (int)RenderQueue.Transparent;
+        }
+
+        static void SetupMacroVariation(Material mat, float variation, float scale, float directionBreakup, float colorVariation)
+        {
+            if (mat.HasProperty("_MacroVariation")) mat.SetFloat("_MacroVariation", variation);
+            if (mat.HasProperty("_MacroScale")) mat.SetFloat("_MacroScale", scale);
+            if (mat.HasProperty("_MacroDirectionBreakup")) mat.SetFloat("_MacroDirectionBreakup", directionBreakup);
+            if (mat.HasProperty("_MacroColorVariation")) mat.SetFloat("_MacroColorVariation", colorVariation);
         }
     }
 }

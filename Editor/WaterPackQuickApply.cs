@@ -32,8 +32,8 @@ namespace Siliq.Water.Editor
         static readonly MotionPreset CalmMotion = new MotionPreset(35f, 0.35f, 1.35f, 1.35f);
         static readonly MotionPreset RippleMotion = new MotionPreset(0f, 0f, 0.55f, 1.15f);
         static readonly MotionPreset StreamMotion = new MotionPreset(0f, 1.0f, 1.45f, 1.8f);
-        static readonly MotionPreset PoolMotion = new MotionPreset(50f, 0.4f, 1.55f, 1.45f);
-        static readonly MotionPreset CyberMotion = new MotionPreset(45f, 0.75f, 1.8f, 1.8f);
+        static readonly MotionPreset PoolMotion = new MotionPreset(50f, 0.24f, 0.55f, 1.08f);
+        static readonly MotionPreset CyberMotion = new MotionPreset(18f, 0.52f, 0.78f, 1.24f);
 
         // PrebakedPack/Materials/*.mat.meta の固定 GUID
         const string CalmGuid = "a171aabb01c34e01a1b2c3d4e5f60201";
@@ -261,6 +261,7 @@ namespace Siliq.Water.Editor
             mat.name = $"M_Water_Ripple{suffix}";
             ApplySiliqNormal(mat, normalSource);
             ApplySiliqWaterPalette(mat, colorSource);
+            SetupMacroVariation(mat, 0.48f, 0.11f, 0.42f, 0.20f);
 
             if (transparent)
             {
@@ -328,6 +329,7 @@ namespace Siliq.Water.Editor
             mat.name = $"M_Water_{label}_iOS_Transparent";
             ApplySiliqNormal(mat, source);
             ApplySiliqWaterPalette(mat, source);
+            SetupMacroVariation(mat, 0.42f, 0.10f, 0.36f, 0.18f);
 
             SetupSiliqMobileTransparent(mat, MobileTransparentOpacity);
             EditorUtility.SetDirty(mat);
@@ -424,6 +426,16 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_Tiling1")) mat.SetFloat("_Tiling1", 1.15f);
             if (mat.HasProperty("_Tiling2")) mat.SetFloat("_Tiling2", 2.1f);
             mat.EnableKeyword("_USE_RIPPLES");
+        }
+
+        static void SetupMacroVariation(Material mat, float variation, float scale, float directionBreakup, float colorVariation)
+        {
+            if (mat == null) return;
+
+            if (mat.HasProperty("_MacroVariation")) mat.SetFloat("_MacroVariation", variation);
+            if (mat.HasProperty("_MacroScale")) mat.SetFloat("_MacroScale", scale);
+            if (mat.HasProperty("_MacroDirectionBreakup")) mat.SetFloat("_MacroDirectionBreakup", directionBreakup);
+            if (mat.HasProperty("_MacroColorVariation")) mat.SetFloat("_MacroColorVariation", colorVariation);
         }
 
         static void ApplySiliqNormal(Material mat, Material source)

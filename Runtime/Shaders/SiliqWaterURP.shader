@@ -17,6 +17,10 @@ Shader "Siliq/Water URP"
         _Tiling2 ("レイヤー2 タイリング", Float) = 2.7
         _Scroll1 ("レイヤー1 スクロール (XY)", Vector) = (0.02, 0.013, 0, 0)
         _Scroll2 ("レイヤー2 スクロール (XY)", Vector) = (-0.017, 0.021, 0, 0)
+        _MacroVariation ("大きなムラ", Range(0, 1)) = 0.35
+        _MacroScale ("大きなムラのスケール", Range(0.01, 1)) = 0.12
+        _MacroDirectionBreakup ("方向の崩し", Range(0, 1)) = 0.28
+        _MacroColorVariation ("色と光のムラ", Range(0, 1)) = 0.16
 
         _Smoothness ("スムースネス", Range(0, 1)) = 0.92
         _FresnelPower ("フレネルの鋭さ", Range(0.5, 8)) = 4
@@ -89,6 +93,10 @@ Shader "Siliq/Water URP"
                 float _Tiling2;
                 float4 _Scroll1;
                 float4 _Scroll2;
+                half _MacroVariation;
+                half _MacroScale;
+                half _MacroDirectionBreakup;
+                half _MacroColorVariation;
                 half _Smoothness;
                 half _FresnelPower;
                 half _ReflStrength;
@@ -106,6 +114,21 @@ Shader "Siliq/Water URP"
                 half _RippleAmplitude;
                 half _RippleChannel;
             CBUFFER_END
+
+            half SiliqMacroNoise(float2 p)
+            {
+                half a = sin(dot(p, float2(1.27, 2.31)) + _Time.y * 0.07);
+                half b = sin(dot(p, float2(-2.14, 1.43)) - _Time.y * 0.05);
+                half c = sin(dot(p, float2(0.63, -1.19)) + _Time.y * 0.03);
+                return a * 0.5h + b * 0.32h + c * 0.18h;
+            }
+
+            float2 SiliqRotate2D(float2 v, half angle)
+            {
+                half s = sin(angle);
+                half c = cos(angle);
+                return float2(v.x * c - v.y * s, v.x * s + v.y * c);
+            }
 
             #ifdef _USE_RIPPLES
             // アバターが触れた/水に入った場所からスクリプト (WaterRippleSource / Udon版) が
@@ -187,32 +210,44 @@ Shader "Siliq/Water URP"
                 return output;
             }
 
-            half3 SampleWaterNormal(float2 uv)
+            half3 SampleWaterNormal(float2 uv, float3 positionWS, out half macroMask)
             {
                 float time = _Time.y;
+                float macroScale = max(_MacroScale, 0.0001h);
+                half macroA = SiliqMacroNoise(positionWS.xz * macroScale);
+                half macroB = SiliqMacroNoise(positionWS.xz * macroScale * 1.71 + float2(13.1, 7.7));
+                macroMask = saturate(0.5h + macroA * 0.5h);
+                float2 centeredUv = uv - 0.5;
+                float2 macroWarp = float2(macroA, macroB) * (_MacroVariation * 0.075h);
+                half layer2Angle = macroB * _MacroDirectionBreakup * 0.9h;
+                float tiling1 = _Tiling1 * (1.0 + macroA * _MacroVariation * 0.18);
+                float tiling2 = _Tiling2 * (1.0 + macroB * _MacroVariation * 0.22);
+                float2 uv1 = centeredUv * tiling1 + 0.5 + macroWarp;
+                float2 uv2 = SiliqRotate2D(centeredUv, layer2Angle) * tiling2 + 0.5 - macroWarp * 1.35;
 
                 #if defined(_USE_FLOWMAP)
                 // フローマップ駆動: 2 位相のサンプルをクロスフェードして連続的な流れを作る
-                half2 flow = (SAMPLE_TEXTURE2D(_FlowMap, sampler_FlowMap, uv).rg * 2.0h - 1.0h) * _FlowIntensity;
+                half2 flow = (SAMPLE_TEXTURE2D(_FlowMap, sampler_FlowMap, uv + macroWarp).rg * 2.0h - 1.0h) * _FlowIntensity;
                 half phase0 = frac(time * _FlowSpeed);
                 half phase1 = frac(time * _FlowSpeed + 0.5h);
                 half blend = abs((0.5h - phase0) / 0.5h);
 
-                half3 nA0 = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, uv * _Tiling1 - flow * phase0));
-                half3 nA1 = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, uv * _Tiling1 - flow * phase1 + 0.37h));
+                half3 nA0 = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, uv1 - flow * phase0));
+                half3 nA1 = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, uv1 - flow * phase1 + 0.37h));
                 half3 n1 = lerp(nA0, nA1, blend);
 
-                half3 nB0 = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, uv * _Tiling2 - flow * phase0 * 1.3h));
-                half3 nB1 = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, uv * _Tiling2 - flow * phase1 * 1.3h + 0.71h));
+                half3 nB0 = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, uv2 - flow * phase0 * 1.3h));
+                half3 nB1 = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, uv2 - flow * phase1 * 1.3h + 0.71h));
                 half3 n2 = lerp(nB0, nB1, blend);
                 #else
                 // 標準: 2 レイヤーの UV スクロール
-                half3 n1 = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, uv * _Tiling1 + _Scroll1.xy * time));
-                half3 n2 = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, uv * _Tiling2 + _Scroll2.xy * time));
+                half3 n1 = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, uv1 + _Scroll1.xy * time));
+                half3 n2 = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, uv2 + _Scroll2.xy * time));
                 #endif
 
                 half3 blended = normalize(half3(n1.xy + n2.xy, n1.z * n2.z));
-                blended.xy *= _NormalStrength;
+                half macroStrength = lerp(1.0h - _MacroVariation * 0.45h, 1.0h + _MacroVariation * 0.55h, macroMask);
+                blended.xy *= _NormalStrength * macroStrength;
                 return normalize(blended);
             }
 
@@ -221,7 +256,8 @@ Shader "Siliq/Water URP"
                 UNITY_SETUP_INSTANCE_ID(input);
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
 
-                half3 normalTS = SampleWaterNormal(input.uv);
+                half macroMask = 0.5h;
+                half3 normalTS = SampleWaterNormal(input.uv, input.positionWS, macroMask);
 
                 half rippleLight = 0;
                 #if defined(_USE_RIPPLES)
@@ -256,12 +292,14 @@ Shader "Siliq/Water URP"
                 #if !defined(_SHORE_EFFECTS)
                 depthLerp = 1.0h - ndl * 0.5h;
                 #endif
+                depthLerp = saturate(depthLerp + (0.5h - macroMask) * _MacroColorVariation);
                 half3 baseCol = lerp(_ShallowColor.rgb, _DeepColor.rgb, depthLerp);
 
                 // 反射: リフレクションプローブ + フレネル
                 half3 reflectVector = reflect(-viewDir, normalWS);
                 half perceptualRoughness = 1.0h - _Smoothness;
                 half3 reflection = GlossyEnvironmentReflection(reflectVector, perceptualRoughness, 1.0h) * _ReflStrength;
+                reflection *= lerp(0.78h, 1.22h, macroMask);
 
                 half fresnel = pow(1.0h - saturate(dot(normalWS, viewDir)), _FresnelPower);
 
@@ -269,6 +307,7 @@ Shader "Siliq/Water URP"
                 half3 halfDir = normalize(mainLight.direction + viewDir);
                 half specPow = exp2(10.0h * _Smoothness + 1.0h);
                 half3 spec = pow(saturate(dot(normalWS, halfDir)), specPow) * mainLight.color;
+                spec *= lerp(0.72h, 1.28h, macroMask);
 
                 half3 color = lerp(baseCol, reflection, fresnel) + spec;
                 color += lerp(_ShallowColor.rgb, half3(1.0h, 1.0h, 1.0h), 0.72h) * rippleLight * 0.35h;
