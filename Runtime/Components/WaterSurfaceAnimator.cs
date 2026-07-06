@@ -48,6 +48,22 @@ namespace Siliq.Water
         [Tooltip("模様の大きさ。1 が元のサイズ、大きいほど模様が細かく (タイリング数が増え) 見える。")]
         [Range(0.1f, 8f)] public float tiling = 1f;
 
+        [Header("色")]
+        [Tooltip("水面の明るい部分の色。Standard / URP Lit ではこの色がベースカラーになります。")]
+        public Color shallowColor = new Color(0.34f, 0.90f, 1f, 1f);
+
+        [Tooltip("水面の深い部分の色。Siliq 水シェーダーで有効。")]
+        public Color deepColor = new Color(0.01f, 0.16f, 0.34f, 1f);
+
+        [Tooltip("空や環境が映り込む反射色。Siliq 水シェーダーで有効。")]
+        public Color reflectionColor = new Color(0.82f, 0.96f, 1f, 1f);
+
+        [Tooltip("透けた水の内側から出る色。透明感と水らしい厚みを作ります。Siliq 水シェーダーで有効。")]
+        public Color transmissionColor = new Color(0.40f, 0.95f, 1f, 1f);
+
+        [Tooltip("細い光ときらめきの色。Siliq 水シェーダーで有効。")]
+        public Color sparkleColor = new Color(0.95f, 1f, 1f, 1f);
+
         [Header("透明・反射")]
         [Tooltip("水面の不透明度。1 に近いほど濃く、低いほど透けます。透明マテリアルで特に有効。")]
         [Range(0.05f, 1f)] public float opacity = 0.55f;
@@ -58,8 +74,14 @@ namespace Siliq.Water
         [Tooltip("全体の反射の強さ。Siliq 水シェーダーで有効。")]
         [Range(0f, 1f)] public float reflectionStrength = 0.85f;
 
+        [Tooltip("透過光の強さ。透明感と水の厚みを足します。Siliq 水シェーダーで有効。")]
+        [Range(0f, 1f)] public float transmissionStrength = 0.62f;
+
         [Tooltip("細い光の揺らぎときらめきの強さ。Siliq 水シェーダーで有効。")]
         [Range(0f, 1f)] public float sparkle = 0.22f;
+
+        [Tooltip("強いハイライトの量。反射が弱く見える時はここを上げます。Siliq 水シェーダーで有効。")]
+        [Range(0f, 2f)] public float highlightStrength = 1.15f;
 
         Renderer targetRenderer;
         Material targetMaterial;
@@ -80,10 +102,17 @@ namespace Siliq.Water
         int opacityPropertyId;
         int colorPropertyId;
         int baseColorPropertyId;
+        int shallowColorPropertyId;
+        int deepColorPropertyId;
+        int horizonColorPropertyId;
+        int transmissionColorPropertyId;
+        int glimmerColorPropertyId;
         int edgeReflectionPropertyId;
         int reflStrengthPropertyId;
+        int transmissionStrengthPropertyId;
         int glimmerIntensityPropertyId;
         int glintIntensityPropertyId;
+        int specIntensityPropertyId;
         string cachedPropertyName;
         Vector2 baseTextureScale = Vector2.one;
         Vector2 baseTextureOffset = Vector2.zero;
@@ -120,6 +149,12 @@ namespace Siliq.Water
 #endif
         }
 
+        void Reset()
+        {
+            RebindRendererAndMaterial();
+            SyncLookFromMaterial();
+        }
+
         void OnDisable()
         {
 #if UNITY_EDITOR
@@ -145,10 +180,17 @@ namespace Siliq.Water
             opacityPropertyId = Shader.PropertyToID("_Opacity");
             colorPropertyId = Shader.PropertyToID("_Color");
             baseColorPropertyId = Shader.PropertyToID("_BaseColor");
+            shallowColorPropertyId = Shader.PropertyToID("_ShallowColor");
+            deepColorPropertyId = Shader.PropertyToID("_DeepColor");
+            horizonColorPropertyId = Shader.PropertyToID("_HorizonColor");
+            transmissionColorPropertyId = Shader.PropertyToID("_TransmissionColor");
+            glimmerColorPropertyId = Shader.PropertyToID("_GlimmerColor");
             edgeReflectionPropertyId = Shader.PropertyToID("_EdgeReflection");
             reflStrengthPropertyId = Shader.PropertyToID("_ReflStrength");
+            transmissionStrengthPropertyId = Shader.PropertyToID("_TransmissionStrength");
             glimmerIntensityPropertyId = Shader.PropertyToID("_GlimmerIntensity");
             glintIntensityPropertyId = Shader.PropertyToID("_GlintIntensity");
+            specIntensityPropertyId = Shader.PropertyToID("_SpecIntensity");
         }
 
         void Update()
@@ -208,7 +250,9 @@ namespace Siliq.Water
             opacity = Mathf.Clamp(opacity, 0.05f, 1f);
             edgeReflection = Mathf.Clamp01(edgeReflection);
             reflectionStrength = Mathf.Clamp01(reflectionStrength);
+            transmissionStrength = Mathf.Clamp01(transmissionStrength);
             sparkle = Mathf.Clamp01(sparkle);
+            highlightStrength = Mathf.Clamp(highlightStrength, 0f, 2f);
             if (propertyBlock == null) propertyBlock = new MaterialPropertyBlock();
             RebindRendererAndMaterial();
             ApplyProperties(0f);
@@ -243,13 +287,49 @@ namespace Siliq.Water
             {
                 edgeReflection = Mathf.Clamp01(targetMaterial.GetFloat(edgeReflectionPropertyId));
             }
+            if (targetMaterial.HasProperty(shallowColorPropertyId))
+            {
+                shallowColor = targetMaterial.GetColor(shallowColorPropertyId);
+            }
+            else if (hasBaseColorProperty)
+            {
+                shallowColor = materialBaseColor;
+            }
+            else if (hasColorProperty)
+            {
+                shallowColor = materialColor;
+            }
+            if (targetMaterial.HasProperty(deepColorPropertyId))
+            {
+                deepColor = targetMaterial.GetColor(deepColorPropertyId);
+            }
+            if (targetMaterial.HasProperty(horizonColorPropertyId))
+            {
+                reflectionColor = targetMaterial.GetColor(horizonColorPropertyId);
+            }
+            if (targetMaterial.HasProperty(transmissionColorPropertyId))
+            {
+                transmissionColor = targetMaterial.GetColor(transmissionColorPropertyId);
+            }
+            if (targetMaterial.HasProperty(glimmerColorPropertyId))
+            {
+                sparkleColor = targetMaterial.GetColor(glimmerColorPropertyId);
+            }
             if (targetMaterial.HasProperty(reflStrengthPropertyId))
             {
                 reflectionStrength = Mathf.Clamp01(targetMaterial.GetFloat(reflStrengthPropertyId));
             }
+            if (targetMaterial.HasProperty(transmissionStrengthPropertyId))
+            {
+                transmissionStrength = Mathf.Clamp01(targetMaterial.GetFloat(transmissionStrengthPropertyId));
+            }
             if (targetMaterial.HasProperty(glimmerIntensityPropertyId))
             {
                 sparkle = Mathf.Clamp01(targetMaterial.GetFloat(glimmerIntensityPropertyId));
+            }
+            if (targetMaterial.HasProperty(specIntensityPropertyId))
+            {
+                highlightStrength = Mathf.Clamp(targetMaterial.GetFloat(specIntensityPropertyId), 0f, 2f);
             }
         }
 
@@ -440,15 +520,35 @@ namespace Siliq.Water
 
             if (hasColorProperty)
             {
-                Color c = materialColor;
+                Color c = shallowColor;
                 c.a = clampedOpacity;
                 propertyBlock.SetColor(colorPropertyId, c);
             }
             if (hasBaseColorProperty)
             {
-                Color c = materialBaseColor;
+                Color c = shallowColor;
                 c.a = clampedOpacity;
                 propertyBlock.SetColor(baseColorPropertyId, c);
+            }
+            if (targetMaterial.HasProperty(shallowColorPropertyId))
+            {
+                propertyBlock.SetColor(shallowColorPropertyId, shallowColor);
+            }
+            if (targetMaterial.HasProperty(deepColorPropertyId))
+            {
+                propertyBlock.SetColor(deepColorPropertyId, deepColor);
+            }
+            if (targetMaterial.HasProperty(horizonColorPropertyId))
+            {
+                propertyBlock.SetColor(horizonColorPropertyId, reflectionColor);
+            }
+            if (targetMaterial.HasProperty(transmissionColorPropertyId))
+            {
+                propertyBlock.SetColor(transmissionColorPropertyId, transmissionColor);
+            }
+            if (targetMaterial.HasProperty(glimmerColorPropertyId))
+            {
+                propertyBlock.SetColor(glimmerColorPropertyId, sparkleColor);
             }
 
             if (targetMaterial.HasProperty(edgeReflectionPropertyId))
@@ -459,6 +559,10 @@ namespace Siliq.Water
             {
                 propertyBlock.SetFloat(reflStrengthPropertyId, Mathf.Clamp01(reflectionStrength));
             }
+            if (targetMaterial.HasProperty(transmissionStrengthPropertyId))
+            {
+                propertyBlock.SetFloat(transmissionStrengthPropertyId, Mathf.Clamp01(transmissionStrength));
+            }
             if (targetMaterial.HasProperty(glimmerIntensityPropertyId))
             {
                 propertyBlock.SetFloat(glimmerIntensityPropertyId, Mathf.Clamp01(sparkle));
@@ -466,6 +570,10 @@ namespace Siliq.Water
             if (targetMaterial.HasProperty(glintIntensityPropertyId))
             {
                 propertyBlock.SetFloat(glintIntensityPropertyId, Mathf.Clamp01(sparkle) * 2f);
+            }
+            if (targetMaterial.HasProperty(specIntensityPropertyId))
+            {
+                propertyBlock.SetFloat(specIntensityPropertyId, Mathf.Clamp(highlightStrength, 0f, 2f));
             }
         }
     }

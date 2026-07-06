@@ -10,9 +10,9 @@ Shader "Siliq/Water Mobile (Quest)"
         _ShallowColor ("浅い水の色", Color) = (0.16, 0.55, 0.60, 1)
         _DeepColor ("深い水の色", Color) = (0.02, 0.15, 0.25, 1)
         _HorizonColor ("反射 (空) の色", Color) = (0.65, 0.80, 0.90, 1)
-        _MinLighting ("暗所の最低明るさ", Range(0, 0.5)) = 0.08
-        _DarkReflectionDamping ("暗所の反射抑制", Range(0, 1)) = 0.85
-        _DarkDetailDamping ("暗所のきらめき抑制", Range(0, 1)) = 0.78
+        _MinLighting ("暗所の最低明るさ", Range(0, 0.5)) = 0.10
+        _DarkReflectionDamping ("暗所の反射抑制", Range(0, 1)) = 0.72
+        _DarkDetailDamping ("暗所のきらめき抑制", Range(0, 1)) = 0.70
         _Opacity ("正面の不透明度", Range(0, 1)) = 1
         _AlphaFresnel ("斜め視線の不透明度加算", Range(0, 1)) = 0
         _AlphaPower ("透明フレネルの鋭さ", Range(0.5, 8)) = 3
@@ -272,10 +272,11 @@ Shader "Siliq/Water Mobile (Quest)"
                 half3 reflDir = reflect(-viewDir, worldN);
                 reflCol = lerp(reflCol, texCUBE(_ReflCube, reflDir).rgb, _ReflStrength);
                 #endif
-                reflCol *= reflectionVisibility;
+                half reflectionAmount = lerp(0.08h, 1.45h, _ReflStrength);
+                reflCol *= reflectionVisibility * reflectionAmount;
 
                 half viewFacing = saturate(dot(worldN, viewDir));
-                half fresnel = pow(1.0h - viewFacing, _FresnelPower);
+                half fresnel = saturate(pow(1.0h - viewFacing, _FresnelPower) * lerp(0.72h, 1.18h, _ReflStrength));
                 half alphaFresnel = pow(1.0h - viewFacing, _AlphaPower);
                 half spec = pow(saturate(dot(worldN, halfDir)), _SpecPower) * _SpecIntensity;
                 spec *= lerp(0.72h, 1.28h, macro01) * detailVisibility * mainLightLum;

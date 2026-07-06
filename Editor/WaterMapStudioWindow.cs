@@ -367,7 +367,7 @@ namespace Siliq.Water.Editor
                     settings.exportExr = false;
                     settings.frameCount = 32;
                     settings.createTransparentMaterial = true;
-                    settings.materialOpacity = 0.52f;
+                    settings.materialOpacity = 0.46f;
                     materialShaderIndex = BestSiliqMaterialShaderIndex();
                     previewMapIndex = 0;
                     SetExportMaps(WaterMapType.Normal, WaterMapType.Roughness, WaterMapType.Flow, WaterMapType.Dudv, WaterMapType.Caustics);
@@ -382,7 +382,7 @@ namespace Siliq.Water.Editor
                     settings.exportExr = false;
                     settings.frameCount = 24;
                     settings.createTransparentMaterial = true;
-                    settings.materialOpacity = 0.42f;
+                    settings.materialOpacity = 0.34f;
                     materialShaderIndex = BestSiliqMaterialShaderIndex();
                     previewMapIndex = 0;
                     SetExportMaps(WaterMapType.Normal, WaterMapType.Roughness, WaterMapType.Caustics);
@@ -1382,17 +1382,17 @@ namespace Siliq.Water.Editor
         {
             SetupDarkSceneResponse(mat);
             if (mat.HasProperty("_Opacity")) mat.SetFloat("_Opacity", Mathf.Clamp01(opacity));
-            if (mat.HasProperty("_AlphaFresnel")) mat.SetFloat("_AlphaFresnel", 0.62f);
-            if (mat.HasProperty("_AlphaPower")) mat.SetFloat("_AlphaPower", 2.15f);
-            if (mat.HasProperty("_EdgeReflection")) mat.SetFloat("_EdgeReflection", 0.55f);
-            if (mat.HasProperty("_TransmissionStrength")) mat.SetFloat("_TransmissionStrength", 0.52f);
-            if (mat.HasProperty("_GlimmerIntensity")) mat.SetFloat("_GlimmerIntensity", 0.22f);
+            if (mat.HasProperty("_AlphaFresnel")) mat.SetFloat("_AlphaFresnel", 0.74f);
+            if (mat.HasProperty("_AlphaPower")) mat.SetFloat("_AlphaPower", 2.05f);
+            if (mat.HasProperty("_EdgeReflection")) mat.SetFloat("_EdgeReflection", 0.70f);
+            if (mat.HasProperty("_TransmissionStrength")) mat.SetFloat("_TransmissionStrength", 0.70f);
+            if (mat.HasProperty("_GlimmerIntensity")) mat.SetFloat("_GlimmerIntensity", 0.28f);
             if (mat.HasProperty("_GlimmerSharpness")) mat.SetFloat("_GlimmerSharpness", 14f);
-            if (mat.HasProperty("_GlintIntensity")) mat.SetFloat("_GlintIntensity", 0.45f);
+            if (mat.HasProperty("_GlintIntensity")) mat.SetFloat("_GlintIntensity", 0.74f);
             if (mat.HasProperty("_GlintPower")) mat.SetFloat("_GlintPower", 220f);
-            if (mat.HasProperty("_FresnelPower")) mat.SetFloat("_FresnelPower", 2.65f);
-            if (mat.HasProperty("_ReflStrength")) mat.SetFloat("_ReflStrength", 0.9f);
-            if (mat.HasProperty("_SpecIntensity")) mat.SetFloat("_SpecIntensity", 1.15f);
+            if (mat.HasProperty("_FresnelPower")) mat.SetFloat("_FresnelPower", 2.35f);
+            if (mat.HasProperty("_ReflStrength")) mat.SetFloat("_ReflStrength", 1f);
+            if (mat.HasProperty("_SpecIntensity")) mat.SetFloat("_SpecIntensity", 1.35f);
             if (mat.HasProperty("_SpecPower")) mat.SetFloat("_SpecPower", 220f);
             if (mat.HasProperty("_SrcBlend")) mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
             if (mat.HasProperty("_DstBlend")) mat.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
@@ -1414,9 +1414,9 @@ namespace Siliq.Water.Editor
         {
             if (mat == null) return;
 
-            if (mat.HasProperty("_MinLighting")) mat.SetFloat("_MinLighting", 0.08f);
-            if (mat.HasProperty("_DarkReflectionDamping")) mat.SetFloat("_DarkReflectionDamping", 0.85f);
-            if (mat.HasProperty("_DarkDetailDamping")) mat.SetFloat("_DarkDetailDamping", 0.78f);
+            if (mat.HasProperty("_MinLighting")) mat.SetFloat("_MinLighting", 0.10f);
+            if (mat.HasProperty("_DarkReflectionDamping")) mat.SetFloat("_DarkReflectionDamping", 0.72f);
+            if (mat.HasProperty("_DarkDetailDamping")) mat.SetFloat("_DarkDetailDamping", 0.70f);
         }
     }
 }

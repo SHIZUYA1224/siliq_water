@@ -95,7 +95,7 @@ Unity エディタ上(またはランタイム)で、水面・流体表現向け
 対象オブジェクトにアタッチしてください。Standard / URP Lit / VRChat Mobile など、
 対象プロパティ (`_BumpMap` 等) を持つシェーダーであれば動作します。
 
-インスペクタで動きと透明・反射をスライダーで直感的に調整できます。
+インスペクタで動き、色、透明・反射を直接調整できます。
 
 | 項目 | 内容 |
 |---|---|
@@ -104,14 +104,17 @@ Unity エディタ上(またはランタイム)で、水面・流体表現向け
 | **Edit Mode Preview Fps** | 編集中プレビューの更新回数。低いほど軽い |
 | **強さ** | 凹凸の強さ (シェーダーに `_BumpScale` がある場合) |
 | **模様の大きさ** | 1 が元のサイズ、大きいほど模様が細かく見える |
-| **Opacity** | 不透明度。1 に近いほど濃く、低いほど透ける |
-| **Edge Reflection** | 斜め視線で戻る輪郭反射と不透明感 |
-| **Reflection Strength** | 全体の反射の強さ |
-| **Sparkle** | 細い光の揺らぎときらめき |
+| **明るい水色 / 深い水色** | 水面の基本色。Standard / URP Lit では明るい水色がベースカラーになる |
+| **反射色** | 空や環境が映り込む色 |
+| **透過光** | 透明水の内側から出る色。水の厚みと透明感を作る |
+| **不透明度** | 1 に近いほど濃く、低いほど透ける |
+| **輪郭反射 / 反射量** | 斜め視線の反射と全体の映り込み |
+| **透過光量 / ハイライト / きらめき** | 透明感、強い光、細い揺らぎの量 |
 
 **Play ボタンを押さなくても、値を変えるとシーンビュー上でその場に反映**されます。
 Standard / URP Lit / VRChat Mobile 系では `_BumpMap` の UV、`_BumpScale`、色 alpha を、
 同梱の Siliq 水シェーダーでは `_Scroll1` / `_Scroll2` / `_NormalStrength` / `_Tiling*` を
+`_ShallowColor` / `_DeepColor` / `_HorizonColor` / `_TransmissionColor` /
 `_Opacity` / `_EdgeReflection` / `_ReflStrength` などと一緒に
 `MaterialPropertyBlock` 経由で動かすため、共有マテリアルを汚さずに調整できます。
 PC の発熱を避けるため、編集モードの連続プレビューは**選択中の水面だけ**最大 10fps で更新されます。
@@ -235,6 +238,7 @@ Built-in / VRChat / Quest / iOS 向けの通常導入ではコンパイル対象
 
 - ノーマルマップ 1 枚を 2 回スクロールサンプリング
 - 深い色 ⇔ 浅い色 + フレネル + 透過光 + 細い光の揺らぎ + スペキュラ + 任意のキューブマップ反射
+- `_ReflStrength` はキューブマップ未使用時も反射量として効くため、反射が足りない時に直接上げられます
 - `_MinLighting` / `_DarkReflectionDamping` / `_DarkDetailDamping` により、暗い部屋では反射ときらめきを減衰
 - `_MacroVariation` / `_MacroScale` / `_MacroDirectionBreakup` /
   `_MacroColorVariation` により、大きな面でも模様の密度・向き・光が均一になりすぎないよう調整

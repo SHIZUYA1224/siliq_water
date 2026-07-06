@@ -79,27 +79,27 @@ namespace Siliq.Water.Editor
             sourceLabel = "Calm",
             motion = new MotionPreset(22f, 0.30f, 0.92f, 1.45f),
             transparent = true,
-            opacity = 0.52f,
-            shallow = new Color(0.22f, 0.82f, 0.94f, 1f),
-            deep = new Color(0.005f, 0.12f, 0.34f, 1f),
-            horizon = new Color(0.72f, 0.92f, 1f, 1f),
-            transmission = new Color(0.36f, 0.94f, 1f, 1f),
-            glimmer = new Color(0.92f, 0.99f, 1f, 1f),
+            opacity = 0.46f,
+            shallow = new Color(0.30f, 0.88f, 1f, 1f),
+            deep = new Color(0.004f, 0.10f, 0.28f, 1f),
+            horizon = new Color(0.86f, 0.98f, 1f, 1f),
+            transmission = new Color(0.40f, 0.98f, 1f, 1f),
+            glimmer = new Color(0.97f, 1f, 1f, 1f),
             normalStrength = 0.92f,
             tiling1 = 1.35f,
             tiling2 = 3.1f,
-            alphaFresnel = 0.68f,
-            alphaPower = 2.35f,
-            edgeReflection = 0.58f,
-            transmissionStrength = 0.58f,
-            glimmerIntensity = 0.20f,
+            alphaFresnel = 0.74f,
+            alphaPower = 2.20f,
+            edgeReflection = 0.72f,
+            transmissionStrength = 0.72f,
+            glimmerIntensity = 0.26f,
             glimmerSharpness = 13f,
-            glintIntensity = 0.55f,
+            glintIntensity = 0.78f,
             glintPower = 220f,
             specPower = 220f,
-            specIntensity = 1.05f,
-            fresnelPower = 2.8f,
-            reflStrength = 0.92f,
+            specIntensity = 1.35f,
+            fresnelPower = 2.45f,
+            reflStrength = 1f,
             smoothness = 0.96f,
             macroVariation = 0.46f,
             macroScale = 0.10f,
@@ -115,27 +115,27 @@ namespace Siliq.Water.Editor
             sourceLabel = "Pool",
             motion = new MotionPreset(50f, 0.18f, 0.38f, 1.0f),
             transparent = true,
-            opacity = 0.42f,
-            shallow = new Color(0.70f, 0.98f, 1f, 1f),
+            opacity = 0.34f,
+            shallow = new Color(0.74f, 0.99f, 1f, 1f),
             deep = new Color(0.08f, 0.42f, 0.62f, 1f),
-            horizon = new Color(0.86f, 0.98f, 1f, 1f),
-            transmission = new Color(0.54f, 0.98f, 1f, 1f),
+            horizon = new Color(0.92f, 1f, 1f, 1f),
+            transmission = new Color(0.62f, 1f, 1f, 1f),
             glimmer = new Color(0.98f, 1f, 1f, 1f),
             normalStrength = 0.40f,
             tiling1 = 0.95f,
             tiling2 = 2.15f,
-            alphaFresnel = 0.62f,
+            alphaFresnel = 0.70f,
             alphaPower = 2.0f,
-            edgeReflection = 0.45f,
-            transmissionStrength = 0.64f,
-            glimmerIntensity = 0.16f,
+            edgeReflection = 0.60f,
+            transmissionStrength = 0.76f,
+            glimmerIntensity = 0.20f,
             glimmerSharpness = 18f,
-            glintIntensity = 0.36f,
+            glintIntensity = 0.52f,
             glintPower = 260f,
             specPower = 260f,
-            specIntensity = 0.82f,
-            fresnelPower = 3.0f,
-            reflStrength = 0.72f,
+            specIntensity = 1.05f,
+            fresnelPower = 2.65f,
+            reflStrength = 0.92f,
             smoothness = 0.94f,
             macroVariation = 0.24f,
             macroScale = 0.08f,
@@ -226,9 +226,9 @@ namespace Siliq.Water.Editor
         const string TransparentMenuRoot = "GameObject/Siliq Water/透明な水マテリアルを適用 (PC)/";
         const string MobileTransparentMenuRoot = "GameObject/Siliq Water/透明な水マテリアルを適用 (iOS/Mobile)/";
         const string LookMenuRoot = "GameObject/Siliq Water/用途別マテリアルを適用/";
-        const float PcSiliqTransparentOpacity = 0.52f;
+        const float PcSiliqTransparentOpacity = 0.46f;
         const float StandardTransparentFallbackOpacity = 0.68f;
-        const float MobileTransparentOpacity = 0.38f;
+        const float MobileTransparentOpacity = 0.34f;
 
         [MenuItem(MenuRoot + "静かな水面 (Calm)", false, 10)]
         static void ApplyCalm() => Apply(CalmGuid, "Calm", CalmMotion);
@@ -811,17 +811,17 @@ namespace Siliq.Water.Editor
 
             SetupDarkSceneResponse(mat);
             if (mat.HasProperty("_Opacity")) mat.SetFloat("_Opacity", Mathf.Clamp01(opacity));
-            if (mat.HasProperty("_AlphaFresnel")) mat.SetFloat("_AlphaFresnel", 0.62f);
-            if (mat.HasProperty("_AlphaPower")) mat.SetFloat("_AlphaPower", 2.15f);
-            if (mat.HasProperty("_EdgeReflection")) mat.SetFloat("_EdgeReflection", 0.55f);
-            if (mat.HasProperty("_TransmissionStrength")) mat.SetFloat("_TransmissionStrength", 0.52f);
-            if (mat.HasProperty("_GlimmerIntensity")) mat.SetFloat("_GlimmerIntensity", 0.22f);
+            if (mat.HasProperty("_AlphaFresnel")) mat.SetFloat("_AlphaFresnel", 0.74f);
+            if (mat.HasProperty("_AlphaPower")) mat.SetFloat("_AlphaPower", 2.05f);
+            if (mat.HasProperty("_EdgeReflection")) mat.SetFloat("_EdgeReflection", 0.70f);
+            if (mat.HasProperty("_TransmissionStrength")) mat.SetFloat("_TransmissionStrength", 0.70f);
+            if (mat.HasProperty("_GlimmerIntensity")) mat.SetFloat("_GlimmerIntensity", 0.28f);
             if (mat.HasProperty("_GlimmerSharpness")) mat.SetFloat("_GlimmerSharpness", 14f);
-            if (mat.HasProperty("_GlintIntensity")) mat.SetFloat("_GlintIntensity", 0.45f);
+            if (mat.HasProperty("_GlintIntensity")) mat.SetFloat("_GlintIntensity", 0.74f);
             if (mat.HasProperty("_GlintPower")) mat.SetFloat("_GlintPower", 220f);
-            if (mat.HasProperty("_FresnelPower")) mat.SetFloat("_FresnelPower", 2.65f);
-            if (mat.HasProperty("_ReflStrength")) mat.SetFloat("_ReflStrength", 0.9f);
-            if (mat.HasProperty("_SpecIntensity")) mat.SetFloat("_SpecIntensity", 1.15f);
+            if (mat.HasProperty("_FresnelPower")) mat.SetFloat("_FresnelPower", 2.35f);
+            if (mat.HasProperty("_ReflStrength")) mat.SetFloat("_ReflStrength", 1f);
+            if (mat.HasProperty("_SpecIntensity")) mat.SetFloat("_SpecIntensity", 1.35f);
             if (mat.HasProperty("_SpecPower")) mat.SetFloat("_SpecPower", 220f);
             if (mat.HasProperty("_SrcBlend")) mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
             if (mat.HasProperty("_DstBlend")) mat.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
@@ -892,9 +892,9 @@ namespace Siliq.Water.Editor
         {
             if (mat == null) return;
 
-            if (mat.HasProperty("_MinLighting")) mat.SetFloat("_MinLighting", 0.08f);
-            if (mat.HasProperty("_DarkReflectionDamping")) mat.SetFloat("_DarkReflectionDamping", 0.85f);
-            if (mat.HasProperty("_DarkDetailDamping")) mat.SetFloat("_DarkDetailDamping", 0.78f);
+            if (mat.HasProperty("_MinLighting")) mat.SetFloat("_MinLighting", 0.10f);
+            if (mat.HasProperty("_DarkReflectionDamping")) mat.SetFloat("_DarkReflectionDamping", 0.72f);
+            if (mat.HasProperty("_DarkDetailDamping")) mat.SetFloat("_DarkDetailDamping", 0.70f);
         }
 
         static void ApplySiliqNormal(Material mat, Material source)

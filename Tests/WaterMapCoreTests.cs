@@ -240,6 +240,7 @@ namespace Siliq.Water.Tests
                 animator.strength = 2f;
                 animator.tiling = 2f;
                 animator.opacity = 0.62f;
+                animator.shallowColor = new Color(0.12f, 0.34f, 0.56f, 1f);
                 animator.ApplyImmediate(0.5f);
 
                 var block = new MaterialPropertyBlock();
@@ -254,7 +255,11 @@ namespace Siliq.Water.Tests
                 Assert.AreEqual(2f, mainSt.y, 1e-5f, "Standard の normal UV 用 _MainTex_ST.y に tiling が反映されていない");
                 Assert.Greater(mainSt.z, 0.2f, "Standard の normal UV 用 _MainTex_ST に offset が反映されていない");
                 Assert.AreEqual(2f, block.GetFloat("_BumpScale"), 1e-5f, "strength が _BumpScale に反映されていない");
-                Assert.AreEqual(0.62f, block.GetColor("_Color").a, 1e-5f, "opacity が Standard の _Color alpha に反映されていない");
+                Color c = block.GetColor("_Color");
+                Assert.AreEqual(0.12f, c.r, 1e-5f, "shallowColor が Standard の _Color.r に反映されていない");
+                Assert.AreEqual(0.34f, c.g, 1e-5f, "shallowColor が Standard の _Color.g に反映されていない");
+                Assert.AreEqual(0.56f, c.b, 1e-5f, "shallowColor が Standard の _Color.b に反映されていない");
+                Assert.AreEqual(0.62f, c.a, 1e-5f, "opacity が Standard の _Color alpha に反映されていない");
                 Vector2 sharedOffset = mat.GetTextureOffset("_BumpMap");
                 Assert.AreEqual(0f, sharedOffset.x, 1e-5f, "共有マテリアルを直接変更してはならない");
                 Assert.AreEqual(0f, sharedOffset.y, 1e-5f, "共有マテリアルを直接変更してはならない");
@@ -284,19 +289,33 @@ namespace Siliq.Water.Tests
                 var animator = go.AddComponent<WaterSurfaceAnimator>();
                 animator.texturePropertyName = "_NormalMap";
                 animator.opacity = 0.48f;
+                animator.shallowColor = new Color(0.2f, 0.8f, 1f, 1f);
+                animator.deepColor = new Color(0.01f, 0.1f, 0.24f, 1f);
+                animator.reflectionColor = new Color(0.9f, 1f, 1f, 1f);
+                animator.transmissionColor = new Color(0.4f, 0.95f, 1f, 1f);
+                animator.sparkleColor = new Color(1f, 0.95f, 0.85f, 1f);
                 animator.edgeReflection = 0.73f;
                 animator.reflectionStrength = 0.64f;
+                animator.transmissionStrength = 0.58f;
                 animator.sparkle = 0.31f;
+                animator.highlightStrength = 1.42f;
                 animator.ApplyImmediate(0f);
 
                 var block = new MaterialPropertyBlock();
                 renderer.GetPropertyBlock(block, 0);
 
                 Assert.AreEqual(0.48f, block.GetFloat("_Opacity"), 1e-5f);
+                AssertColor(animator.shallowColor, block.GetColor("_ShallowColor"), "_ShallowColor");
+                AssertColor(animator.deepColor, block.GetColor("_DeepColor"), "_DeepColor");
+                AssertColor(animator.reflectionColor, block.GetColor("_HorizonColor"), "_HorizonColor");
+                AssertColor(animator.transmissionColor, block.GetColor("_TransmissionColor"), "_TransmissionColor");
+                AssertColor(animator.sparkleColor, block.GetColor("_GlimmerColor"), "_GlimmerColor");
                 Assert.AreEqual(0.73f, block.GetFloat("_EdgeReflection"), 1e-5f);
                 Assert.AreEqual(0.64f, block.GetFloat("_ReflStrength"), 1e-5f);
+                Assert.AreEqual(0.58f, block.GetFloat("_TransmissionStrength"), 1e-5f);
                 Assert.AreEqual(0.31f, block.GetFloat("_GlimmerIntensity"), 1e-5f);
                 Assert.AreEqual(0.62f, block.GetFloat("_GlintIntensity"), 1e-5f);
+                Assert.AreEqual(1.42f, block.GetFloat("_SpecIntensity"), 1e-5f);
                 Assert.AreEqual(1f, mat.GetFloat("_Opacity"), 1e-5f, "共有マテリアルの _Opacity を直接変更してはならない");
             }
             finally
@@ -443,6 +462,14 @@ namespace Siliq.Water.Tests
                 sum += WaterMapCore.EvaluateLayer(layer, u, v, t, s.globalSeed) * layer.amplitude;
             }
             return sum;
+        }
+
+        static void AssertColor(Color expected, Color actual, string label)
+        {
+            Assert.AreEqual(expected.r, actual.r, 1e-5f, $"{label}.r");
+            Assert.AreEqual(expected.g, actual.g, 1e-5f, $"{label}.g");
+            Assert.AreEqual(expected.b, actual.b, 1e-5f, $"{label}.b");
+            Assert.AreEqual(expected.a, actual.a, 1e-5f, $"{label}.a");
         }
 
         sealed class UniversalFakePipelineAsset : RenderPipelineAsset
