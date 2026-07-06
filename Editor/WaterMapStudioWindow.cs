@@ -15,6 +15,10 @@ namespace Siliq.Water.Editor
     {
         const string PrefsKey = "Siliq.Water.Settings.v2";
         const int PreviewResolution = 256;
+        const float WideLayoutThreshold = 820f;
+        const float LeftPaneMinWidth = 360f;
+        const float LeftPaneMaxWidth = 520f;
+        const float PaneGap = 10f;
 
         static readonly WaterMapType[] MapTypes =
         {
@@ -58,7 +62,7 @@ namespace Siliq.Water.Editor
         public static void Open()
         {
             var window = GetWindow<WaterMapStudioWindow>("水面マップスタジオ");
-            window.minSize = new Vector2(440f, 660f);
+            window.minSize = new Vector2(720f, 560f);
         }
 
         void OnEnable()
@@ -130,34 +134,81 @@ namespace Siliq.Water.Editor
 
         void OnGUI()
         {
-            scroll = EditorGUILayout.BeginScrollView(scroll);
+            if (settings == null)
+            {
+                settings = WaterMapPresets.Create(0);
+            }
 
+            if (position.width >= WideLayoutThreshold)
+            {
+                DrawWideLayout();
+            }
+            else
+            {
+                DrawCompactLayout();
+            }
+
+            if (previewDirty && Event.current.type == EventType.Repaint)
+            {
+                RegeneratePreview();
+            }
+        }
+
+        void DrawWideLayout()
+        {
+            float leftWidth = Mathf.Clamp(position.width * 0.38f, LeftPaneMinWidth, LeftPaneMaxWidth);
+            float previewPaneWidth = Mathf.Max(280f, position.width - leftWidth - PaneGap - 18f);
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                using (new EditorGUILayout.VerticalScope(GUILayout.Width(leftWidth)))
+                {
+                    DrawControlScroll();
+                }
+
+                GUILayout.Space(PaneGap);
+
+                using (new EditorGUILayout.VerticalScope(GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true)))
+                {
+                    DrawPreviewSection(previewPaneWidth, fixedPane: true);
+                }
+            }
+        }
+
+        void DrawCompactLayout()
+        {
+            scroll = EditorGUILayout.BeginScrollView(scroll);
+            DrawControlContents();
+            GUILayout.Space(8f);
+            DrawPreviewSection(EditorGUIUtility.currentViewWidth - 24f, fixedPane: false);
+            EditorGUILayout.EndScrollView();
+        }
+
+        void DrawControlScroll()
+        {
+            scroll = EditorGUILayout.BeginScrollView(scroll, GUILayout.ExpandHeight(true));
+            DrawControlContents();
+            EditorGUILayout.EndScrollView();
+        }
+
+        void DrawControlContents()
+        {
             EditorGUI.BeginChangeCheck();
 
             DrawPresetAndProfileSection();
-            GUILayout.Space(6f);
+            GUILayout.Space(8f);
             DrawGlobalSection();
-            GUILayout.Space(6f);
+            GUILayout.Space(8f);
             DrawMapSettingsSection();
-            GUILayout.Space(6f);
+            GUILayout.Space(8f);
             DrawLayersSection();
+            GUILayout.Space(8f);
+            DrawExportSection();
 
             if (EditorGUI.EndChangeCheck())
             {
                 previewDirty = true;
                 SaveSettings();
-            }
-
-            GUILayout.Space(8f);
-            DrawPreviewSection();
-            GUILayout.Space(8f);
-            DrawExportSection();
-
-            EditorGUILayout.EndScrollView();
-
-            if (previewDirty && Event.current.type == EventType.Repaint)
-            {
-                RegeneratePreview();
             }
         }
 
@@ -167,7 +218,7 @@ namespace Siliq.Water.Editor
 
         void DrawPresetAndProfileSection()
         {
-            EditorGUILayout.LabelField("プリセット", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("1. プリセット", EditorStyles.boldLabel);
             using (new EditorGUILayout.HorizontalScope())
             {
                 presetIndex = EditorGUILayout.Popup(presetIndex, WaterMapPresets.Names);
@@ -181,7 +232,7 @@ namespace Siliq.Water.Editor
                 }
             }
 
-            EditorGUILayout.LabelField("プロファイル (アセット保存 / 共有)", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("プロファイル", EditorStyles.boldLabel);
             using (new EditorGUILayout.HorizontalScope())
             {
                 profileAsset = (WaterMapProfile)EditorGUILayout.ObjectField(profileAsset, typeof(WaterMapProfile), false);
@@ -256,7 +307,7 @@ namespace Siliq.Water.Editor
 
         void DrawGlobalSection()
         {
-            EditorGUILayout.LabelField("全体設定", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("2. 全体設定", EditorStyles.boldLabel);
 
             int resIndex = Mathf.Max(0, Array.IndexOf(ResolutionOptions, settings.resolution));
             resIndex = EditorGUILayout.Popup("書き出し解像度", resIndex, ResolutionLabels);
@@ -323,7 +374,7 @@ namespace Siliq.Water.Editor
 
         void DrawLayersSection()
         {
-            EditorGUILayout.LabelField("波レイヤー", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("3. 波レイヤー", EditorStyles.boldLabel);
 
             var layers = new List<WaveLayer>(settings.layers);
             while (layerFoldouts.Count < layers.Count) layerFoldouts.Add(true);
@@ -485,12 +536,15 @@ namespace Siliq.Water.Editor
         // プレビュー
         // ---------------------------------------------------------------
 
-        void DrawPreviewSection()
+        void DrawPreviewSection(float paneWidth, bool fixedPane)
         {
-            EditorGUILayout.LabelField("プレビュー", EditorStyles.boldLabel);
+            using (new EditorGUILayout.VerticalScope(fixedPane ? EditorStyles.helpBox : GUIStyle.none, GUILayout.ExpandHeight(fixedPane)))
+            {
+            EditorGUILayout.LabelField(fixedPane ? "固定プレビュー" : "プレビュー", EditorStyles.boldLabel);
 
             EditorGUI.BeginChangeCheck();
-            previewMapIndex = GUILayout.SelectionGrid(previewMapIndex, MapTabLabels, 4);
+            int columns = paneWidth < 420f ? 2 : 3;
+            previewMapIndex = GUILayout.SelectionGrid(previewMapIndex, MapTabLabels, columns);
             if (EditorGUI.EndChangeCheck())
             {
                 previewDirty = true;
@@ -514,9 +568,11 @@ namespace Siliq.Water.Editor
                 previewDirty = true;
             }
 
-            float size = Mathf.Min(EditorGUIUtility.currentViewWidth - 40f, 320f);
+            float availableHeight = fixedPane ? Mathf.Max(220f, position.height - 122f) : 320f;
+            float size = Mathf.Min(Mathf.Max(220f, paneWidth - 28f), availableHeight);
             Rect rect = GUILayoutUtility.GetRect(size, size, GUILayout.ExpandWidth(false));
-            rect.x = (EditorGUIUtility.currentViewWidth - size) * 0.5f;
+            float contentWidth = fixedPane ? paneWidth : EditorGUIUtility.currentViewWidth;
+            rect.x += Mathf.Max(0f, (contentWidth - size) * 0.5f - 8f);
 
             if (previewTexture != null)
             {
@@ -532,6 +588,7 @@ namespace Siliq.Water.Editor
             else
             {
                 EditorGUI.DrawRect(rect, new Color(0.15f, 0.15f, 0.15f));
+            }
             }
         }
 
@@ -570,7 +627,7 @@ namespace Siliq.Water.Editor
 
         void DrawExportSection()
         {
-            EditorGUILayout.LabelField("書き出し", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("4. 書き出し", EditorStyles.boldLabel);
 
             EditorGUILayout.LabelField("書き出すマップ", EditorStyles.miniBoldLabel);
             using (new EditorGUILayout.HorizontalScope())
