@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.3.18] - 2026-07-06
+
+### 改善: Animator から透明感と反射を直接調整できるように変更
+- `WaterSurfaceAnimator` に `Opacity` / `Edge Reflection` / `Reflection Strength` /
+  `Sparkle` を追加し、Inspector から水面の不透明度、輪郭反射、反射量、きらめきを調整できるようにした
+- 透明・反射系の値は `MaterialPropertyBlock` で反映し、共有マテリアルを直接汚さない
+- 右クリック適用時に現在のマテリアル値から Animator の透明・反射スライダーを初期化するようにした
+- `Speed` の範囲を `0..0.6` に変更し、`0.3` が標準の中間値になるよう各プリセット速度を再調整
+
 ## [2.3.17] - 2026-07-06
 
 ### 改善: PC 透明水の初期見た目を濃く、失敗しにくく調整

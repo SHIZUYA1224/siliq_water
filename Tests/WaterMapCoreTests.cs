@@ -234,10 +234,11 @@ namespace Siliq.Water.Tests
                 var animator = go.AddComponent<WaterSurfaceAnimator>();
                 animator.texturePropertyName = "_BumpMap";
                 animator.directionDegrees = 0f;
-                animator.speed = 1f;
+                animator.speed = 0.6f;
                 animator.strength = 2f;
                 animator.tiling = 2f;
-                animator.ApplyImmediate(0.25f);
+                animator.opacity = 0.62f;
+                animator.ApplyImmediate(0.5f);
 
                 var block = new MaterialPropertyBlock();
                 renderer.GetPropertyBlock(block, 0);
@@ -251,9 +252,50 @@ namespace Siliq.Water.Tests
                 Assert.AreEqual(2f, mainSt.y, 1e-5f, "Standard の normal UV 用 _MainTex_ST.y に tiling が反映されていない");
                 Assert.Greater(mainSt.z, 0.2f, "Standard の normal UV 用 _MainTex_ST に offset が反映されていない");
                 Assert.AreEqual(2f, block.GetFloat("_BumpScale"), 1e-5f, "strength が _BumpScale に反映されていない");
+                Assert.AreEqual(0.62f, block.GetColor("_Color").a, 1e-5f, "opacity が Standard の _Color alpha に反映されていない");
                 Vector2 sharedOffset = mat.GetTextureOffset("_BumpMap");
                 Assert.AreEqual(0f, sharedOffset.x, 1e-5f, "共有マテリアルを直接変更してはならない");
                 Assert.AreEqual(0f, sharedOffset.y, 1e-5f, "共有マテリアルを直接変更してはならない");
+            }
+            finally
+            {
+                if (go != null) Object.DestroyImmediate(go);
+                if (mat != null) Object.DestroyImmediate(mat);
+            }
+        }
+
+        [Test]
+        public void WaterSurfaceAnimator_AppliesSiliqTransparencyControls()
+        {
+            GameObject go = null;
+            Material mat = null;
+            try
+            {
+                Shader shader = Shader.Find("Siliq/Water Mobile (Quest)");
+                Assert.IsNotNull(shader, "Siliq/Water Mobile (Quest) シェーダーが見つからない");
+
+                go = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                mat = new Material(shader);
+                var renderer = go.GetComponent<Renderer>();
+                renderer.sharedMaterial = mat;
+
+                var animator = go.AddComponent<WaterSurfaceAnimator>();
+                animator.texturePropertyName = "_NormalMap";
+                animator.opacity = 0.48f;
+                animator.edgeReflection = 0.73f;
+                animator.reflectionStrength = 0.64f;
+                animator.sparkle = 0.31f;
+                animator.ApplyImmediate(0f);
+
+                var block = new MaterialPropertyBlock();
+                renderer.GetPropertyBlock(block, 0);
+
+                Assert.AreEqual(0.48f, block.GetFloat("_Opacity"), 1e-5f);
+                Assert.AreEqual(0.73f, block.GetFloat("_EdgeReflection"), 1e-5f);
+                Assert.AreEqual(0.64f, block.GetFloat("_ReflStrength"), 1e-5f);
+                Assert.AreEqual(0.31f, block.GetFloat("_GlimmerIntensity"), 1e-5f);
+                Assert.AreEqual(0.62f, block.GetFloat("_GlintIntensity"), 1e-5f);
+                Assert.AreEqual(1f, mat.GetFloat("_Opacity"), 1e-5f, "共有マテリアルの _Opacity を直接変更してはならない");
             }
             finally
             {

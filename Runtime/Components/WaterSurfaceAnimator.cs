@@ -19,6 +19,8 @@ namespace Siliq.Water
     [ExecuteAlways]
     public class WaterSurfaceAnimator : MonoBehaviour
     {
+        const float MaxSurfaceSpeed = 0.6f;
+
         [Tooltip("スクロールさせるテクスチャのプロパティ名。Standard/URP Lit/VRChat Mobile は _BumpMap、Siliq 独自シェーダーは _NormalMap。")]
         public string texturePropertyName = "_BumpMap";
 
@@ -32,8 +34,8 @@ namespace Siliq.Water
         [Tooltip("波が流れる向き (度)。0=右、90=上、180=左、270=下。")]
         [Range(0f, 360f)] public float directionDegrees = 30f;
 
-        [Tooltip("流れる速さ。0で静止。")]
-        [Range(0f, 3f)] public float speed = 0.6f;
+        [Tooltip("流れる速さ。0で静止、0.3が標準、0.6が速め。")]
+        [Range(0f, MaxSurfaceSpeed)] public float speed = 0.3f;
 
         [Header("見た目")]
         [Tooltip("凹凸の強さ。シェーダーに _BumpScale (Standard 等) がある場合のみ有効。")]
@@ -41,6 +43,19 @@ namespace Siliq.Water
 
         [Tooltip("模様の大きさ。1 が元のサイズ、大きいほど模様が細かく (タイリング数が増え) 見える。")]
         [Range(0.1f, 8f)] public float tiling = 1f;
+
+        [Header("透明・反射")]
+        [Tooltip("水面の不透明度。1 に近いほど濃く、低いほど透けます。透明マテリアルで特に有効。")]
+        [Range(0.05f, 1f)] public float opacity = 0.55f;
+
+        [Tooltip("斜めから見た時に戻る輪郭反射と不透明感。Siliq 水シェーダーで有効。")]
+        [Range(0f, 1f)] public float edgeReflection = 0.55f;
+
+        [Tooltip("全体の反射の強さ。Siliq 水シェーダーで有効。")]
+        [Range(0f, 1f)] public float reflectionStrength = 0.85f;
+
+        [Tooltip("細い光の揺らぎときらめきの強さ。Siliq 水シェーダーで有効。")]
+        [Range(0f, 1f)] public float sparkle = 0.22f;
 
         Renderer targetRenderer;
         Material targetMaterial;
@@ -58,6 +73,13 @@ namespace Siliq.Water
         int mainTexStPropertyId;
         int baseMapPropertyId;
         int baseMapStPropertyId;
+        int opacityPropertyId;
+        int colorPropertyId;
+        int baseColorPropertyId;
+        int edgeReflectionPropertyId;
+        int reflStrengthPropertyId;
+        int glimmerIntensityPropertyId;
+        int glintIntensityPropertyId;
         string cachedPropertyName;
         Vector2 baseTextureScale = Vector2.one;
         Vector2 baseTextureOffset = Vector2.zero;
@@ -65,9 +87,13 @@ namespace Siliq.Water
         Vector2 mainTexBaseOffset = Vector2.zero;
         Vector2 baseMapBaseScale = Vector2.one;
         Vector2 baseMapBaseOffset = Vector2.zero;
+        Color materialColor = Color.white;
+        Color materialBaseColor = Color.white;
         bool hasTextureTransform;
         bool hasMainTexTransform;
         bool hasBaseMapTransform;
+        bool hasColorProperty;
+        bool hasBaseColorProperty;
         bool hasSiliqScrollControls;
 
 #if UNITY_EDITOR
@@ -111,6 +137,13 @@ namespace Siliq.Water
             mainTexStPropertyId = Shader.PropertyToID("_MainTex_ST");
             baseMapPropertyId = Shader.PropertyToID("_BaseMap");
             baseMapStPropertyId = Shader.PropertyToID("_BaseMap_ST");
+            opacityPropertyId = Shader.PropertyToID("_Opacity");
+            colorPropertyId = Shader.PropertyToID("_Color");
+            baseColorPropertyId = Shader.PropertyToID("_BaseColor");
+            edgeReflectionPropertyId = Shader.PropertyToID("_EdgeReflection");
+            reflStrengthPropertyId = Shader.PropertyToID("_ReflStrength");
+            glimmerIntensityPropertyId = Shader.PropertyToID("_GlimmerIntensity");
+            glintIntensityPropertyId = Shader.PropertyToID("_GlintIntensity");
         }
 
         void Update()
@@ -127,7 +160,7 @@ namespace Siliq.Water
             float dt = lastEditorTime > 0 ? (float)(now - lastEditorTime) : 0f;
             lastEditorTime = now;
             Animate(dt);
-            if (speed > 0f && SceneView.lastActiveSceneView != null)
+            if (Mathf.Clamp(speed, 0f, MaxSurfaceSpeed) > 0f && SceneView.lastActiveSceneView != null)
             {
                 SceneView.RepaintAll();
             }
@@ -137,6 +170,11 @@ namespace Siliq.Water
         void OnValidate()
         {
             if (texturePropertyName == null) texturePropertyName = string.Empty;
+            speed = Mathf.Clamp(speed, 0f, MaxSurfaceSpeed);
+            opacity = Mathf.Clamp(opacity, 0.05f, 1f);
+            edgeReflection = Mathf.Clamp01(edgeReflection);
+            reflectionStrength = Mathf.Clamp01(reflectionStrength);
+            sparkle = Mathf.Clamp01(sparkle);
             if (propertyBlock == null) propertyBlock = new MaterialPropertyBlock();
             RebindRendererAndMaterial();
             ApplyProperties(0f);
@@ -146,6 +184,39 @@ namespace Siliq.Water
         public void ApplyImmediate(float deltaTime = 0f)
         {
             Animate(deltaTime);
+        }
+
+        /// <summary>現在のマテリアルから透明・反射系の初期値を読み取り、インスペクタ操作の開始点にする。</summary>
+        public void SyncLookFromMaterial()
+        {
+            RebindRendererAndMaterial();
+            if (targetMaterial == null) return;
+
+            if (targetMaterial.HasProperty(opacityPropertyId))
+            {
+                opacity = Mathf.Clamp01(targetMaterial.GetFloat(opacityPropertyId));
+            }
+            else if (hasBaseColorProperty)
+            {
+                opacity = Mathf.Clamp01(materialBaseColor.a);
+            }
+            else if (hasColorProperty)
+            {
+                opacity = Mathf.Clamp01(materialColor.a);
+            }
+
+            if (targetMaterial.HasProperty(edgeReflectionPropertyId))
+            {
+                edgeReflection = Mathf.Clamp01(targetMaterial.GetFloat(edgeReflectionPropertyId));
+            }
+            if (targetMaterial.HasProperty(reflStrengthPropertyId))
+            {
+                reflectionStrength = Mathf.Clamp01(targetMaterial.GetFloat(reflStrengthPropertyId));
+            }
+            if (targetMaterial.HasProperty(glimmerIntensityPropertyId))
+            {
+                sparkle = Mathf.Clamp01(targetMaterial.GetFloat(glimmerIntensityPropertyId));
+            }
         }
 
         void EnsurePropertyBlock()
@@ -165,6 +236,8 @@ namespace Siliq.Water
             hasTextureTransform = false;
             hasMainTexTransform = false;
             hasBaseMapTransform = false;
+            hasColorProperty = false;
+            hasBaseColorProperty = false;
             hasSiliqScrollControls = false;
             baseTextureScale = Vector2.one;
             baseTextureOffset = Vector2.zero;
@@ -172,6 +245,8 @@ namespace Siliq.Water
             mainTexBaseOffset = Vector2.zero;
             baseMapBaseScale = Vector2.one;
             baseMapBaseOffset = Vector2.zero;
+            materialColor = Color.white;
+            materialBaseColor = Color.white;
 
             if (targetRenderer == null) return;
             var materials = targetRenderer.sharedMaterials;
@@ -194,6 +269,18 @@ namespace Siliq.Water
             {
                 hasMainTexTransform = TryCacheTextureTransform("_MainTex", mainTexPropertyId, out mainTexBaseScale, out mainTexBaseOffset);
                 hasBaseMapTransform = TryCacheTextureTransform("_BaseMap", baseMapPropertyId, out baseMapBaseScale, out baseMapBaseOffset);
+            }
+
+            hasColorProperty = targetMaterial.HasProperty(colorPropertyId);
+            if (hasColorProperty)
+            {
+                materialColor = targetMaterial.GetColor(colorPropertyId);
+            }
+
+            hasBaseColorProperty = targetMaterial.HasProperty(baseColorPropertyId);
+            if (hasBaseColorProperty)
+            {
+                materialBaseColor = targetMaterial.GetColor(baseColorPropertyId);
             }
 
             hasSiliqScrollControls = targetMaterial.HasProperty(scroll1PropertyId) ||
@@ -239,7 +326,8 @@ namespace Siliq.Water
 
             float rad = directionDegrees * Mathf.Deg2Rad;
             var dir = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
-            offset += dir * speed * dt;
+            float effectiveSpeed = Mathf.Clamp(speed, 0f, MaxSurfaceSpeed);
+            offset += dir * effectiveSpeed * dt;
             offset.x %= 1f;
             offset.y %= 1f;
 
@@ -272,18 +360,20 @@ namespace Siliq.Water
                 propertyBlock.SetFloat(normalStrengthPropertyId, strength);
             }
 
+            ApplyLookControls();
+
             // Siliq 独自シェーダーは [NoScaleOffset] の _NormalMap を使うため、
             // テクスチャ ST ではなくシェーダー固有のスクロール/タイリング値を動かす。
             if (hasSiliqScrollControls)
             {
-                Vector2 scroll = dir * speed;
+                Vector2 scroll = dir * effectiveSpeed;
                 if (targetMaterial.HasProperty(scroll1PropertyId))
                 {
                     propertyBlock.SetVector(scroll1PropertyId, new Vector4(scroll.x, scroll.y, 0f, 0f));
                 }
                 if (targetMaterial.HasProperty(scroll2PropertyId))
                 {
-                    Vector2 second = new Vector2(-dir.y, dir.x) * speed * 0.73f;
+                    Vector2 second = new Vector2(-dir.y, dir.x) * effectiveSpeed * 0.73f;
                     propertyBlock.SetVector(scroll2PropertyId, new Vector4(second.x, second.y, 0f, 0f));
                 }
                 if (targetMaterial.HasProperty(tiling1PropertyId))
@@ -304,6 +394,45 @@ namespace Siliq.Water
             Vector2 scale = new Vector2(baseScale.x * tiling, baseScale.y * tiling);
             Vector2 finalOffset = baseOffset + offset;
             propertyBlock.SetVector(propertyId, new Vector4(scale.x, scale.y, finalOffset.x, finalOffset.y));
+        }
+
+        void ApplyLookControls()
+        {
+            float clampedOpacity = Mathf.Clamp01(opacity);
+            if (targetMaterial.HasProperty(opacityPropertyId))
+            {
+                propertyBlock.SetFloat(opacityPropertyId, clampedOpacity);
+            }
+
+            if (hasColorProperty)
+            {
+                Color c = materialColor;
+                c.a = clampedOpacity;
+                propertyBlock.SetColor(colorPropertyId, c);
+            }
+            if (hasBaseColorProperty)
+            {
+                Color c = materialBaseColor;
+                c.a = clampedOpacity;
+                propertyBlock.SetColor(baseColorPropertyId, c);
+            }
+
+            if (targetMaterial.HasProperty(edgeReflectionPropertyId))
+            {
+                propertyBlock.SetFloat(edgeReflectionPropertyId, Mathf.Clamp01(edgeReflection));
+            }
+            if (targetMaterial.HasProperty(reflStrengthPropertyId))
+            {
+                propertyBlock.SetFloat(reflStrengthPropertyId, Mathf.Clamp01(reflectionStrength));
+            }
+            if (targetMaterial.HasProperty(glimmerIntensityPropertyId))
+            {
+                propertyBlock.SetFloat(glimmerIntensityPropertyId, Mathf.Clamp01(sparkle));
+            }
+            if (targetMaterial.HasProperty(glintIntensityPropertyId))
+            {
+                propertyBlock.SetFloat(glintIntensityPropertyId, Mathf.Clamp01(sparkle) * 2f);
+            }
         }
     }
 }

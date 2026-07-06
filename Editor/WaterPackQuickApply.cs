@@ -65,11 +65,11 @@ namespace Siliq.Water.Editor
         }
 
         // 各水の雰囲気に合わせた動き。Standard のノーマルだけでも見えるよう少し強めにしている。
-        static readonly MotionPreset CalmMotion = new MotionPreset(35f, 0.35f, 1.35f, 1.35f);
+        static readonly MotionPreset CalmMotion = new MotionPreset(35f, 0.30f, 1.35f, 1.35f);
         static readonly MotionPreset RippleMotion = new MotionPreset(0f, 0f, 0.55f, 1.15f);
-        static readonly MotionPreset StreamMotion = new MotionPreset(0f, 1.0f, 1.45f, 1.8f);
+        static readonly MotionPreset StreamMotion = new MotionPreset(0f, 0.55f, 1.45f, 1.8f);
         static readonly MotionPreset PoolMotion = new MotionPreset(50f, 0.24f, 0.55f, 1.08f);
-        static readonly MotionPreset CyberMotion = new MotionPreset(18f, 0.52f, 0.78f, 1.24f);
+        static readonly MotionPreset CyberMotion = new MotionPreset(18f, 0.34f, 0.78f, 1.24f);
 
         static readonly LookPreset ClearSeaLook = new LookPreset
         {
@@ -77,7 +77,7 @@ namespace Siliq.Water.Editor
             displayName = "美しい海",
             sourceGuid = CalmGuid,
             sourceLabel = "Calm",
-            motion = new MotionPreset(22f, 0.34f, 0.92f, 1.45f),
+            motion = new MotionPreset(22f, 0.30f, 0.92f, 1.45f),
             transparent = true,
             opacity = 0.52f,
             shallow = new Color(0.22f, 0.82f, 0.94f, 1f),
@@ -185,7 +185,7 @@ namespace Siliq.Water.Editor
             displayName = "液体金属",
             sourceGuid = CyberGuid,
             sourceLabel = "Cyber",
-            motion = new MotionPreset(18f, 0.32f, 0.72f, 1.38f),
+            motion = new MotionPreset(18f, 0.30f, 0.72f, 1.38f),
             transparent = false,
             opacity = 1f,
             shallow = new Color(0.86f, 0.88f, 0.90f, 1f),
@@ -417,6 +417,7 @@ namespace Siliq.Water.Editor
                     Undo.RecordObject(animator, "水マテリアルを適用");
                 }
                 animator.texturePropertyName = texturePropertyName;
+                animator.SyncLookFromMaterial();
                 animator.directionDegrees = motion.dir;
                 animator.speed = motion.speed;
                 animator.strength = motion.strength;

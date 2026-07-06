@@ -94,18 +94,23 @@ Unity エディタ上(またはランタイム)で、水面・流体表現向け
 対象オブジェクトにアタッチしてください。Standard / URP Lit / VRChat Mobile など、
 対象プロパティ (`_BumpMap` 等) を持つシェーダーであれば動作します。
 
-インスペクタで次の 4 項目をスライダーで直感的に調整できます。
+インスペクタで動きと透明・反射をスライダーで直感的に調整できます。
 
 | 項目 | 内容 |
 |---|---|
 | **方向 (度)** | 波が流れる向き。0=右、90=上、180=左、270=下 |
-| **速さ** | 流れる速さ。0 で静止 |
+| **速さ** | 流れる速さ。0 で静止、0.3 が標準、0.6 が速め |
 | **強さ** | 凹凸の強さ (シェーダーに `_BumpScale` がある場合) |
 | **模様の大きさ** | 1 が元のサイズ、大きいほど模様が細かく見える |
+| **Opacity** | 不透明度。1 に近いほど濃く、低いほど透ける |
+| **Edge Reflection** | 斜め視線で戻る輪郭反射と不透明感 |
+| **Reflection Strength** | 全体の反射の強さ |
+| **Sparkle** | 細い光の揺らぎときらめき |
 
 **Play ボタンを押さなくても、値を変えるとシーンビュー上でその場に反映**されます。
-Standard / URP Lit / VRChat Mobile 系では `_BumpMap` の UV と `_BumpScale` を、
+Standard / URP Lit / VRChat Mobile 系では `_BumpMap` の UV、`_BumpScale`、色 alpha を、
 同梱の Siliq 水シェーダーでは `_Scroll1` / `_Scroll2` / `_NormalStrength` / `_Tiling*` を
+`_Opacity` / `_EdgeReflection` / `_ReflStrength` などと一緒に
 `MaterialPropertyBlock` 経由で動かすため、共有マテリアルを汚さずに調整できます。
 右クリック適用時は、静止して見えない問題を避けるため水の種類ごとに少し強めの初期値が入ります。
 ただし `波紋 (Ripple)` はスライドさせると水滴の波紋として不自然なので、
