@@ -7,7 +7,8 @@ namespace Siliq.Water.Editor
     /// <summary>
     /// 焼き済み水マテリアルを選択オブジェクトへワンクリック適用するメニュー。
     /// Hierarchy でオブジェクトを右クリック → Siliq Water → 好きな水を選ぶだけ。
-    /// 適用と同時に UV スクロール用コンポーネントも付与し、静止画にならないようにする。
+    /// 適用と同時に動き用コンポーネントも付与し、静止画にならないようにする。
+    /// Ripple は UV スクロールではなく、発生点から外へ広がる波紋 emitter を使う。
     /// </summary>
     public static class WaterPackQuickApply
     {
@@ -29,7 +30,7 @@ namespace Siliq.Water.Editor
 
         // 各水の雰囲気に合わせた動き。Standard のノーマルだけでも見えるよう少し強めにしている。
         static readonly MotionPreset CalmMotion = new MotionPreset(35f, 0.35f, 1.35f, 1.35f);
-        static readonly MotionPreset RippleMotion = new MotionPreset(60f, 0.45f, 1.7f, 1.6f);
+        static readonly MotionPreset RippleMotion = new MotionPreset(0f, 0f, 0.55f, 1.15f);
         static readonly MotionPreset StreamMotion = new MotionPreset(0f, 1.0f, 1.45f, 1.8f);
         static readonly MotionPreset PoolMotion = new MotionPreset(50f, 0.4f, 1.55f, 1.45f);
         static readonly MotionPreset CyberMotion = new MotionPreset(45f, 0.75f, 1.8f, 1.8f);
@@ -51,7 +52,7 @@ namespace Siliq.Water.Editor
         static void ApplyCalm() => Apply(CalmGuid, "Calm", CalmMotion);
 
         [MenuItem(MenuRoot + "波紋 (Ripple)", false, 11)]
-        static void ApplyRipple() => Apply(RippleGuid, "Ripple", RippleMotion);
+        static void ApplyRipple() => ApplyRipplePreset(false, false);
 
         [MenuItem(MenuRoot + "流れ (Stream)", false, 12)]
         static void ApplyStream() => Apply(StreamGuid, "Stream", StreamMotion);
@@ -66,7 +67,7 @@ namespace Siliq.Water.Editor
         static void ApplyTransparentCalm() => Apply(CalmGuid, "Calm", CalmMotion, true);
 
         [MenuItem(TransparentMenuRoot + "波紋 (Ripple)", false, 21)]
-        static void ApplyTransparentRipple() => Apply(RippleGuid, "Ripple", RippleMotion, true);
+        static void ApplyTransparentRipple() => ApplyRipplePreset(true, false);
 
         [MenuItem(TransparentMenuRoot + "流れ (Stream)", false, 22)]
         static void ApplyTransparentStream() => Apply(StreamGuid, "Stream", StreamMotion, true);
@@ -81,7 +82,7 @@ namespace Siliq.Water.Editor
         static void ApplyMobileTransparentCalm() => ApplyMobileTransparent(CalmGuid, "Calm", CalmMotion);
 
         [MenuItem(MobileTransparentMenuRoot + "波紋 (Ripple)", false, 31)]
-        static void ApplyMobileTransparentRipple() => ApplyMobileTransparent(RippleGuid, "Ripple", RippleMotion);
+        static void ApplyMobileTransparentRipple() => ApplyRipplePreset(true, true);
 
         [MenuItem(MobileTransparentMenuRoot + "流れ (Stream)", false, 32)]
         static void ApplyMobileTransparentStream() => ApplyMobileTransparent(StreamGuid, "Stream", StreamMotion);
@@ -133,6 +134,28 @@ namespace Siliq.Water.Editor
             ApplyMaterialToSelection(mat, motion, "_BumpMap");
         }
 
+        static void ApplyRipplePreset(bool transparent, bool mobileTransparent)
+        {
+            var source = LoadPrebakedMaterial(RippleGuid, "M_Water_Ripple");
+            if (source == null)
+            {
+                EditorUtility.DisplayDialog("Siliq Water",
+                    "M_Water_Ripple が見つかりませんでした。\nPrebakedPack フォルダがプロジェクトに含まれているか確認してください。", "OK");
+                return;
+            }
+
+            var baseNormalSource = LoadPrebakedMaterial(CalmGuid, "M_Water_Calm") ?? source;
+            var mat = GetOrCreateExpandingRippleMaterial(source, baseNormalSource, transparent, mobileTransparent);
+            if (mat == null)
+            {
+                EditorUtility.DisplayDialog("Siliq Water",
+                    "Siliq/Water Mobile (Quest) シェーダーが見つかりませんでした。パッケージが正しく読み込まれているか確認してください。", "OK");
+                return;
+            }
+
+            ApplyMaterialToSelection(mat, RippleMotion, "_NormalMap", true);
+        }
+
         static void ApplyMobileTransparent(string guid, string label, MotionPreset motion)
         {
             var source = LoadPrebakedMaterial(guid, $"M_Water_{label}");
@@ -154,7 +177,7 @@ namespace Siliq.Water.Editor
             ApplyMaterialToSelection(mat, motion, "_NormalMap");
         }
 
-        static void ApplyMaterialToSelection(Material mat, MotionPreset motion, string texturePropertyName)
+        static void ApplyMaterialToSelection(Material mat, MotionPreset motion, string texturePropertyName, bool expandingRipples = false)
         {
             int applied = 0;
             foreach (var go in Selection.gameObjects)
@@ -181,6 +204,7 @@ namespace Siliq.Water.Editor
                 animator.ApplyImmediate(0f);
                 EditorUtility.SetDirty(animator);
 
+                ConfigureRippleEmitter(go, renderer, expandingRipples);
                 applied++;
             }
 
@@ -209,6 +233,48 @@ namespace Siliq.Water.Editor
                 }
             }
             return null;
+        }
+
+        static Material GetOrCreateExpandingRippleMaterial(Material colorSource, Material normalSource, bool transparent, bool mobileTransparent)
+        {
+            Shader shader = Shader.Find("Siliq/Water Mobile (Quest)");
+            if (shader == null) return null;
+
+            const string root = "Assets/SiliqWater";
+            const string folder = root + "/GeneratedMaterials";
+            EnsureFolder("Assets", "SiliqWater");
+            EnsureFolder(root, "GeneratedMaterials");
+
+            string suffix = transparent ? (mobileTransparent ? "_iOS_Transparent" : "_Transparent") : "_Expanding";
+            string path = $"{folder}/M_Water_Ripple{suffix}.mat";
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (mat == null)
+            {
+                mat = new Material(shader);
+                AssetDatabase.CreateAsset(mat, path);
+            }
+            else
+            {
+                mat.shader = shader;
+            }
+
+            mat.name = $"M_Water_Ripple{suffix}";
+            ApplySiliqNormal(mat, normalSource);
+            ApplySiliqWaterPalette(mat, colorSource);
+
+            if (transparent)
+            {
+                SetupSiliqMobileTransparent(mat, mobileTransparent ? MobileTransparentOpacity : TransparentOpacity);
+            }
+            else
+            {
+                SetupSiliqOpaque(mat);
+            }
+
+            SetupExpandingRippleMaterial(mat);
+            EditorUtility.SetDirty(mat);
+            AssetDatabase.SaveAssets();
+            return mat;
         }
 
         static Material GetOrCreateTransparentMaterial(Material source, string label)
@@ -260,25 +326,8 @@ namespace Siliq.Water.Editor
             }
 
             mat.name = $"M_Water_{label}_iOS_Transparent";
-            if (source.HasProperty("_BumpMap") && mat.HasProperty("_NormalMap"))
-            {
-                mat.SetTexture("_NormalMap", source.GetTexture("_BumpMap"));
-            }
-            if (source.HasProperty("_BumpScale") && mat.HasProperty("_NormalStrength"))
-            {
-                mat.SetFloat("_NormalStrength", Mathf.Max(1f, source.GetFloat("_BumpScale")));
-            }
-            if (source.HasProperty("_Color"))
-            {
-                Color sourceColor = source.GetColor("_Color");
-                Color shallow = Color.Lerp(sourceColor, new Color(0.62f, 0.96f, 1f, 1f), 0.45f);
-                Color deep = Color.Lerp(sourceColor, new Color(0.005f, 0.09f, 0.16f, 1f), 0.58f);
-                mat.SetColor("_ShallowColor", shallow);
-                mat.SetColor("_DeepColor", deep);
-                mat.SetColor("_HorizonColor", new Color(0.82f, 0.94f, 1f, 1f));
-                if (mat.HasProperty("_TransmissionColor")) mat.SetColor("_TransmissionColor", new Color(0.35f, 0.9f, 1f, 1f));
-                if (mat.HasProperty("_GlimmerColor")) mat.SetColor("_GlimmerColor", new Color(0.92f, 0.99f, 1f, 1f));
-            }
+            ApplySiliqNormal(mat, source);
+            ApplySiliqWaterPalette(mat, source);
 
             SetupSiliqMobileTransparent(mat, MobileTransparentOpacity);
             EditorUtility.SetDirty(mat);
@@ -319,6 +368,21 @@ namespace Siliq.Water.Editor
             mat.EnableKeyword("_NORMALMAP");
         }
 
+        static void SetupSiliqOpaque(Material mat)
+        {
+            if (mat == null) return;
+
+            if (mat.HasProperty("_Opacity")) mat.SetFloat("_Opacity", 1f);
+            if (mat.HasProperty("_AlphaFresnel")) mat.SetFloat("_AlphaFresnel", 0f);
+            if (mat.HasProperty("_EdgeReflection")) mat.SetFloat("_EdgeReflection", 0f);
+            if (mat.HasProperty("_SrcBlend")) mat.SetFloat("_SrcBlend", (float)BlendMode.One);
+            if (mat.HasProperty("_DstBlend")) mat.SetFloat("_DstBlend", (float)BlendMode.Zero);
+            if (mat.HasProperty("_ZWrite")) mat.SetFloat("_ZWrite", 1f);
+
+            mat.SetOverrideTag("RenderType", "Opaque");
+            mat.renderQueue = (int)RenderQueue.Geometry;
+        }
+
         static void SetupSiliqMobileTransparent(Material mat, float opacity)
         {
             if (mat == null) return;
@@ -342,6 +406,95 @@ namespace Siliq.Water.Editor
 
             mat.SetOverrideTag("RenderType", "Transparent");
             mat.renderQueue = (int)RenderQueue.Transparent;
+        }
+
+        static void SetupExpandingRippleMaterial(Material mat)
+        {
+            if (mat == null) return;
+
+            if (mat.HasProperty("_UseRipples")) mat.SetFloat("_UseRipples", 1f);
+            if (mat.HasProperty("_RippleSpeed")) mat.SetFloat("_RippleSpeed", 2.8f);
+            if (mat.HasProperty("_RippleWidth")) mat.SetFloat("_RippleWidth", 0.28f);
+            if (mat.HasProperty("_RippleLifetime")) mat.SetFloat("_RippleLifetime", 2.6f);
+            if (mat.HasProperty("_RippleAmplitude")) mat.SetFloat("_RippleAmplitude", 1.15f);
+            if (mat.HasProperty("_RippleChannel")) mat.SetFloat("_RippleChannel", 0f);
+            if (mat.HasProperty("_Scroll1")) mat.SetVector("_Scroll1", Vector4.zero);
+            if (mat.HasProperty("_Scroll2")) mat.SetVector("_Scroll2", Vector4.zero);
+            if (mat.HasProperty("_NormalStrength")) mat.SetFloat("_NormalStrength", 0.55f);
+            if (mat.HasProperty("_Tiling1")) mat.SetFloat("_Tiling1", 1.15f);
+            if (mat.HasProperty("_Tiling2")) mat.SetFloat("_Tiling2", 2.1f);
+            mat.EnableKeyword("_USE_RIPPLES");
+        }
+
+        static void ApplySiliqNormal(Material mat, Material source)
+        {
+            if (mat == null || source == null) return;
+
+            if (source.HasProperty("_BumpMap") && mat.HasProperty("_NormalMap"))
+            {
+                mat.SetTexture("_NormalMap", source.GetTexture("_BumpMap"));
+            }
+            if (source.HasProperty("_BumpScale") && mat.HasProperty("_NormalStrength"))
+            {
+                mat.SetFloat("_NormalStrength", Mathf.Max(1f, source.GetFloat("_BumpScale")));
+            }
+        }
+
+        static void ApplySiliqWaterPalette(Material mat, Material source)
+        {
+            if (mat == null) return;
+
+            Color sourceColor = new Color(0.1f, 0.35f, 0.45f, 1f);
+            if (source != null && source.HasProperty("_Color"))
+            {
+                sourceColor = source.GetColor("_Color");
+            }
+
+            Color shallow = Color.Lerp(sourceColor, new Color(0.62f, 0.96f, 1f, 1f), 0.45f);
+            Color deep = Color.Lerp(sourceColor, new Color(0.005f, 0.09f, 0.16f, 1f), 0.58f);
+            if (mat.HasProperty("_ShallowColor")) mat.SetColor("_ShallowColor", shallow);
+            if (mat.HasProperty("_DeepColor")) mat.SetColor("_DeepColor", deep);
+            if (mat.HasProperty("_HorizonColor")) mat.SetColor("_HorizonColor", new Color(0.82f, 0.94f, 1f, 1f));
+            if (mat.HasProperty("_TransmissionColor")) mat.SetColor("_TransmissionColor", new Color(0.35f, 0.9f, 1f, 1f));
+            if (mat.HasProperty("_GlimmerColor")) mat.SetColor("_GlimmerColor", new Color(0.92f, 0.99f, 1f, 1f));
+        }
+
+        static void ConfigureRippleEmitter(GameObject go, Renderer renderer, bool enabled)
+        {
+            var emitter = go.GetComponent<WaterRippleEmitter>();
+            if (!enabled)
+            {
+                if (emitter != null)
+                {
+                    Undo.RecordObject(emitter, "水マテリアルを適用");
+                    emitter.enabled = false;
+                    EditorUtility.SetDirty(emitter);
+                }
+                return;
+            }
+
+            if (emitter == null)
+            {
+                emitter = Undo.AddComponent<WaterRippleEmitter>(go);
+            }
+            else
+            {
+                Undo.RecordObject(emitter, "水マテリアルを適用");
+            }
+
+            emitter.enabled = true;
+            emitter.targetRenderer = renderer;
+            emitter.waterSurfaceY = renderer.bounds.center.y;
+            emitter.rippleChannel = 0;
+            emitter.ripplesPerSecond = 1.8f;
+            emitter.burstCount = 1;
+            emitter.rippleSpeed = 2.8f;
+            emitter.rippleWidth = 0.28f;
+            emitter.rippleLifetime = 2.6f;
+            emitter.rippleAmplitude = 1.15f;
+            emitter.applyShaderSettings = true;
+            emitter.ApplyImmediate();
+            EditorUtility.SetDirty(emitter);
         }
     }
 }

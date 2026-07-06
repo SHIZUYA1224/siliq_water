@@ -109,14 +109,15 @@ Shader "Siliq/Water URP"
 
             #ifdef _USE_RIPPLES
             // アバターが触れた/水に入った場所からスクリプト (WaterRippleSource / Udon版) が
-            // 都度書き込むグローバル配列。xy=ワールドXZ座標, z=発生時刻, w=未使用。
+            // 都度書き込むグローバル配列。xy=ワールドXZ座標, z=発生時刻, w=波紋チャンネル。
             // 複数の水面マテリアルで共有されるため UnityPerMaterial の外で定義する (SRP Batcher 互換)。
             #define SILIQ_MAX_RIPPLES 8
             float4 _SiliqRipplePoints[SILIQ_MAX_RIPPLES];
 
-            half2 SiliqComputeRippleOffset(float2 worldXZ)
+            half3 SiliqComputeRipple(float2 worldXZ)
             {
                 half2 total = 0;
+                half light = 0;
                 UNITY_UNROLL
                 for (int i = 0; i < SILIQ_MAX_RIPPLES; i++)
                 {
@@ -131,12 +132,16 @@ Shader "Siliq/Water URP"
                     float radius = age * _RippleSpeed;
                     float width = max(_RippleWidth, 1e-3);
                     float ringPhase = (d - radius) / width;
-                    float envelope = exp(-ringPhase * ringPhase) * saturate(1.0 - age / _RippleLifetime);
+                    float envelope = exp(-ringPhase * ringPhase);
+                    float fade = saturate(age / 0.08) * saturate(1.0 - age / _RippleLifetime);
                     half2 dir = d > 1e-4 ? (worldXZ - center) / d : half2(0, 0);
-                    float wave = sin((d - radius) * (TWO_PI / width));
-                    total += dir * (wave * envelope * _RippleAmplitude);
+                    float phase = ringPhase * TWO_PI;
+                    float wave = sin(phase);
+                    float crest = (0.5 + 0.5 * cos(phase)) * envelope * fade;
+                    total += dir * (wave * envelope * fade * _RippleAmplitude);
+                    light += crest * _RippleAmplitude;
                 }
-                return total;
+                return half3(total, saturate(light));
             }
             #endif
 
@@ -218,8 +223,11 @@ Shader "Siliq/Water URP"
 
                 half3 normalTS = SampleWaterNormal(input.uv);
 
+                half rippleLight = 0;
                 #if defined(_USE_RIPPLES)
-                normalTS.xy += SiliqComputeRippleOffset(input.positionWS.xz);
+                half3 ripple = SiliqComputeRipple(input.positionWS.xz);
+                normalTS.xy += ripple.xy;
+                rippleLight = ripple.z;
                 normalTS = normalize(normalTS);
                 #endif
 
@@ -263,6 +271,7 @@ Shader "Siliq/Water URP"
                 half3 spec = pow(saturate(dot(normalWS, halfDir)), specPow) * mainLight.color;
 
                 half3 color = lerp(baseCol, reflection, fresnel) + spec;
+                color += lerp(_ShallowColor.rgb, half3(1.0h, 1.0h, 1.0h), 0.72h) * rippleLight * 0.35h;
                 half alpha = _Opacity;
 
                 #if defined(_SHORE_EFFECTS)

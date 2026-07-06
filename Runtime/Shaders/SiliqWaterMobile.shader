@@ -103,14 +103,15 @@ Shader "Siliq/Water Mobile (Quest)"
             half _RippleChannel;
 
             // アバターが触れた/水に入った場所からスクリプト (WaterRippleSource / Udon版) が
-            // 都度書き込むグローバル配列。xy=ワールドXZ座標, z=発生時刻, w=未使用。
+            // 都度書き込むグローバル配列。xy=ワールドXZ座標, z=発生時刻, w=波紋チャンネル。
             // 複数の水面マテリアルで共有されるためマテリアル固有バッファの外で定義する。
             #define SILIQ_MAX_RIPPLES 8
             float4 _SiliqRipplePoints[SILIQ_MAX_RIPPLES];
 
-            half2 SiliqComputeRippleOffset(float2 worldXZ)
+            half3 SiliqComputeRipple(float2 worldXZ)
             {
                 half2 total = 0;
+                half light = 0;
                 UNITY_UNROLL
                 for (int i = 0; i < SILIQ_MAX_RIPPLES; i++)
                 {
@@ -125,12 +126,16 @@ Shader "Siliq/Water Mobile (Quest)"
                     float radius = age * _RippleSpeed;
                     float width = max(_RippleWidth, 1e-3);
                     float ringPhase = (d - radius) / width;
-                    float envelope = exp(-ringPhase * ringPhase) * saturate(1.0 - age / _RippleLifetime);
+                    float envelope = exp(-ringPhase * ringPhase);
+                    float fade = saturate(age / 0.08) * saturate(1.0 - age / _RippleLifetime);
                     half2 dir = d > 1e-4 ? (worldXZ - center) / d : half2(0, 0);
-                    float wave = sin((d - radius) * (UNITY_TWO_PI / width));
-                    total += dir * (wave * envelope * _RippleAmplitude);
+                    float phase = ringPhase * UNITY_TWO_PI;
+                    float wave = sin(phase);
+                    float crest = (0.5 + 0.5 * cos(phase)) * envelope * fade;
+                    total += dir * (wave * envelope * fade * _RippleAmplitude);
+                    light += crest * _RippleAmplitude;
                 }
-                return total;
+                return half3(total, saturate(light));
             }
             #endif
 
@@ -189,8 +194,11 @@ Shader "Siliq/Water Mobile (Quest)"
                 half3 tn = normalize(half3(n1.xy + n2.xy, n1.z * n2.z));
                 tn.xy *= _NormalStrength;
 
+                half rippleLight = 0;
                 #ifdef _USE_RIPPLES
-                tn.xy += SiliqComputeRippleOffset(i.worldPos.xz);
+                half3 ripple = SiliqComputeRipple(i.worldPos.xz);
+                tn.xy += ripple.xy;
+                rippleLight = ripple.z;
                 #endif
 
                 tn = normalize(tn);
@@ -226,9 +234,9 @@ Shader "Siliq/Water Mobile (Quest)"
 
                 half4 col;
                 col.rgb = lerp(baseCol + transmission, reflCol, fresnel) + (spec + glint) * _LightColor0.rgb;
-                col.rgb += _GlimmerColor.rgb * glimmer;
+                col.rgb += _GlimmerColor.rgb * (glimmer + rippleLight * 0.35h);
                 col.rgb = lerp(col.rgb, reflCol + (spec + glint) * _LightColor0.rgb, alphaFresnel * _EdgeReflection);
-                col.a = saturate(_Opacity + alphaFresnel * _AlphaFresnel + glimmer * 0.08h);
+                col.a = saturate(_Opacity + alphaFresnel * _AlphaFresnel + glimmer * 0.08h + rippleLight * 0.05h);
 
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;

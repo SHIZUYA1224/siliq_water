@@ -258,6 +258,45 @@ namespace Siliq.Water.Tests
             }
         }
 
+        [Test]
+        public void WaterRippleEmitter_ConfiguresRendererForExpandingRipples()
+        {
+            GameObject go = null;
+            Material mat = null;
+            try
+            {
+                go = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                Shader shader = Shader.Find("Siliq/Water Mobile (Quest)") ?? Shader.Find("Standard");
+                mat = new Material(shader);
+                var renderer = go.GetComponent<Renderer>();
+                renderer.sharedMaterial = mat;
+
+                var emitter = go.AddComponent<WaterRippleEmitter>();
+                emitter.targetRenderer = renderer;
+                emitter.rippleChannel = 3;
+                emitter.rippleSpeed = 3.2f;
+                emitter.rippleWidth = 0.22f;
+                emitter.rippleLifetime = 2.4f;
+                emitter.rippleAmplitude = 1.4f;
+                emitter.ApplyImmediate();
+
+                var block = new MaterialPropertyBlock();
+                renderer.GetPropertyBlock(block);
+
+                Assert.AreEqual(3f, block.GetFloat("_RippleChannel"), 1e-5f);
+                Assert.AreEqual(3.2f, block.GetFloat("_RippleSpeed"), 1e-5f);
+                Assert.AreEqual(0.22f, block.GetFloat("_RippleWidth"), 1e-5f);
+                Assert.AreEqual(2.4f, block.GetFloat("_RippleLifetime"), 1e-5f);
+                Assert.AreEqual(1.4f, block.GetFloat("_RippleAmplitude"), 1e-5f);
+                Assert.IsTrue(mat.IsKeywordEnabled("_USE_RIPPLES"), "波紋 keyword が有効化されていない");
+            }
+            finally
+            {
+                if (go != null) Object.DestroyImmediate(go);
+                if (mat != null) Object.DestroyImmediate(mat);
+            }
+        }
+
         // ---------------------------------------------------------------
         // ヘルパー
         // ---------------------------------------------------------------

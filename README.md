@@ -59,6 +59,8 @@ Unity エディタ上(またはランタイム)で、水面・流体表現向け
 1. **右クリック一発**: Hierarchy でオブジェクトを選択 → 右クリック →
    `Siliq Water > 水マテリアルを適用 > 好きな水` — マテリアル適用と同時に
    `WaterSurfaceAnimator` コンポーネントも自動で付き、**再生すると波が流れます**
+   `波紋 (Ripple)` だけは例外で、ノーマルを横へ流さず、
+   `WaterRippleEmitter` を自動で付けて発生点から外へ広がるリングを作ります。
    PC 向けに透ける水が欲しい場合は
    `Siliq Water > 透明な水マテリアルを適用 (PC) > 好きな水` を使ってください。
    `Assets/SiliqWater/GeneratedMaterials/` に透明設定済みのマテリアルを生成して適用します。
@@ -93,6 +95,8 @@ Standard / URP Lit / VRChat Mobile 系では `_BumpMap` の UV と `_BumpScale` 
 同梱の Siliq 水シェーダーでは `_Scroll1` / `_Scroll2` / `_NormalStrength` / `_Tiling*` を
 `MaterialPropertyBlock` 経由で動かすため、共有マテリアルを汚さずに調整できます。
 右クリック適用時は、静止して見えない問題を避けるため水の種類ごとに少し強めの初期値が入ります。
+ただし `波紋 (Ripple)` はスライドさせると水滴の波紋として不自然なので、
+このコンポーネントの速度は 0 にし、下記の `WaterRippleEmitter` で同心円が広がる表現にしています。
 
 より本格的な (2 レイヤースクロール・反射・岸辺フォームなどを含む) 動く水面が欲しい場合は、
 下記の同梱シェーダー `Siliq/Water Mobile (Quest)` や `Siliq/Water URP` を使ってください。
@@ -203,6 +207,23 @@ SRP Batcher 対応・1 パス。最新 Unity での本命です。
 
 同梱の 2 シェーダーは、指定したワールド座標から**実時間で波紋が広がる**機能を持っています。
 波紋の発生源 (アバターの接触位置など) は、以下いずれかのコンポーネントが供給します。
+
+### 雨面・環境演出として自動で波紋を出す
+
+`Runtime/Components/WaterRippleEmitter.cs` を水面 Renderer にアタッチすると、
+Renderer の範囲内へ波紋発生点を自動で作ります。Play 中、各点からリングが外側へ広がります。
+右クリックメニューの `波紋 (Ripple)` はこの方式を自動設定します。
+
+調整項目:
+
+| 項目 | 内容 |
+|---|---|
+| **Ripples Per Second** | 1秒あたりに発生する波紋数 |
+| **Burst Count** | 同時に出す波紋数 |
+| **Ripple Speed** | リングが外へ広がる速さ |
+| **Ripple Width** | リング幅。小さいほど細く鋭い輪 |
+| **Ripple Lifetime** | 消えるまでの秒数 |
+| **Ripple Amplitude** | 法線に乗せる波紋の強さ |
 
 ### 通常の Unity プロジェクト / エディタでのテスト
 
