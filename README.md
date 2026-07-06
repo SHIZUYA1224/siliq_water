@@ -40,7 +40,9 @@ Unity エディタ上(またはランタイム)で、水面・流体表現向け
 
 ## 焼き済みパック (PrebakedPack) — ツール不要ですぐ使える 5 種
 
-ツールを触らなくても、`PrebakedPack/` に**すぐ使える水ノーマルマップ 5 種 + 設定済みマテリアル + サンプルシーン**が入っています。
+ツールを触らなくても、`PrebakedPack/` に**すぐ使える水・素材ノーマルマップ 11 種 + 設定済みマテリアル + サンプルシーン**が入っています。
+
+**水の表現 (5 種)**
 
 | ファイル | 用途 | マテリアル |
 |---|---|---|
@@ -50,9 +52,22 @@ Unity エディタ上(またはランタイム)で、水面・流体表現向け
 | `Water_Normal_Pool_01.png` | プール・浅い水 (光の網目) | `M_Water_Pool` |
 | `Water_Normal_Cyber_01.png` | 近未来・人工水面 | `M_Water_Cyber` |
 
-すべて **1024×1024 PNG / シームレス / インポート設定済み (NormalMap・Repeat・Android は ASTC 6x6)**。
+**素材の表現 (6 種) — 透明水〜ガラス〜金属**
+
+| ファイル | 用途 | マテリアル |
+|---|---|---|
+| `Water_Normal_Shallows_01.png` | 透き通った浅瀬の煌めき | `M_Water_Shallows` |
+| `Water_Normal_FlutedGlass_01.png` | リブ (フルート) ガラス | `M_Water_FlutedGlass` |
+| `Water_Normal_LiquidMetal_01.png` | 液体金属・クローム | `M_Water_LiquidMetal` |
+| `Water_Normal_FrostedGlass_01.png` | すりガラス (マット) | `M_Water_FrostedGlass` |
+| `Water_Normal_Condensation_01.png` | 窓の結露 (水滴) | `M_Water_Condensation` |
+| `Water_Normal_Kaleidoscope_01.png` | 万華鏡・カットクリスタル ※非タイリング | `M_Water_Kaleidoscope` |
+
+すべて **1024×1024 PNG / インポート設定済み (NormalMap・Android/iOS は ASTC 6x6)**。
+万華鏡以外はシームレスにタイリングします (万華鏡は中心対称のため Clamp・装飾パネル向け)。
 マテリアルは Standard シェーダー(Metallic 0 / Smoothness 高め / 不透明)なので、
 ビルトイン RP と VRChat (PC / Quest ワールド) でそのまま使えます。
+金属らしさが欲しい場合はマテリアルの Metallic / Smoothness を上げてください。
 
 ### 一瞬で水面にする 3 つの方法
 

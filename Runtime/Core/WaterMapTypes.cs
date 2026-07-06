@@ -14,6 +14,9 @@ namespace Siliq.Water
         VoronoiCaustics,  // ボロノイ・エッジ(コースティクス風の網目)
         DirectionalWaves, // 指向性のある波(ゲルストナー風 / 多波スペクトル)
         RainRipples,      // 雨の波紋(広がるリング)
+        FlutedRibs,       // 縦リブ(フルートガラス / リブパネル)
+        MetaBlobs,        // メタボール(液体金属のような滑らかな液だまり)
+        Kaleidoscope,     // 万華鏡ファセット(放射鏡映のクリスタル面。※タイリング非対応)
     }
 
     /// <summary>

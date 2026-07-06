@@ -198,9 +198,13 @@ namespace Siliq.Water
                     float uu = u + t * sx;
                     float vv = v + t * sy;
 
-                    // 流れ (X) 方向へ引き伸ばす: X の周期を下げると模様が横に伸びる
-                    int perX = Mathf.Max(1, layer.scale / Mathf.Max(1, layer.stretch));
-                    int perY = Mathf.Max(1, layer.scale);
+                    // 引き伸ばしはスクロール方向 (縦横の近い方) に沿う。
+                    // 方向が縦寄り (90°/270° 付近) なら縦筋、それ以外は横筋になる。
+                    float dirMod = Mathf.Repeat(layer.directionDeg, 180f);
+                    bool stretchVertical = dirMod > 45f && dirMod < 135f;
+                    int stretched = Mathf.Max(1, layer.scale / Mathf.Max(1, layer.stretch));
+                    int perX = stretchVertical ? Mathf.Max(1, layer.scale) : stretched;
+                    int perY = stretchVertical ? stretched : Mathf.Max(1, layer.scale);
 
                     bool ridged = layer.type == WaveLayerType.RidgedWaves;
                     h = FbmTileable(uu, vv, perX, perY, layer.octaves, layer.persistence, seed, ridged);
@@ -259,6 +263,95 @@ namespace Siliq.Water
                         ampSum += amp;
                     }
                     h = sum / Mathf.Max(ampSum, 1e-5f);
+                    break;
+                }
+
+                case WaveLayerType.FlutedRibs:
+                {
+                    // 縦リブ (フルートガラス): X 方向に丸い畝が並ぶ。scale = リブの本数。
+                    // speed で横に整数本ぶんドリフト → t=1 で完全ループ。
+                    // ドメインワープを併用すると液体で歪んだリブガラスになる。
+                    // 断面は余弦 (どこでも滑らか = 境界にクリースやエイリアスが出ない)
+                    float x = u * Mathf.Max(1, layer.scale) + t * layer.speed;
+                    float profile = 0.5f - 0.5f * Mathf.Cos((x - Mathf.Floor(x)) * TwoPi);
+                    // sharpness > 1 で上面が平らな角柱寄り、< 1 で尖る
+                    h = Mathf.Pow(profile, 1f / Mathf.Max(0.25f, layer.sharpness)) * 2f - 1f;
+                    break;
+                }
+
+                case WaveLayerType.MetaBlobs:
+                {
+                    // メタボール: ジッターした格子点のガウス球を合成し、柔らかい
+                    // しきい値で液体金属のような滑らかな液だまりを作る。
+                    int cells = Mathf.Max(1, layer.scale);
+                    float x = u * cells;
+                    float y = v * cells;
+                    int cx = Mathf.FloorToInt(x);
+                    int cy = Mathf.FloorToInt(y);
+                    float sigma = 0.2f + layer.jitter * 0.35f; // 玉の大きさ (セル単位)
+                    float twoSigmaSq = 2f * sigma * sigma;
+                    float ang = t * layer.speed * TwoPi;
+
+                    // ガウス球の裾が隣接セルを越えて届くため 5x5 近傍まで合算する
+                    // (3x3 だと打ち切り誤差がタイル境界に細い継ぎ目として現れる)
+                    float field = 0f;
+                    for (int dy = -2; dy <= 2; dy++)
+                    {
+                        for (int dx = -2; dx <= 2; dx++)
+                        {
+                            int ix = cx + dx;
+                            int iy = cy + dy;
+                            int wx = Mod(ix, cells);
+                            int wy = Mod(iy, cells);
+
+                            float ph = Hash01(wx, wy, seed + 71) * TwoPi;
+                            float ox = 0.5f + 0.45f * Mathf.Sin(ang + ph);
+                            float oy = 0.5f + 0.45f * Mathf.Cos(ang + ph * 1.7f + Hash01(wx, wy, seed + 913) * TwoPi);
+
+                            float ddx = x - (ix + ox);
+                            float ddy = y - (iy + oy);
+                            field += Mathf.Exp(-(ddx * ddx + ddy * ddy) / twoSigmaSq);
+                        }
+                    }
+
+                    // 柔らかいしきい値 (sharpness = 縁の硬さ) で液だまり状に
+                    float edge = 0.5f / Mathf.Max(0.25f, layer.sharpness);
+                    float b01 = Mathf.Clamp01((field - 0.75f) / (2f * edge) + 0.5f);
+                    b01 = b01 * b01 * (3f - 2f * b01); // smoothstep
+                    h = b01 * 2f - 1f;
+                    break;
+                }
+
+                case WaveLayerType.Kaleidoscope:
+                {
+                    // 万華鏡ファセット: テクスチャ中心を軸に角度を鏡映折り畳みし、
+                    // リング×ウェッジのセルごとにランダムな傾きの平面 (ファセット) を張る。
+                    // ※このタイプは放射模様のためタイリングしない (中央配置用)。
+                    // 回転アニメは 1 ループでちょうど鏡映周期 × speed 回転 → 完全ループ。
+                    float du = u - 0.5f;
+                    float dv = v - 0.5f;
+                    float r = Mathf.Sqrt(du * du + dv * dv);
+                    int seg = Mathf.Max(3, layer.waveCount);
+                    float sector = TwoPi / seg;
+
+                    float a = Mathf.Atan2(dv, du) + TwoPi;
+                    a += t * layer.speed * 2f * sector;
+                    float af = a % (2f * sector);
+                    af = Mathf.Abs(af - sector); // 0..sector へ鏡映
+
+                    float rn = r * Mathf.Max(1, layer.scale);              // リング座標
+                    float an = af / sector * Mathf.Max(1, layer.octaves);  // ウェッジ座標
+                    int ri = Mathf.FloorToInt(rn);
+                    int ai = Mathf.FloorToInt(an);
+                    float fr = rn - ri;
+                    float fa = an - ai;
+
+                    // 各セル = ランダムな傾きを持つ平面 → 面ごとにパキッと違う法線 (カットガラス)
+                    float gx = Hash01(ri, ai, seed + 17) * 2f - 1f;
+                    float gy = Hash01(ri, ai, seed + 29) * 2f - 1f;
+                    float baseH = Hash01(ri, ai, seed + 43);
+                    float slope = layer.sharpness; // 尖り = ファセットの傾きの強さ
+                    h = Mathf.Clamp01(baseH + (gx * (fr - 0.5f) + gy * (fa - 0.5f)) * slope * 0.5f) * 2f - 1f;
                     break;
                 }
 

@@ -17,6 +17,12 @@ namespace Siliq.Water
             "溶岩 / 粘性流体",
             "プール (光の網目)",
             "サイバー (人工水面)",
+            "透明な浅瀬 (煌めき)",
+            "リブガラス (フルート)",
+            "液体金属 (クローム)",
+            "マットガラス (すりガラス)",
+            "結露ガラス (水滴)",
+            "万華鏡 (放射クリスタル ※非タイリング)",
         };
 
         public static WaterMapSettings Create(int index)
@@ -33,6 +39,12 @@ namespace Siliq.Water
                 case 7: return Lava();
                 case 8: return Pool();
                 case 9: return Cyber();
+                case 10: return ClearShallows();
+                case 11: return FlutedGlass();
+                case 12: return LiquidMetal();
+                case 13: return FrostedGlass();
+                case 14: return Condensation();
+                case 15: return Kaleidoscope();
                 default: return CalmLake();
             }
         }
@@ -263,6 +275,158 @@ namespace Siliq.Water
                 {
                     name = "規則ドット", type = WaveLayerType.VoronoiCells, blend = WaveBlendMode.Add,
                     amplitude = 0.4f, scale = 24, sharpness = 5f, jitter = 0.15f, speed = 1, seed = 3,
+                },
+            };
+            return s;
+        }
+
+        /// <summary>PrebakedPack の Water_Normal_Shallows_01 と同一レシピ。透き通った浅瀬の煌めき。</summary>
+        static WaterMapSettings ClearShallows()
+        {
+            var s = Base(1.1f);
+            s.causticsSharpness = 3f;
+            s.layers = new[]
+            {
+                new WaveLayer
+                {
+                    name = "煌めきの網目", type = WaveLayerType.VoronoiCaustics, blend = WaveBlendMode.Add,
+                    amplitude = 1f, scale = 14, sharpness = 1.3f, jitter = 0.95f, speed = 1,
+                    warpAmount = 0.4f, warpScale = 5,
+                },
+                new WaveLayer
+                {
+                    name = "細かい煌めき", type = WaveLayerType.VoronoiCaustics, blend = WaveBlendMode.Add,
+                    amplitude = 0.4f, scale = 28, sharpness = 1.2f, jitter = 0.95f, speed = 2, seed = 5,
+                },
+                new WaveLayer
+                {
+                    name = "うねり", type = WaveLayerType.PerlinWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.3f, scale = 5, octaves = 3, speed = 1, seed = 9,
+                },
+            };
+            return s;
+        }
+
+        /// <summary>PrebakedPack の Water_Normal_FlutedGlass_01 と同一レシピ。液体で歪んだ縦リブガラス。</summary>
+        static WaterMapSettings FlutedGlass()
+        {
+            var s = Base(2.4f);
+            s.layers = new[]
+            {
+                new WaveLayer
+                {
+                    name = "縦リブ", type = WaveLayerType.FlutedRibs, blend = WaveBlendMode.Add,
+                    amplitude = 1f, scale = 12, sharpness = 1.4f, speed = 0,
+                    warpAmount = 0.35f, warpScale = 3,
+                },
+                new WaveLayer
+                {
+                    name = "表面のゆらぎ", type = WaveLayerType.PerlinWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.12f, scale = 6, octaves = 3, speed = 1, seed = 3,
+                },
+            };
+            return s;
+        }
+
+        /// <summary>PrebakedPack の Water_Normal_LiquidMetal_01 と同一レシピ。クロームの液だまり。</summary>
+        static WaterMapSettings LiquidMetal()
+        {
+            var s = Base(2.4f);
+            s.baseRoughness = 0.02f;
+            s.layers = new[]
+            {
+                new WaveLayer
+                {
+                    name = "大きな液だまり", type = WaveLayerType.MetaBlobs, blend = WaveBlendMode.Add,
+                    amplitude = 1f, scale = 4, jitter = 0.9f, sharpness = 1.2f, speed = 1,
+                },
+                new WaveLayer
+                {
+                    name = "小さな液滴", type = WaveLayerType.MetaBlobs, blend = WaveBlendMode.Add,
+                    amplitude = 0.45f, scale = 8, jitter = 0.7f, sharpness = 1.5f, speed = 1, seed = 7,
+                },
+                new WaveLayer
+                {
+                    name = "うねり", type = WaveLayerType.PerlinWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.15f, scale = 3, octaves = 2, speed = 1, seed = 11,
+                },
+            };
+            return s;
+        }
+
+        /// <summary>PrebakedPack の Water_Normal_FrostedGlass_01 と同一レシピ。すりガラスの微細グレイン。</summary>
+        static WaterMapSettings FrostedGlass()
+        {
+            var s = Base(0.4f);
+            s.baseRoughness = 0.6f;
+            s.layers = new[]
+            {
+                new WaveLayer
+                {
+                    name = "微細グレイン", type = WaveLayerType.PerlinWaves, blend = WaveBlendMode.Add,
+                    amplitude = 1f, scale = 48, octaves = 3, persistence = 0.6f, speed = 0,
+                },
+                new WaveLayer
+                {
+                    name = "むら", type = WaveLayerType.PerlinWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.25f, scale = 12, octaves = 2, speed = 0, seed = 4,
+                },
+            };
+            return s;
+        }
+
+        /// <summary>PrebakedPack の Water_Normal_Condensation_01 と同一レシピ。窓の結露(水滴)。</summary>
+        static WaterMapSettings Condensation()
+        {
+            var s = Base(1.5f);
+            s.baseRoughness = 0.3f;
+            s.layers = new[]
+            {
+                new WaveLayer
+                {
+                    name = "大きな水滴", type = WaveLayerType.MetaBlobs, blend = WaveBlendMode.Add,
+                    amplitude = 1f, scale = 14, jitter = 0.28f, sharpness = 6f, speed = 0,
+                    maskAmount = 0.45f, maskScale = 3,
+                },
+                new WaveLayer
+                {
+                    name = "小さな水滴", type = WaveLayerType.MetaBlobs, blend = WaveBlendMode.Add,
+                    amplitude = 0.55f, scale = 30, jitter = 0.22f, sharpness = 6f, speed = 0, seed = 7,
+                    maskAmount = 0.35f, maskScale = 4,
+                },
+                new WaveLayer
+                {
+                    name = "垂れる筋", type = WaveLayerType.RidgedWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.22f, scale = 20, octaves = 2, stretch = 6, directionDeg = 270f,
+                    sharpness = 2f, speed = 1, seed = 3, maskAmount = 0.7f, maskScale = 4,
+                },
+                new WaveLayer
+                {
+                    name = "曇りグレイン", type = WaveLayerType.PerlinWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.08f, scale = 56, octaves = 2, speed = 0, seed = 9,
+                },
+            };
+            return s;
+        }
+
+        /// <summary>
+        /// PrebakedPack の Water_Normal_Kaleidoscope_01 と同一レシピ。放射状のカットガラス。
+        /// ※ このプリセットは中心対称のためシームレスにタイリングしない (装飾パネル向け)。
+        /// </summary>
+        static WaterMapSettings Kaleidoscope()
+        {
+            var s = Base(2f);
+            s.layers = new[]
+            {
+                new WaveLayer
+                {
+                    name = "粗ファセット", type = WaveLayerType.Kaleidoscope, blend = WaveBlendMode.Add,
+                    amplitude = 1f, scale = 6, octaves = 4, waveCount = 8, sharpness = 3f, speed = 1,
+                },
+                new WaveLayer
+                {
+                    name = "細ファセット", type = WaveLayerType.Kaleidoscope, blend = WaveBlendMode.Add,
+                    amplitude = 0.4f, scale = 12, octaves = 8, waveCount = 8, sharpness = 2f, speed = 1, seed = 5,
                 },
             };
             return s;

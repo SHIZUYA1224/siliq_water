@@ -404,6 +404,9 @@ namespace Siliq.Water.Editor
                 case WaveLayerType.VoronoiCaustics: return "ボロノイ(網目)";
                 case WaveLayerType.DirectionalWaves: return "指向性の波";
                 case WaveLayerType.RainRipples: return "雨の波紋";
+                case WaveLayerType.FlutedRibs: return "縦リブ";
+                case WaveLayerType.MetaBlobs: return "液体ブロブ";
+                case WaveLayerType.Kaleidoscope: return "万華鏡";
                 default: return type.ToString();
             }
         }
@@ -421,6 +424,9 @@ namespace Siliq.Water.Editor
                 "ボロノイ・網目 (コースティクス風)",
                 "指向性の波 (ゲルストナー風 / スペクトル)",
                 "雨の波紋 (広がるリング)",
+                "縦リブ (フルートガラス)",
+                "液体ブロブ (メタボール / 液体金属)",
+                "万華鏡 (放射クリスタル ※非タイリング)",
             });
 
             if (index > 0)
@@ -459,6 +465,23 @@ namespace Siliq.Water.Editor
                     layer.dropCount = EditorGUILayout.IntSlider(new GUIContent("滴の数"), layer.dropCount, 1, 128);
                     layer.octaves = EditorGUILayout.IntSlider(new GUIContent("リングの本数", "1 つの波紋に含まれる輪の数"), layer.octaves, 1, 8);
                     layer.sharpness = EditorGUILayout.Slider(new GUIContent("リングの鋭さ"), layer.sharpness, 0.25f, 8f);
+                    break;
+
+                case WaveLayerType.FlutedRibs:
+                    layer.sharpness = EditorGUILayout.Slider(new GUIContent("断面の平たさ", "1 で丸い畝。大きいほど上面が平らな角柱寄りに。"), layer.sharpness, 0.25f, 8f);
+                    EditorGUILayout.HelpBox("リブは縦方向に走ります。向きを変えたい場合はオブジェクトやマテリアルのタイリング回転で調整してください。ドメインワープを足すと液体で歪んだリブガラスになります。", MessageType.None);
+                    break;
+
+                case WaveLayerType.MetaBlobs:
+                    layer.jitter = EditorGUILayout.Slider(new GUIContent("玉の大きさ", "液だまりの半径。大きいほど繋がって流れたような形に。"), layer.jitter, 0f, 1f);
+                    layer.sharpness = EditorGUILayout.Slider(new GUIContent("縁の硬さ", "小さいと柔らかく盛り上がり、大きいとくっきりした液だまりに。"), layer.sharpness, 0.25f, 8f);
+                    break;
+
+                case WaveLayerType.Kaleidoscope:
+                    layer.waveCount = EditorGUILayout.IntSlider(new GUIContent("鏡映の数", "放射状に折り返す枚数。多いほど細かい万華鏡に。"), layer.waveCount, 3, 24);
+                    layer.octaves = EditorGUILayout.IntSlider(new GUIContent("角度の分割", "1 枚あたりのファセット数 (周方向)。"), layer.octaves, 1, 12);
+                    layer.sharpness = EditorGUILayout.Slider(new GUIContent("ファセットの傾き", "カット面の急峻さ。大きいほどエッジの立ったクリスタルに。"), layer.sharpness, 0.25f, 8f);
+                    EditorGUILayout.HelpBox("万華鏡タイプは中心対称のためシームレスにタイリングしません。装飾パネルやスカイボックス的な単発配置に向いています。", MessageType.Info);
                     break;
             }
 
