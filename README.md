@@ -3,11 +3,11 @@
 Unity エディタ上(またはランタイム)で、水面・流体表現向けの **PBR テクスチャ一式を手続き生成**するツールです。
 
 - **VRChat モバイル (Quest / Android / iOS)** — 生成物はただの PNG テクスチャなのでそのまま使用可
-- **最新の Unity (ビルトイン / URP)** — フォーム・フロー・ラフネスマップまで含む本格的な水表現に対応
+- **最新の Unity (ビルトイン / URP)** — フォーム・フロー・ラフネスマップまで含む本格的な水表現に対応。URP シェーダーは任意 Sample として導入
 - **ランタイム API** — ビルドにテクスチャを含めず、ロード時に動的生成することも可能
 - **触れたら波紋が広がるインタラクティブな水面** — アバターが水に入った位置から波紋が実時間で広がる (同梱シェーダー限定)
 
-対応: Unity 2019.4 以降 / ビルトイン RP・URP
+対応: Unity 2019.4 以降 / ビルトイン RP・URP (URP シェーダーは Package Manager Sample)
 
 ## 生成できるマップ (7 種類)
 
@@ -111,7 +111,8 @@ Standard / URP Lit / VRChat Mobile 系では `_BumpMap` の UV と `_BumpScale` 
 このコンポーネントの速度は 0 にし、下記の `WaterRippleEmitter` で同心円が広がる表現にしています。
 
 より本格的な (2 レイヤースクロール・反射・岸辺フォームなどを含む) 動く水面が欲しい場合は、
-下記の同梱シェーダー `Siliq/Water Mobile (Quest)` や `Siliq/Water URP` を使ってください。
+下記の `Siliq/Water Mobile (Quest)` を使ってください。URP プロジェクトでは
+Package Manager の `URP Shader` Sample を Import すると `Siliq/Water URP` も使えます。
 これらは最初から UV スクロールが組み込まれているため `WaterSurfaceAnimator` は不要です。
 
 見た目は `PrebakedPack/Preview/` のプレビュー画像 (Plane に貼って光を当てた状態) で事前確認できます。
@@ -199,9 +200,14 @@ Texture2D foam = WaterMapCore.BakeTexture(settings, WaterMapType.Foam, 512);
 
 ## 同梱シェーダー
 
-### `Siliq/Water URP` (URP 用)
+### `Siliq/Water URP` (URP 用 / 任意 Sample)
 
-SRP Batcher 対応・1 パス。最新 Unity での本命です。
+SRP Batcher 対応・1 パス。URP が入っているプロジェクトだけで使う任意 Sample です。
+Built-in / VRChat / Quest / iOS 向けの通常導入ではコンパイル対象にしないため、URP package が無いプロジェクトでも import error を起こしません。
+
+導入:
+
+`Package Manager > Siliq Water Maps Studio > Samples > URP Shader > Import`
 
 - ノーマルマップ 2 レイヤースクロール、または**フローマップ駆動**の流れ(生成したフローマップをそのまま活用)
 - リフレクションプローブによる映り込み + フレネル + スペキュラ
@@ -289,12 +295,33 @@ PrebakedPack のテクスチャにも同設定が最初から入っています�
 
 ## iOS 対応
 
-同梱シェーダー (`Siliq/Water Mobile`・`Siliq/Water URP`) は標準的な CG/HLSL のみで書かれており、
+通常同梱の `Siliq/Water Mobile` は標準的な CG/HLSL のみで書かれており、
 Android 専用の API には依存していないため Metal (iOS) でもそのままコンパイル・動作します。
+`Siliq/Water URP` は URP Sample を Import した URP プロジェクトでのみ使用してください。
 テクスチャのインポート設定にも iOS (`iPhone`) 向けの ASTC 6x6 圧縮が含まれています。
 
 VRChat の iOS 版クライアント自体の対応状況はアプリ側の仕様に依存するため、
 実際にアップロードする際は VRChat SDK の Quest/iOS ビルド対象設定に従ってください。
+
+## トラブルシューティング
+
+### `package.json has no meta file` が残る
+
+このリポジトリには `package.json.meta` を同梱しています。警告が残る場合、Unity が古い PackageCache または古い `Packages/packages-lock.json` の commit を見ている可能性が高いです。
+
+対処:
+
+1. Package Manager から `Siliq Water Maps Studio` を Remove
+2. プロジェクトの `Packages/packages-lock.json` から古い `com.siliq.water-normalmap` の参照を更新、または削除して再解決
+3. 必要なら `Library/PackageCache/com.siliq.water-normalmap*` を削除
+4. Git URL を最新 commit で Add し直す
+
+### `Core.hlsl` が見つからない
+
+Built-in / VRChat プロジェクトに URP package が入っていない状態で `Siliq/Water URP` を直接 import すると発生します。通常導入では URP shader は読み込まれません。
+
+- Built-in / VRChat / Quest / iOS: `Siliq/Water Mobile (Quest)` を使う
+- URP: Universal Render Pipeline を導入した上で `Samples > URP Shader` を Import する
 
 ## 構成
 
@@ -309,9 +336,11 @@ Runtime/
     RuntimeWaterMapApplier.cs  ランタイムベイク & 適用コンポーネント
   Shaders/
     SiliqWaterMobile.shader    ビルトイン RP / Quest ワールド向け
-    SiliqWaterURP.shader       URP 向け (フローマップ・岸辺エフェクト対応)
 Editor/
   WaterMapStudioWindow.cs   エディタウィンドウ (プレビュー / 書き出し / プロファイル)
+Samples~/
+  URP/
+    SiliqWaterURP.shader       URP 向け任意 Sample (フローマップ・岸辺エフェクト対応)
 Tests/
   WaterMapCoreTests.cs      Unity Test Runner (EditMode) 用の自動テスト
 PrebakedPack/

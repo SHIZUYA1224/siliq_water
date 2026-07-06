@@ -45,7 +45,7 @@ namespace Siliq.Water.Editor
             "Standard (ビルトイン)",
             "Universal Render Pipeline/Lit (URP)",
             "Siliq/Water Mobile (Quest / iOS)",
-            "Siliq/Water URP",
+            "Siliq/Water URP (Sample導入時)",
         };
 
         [SerializeField] WaterMapSettings settings;
@@ -82,6 +82,10 @@ namespace Siliq.Water.Editor
                 exportMapFlags[0] = true;
             }
             previewDirty = true;
+            if (materialShaderIndex == 4 && Shader.Find("Siliq/Water URP") == null)
+            {
+                materialShaderIndex = 3;
+            }
             EditorApplication.update += OnEditorUpdate;
         }
 
@@ -397,7 +401,7 @@ namespace Siliq.Water.Editor
 
         int BestSiliqMaterialShaderIndex()
         {
-            return IsUniversalPipelineActive() ? 4 : 3;
+            return IsUniversalPipelineActive() && Shader.Find("Siliq/Water URP") != null ? 4 : 3;
         }
 
         static bool IsUniversalPipelineActive()
@@ -850,7 +854,7 @@ namespace Siliq.Water.Editor
                 "VRChat モバイル (Quest) で使う場合:\n" +
                 "・アバター → VRChat/Mobile/Standard Lite の Normal Map スロットにセット\n" +
                 "・ワールド → 同梱の \"Siliq/Water Mobile (Quest)\" などのカスタムシェーダー可\n" +
-                "最新 Unity (URP) では同梱の \"Siliq/Water URP\" やお手持ちの水シェーダーで、\n" +
+                "最新 Unity (URP) では Sample 導入後の \"Siliq/Water URP\" やお手持ちの水シェーダーで、\n" +
                 "フォーム / フロー / ラフネスマップも活用できます。ランタイム生成 API は README 参照。",
                 MessageType.None);
         }
@@ -1178,6 +1182,11 @@ namespace Siliq.Water.Editor
             Shader shader = Shader.Find(shaderName);
             if (shader == null)
             {
+                if (shaderName == "Siliq/Water URP")
+                {
+                    Debug.LogWarning("[Siliq Water] URP シェーダーは通常導入では読み込まれません。Package Manager > Siliq Water Maps Studio > Samples > URP Shader から Sample を Import した URP プロジェクトでのみ使用できます。Built-in / VRChat / iOS では Siliq/Water Mobile (Quest) を選んでください。");
+                    return;
+                }
                 Debug.LogWarning($"[Siliq Water] シェーダー '{shaderName}' が見つからないためマテリアル作成をスキップしました。");
                 return;
             }

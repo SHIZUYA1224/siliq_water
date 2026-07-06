@@ -23,7 +23,8 @@ Siliq Water は、ノーマルマップ単体ではなく「用途別の見た�
 - 色、透明度、反射、透過光、きらめきを設定する
 - `WaterSurfaceAnimator` を追加または更新し、動きを付ける
 - Built-in / iOS 系では `Siliq/Water Mobile (Quest)` を使う
-- URP プロジェクトでは `Siliq/Water URP` を優先して使う
+- URP プロジェクトでは、`URP Shader` Sample が Import 済みなら `Siliq/Water URP` を優先して使う
+- URP Sample が未導入、または Built-in / VRChat / iOS 系では `Siliq/Water Mobile (Quest)` を使う
 
 ## 調整の目安
 

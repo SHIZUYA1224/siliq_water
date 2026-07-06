@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.3.16] - 2026-07-06
+
+### 修正: Built-in / VRChat プロジェクトでの URP シェーダー import error
+- `Siliq/Water URP` を通常 Runtime から外し、Package Manager の任意 Sample として導入する構成に変更
+- Universal Render Pipeline が入っていないプロジェクトでは URP include をコンパイル対象にしないようにし、
+  `Couldn't open include file 'Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl'` を回避
+- 水面マップスタジオと Quick Apply は、URP シェーダーが実際に存在する場合のみ `Siliq/Water URP` を選び、
+  それ以外では `Siliq/Water Mobile (Quest)` へフォールバック
+- `package.json.meta` 警告が Unity の古い PackageCache / `packages-lock.json` 由来で残る場合の対処を README に追記
+
 ## [2.3.15] - 2026-07-06
 
 ### 追加: 公開リポジトリ向けの製品品質ファイル

@@ -18,7 +18,7 @@
 //    (または単に新規 .cs ファイルを作成) し、中身を貼り付けて保存
 //    (UdonSharp が入っていれば自動で Udon 用として認識されます)
 // 4. 水面のコライダー (Is Trigger を ON) を持つ GameObject にこのスクリプトをアタッチ
-// 5. Siliq/Water Mobile (Quest) または Siliq/Water URP のマテリアルで
+// 5. Siliq/Water Mobile (Quest) のマテリアルで
 //    「触れた時の波紋を有効化」(_USE_RIPPLES) を ON にする
 // 6. waterSurfaceY を水面の実際のワールド Y 座標に合わせる
 //

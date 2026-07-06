@@ -9,6 +9,7 @@ Use this before switching the GitHub repository to public or cutting a product r
 - [ ] `.gitattributes` marks Unity text assets and binary textures correctly
 - [ ] every Unity package asset has a matching `.meta` file
 - [ ] no screenshots, temporary captures, local test projects, or generated materials are tracked
+- [ ] UPM install does not show `package.json has no meta file` after clearing stale PackageCache / package lock
 
 ## Legal And Package Metadata
 
@@ -22,6 +23,8 @@ Use this before switching the GitHub repository to public or cutting a product r
 - [ ] Unity batch tests pass
 - [ ] `git diff --check` passes
 - [ ] generated/prebaked textures import without warnings
+- [ ] Built-in / VRChat project imports without compiling `Siliq/Water URP`
+- [ ] URP shader is available only through `Samples > URP Shader` and imports cleanly in a URP project
 - [ ] water studio opens without layout errors at narrow and wide window sizes
 - [ ] purpose-first presets set reasonable maps, quality, and material options
 - [ ] Quick Apply creates moving, usable materials for clear sea, pool, blood sea, and liquid metal
