@@ -357,6 +357,9 @@ namespace Siliq.Water.Tests
                 Assert.IsTrue(mat.HasProperty("_MacroScale"));
                 Assert.IsTrue(mat.HasProperty("_MacroDirectionBreakup"));
                 Assert.IsTrue(mat.HasProperty("_MacroColorVariation"));
+                Assert.IsTrue(mat.HasProperty("_MinLighting"));
+                Assert.IsTrue(mat.HasProperty("_DarkReflectionDamping"));
+                Assert.IsTrue(mat.HasProperty("_DarkDetailDamping"));
             }
             finally
             {

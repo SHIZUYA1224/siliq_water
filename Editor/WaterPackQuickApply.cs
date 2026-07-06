@@ -748,6 +748,7 @@ namespace Siliq.Water.Editor
         {
             if (mat == null) return;
 
+            SetupDarkSceneResponse(mat);
             if (mat.HasProperty("_Opacity")) mat.SetFloat("_Opacity", 1f);
             if (mat.HasProperty("_AlphaFresnel")) mat.SetFloat("_AlphaFresnel", 0f);
             if (mat.HasProperty("_EdgeReflection")) mat.SetFloat("_EdgeReflection", 0f);
@@ -763,6 +764,7 @@ namespace Siliq.Water.Editor
         {
             if (mat == null) return;
 
+            SetupDarkSceneResponse(mat);
             if (mat.HasProperty("_Opacity")) mat.SetFloat("_Opacity", Mathf.Clamp01(opacity));
             if (mat.HasProperty("_AlphaFresnel")) mat.SetFloat("_AlphaFresnel", 0.62f);
             if (mat.HasProperty("_AlphaPower")) mat.SetFloat("_AlphaPower", 2.15f);
@@ -841,6 +843,15 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_MacroColorVariation")) mat.SetFloat("_MacroColorVariation", colorVariation);
         }
 
+        static void SetupDarkSceneResponse(Material mat)
+        {
+            if (mat == null) return;
+
+            if (mat.HasProperty("_MinLighting")) mat.SetFloat("_MinLighting", 0.08f);
+            if (mat.HasProperty("_DarkReflectionDamping")) mat.SetFloat("_DarkReflectionDamping", 0.85f);
+            if (mat.HasProperty("_DarkDetailDamping")) mat.SetFloat("_DarkDetailDamping", 0.78f);
+        }
+
         static void ApplySiliqNormal(Material mat, Material source)
         {
             if (mat == null || source == null) return;
@@ -917,6 +928,7 @@ namespace Siliq.Water.Editor
             }
 
             SetupMacroVariation(mat, preset.macroVariation, preset.macroScale, preset.macroDirectionBreakup, preset.macroColorVariation);
+            SetupDarkSceneResponse(mat);
 
             if (mat.HasProperty("_UseFlowMap")) mat.SetFloat("_UseFlowMap", 0f);
             if (mat.HasProperty("_UseShore")) mat.SetFloat("_UseShore", 0f);

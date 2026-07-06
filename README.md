@@ -81,6 +81,7 @@ Unity エディタ上(またはランタイム)で、水面・流体表現向け
    `Siliq Water > 透明な水マテリアルを適用 (iOS/Mobile) > 好きな水` を使ってください。
    同梱の `Siliq/Water Mobile (Quest)` を alpha blend 設定にしたマテリアルを生成します。
    正面は透け、斜め視線では Fresnel で反射と不透明感が増え、透過光・細い光・きらめきで水らしさが出るように調整済みです。
+   暗い部屋では反射ときらめきを自動で抑えるため、黒背景で水面だけ銀色に浮きにくくなります。
 2. **ドラッグ & ドロップ**: `PrebakedPack/Materials/` の `M_Water_*` をシーンのオブジェクトへドラッグ
    (この方法では静止したままなので、動かしたい場合は次項のコンポーネントを手動で追加してください)
 3. **サンプルシーンで見比べる**: `PrebakedPack/SampleScene/SC_WaterNormalMap_Preview.unity` を開くと
@@ -162,6 +163,8 @@ Quest / モバイルでは不透明のまま使うことを推奨します。PC 
 薄すぎる場合は水面マップスタジオの **不透明度** を 0.5 以上に上げるか、用途別の `美しい海` / `透明プール` を使ってください。
 iOS 透明版はさらに `_TransmissionStrength` / `_GlimmerIntensity` / `_GlintIntensity` で
 透過光、細い光の揺らぎ、強いハイライトを足し、透明なだけの板に見えにくい設定にしています。
+暗い場所で水面だけ明るく浮く場合は、`_DarkReflectionDamping` と `_DarkDetailDamping` を上げると、
+空反射と細かい光が暗さに追従しやすくなります。
 iOS 透明版は GrabPass や深度依存なしの alpha blend なので軽量ですが、
 透明描画はソート順と重なりに弱い点に注意してください。Quest 用の不透明運用と混ぜないこと。
 
@@ -232,6 +235,7 @@ Built-in / VRChat / Quest / iOS 向けの通常導入ではコンパイル対象
 
 - ノーマルマップ 1 枚を 2 回スクロールサンプリング
 - 深い色 ⇔ 浅い色 + フレネル + 透過光 + 細い光の揺らぎ + スペキュラ + 任意のキューブマップ反射
+- `_MinLighting` / `_DarkReflectionDamping` / `_DarkDetailDamping` により、暗い部屋では反射ときらめきを減衰
 - `_MacroVariation` / `_MacroScale` / `_MacroDirectionBreakup` /
   `_MacroColorVariation` により、大きな面でも模様の密度・向き・光が均一になりすぎないよう調整
 

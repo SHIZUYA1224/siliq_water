@@ -10,6 +10,9 @@ Shader "Siliq/Water Mobile (Quest)"
         _ShallowColor ("浅い水の色", Color) = (0.16, 0.55, 0.60, 1)
         _DeepColor ("深い水の色", Color) = (0.02, 0.15, 0.25, 1)
         _HorizonColor ("反射 (空) の色", Color) = (0.65, 0.80, 0.90, 1)
+        _MinLighting ("暗所の最低明るさ", Range(0, 0.5)) = 0.08
+        _DarkReflectionDamping ("暗所の反射抑制", Range(0, 1)) = 0.85
+        _DarkDetailDamping ("暗所のきらめき抑制", Range(0, 1)) = 0.78
         _Opacity ("正面の不透明度", Range(0, 1)) = 1
         _AlphaFresnel ("斜め視線の不透明度加算", Range(0, 1)) = 0
         _AlphaPower ("透明フレネルの鋭さ", Range(0.5, 8)) = 3
@@ -75,6 +78,9 @@ Shader "Siliq/Water Mobile (Quest)"
             half4 _ShallowColor;
             half4 _DeepColor;
             half4 _HorizonColor;
+            half _MinLighting;
+            half _DarkReflectionDamping;
+            half _DarkDetailDamping;
             half _Opacity;
             half _AlphaFresnel;
             half _AlphaPower;
@@ -247,31 +253,43 @@ Shader "Siliq/Water Mobile (Quest)"
                 half3 lightDir = normalize(_WorldSpaceLightPos0.xyz);
                 half3 halfDir = normalize(lightDir + viewDir);
 
-                half halfLambert = saturate(dot(worldN, lightDir)) * 0.5h + 0.5h;
+                half3 lumaWeights = half3(0.2126h, 0.7152h, 0.0722h);
+                half ndl = saturate(dot(worldN, lightDir));
+                half3 ambientSH = max(ShadeSH9(half4(worldN, 1.0h)), half3(0, 0, 0));
+                half ambientLum = saturate(dot(ambientSH, lumaWeights));
+                half mainLightLum = saturate(dot(_LightColor0.rgb, lumaWeights));
+                half directLum = ndl * mainLightLum;
+                half surfaceLight = saturate(ambientLum + directLum);
+                half baseVisibility = saturate(_MinLighting + surfaceLight * (1.0h - _MinLighting));
+                half reflectionVisibility = lerp(1.0h - _DarkReflectionDamping, 1.0h, ambientLum);
+                half detailVisibility = lerp(1.0h - _DarkDetailDamping, 1.0h, surfaceLight);
                 half colorLift = (macro01 - 0.5h) * _MacroColorVariation;
-                half3 baseCol = lerp(_DeepColor.rgb, _ShallowColor.rgb, saturate(halfLambert + colorLift));
+                half colorMix = saturate(0.12h + directLum * 0.68h + ambientLum * 0.32h + colorLift);
+                half3 baseCol = lerp(_DeepColor.rgb, _ShallowColor.rgb, colorMix) * baseVisibility;
 
                 half3 reflCol = _HorizonColor.rgb;
                 #ifdef USE_REFLECTION_CUBE
                 half3 reflDir = reflect(-viewDir, worldN);
                 reflCol = lerp(reflCol, texCUBE(_ReflCube, reflDir).rgb, _ReflStrength);
                 #endif
+                reflCol *= reflectionVisibility;
 
                 half viewFacing = saturate(dot(worldN, viewDir));
                 half fresnel = pow(1.0h - viewFacing, _FresnelPower);
                 half alphaFresnel = pow(1.0h - viewFacing, _AlphaPower);
                 half spec = pow(saturate(dot(worldN, halfDir)), _SpecPower) * _SpecIntensity;
-                spec *= lerp(0.72h, 1.28h, macro01);
+                spec *= lerp(0.72h, 1.28h, macro01) * detailVisibility * mainLightLum;
                 half glint = pow(saturate(dot(reflect(-lightDir, worldN), viewDir)), _GlintPower) * _GlintIntensity;
+                glint *= detailVisibility * mainLightLum;
 
                 half interference = saturate(1.0h - abs(n1.x * 0.72h + n1.y * 0.31h - n2.x * 0.46h + n2.y * 0.58h));
-                half glimmer = pow(interference, _GlimmerSharpness) * _GlimmerIntensity * saturate(0.45h + halfLambert);
-                glimmer *= lerp(0.65h, 1.35h, macro01);
-                half3 transmission = _TransmissionColor.rgb * _TransmissionStrength * viewFacing * saturate(0.25h + halfLambert);
+                half glimmer = pow(interference, _GlimmerSharpness) * _GlimmerIntensity * saturate(0.35h + surfaceLight);
+                glimmer *= lerp(0.65h, 1.35h, macro01) * detailVisibility;
+                half3 transmission = _TransmissionColor.rgb * _TransmissionStrength * viewFacing * saturate(0.2h + surfaceLight) * baseVisibility;
 
                 half4 col;
                 col.rgb = lerp(baseCol + transmission, reflCol, fresnel) + (spec + glint) * _LightColor0.rgb;
-                col.rgb += _GlimmerColor.rgb * (glimmer + rippleLight * 0.35h);
+                col.rgb += _GlimmerColor.rgb * (glimmer + rippleLight * 0.35h * detailVisibility);
                 col.rgb = lerp(col.rgb, reflCol + (spec + glint) * _LightColor0.rgb, alphaFresnel * _EdgeReflection);
                 col.a = saturate(_Opacity + alphaFresnel * _AlphaFresnel + glimmer * 0.08h + rippleLight * 0.05h);
 

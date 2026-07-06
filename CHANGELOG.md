@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.21] - 2026-07-06
+
+### 修正: 暗い場所で水面だけ銀色に浮く見え方を抑制
+- `Siliq/Water Mobile (Quest)` に `_MinLighting` / `_DarkReflectionDamping` / `_DarkDetailDamping` を追加
+- ambient が暗い場所では空反射、細いきらめき、glint、ripple の明るさを落とし、黒背景で水面だけ白く浮かないようにした
+- Quick Apply と水面マップスタジオで生成する Siliq 水マテリアルにも暗所向けの初期値を保存するようにした
+
 ## [2.3.20] - 2026-07-06
 
 ### 修正: Tool から作成したマテリアルがピンクになる問題を回避
