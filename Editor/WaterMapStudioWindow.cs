@@ -17,11 +17,13 @@ namespace Siliq.Water.Editor
         {
             ClearSea,
             ClearPool,
+            IndoorBluePool,
             BloodSea,
             LiquidMetal,
         }
 
         const string PrefsKey = "Siliq.Water.Settings.v2";
+        const int IndoorBluePoolPresetIndex = 10;
         const int PreviewResolution = 256;
         const float PreviewAnimationFps = 12f;
         const float PreviewRegenerateMinInterval = 0.12f;
@@ -273,6 +275,13 @@ namespace Siliq.Water.Editor
             }
             using (new EditorGUILayout.HorizontalScope())
             {
+                if (GUILayout.Button(new GUIContent("室内ブループール", "青い室内プール、窓反射、柔らかい白ハイライト向け。広い反射の揺らぎと透明 Siliq マテリアルに設定します。")))
+                {
+                    ApplyGoalPreset(GoalPreset.IndoorBluePool);
+                }
+            }
+            using (new EditorGUILayout.HorizontalScope())
+            {
                 if (GUILayout.Button(new GUIContent("血の海", "重い赤い液体向け。粘度感のある流れ、濃い透明度、ラフネス/フロー出力に設定します。")))
                 {
                     ApplyGoalPreset(GoalPreset.BloodSea);
@@ -386,6 +395,21 @@ namespace Siliq.Water.Editor
                     materialShaderIndex = BestSiliqMaterialShaderIndex();
                     previewMapIndex = 0;
                     SetExportMaps(WaterMapType.Normal, WaterMapType.Height, WaterMapType.Roughness, WaterMapType.Caustics);
+                    break;
+
+                case GoalPreset.IndoorBluePool:
+                    presetIndex = IndoorBluePoolPresetIndex;
+                    settings = WaterMapPresets.Create(presetIndex);
+                    settings.resolution = 2048;
+                    settings.strength = 0.36f;
+                    settings.supersample = 2;
+                    settings.exportExr = false;
+                    settings.frameCount = 24;
+                    settings.createTransparentMaterial = true;
+                    settings.materialOpacity = 0.38f;
+                    materialShaderIndex = BestSiliqMaterialShaderIndex();
+                    previewMapIndex = 0;
+                    SetExportMaps(WaterMapType.Normal, WaterMapType.Height, WaterMapType.Roughness, WaterMapType.Dudv, WaterMapType.Caustics);
                     break;
 
                 case GoalPreset.BloodSea:
@@ -1236,6 +1260,10 @@ namespace Siliq.Water.Editor
             var height = Find(WaterMapType.Height);
             var foam = Find(WaterMapType.Foam);
             var flow = Find(WaterMapType.Flow);
+            bool indoorBluePool = presetIndex == IndoorBluePoolPresetIndex;
+            Color generatedBaseColor = indoorBluePool
+                ? new Color(0.32f, 0.86f, 1f, settings.createTransparentMaterial ? settings.materialOpacity : 1f)
+                : new Color(0.1f, 0.35f, 0.45f, settings.createTransparentMaterial ? settings.materialOpacity : 1f);
 
             switch (resolvedShaderIndex)
             {
@@ -1251,8 +1279,8 @@ namespace Siliq.Water.Editor
                         mat.EnableKeyword("_PARALLAXMAP");
                         mat.SetFloat("_Parallax", 0.02f);
                     }
-                    mat.SetColor("_Color", new Color(0.1f, 0.35f, 0.45f, 1f));
-                    mat.SetFloat("_Glossiness", 0.9f);
+                    mat.SetColor("_Color", generatedBaseColor);
+                    mat.SetFloat("_Glossiness", indoorBluePool ? 0.98f : 0.9f);
                     if (settings.createTransparentMaterial)
                     {
                         SetupStandardTransparent(mat, settings.materialOpacity);
@@ -1270,9 +1298,8 @@ namespace Siliq.Water.Editor
                         mat.SetTexture("_ParallaxMap", height);
                         mat.EnableKeyword("_PARALLAXMAP");
                     }
-                    Color baseColor = new Color(0.1f, 0.35f, 0.45f, settings.createTransparentMaterial ? settings.materialOpacity : 1f);
-                    mat.SetColor("_BaseColor", baseColor);
-                    mat.SetFloat("_Smoothness", 0.9f);
+                    mat.SetColor("_BaseColor", generatedBaseColor);
+                    mat.SetFloat("_Smoothness", indoorBluePool ? 0.98f : 0.9f);
                     if (settings.createTransparentMaterial)
                     {
                         SetupUrpLitTransparent(mat, settings.materialOpacity);
@@ -1323,12 +1350,19 @@ namespace Siliq.Water.Editor
                     }
                     else if (settings.createTransparentMaterial)
                     {
-                        mat.SetColor("_ShallowColor", new Color(0.62f, 0.96f, 1f, 1f));
-                        mat.SetColor("_DeepColor", new Color(0.005f, 0.09f, 0.16f, 1f));
-                        mat.SetColor("_HorizonColor", new Color(0.82f, 0.94f, 1f, 1f));
-                        if (mat.HasProperty("_TransmissionColor")) mat.SetColor("_TransmissionColor", new Color(0.35f, 0.9f, 1f, 1f));
-                        if (mat.HasProperty("_GlimmerColor")) mat.SetColor("_GlimmerColor", new Color(0.92f, 0.99f, 1f, 1f));
+                        if (!indoorBluePool)
+                        {
+                            mat.SetColor("_ShallowColor", new Color(0.62f, 0.96f, 1f, 1f));
+                            mat.SetColor("_DeepColor", new Color(0.005f, 0.09f, 0.16f, 1f));
+                            mat.SetColor("_HorizonColor", new Color(0.82f, 0.94f, 1f, 1f));
+                            if (mat.HasProperty("_TransmissionColor")) mat.SetColor("_TransmissionColor", new Color(0.35f, 0.9f, 1f, 1f));
+                            if (mat.HasProperty("_GlimmerColor")) mat.SetColor("_GlimmerColor", new Color(0.92f, 0.99f, 1f, 1f));
+                        }
                         SetupSiliqMobileTransparent(mat, settings.materialOpacity);
+                    }
+                    if (indoorBluePool)
+                    {
+                        SetupSiliqIndoorBluePool(mat, settings.materialOpacity, height != null);
                     }
                     break;
             }
@@ -1415,6 +1449,39 @@ namespace Siliq.Water.Editor
 
             mat.SetOverrideTag("RenderType", "Transparent");
             mat.renderQueue = (int)RenderQueue.Transparent;
+        }
+
+        static void SetupSiliqIndoorBluePool(Material mat, float opacity, bool hasHeightMap)
+        {
+            SetupDarkSceneResponse(mat);
+
+            if (mat.HasProperty("_ShallowColor")) mat.SetColor("_ShallowColor", new Color(0.48f, 0.92f, 1f, 1f));
+            if (mat.HasProperty("_DeepColor")) mat.SetColor("_DeepColor", new Color(0.02f, 0.22f, 0.52f, 1f));
+            if (mat.HasProperty("_HorizonColor")) mat.SetColor("_HorizonColor", new Color(0.92f, 0.99f, 1f, 1f));
+            if (mat.HasProperty("_TransmissionColor")) mat.SetColor("_TransmissionColor", new Color(0.56f, 0.98f, 1f, 1f));
+            if (mat.HasProperty("_GlimmerColor")) mat.SetColor("_GlimmerColor", new Color(1f, 1f, 0.96f, 1f));
+            if (mat.HasProperty("_Opacity")) mat.SetFloat("_Opacity", Mathf.Clamp01(opacity));
+            if (mat.HasProperty("_NormalStrength")) mat.SetFloat("_NormalStrength", 0.46f);
+            if (mat.HasProperty("_Tiling1")) mat.SetFloat("_Tiling1", 0.78f);
+            if (mat.HasProperty("_Tiling2")) mat.SetFloat("_Tiling2", 1.55f);
+            if (mat.HasProperty("_AlphaFresnel")) mat.SetFloat("_AlphaFresnel", 0.78f);
+            if (mat.HasProperty("_AlphaPower")) mat.SetFloat("_AlphaPower", 1.85f);
+            if (mat.HasProperty("_EdgeReflection")) mat.SetFloat("_EdgeReflection", 0.82f);
+            if (mat.HasProperty("_TransmissionStrength")) mat.SetFloat("_TransmissionStrength", 0.82f);
+            if (mat.HasProperty("_GlimmerIntensity")) mat.SetFloat("_GlimmerIntensity", 0.24f);
+            if (mat.HasProperty("_GlimmerSharpness")) mat.SetFloat("_GlimmerSharpness", 16f);
+            if (mat.HasProperty("_GlintIntensity")) mat.SetFloat("_GlintIntensity", 0.68f);
+            if (mat.HasProperty("_GlintPower")) mat.SetFloat("_GlintPower", 260f);
+            if (mat.HasProperty("_FresnelPower")) mat.SetFloat("_FresnelPower", 2.05f);
+            if (mat.HasProperty("_ReflStrength")) mat.SetFloat("_ReflStrength", 1f);
+            if (mat.HasProperty("_SpecIntensity")) mat.SetFloat("_SpecIntensity", 1.50f);
+            if (mat.HasProperty("_SpecPower")) mat.SetFloat("_SpecPower", 300f);
+            if (mat.HasProperty("_Smoothness")) mat.SetFloat("_Smoothness", 0.98f);
+            if (mat.HasProperty("_DisplacementStrength")) mat.SetFloat("_DisplacementStrength", 0.025f);
+            if (mat.HasProperty("_DisplacementScale")) mat.SetFloat("_DisplacementScale", 0.42f);
+            if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.16f);
+            if (mat.HasProperty("_HeightMapInfluence")) mat.SetFloat("_HeightMapInfluence", hasHeightMap ? 0.25f : 0f);
+            SetupMacroVariation(mat, 0.30f, 0.07f, 0.18f, 0.10f);
         }
 
         static void SetupMacroVariation(Material mat, float variation, float scale, float directionBreakup, float colorVariation)

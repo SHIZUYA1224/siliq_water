@@ -462,6 +462,35 @@ namespace Siliq.Water.Tests
             Assert.IsTrue(foundDirectionalFlow, "Cyber には細いデータ流の方向波レイヤーが必要");
         }
 
+        [Test]
+        public void IndoorBluePoolPreset_UsesBroadGentleReflectionRecipe()
+        {
+            var settings = WaterMapPresets.Create(10);
+            Assert.LessOrEqual(settings.strength, 0.45f, "室内ブループールは凹凸ではなく広い反射の揺らぎを主役にする");
+            Assert.LessOrEqual(settings.baseRoughness, 0.04f, "室内ブループールは窓反射が乗るようラフネスを低めにする");
+
+            bool foundBroadWave = false;
+            bool foundSubtleCaustics = false;
+            foreach (var layer in settings.layers)
+            {
+                if (layer.type == WaveLayerType.DirectionalWaves &&
+                    layer.scale <= 5 &&
+                    layer.amplitude >= 0.45f &&
+                    layer.sharpness <= 1.2f)
+                {
+                    foundBroadWave = true;
+                }
+
+                if (layer.type != WaveLayerType.VoronoiCaustics) continue;
+                foundSubtleCaustics = true;
+                Assert.LessOrEqual(layer.amplitude, 0.08f, "室内ブループールの光ムラを太いプール網目に戻してはならない");
+                Assert.LessOrEqual(layer.sharpness, 2.2f, "室内ブループールの光ムラは柔らかくする");
+            }
+
+            Assert.IsTrue(foundBroadWave, "室内ブループールには窓反射を崩す広い方向波が必要");
+            Assert.IsTrue(foundSubtleCaustics, "室内ブループールには淡い室内光のムラが必要");
+        }
+
         // ---------------------------------------------------------------
         // ヘルパー
         // ---------------------------------------------------------------

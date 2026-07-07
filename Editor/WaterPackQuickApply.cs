@@ -155,6 +155,46 @@ namespace Siliq.Water.Editor
             macroColorVariation = 0.10f,
         };
 
+        static readonly LookPreset IndoorBluePoolLook = new LookPreset
+        {
+            assetName = "IndoorBluePool",
+            displayName = "室内ブループール",
+            sourceGuid = CalmGuid,
+            sourceLabel = "Calm",
+            motion = new MotionPreset(18f, 0.16f, 0.46f, 0.82f),
+            transparent = true,
+            opacity = 0.38f,
+            shallow = new Color(0.48f, 0.92f, 1f, 1f),
+            deep = new Color(0.02f, 0.22f, 0.52f, 1f),
+            horizon = new Color(0.92f, 0.99f, 1f, 1f),
+            transmission = new Color(0.56f, 0.98f, 1f, 1f),
+            glimmer = new Color(1f, 1f, 0.96f, 1f),
+            normalStrength = 0.46f,
+            tiling1 = 0.78f,
+            tiling2 = 1.55f,
+            alphaFresnel = 0.78f,
+            alphaPower = 1.85f,
+            edgeReflection = 0.82f,
+            transmissionStrength = 0.82f,
+            glimmerIntensity = 0.24f,
+            glimmerSharpness = 16f,
+            glintIntensity = 0.68f,
+            glintPower = 260f,
+            specPower = 300f,
+            specIntensity = 1.50f,
+            fresnelPower = 2.05f,
+            reflStrength = 1f,
+            displacementStrength = 0.025f,
+            displacementScale = 0.42f,
+            displacementSpeed = 0.16f,
+            heightMapInfluence = 0f,
+            smoothness = 0.98f,
+            macroVariation = 0.30f,
+            macroScale = 0.07f,
+            macroDirectionBreakup = 0.18f,
+            macroColorVariation = 0.10f,
+        };
+
         static readonly LookPreset BloodSeaLook = new LookPreset
         {
             assetName = "BloodSea",
@@ -301,10 +341,13 @@ namespace Siliq.Water.Editor
         [MenuItem(LookMenuRoot + "透明プール (Clear Pool)", false, 41)]
         static void ApplyClearPoolLook() => ApplyLook(ClearPoolLook);
 
-        [MenuItem(LookMenuRoot + "血の海 (Blood Sea)", false, 42)]
+        [MenuItem(LookMenuRoot + "室内ブループール (Indoor Blue Pool)", false, 42)]
+        static void ApplyIndoorBluePoolLook() => ApplyLook(IndoorBluePoolLook);
+
+        [MenuItem(LookMenuRoot + "血の海 (Blood Sea)", false, 43)]
         static void ApplyBloodSeaLook() => ApplyLook(BloodSeaLook);
 
-        [MenuItem(LookMenuRoot + "液体金属 (Liquid Metal)", false, 43)]
+        [MenuItem(LookMenuRoot + "液体金属 (Liquid Metal)", false, 44)]
         static void ApplyLiquidMetalLook() => ApplyLook(LiquidMetalLook);
 
         [MenuItem(MenuRoot + "静かな水面 (Calm)", true)]
@@ -324,6 +367,7 @@ namespace Siliq.Water.Editor
         [MenuItem(MobileTransparentMenuRoot + "サイバー (Cyber)", true)]
         [MenuItem(LookMenuRoot + "美しい海 (Clear Sea)", true)]
         [MenuItem(LookMenuRoot + "透明プール (Clear Pool)", true)]
+        [MenuItem(LookMenuRoot + "室内ブループール (Indoor Blue Pool)", true)]
         [MenuItem(LookMenuRoot + "血の海 (Blood Sea)", true)]
         [MenuItem(LookMenuRoot + "液体金属 (Liquid Metal)", true)]
         static bool ValidateSelection()
