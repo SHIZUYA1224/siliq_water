@@ -370,7 +370,7 @@ namespace Siliq.Water.Editor
                     settings.materialOpacity = 0.46f;
                     materialShaderIndex = BestSiliqMaterialShaderIndex();
                     previewMapIndex = 0;
-                    SetExportMaps(WaterMapType.Normal, WaterMapType.Roughness, WaterMapType.Flow, WaterMapType.Dudv, WaterMapType.Caustics);
+                    SetExportMaps(WaterMapType.Normal, WaterMapType.Height, WaterMapType.Roughness, WaterMapType.Flow, WaterMapType.Dudv, WaterMapType.Caustics);
                     break;
 
                 case GoalPreset.ClearPool:
@@ -385,7 +385,7 @@ namespace Siliq.Water.Editor
                     settings.materialOpacity = 0.34f;
                     materialShaderIndex = BestSiliqMaterialShaderIndex();
                     previewMapIndex = 0;
-                    SetExportMaps(WaterMapType.Normal, WaterMapType.Roughness, WaterMapType.Caustics);
+                    SetExportMaps(WaterMapType.Normal, WaterMapType.Height, WaterMapType.Roughness, WaterMapType.Caustics);
                     break;
 
                 case GoalPreset.BloodSea:
@@ -400,7 +400,7 @@ namespace Siliq.Water.Editor
                     settings.materialOpacity = 0.68f;
                     materialShaderIndex = BestSiliqMaterialShaderIndex();
                     previewMapIndex = 0;
-                    SetExportMaps(WaterMapType.Normal, WaterMapType.Roughness, WaterMapType.Flow, WaterMapType.Dudv);
+                    SetExportMaps(WaterMapType.Normal, WaterMapType.Height, WaterMapType.Roughness, WaterMapType.Flow, WaterMapType.Dudv);
                     break;
 
                 case GoalPreset.LiquidMetal:
@@ -415,7 +415,7 @@ namespace Siliq.Water.Editor
                     settings.materialOpacity = 1f;
                     materialShaderIndex = BestSiliqMaterialShaderIndex();
                     previewMapIndex = 0;
-                    SetExportMaps(WaterMapType.Normal, WaterMapType.Roughness, WaterMapType.Flow);
+                    SetExportMaps(WaterMapType.Normal, WaterMapType.Height, WaterMapType.Roughness, WaterMapType.Flow);
                     break;
             }
 
@@ -1284,6 +1284,21 @@ namespace Siliq.Water.Editor
                     if (normal != null)
                     {
                         mat.SetTexture("_NormalMap", normal);
+                    }
+                    if (height != null && mat.HasProperty("_HeightMap"))
+                    {
+                        mat.SetTexture("_HeightMap", height);
+                        if (mat.HasProperty("_HeightMapInfluence")) mat.SetFloat("_HeightMapInfluence", 0.45f);
+                        if (mat.HasProperty("_DisplacementStrength")) mat.SetFloat("_DisplacementStrength", settings.createTransparentMaterial ? 0.04f : 0.025f);
+                        if (mat.HasProperty("_DisplacementScale")) mat.SetFloat("_DisplacementScale", 0.75f);
+                        if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.28f);
+                    }
+                    else
+                    {
+                        if (mat.HasProperty("_HeightMapInfluence")) mat.SetFloat("_HeightMapInfluence", 0f);
+                        if (mat.HasProperty("_DisplacementStrength")) mat.SetFloat("_DisplacementStrength", settings.createTransparentMaterial ? 0.035f : 0.018f);
+                        if (mat.HasProperty("_DisplacementScale")) mat.SetFloat("_DisplacementScale", 0.75f);
+                        if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.28f);
                     }
                     SetupMacroVariation(mat, 0.42f, 0.10f, 0.36f, 0.18f);
                     SetupDarkSceneResponse(mat);

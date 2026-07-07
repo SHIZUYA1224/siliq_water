@@ -57,6 +57,10 @@ namespace Siliq.Water.Editor
             public float specIntensity;
             public float fresnelPower;
             public float reflStrength;
+            public float displacementStrength;
+            public float displacementScale;
+            public float displacementSpeed;
+            public float heightMapInfluence;
             public float smoothness;
             public float macroVariation;
             public float macroScale;
@@ -100,6 +104,10 @@ namespace Siliq.Water.Editor
             specIntensity = 1.35f,
             fresnelPower = 2.45f,
             reflStrength = 1f,
+            displacementStrength = 0.055f,
+            displacementScale = 0.55f,
+            displacementSpeed = 0.28f,
+            heightMapInfluence = 0f,
             smoothness = 0.96f,
             macroVariation = 0.46f,
             macroScale = 0.10f,
@@ -136,6 +144,10 @@ namespace Siliq.Water.Editor
             specIntensity = 1.05f,
             fresnelPower = 2.65f,
             reflStrength = 0.92f,
+            displacementStrength = 0.018f,
+            displacementScale = 1.10f,
+            displacementSpeed = 0.18f,
+            heightMapInfluence = 0f,
             smoothness = 0.94f,
             macroVariation = 0.24f,
             macroScale = 0.08f,
@@ -172,6 +184,10 @@ namespace Siliq.Water.Editor
             specIntensity = 0.52f,
             fresnelPower = 4.2f,
             reflStrength = 0.35f,
+            displacementStrength = 0.035f,
+            displacementScale = 0.65f,
+            displacementSpeed = 0.18f,
+            heightMapInfluence = 0f,
             smoothness = 0.86f,
             macroVariation = 0.52f,
             macroScale = 0.09f,
@@ -208,6 +224,10 @@ namespace Siliq.Water.Editor
             specIntensity = 1.65f,
             fresnelPower = 1.6f,
             reflStrength = 1f,
+            displacementStrength = 0.025f,
+            displacementScale = 0.85f,
+            displacementSpeed = 0.22f,
+            heightMapInfluence = 0f,
             smoothness = 0.99f,
             macroVariation = 0.40f,
             macroScale = 0.12f,
@@ -823,6 +843,10 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_ReflStrength")) mat.SetFloat("_ReflStrength", 1f);
             if (mat.HasProperty("_SpecIntensity")) mat.SetFloat("_SpecIntensity", 1.35f);
             if (mat.HasProperty("_SpecPower")) mat.SetFloat("_SpecPower", 220f);
+            if (mat.HasProperty("_DisplacementStrength")) mat.SetFloat("_DisplacementStrength", 0.04f);
+            if (mat.HasProperty("_DisplacementScale")) mat.SetFloat("_DisplacementScale", 0.70f);
+            if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.28f);
+            if (mat.HasProperty("_HeightMapInfluence")) mat.SetFloat("_HeightMapInfluence", 0f);
             if (mat.HasProperty("_SrcBlend")) mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
             if (mat.HasProperty("_DstBlend")) mat.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
             if (mat.HasProperty("_ZWrite")) mat.SetFloat("_ZWrite", 0f);
@@ -875,6 +899,10 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_NormalStrength")) mat.SetFloat("_NormalStrength", 0.55f);
             if (mat.HasProperty("_Tiling1")) mat.SetFloat("_Tiling1", 1.15f);
             if (mat.HasProperty("_Tiling2")) mat.SetFloat("_Tiling2", 2.1f);
+            if (mat.HasProperty("_DisplacementStrength")) mat.SetFloat("_DisplacementStrength", 0.022f);
+            if (mat.HasProperty("_DisplacementScale")) mat.SetFloat("_DisplacementScale", 0.90f);
+            if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.18f);
+            if (mat.HasProperty("_HeightMapInfluence")) mat.SetFloat("_HeightMapInfluence", 0f);
             mat.EnableKeyword("_USE_RIPPLES");
         }
 
@@ -959,6 +987,10 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_SpecIntensity")) mat.SetFloat("_SpecIntensity", preset.specIntensity);
             if (mat.HasProperty("_FresnelPower")) mat.SetFloat("_FresnelPower", preset.fresnelPower);
             if (mat.HasProperty("_ReflStrength")) mat.SetFloat("_ReflStrength", preset.reflStrength);
+            if (mat.HasProperty("_DisplacementStrength")) mat.SetFloat("_DisplacementStrength", preset.displacementStrength);
+            if (mat.HasProperty("_DisplacementScale")) mat.SetFloat("_DisplacementScale", preset.displacementScale);
+            if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", preset.displacementSpeed);
+            if (mat.HasProperty("_HeightMapInfluence")) mat.SetFloat("_HeightMapInfluence", preset.heightMapInfluence);
             if (mat.HasProperty("_Smoothness")) mat.SetFloat("_Smoothness", preset.smoothness);
 
             if (mat.HasProperty("_Scroll1"))

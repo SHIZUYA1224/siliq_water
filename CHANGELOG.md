@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.3.24] - 2026-07-07
+
+### 改善: 水面の実高さを追加し、板っぽさを軽減
+- `Siliq/Water Mobile (Quest)` に `_DisplacementStrength` / `_DisplacementScale` / `_DisplacementSpeed` / `_HeightMapInfluence` / `_HeightMap` を追加
+- ノーマルだけでなく頂点を上下させる実ジオメトリ変位を追加し、Plane 上でも水面が起伏するようにした
+- `WaterSurfaceAnimator` と専用 Inspector に高さ / 波長 / 高さ速度 / ハイトマップ影響を追加
+- 水面マップスタジオの目的別プリセットで Height map も書き出し対象にし、Siliq material へ自動割り当てするようにした
+- 用途別マテリアルにも海・プール・血の海・液体金属ごとの高さ初期値を追加
+
 ## [2.3.23] - 2026-07-06
 
 ### 改善: 水の色・透明感・反射を Inspector から直接調整可能に

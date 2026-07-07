@@ -16,6 +16,10 @@ namespace Siliq.Water.Editor
         SerializedProperty speed;
         SerializedProperty strength;
         SerializedProperty tiling;
+        SerializedProperty displacementStrength;
+        SerializedProperty displacementScale;
+        SerializedProperty displacementSpeed;
+        SerializedProperty heightMapInfluence;
         SerializedProperty shallowColor;
         SerializedProperty deepColor;
         SerializedProperty reflectionColor;
@@ -38,6 +42,10 @@ namespace Siliq.Water.Editor
             speed = serializedObject.FindProperty("speed");
             strength = serializedObject.FindProperty("strength");
             tiling = serializedObject.FindProperty("tiling");
+            displacementStrength = serializedObject.FindProperty("displacementStrength");
+            displacementScale = serializedObject.FindProperty("displacementScale");
+            displacementSpeed = serializedObject.FindProperty("displacementSpeed");
+            heightMapInfluence = serializedObject.FindProperty("heightMapInfluence");
             shallowColor = serializedObject.FindProperty("shallowColor");
             deepColor = serializedObject.FindProperty("deepColor");
             reflectionColor = serializedObject.FindProperty("reflectionColor");
@@ -58,6 +66,7 @@ namespace Siliq.Water.Editor
             EditorGUI.BeginChangeCheck();
             DrawRendererSection();
             DrawMotionSection();
+            DrawHeightSection();
             DrawColorSection();
             DrawOpticalSection();
             bool changed = EditorGUI.EndChangeCheck();
@@ -115,6 +124,16 @@ namespace Siliq.Water.Editor
             EditorGUILayout.PropertyField(reflectionColor, new GUIContent("反射色"));
             EditorGUILayout.PropertyField(transmissionColor, new GUIContent("透過光"));
             EditorGUILayout.PropertyField(sparkleColor, new GUIContent("きらめき色"));
+            EditorGUILayout.Space(4f);
+        }
+
+        void DrawHeightSection()
+        {
+            EditorGUILayout.LabelField("高さ", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(displacementStrength, new GUIContent("高さ"));
+            EditorGUILayout.PropertyField(displacementScale, new GUIContent("高さの波長"));
+            EditorGUILayout.PropertyField(displacementSpeed, new GUIContent("高さの速度"));
+            EditorGUILayout.PropertyField(heightMapInfluence, new GUIContent("ハイトマップの影響"));
             EditorGUILayout.Space(4f);
         }
 

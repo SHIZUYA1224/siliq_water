@@ -102,8 +102,11 @@ Unity エディタ上(またはランタイム)で、水面・流体表現向け
 | **方向 (度)** | 波が流れる向き。0=右、90=上、180=左、270=下 |
 | **速さ** | 流れる速さ。0 で静止、0.3 が標準、0.6 が速め |
 | **Edit Mode Preview Fps** | 編集中プレビューの更新回数。低いほど軽い |
-| **強さ** | 凹凸の強さ (シェーダーに `_BumpScale` がある場合) |
+| **強さ** | 凹凸の強さ (シェーダーに `_BumpScale` / `_NormalStrength` がある場合) |
 | **模様の大きさ** | 1 が元のサイズ、大きいほど模様が細かく見える |
+| **高さ** | Siliq 水シェーダーで水面メッシュを実際に上下させる量 |
+| **高さの波長 / 速度** | 実高さのうねりの大きさと動き |
+| **ハイトマップの影響** | 書き出した Height map を頂点変位に使う割合 |
 | **明るい水色 / 深い水色** | 水面の基本色。Standard / URP Lit では明るい水色がベースカラーになる |
 | **反射色** | 空や環境が映り込む色 |
 | **透過光** | 透明水の内側から出る色。水の厚みと透明感を作る |
@@ -113,10 +116,12 @@ Unity エディタ上(またはランタイム)で、水面・流体表現向け
 
 **Play ボタンを押さなくても、値を変えるとシーンビュー上でその場に反映**されます。
 Standard / URP Lit / VRChat Mobile 系では `_BumpMap` の UV、`_BumpScale`、色 alpha を、
-同梱の Siliq 水シェーダーでは `_Scroll1` / `_Scroll2` / `_NormalStrength` / `_Tiling*` を
+同梱の Siliq 水シェーダーでは `_Scroll1` / `_Scroll2` / `_NormalStrength` / `_Tiling*` /
+`_DisplacementStrength` / `_DisplacementScale` / `_DisplacementSpeed` を
 `_ShallowColor` / `_DeepColor` / `_HorizonColor` / `_TransmissionColor` /
 `_Opacity` / `_EdgeReflection` / `_ReflStrength` などと一緒に
 `MaterialPropertyBlock` 経由で動かすため、共有マテリアルを汚さずに調整できます。
+実際の高さは頂点変位なので、1 枚ポリゴンの Quad では見えにくいです。Unity 標準の Plane や細分化された水面メッシュを使ってください。
 PC の発熱を避けるため、編集モードの連続プレビューは**選択中の水面だけ**最大 10fps で更新されます。
 重い場合は `Animate In Edit Mode` を OFF にするか、`Edit Mode Preview Fps` を下げてください。
 右クリック適用時は、静止して見えない問題を避けるため水の種類ごとに少し強めの初期値が入ります。
@@ -237,6 +242,7 @@ Built-in / VRChat / Quest / iOS 向けの通常導入ではコンパイル対象
 切り替えて iOS でも透ける水面にできます。
 
 - ノーマルマップ 1 枚を 2 回スクロールサンプリング
+- `_DisplacementStrength` による実頂点変位。ハイトマップがある場合は `_HeightMapInfluence` で混ぜられます
 - 深い色 ⇔ 浅い色 + フレネル + 透過光 + 細い光の揺らぎ + スペキュラ + 任意のキューブマップ反射
 - `_ReflStrength` はキューブマップ未使用時も反射量として効くため、反射が足りない時に直接上げられます
 - `_MinLighting` / `_DarkReflectionDamping` / `_DarkDetailDamping` により、暗い部屋では反射ときらめきを減衰

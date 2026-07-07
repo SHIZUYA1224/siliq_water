@@ -48,6 +48,19 @@ namespace Siliq.Water
         [Tooltip("模様の大きさ。1 が元のサイズ、大きいほど模様が細かく (タイリング数が増え) 見える。")]
         [Range(0.1f, 8f)] public float tiling = 1f;
 
+        [Header("高さ")]
+        [Tooltip("水面メッシュを実際に上下させる量。Plane のように頂点があるメッシュで有効です。")]
+        [Range(0f, 0.5f)] public float displacementStrength = 0.04f;
+
+        [Tooltip("高さの波長。小さいほど大きなうねり、大きいほど細かい起伏になります。")]
+        [Range(0.05f, 4f)] public float displacementScale = 0.75f;
+
+        [Tooltip("高さ変位の動く速さ。")]
+        [Range(0f, 2f)] public float displacementSpeed = 0.28f;
+
+        [Tooltip("書き出したハイトマップを高さに使う割合。0 なら手続き的なうねりのみ、1 ならハイトマップ中心。")]
+        [Range(0f, 1f)] public float heightMapInfluence = 0f;
+
         [Header("色")]
         [Tooltip("水面の明るい部分の色。Standard / URP Lit ではこの色がベースカラーになります。")]
         public Color shallowColor = new Color(0.34f, 0.90f, 1f, 1f);
@@ -93,6 +106,10 @@ namespace Siliq.Water
         int normalStrengthPropertyId;
         int tiling1PropertyId;
         int tiling2PropertyId;
+        int displacementStrengthPropertyId;
+        int displacementScalePropertyId;
+        int displacementSpeedPropertyId;
+        int heightMapInfluencePropertyId;
         int scroll1PropertyId;
         int scroll2PropertyId;
         int mainTexPropertyId;
@@ -171,6 +188,10 @@ namespace Siliq.Water
             normalStrengthPropertyId = Shader.PropertyToID("_NormalStrength");
             tiling1PropertyId = Shader.PropertyToID("_Tiling1");
             tiling2PropertyId = Shader.PropertyToID("_Tiling2");
+            displacementStrengthPropertyId = Shader.PropertyToID("_DisplacementStrength");
+            displacementScalePropertyId = Shader.PropertyToID("_DisplacementScale");
+            displacementSpeedPropertyId = Shader.PropertyToID("_DisplacementSpeed");
+            heightMapInfluencePropertyId = Shader.PropertyToID("_HeightMapInfluence");
             scroll1PropertyId = Shader.PropertyToID("_Scroll1");
             scroll2PropertyId = Shader.PropertyToID("_Scroll2");
             mainTexPropertyId = Shader.PropertyToID("_MainTex");
@@ -247,6 +268,10 @@ namespace Siliq.Water
             if (texturePropertyName == null) texturePropertyName = string.Empty;
             speed = Mathf.Clamp(speed, 0f, MaxSurfaceSpeed);
             editModePreviewFps = Mathf.Clamp(editModePreviewFps, 1, 30);
+            displacementStrength = Mathf.Clamp(displacementStrength, 0f, 0.5f);
+            displacementScale = Mathf.Clamp(displacementScale, 0.05f, 4f);
+            displacementSpeed = Mathf.Clamp(displacementSpeed, 0f, 2f);
+            heightMapInfluence = Mathf.Clamp01(heightMapInfluence);
             opacity = Mathf.Clamp(opacity, 0.05f, 1f);
             edgeReflection = Mathf.Clamp01(edgeReflection);
             reflectionStrength = Mathf.Clamp01(reflectionStrength);
@@ -318,6 +343,22 @@ namespace Siliq.Water
             if (targetMaterial.HasProperty(reflStrengthPropertyId))
             {
                 reflectionStrength = Mathf.Clamp01(targetMaterial.GetFloat(reflStrengthPropertyId));
+            }
+            if (targetMaterial.HasProperty(displacementStrengthPropertyId))
+            {
+                displacementStrength = Mathf.Clamp(targetMaterial.GetFloat(displacementStrengthPropertyId), 0f, 0.5f);
+            }
+            if (targetMaterial.HasProperty(displacementScalePropertyId))
+            {
+                displacementScale = Mathf.Clamp(targetMaterial.GetFloat(displacementScalePropertyId), 0.05f, 4f);
+            }
+            if (targetMaterial.HasProperty(displacementSpeedPropertyId))
+            {
+                displacementSpeed = Mathf.Clamp(targetMaterial.GetFloat(displacementSpeedPropertyId), 0f, 2f);
+            }
+            if (targetMaterial.HasProperty(heightMapInfluencePropertyId))
+            {
+                heightMapInfluence = Mathf.Clamp01(targetMaterial.GetFloat(heightMapInfluencePropertyId));
             }
             if (targetMaterial.HasProperty(transmissionStrengthPropertyId))
             {
@@ -472,6 +513,22 @@ namespace Siliq.Water
             if (targetMaterial.HasProperty(normalStrengthPropertyId))
             {
                 propertyBlock.SetFloat(normalStrengthPropertyId, strength);
+            }
+            if (targetMaterial.HasProperty(displacementStrengthPropertyId))
+            {
+                propertyBlock.SetFloat(displacementStrengthPropertyId, Mathf.Clamp(displacementStrength, 0f, 0.5f));
+            }
+            if (targetMaterial.HasProperty(displacementScalePropertyId))
+            {
+                propertyBlock.SetFloat(displacementScalePropertyId, Mathf.Clamp(displacementScale, 0.05f, 4f));
+            }
+            if (targetMaterial.HasProperty(displacementSpeedPropertyId))
+            {
+                propertyBlock.SetFloat(displacementSpeedPropertyId, Mathf.Clamp(displacementSpeed, 0f, 2f));
+            }
+            if (targetMaterial.HasProperty(heightMapInfluencePropertyId))
+            {
+                propertyBlock.SetFloat(heightMapInfluencePropertyId, Mathf.Clamp01(heightMapInfluence));
             }
 
             ApplyLookControls();

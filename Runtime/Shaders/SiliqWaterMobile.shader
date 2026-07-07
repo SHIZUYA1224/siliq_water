@@ -25,6 +25,11 @@ Shader "Siliq/Water Mobile (Quest)"
         _GlintIntensity ("きらめきの強さ", Range(0, 2)) = 0
         _GlintPower ("きらめきの鋭さ", Range(16, 512)) = 180
         [NoScaleOffset] _NormalMap ("水面ノーマルマップ", 2D) = "bump" {}
+        [NoScaleOffset] _HeightMap ("水面ハイトマップ", 2D) = "gray" {}
+        _DisplacementStrength ("実際の高さ", Range(0, 0.5)) = 0
+        _DisplacementScale ("高さの波長", Range(0.05, 4)) = 0.75
+        _DisplacementSpeed ("高さの速度", Range(0, 2)) = 0.28
+        _HeightMapInfluence ("ハイトマップの影響", Range(0, 1)) = 0
         _NormalStrength ("ノーマル強度", Range(0, 2)) = 1
         _Tiling1 ("レイヤー1 タイリング", Float) = 1
         _Tiling2 ("レイヤー2 タイリング", Float) = 2.7
@@ -67,6 +72,7 @@ Shader "Siliq/Water Mobile (Quest)"
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma target 3.0
             #pragma shader_feature_local USE_REFLECTION_CUBE
             #pragma shader_feature_local _USE_RIPPLES
             #pragma multi_compile_fog
@@ -75,6 +81,7 @@ Shader "Siliq/Water Mobile (Quest)"
             #include "Lighting.cginc"
 
             sampler2D _NormalMap;
+            sampler2D _HeightMap;
             half4 _ShallowColor;
             half4 _DeepColor;
             half4 _HorizonColor;
@@ -92,6 +99,10 @@ Shader "Siliq/Water Mobile (Quest)"
             half _GlimmerSharpness;
             half _GlintIntensity;
             half _GlintPower;
+            half _DisplacementStrength;
+            half _DisplacementScale;
+            half _DisplacementSpeed;
+            half _HeightMapInfluence;
             half _NormalStrength;
             float _Tiling1;
             float _Tiling2;
@@ -122,6 +133,19 @@ Shader "Siliq/Water Mobile (Quest)"
                 half s = sin(angle);
                 half c = cos(angle);
                 return float2(v.x * c - v.y * s, v.x * s + v.y * c);
+            }
+
+            half SiliqVertexHeight(float3 localPos, float2 uv)
+            {
+                float t = _Time.y * _DisplacementSpeed;
+                float scale = max(_DisplacementScale, 0.001h);
+                float2 p = localPos.xz * scale;
+                half waveA = sin(dot(p, float2(1.37, 0.41)) + t * 1.70);
+                half waveB = sin(dot(p, float2(-0.52, 1.19)) - t * 1.13);
+                half waveC = sin(dot(p, float2(0.31, 0.73)) + t * 0.61);
+                half procedural = waveA * 0.52h + waveB * 0.33h + waveC * 0.15h;
+                half heightMap = tex2Dlod(_HeightMap, float4(uv * scale + t * 0.035, 0, 0)).r * 2.0h - 1.0h;
+                return lerp(procedural, heightMap, _HeightMapInfluence) * _DisplacementStrength;
             }
 
             #ifdef _USE_RIPPLES
@@ -195,6 +219,11 @@ Shader "Siliq/Water Mobile (Quest)"
                 UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_INITIALIZE_OUTPUT(v2f, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+
+                if (_DisplacementStrength > 0.0001h)
+                {
+                    v.vertex.xyz += v.normal * SiliqVertexHeight(v.vertex.xyz, v.uv);
+                }
 
                 o.pos = UnityObjectToClipPos(v.vertex);
                 o.uv = v.uv;

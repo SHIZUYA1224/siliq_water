@@ -299,6 +299,10 @@ namespace Siliq.Water.Tests
                 animator.transmissionStrength = 0.58f;
                 animator.sparkle = 0.31f;
                 animator.highlightStrength = 1.42f;
+                animator.displacementStrength = 0.07f;
+                animator.displacementScale = 0.66f;
+                animator.displacementSpeed = 0.44f;
+                animator.heightMapInfluence = 0.25f;
                 animator.ApplyImmediate(0f);
 
                 var block = new MaterialPropertyBlock();
@@ -316,6 +320,10 @@ namespace Siliq.Water.Tests
                 Assert.AreEqual(0.31f, block.GetFloat("_GlimmerIntensity"), 1e-5f);
                 Assert.AreEqual(0.62f, block.GetFloat("_GlintIntensity"), 1e-5f);
                 Assert.AreEqual(1.42f, block.GetFloat("_SpecIntensity"), 1e-5f);
+                Assert.AreEqual(0.07f, block.GetFloat("_DisplacementStrength"), 1e-5f);
+                Assert.AreEqual(0.66f, block.GetFloat("_DisplacementScale"), 1e-5f);
+                Assert.AreEqual(0.44f, block.GetFloat("_DisplacementSpeed"), 1e-5f);
+                Assert.AreEqual(0.25f, block.GetFloat("_HeightMapInfluence"), 1e-5f);
                 Assert.AreEqual(1f, mat.GetFloat("_Opacity"), 1e-5f, "共有マテリアルの _Opacity を直接変更してはならない");
             }
             finally
@@ -381,6 +389,11 @@ namespace Siliq.Water.Tests
                 Assert.IsTrue(mat.HasProperty("_MinLighting"));
                 Assert.IsTrue(mat.HasProperty("_DarkReflectionDamping"));
                 Assert.IsTrue(mat.HasProperty("_DarkDetailDamping"));
+                Assert.IsTrue(mat.HasProperty("_HeightMap"));
+                Assert.IsTrue(mat.HasProperty("_DisplacementStrength"));
+                Assert.IsTrue(mat.HasProperty("_DisplacementScale"));
+                Assert.IsTrue(mat.HasProperty("_DisplacementSpeed"));
+                Assert.IsTrue(mat.HasProperty("_HeightMapInfluence"));
             }
             finally
             {
