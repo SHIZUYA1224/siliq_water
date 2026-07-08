@@ -1,3 +1,5 @@
+using System.IO;
+using System.Reflection;
 using NUnit.Framework;
 using Siliq.Water.Editor;
 using UnityEditor;
@@ -689,6 +691,48 @@ namespace Siliq.Water.Tests
             {
                 if (go != null) Object.DestroyImmediate(go);
             }
+        }
+
+        [Test]
+        public void BeginnerGuide_ProvidesMenuEntryAndActions()
+        {
+            var method = typeof(WaterBeginnerGuideWindow).GetMethod(
+                "Open",
+                BindingFlags.Public | BindingFlags.Static);
+            Assert.IsNotNull(method, "はじめてガイドを開く entry point が見つからない");
+
+            bool hasMenu = false;
+            foreach (var attribute in method.GetCustomAttributes(typeof(MenuItem), false))
+            {
+                var menuItem = attribute as MenuItem;
+                if (menuItem != null && menuItem.menuItem == WaterBeginnerGuideWindow.MenuPath)
+                {
+                    hasMenu = true;
+                    break;
+                }
+            }
+
+            Assert.IsTrue(hasMenu, "Tools > Siliq Water > はじめてガイド menu が登録されていない");
+            Assert.AreEqual("フラッグシップ水面を作成", WaterBeginnerGuideWindow.CreateFlagshipActionLabel);
+            Assert.AreEqual("選択中の水面を診断して自動修復", WaterBeginnerGuideWindow.RepairSelectionActionLabel);
+        }
+
+        [Test]
+        public void PackageRoot_IncludesPackageJsonMeta()
+        {
+            const string packageJsonGuid = "0f4d17e00f5a4d638fbfdc4cb7483e2f";
+            string packageJsonPath = AssetDatabase.GUIDToAssetPath(packageJsonGuid);
+            Assert.IsNotEmpty(packageJsonPath, "package.json.meta の GUID が解決できない");
+
+            string metaPath = packageJsonPath + ".meta";
+            var packageInfo = UnityEditor.PackageManager.PackageInfo.FindForAssetPath(packageJsonPath);
+            if (packageInfo != null && !string.IsNullOrEmpty(packageInfo.resolvedPath))
+            {
+                metaPath = Path.Combine(packageInfo.resolvedPath, "package.json.meta");
+            }
+
+            Assert.IsTrue(File.Exists(metaPath), "`package.json has no meta file` 警告を防ぐ package.json.meta がない");
+            StringAssert.Contains("TextScriptImporter", File.ReadAllText(metaPath));
         }
 
         // ---------------------------------------------------------------
