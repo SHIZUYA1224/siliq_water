@@ -123,7 +123,7 @@ namespace Siliq.Water.Editor
             reflectionPatternScale = 1.05f,
             displacementStrength = 0.055f,
             displacementScale = 0.55f,
-            displacementSpeed = 0.0013f,
+            displacementSpeed = 0.0008f,
             heightMapInfluence = 0f,
             smoothness = 0.96f,
             macroVariation = 0.46f,
@@ -133,7 +133,7 @@ namespace Siliq.Water.Editor
             causticsGuid = CrystalCausticsGuid,
             causticsStrength = 0.28f,
             causticsScale = 1.9f,
-            causticsSpeed = 0.00027f,
+            causticsSpeed = 0.00016f,
             causticsFocus = 1.35f,
             causticsPrismStrength = 0.08f,
             causticsScatterStrength = 0.28f,
@@ -175,7 +175,7 @@ namespace Siliq.Water.Editor
             reflectionPatternScale = 0.85f,
             displacementStrength = 0.018f,
             displacementScale = 1.10f,
-            displacementSpeed = 0.0009f,
+            displacementSpeed = 0.0006f,
             heightMapInfluence = 0f,
             smoothness = 0.94f,
             macroVariation = 0.24f,
@@ -185,7 +185,7 @@ namespace Siliq.Water.Editor
             causticsGuid = CrystalCausticsGuid,
             causticsStrength = 0.46f,
             causticsScale = 2.4f,
-            causticsSpeed = 0.00022f,
+            causticsSpeed = 0.00014f,
             causticsFocus = 1.55f,
             causticsPrismStrength = 0.12f,
             causticsScatterStrength = 0.36f,
@@ -227,7 +227,7 @@ namespace Siliq.Water.Editor
             reflectionPatternScale = 0.78f,
             displacementStrength = 0.025f,
             displacementScale = 0.42f,
-            displacementSpeed = 0.0009f,
+            displacementSpeed = 0.0006f,
             heightMapInfluence = 0f,
             smoothness = 0.98f,
             macroVariation = 0.30f,
@@ -237,7 +237,7 @@ namespace Siliq.Water.Editor
             causticsGuid = CrystalCausticsGuid,
             causticsStrength = 0.58f,
             causticsScale = 1.7f,
-            causticsSpeed = 0.00022f,
+            causticsSpeed = 0.00014f,
             causticsFocus = 1.45f,
             causticsPrismStrength = 0.14f,
             causticsScatterStrength = 0.42f,
@@ -280,7 +280,7 @@ namespace Siliq.Water.Editor
             reflectionPatternScale = 1.15f,
             displacementStrength = 0.012f,
             displacementScale = 0.85f,
-            displacementSpeed = 0.0009f,
+            displacementSpeed = 0.0006f,
             heightMapInfluence = 0f,
             smoothness = 0.99f,
             macroVariation = 0.22f,
@@ -290,7 +290,7 @@ namespace Siliq.Water.Editor
             causticsGuid = CrystalCausticsGuid,
             causticsStrength = 0.64f,
             causticsScale = 2.1f,
-            causticsSpeed = 0.00022f,
+            causticsSpeed = 0.00014f,
             causticsFocus = 1.75f,
             causticsPrismStrength = 0.16f,
             causticsScatterStrength = 0.48f,
@@ -306,7 +306,7 @@ namespace Siliq.Water.Editor
             sourceLabel = "FlagshipCrystal",
             normalGuid = CrystalLagoonNormalGuid,
             heightGuid = CrystalLagoonHeightGuid,
-            motion = new MotionPreset(20f, 0.00022f, 0.42f, 0.92f),
+            motion = new MotionPreset(20f, 0.00013f, 0.42f, 0.92f),
             transparent = true,
             opacity = 0.40f,
             shallow = new Color(0.56f, 1f, 0.98f, 1f),
@@ -334,7 +334,7 @@ namespace Siliq.Water.Editor
             reflectionPatternScale = 0.92f,
             displacementStrength = 0.006f,
             displacementScale = 0.95f,
-            displacementSpeed = 0.0007f,
+            displacementSpeed = 0.00045f,
             heightMapInfluence = 0f,
             smoothness = 0.995f,
             macroVariation = 0.18f,
@@ -344,7 +344,7 @@ namespace Siliq.Water.Editor
             causticsGuid = CrystalLagoonCausticsGuid,
             causticsStrength = 0.72f,
             causticsScale = 2.25f,
-            causticsSpeed = 0.00016f,
+            causticsSpeed = 0.00010f,
             causticsFocus = 2.0f,
             causticsPrismStrength = 0.18f,
             causticsScatterStrength = 0.58f,
@@ -360,7 +360,7 @@ namespace Siliq.Water.Editor
             sourceLabel = "FlagshipCrystal",
             normalGuid = CrystalLagoonHeroNormalGuid,
             heightGuid = CrystalLagoonHeroHeightGuid,
-            motion = new MotionPreset(20f, 0.00016f, 0.36f, 0.82f),
+            motion = new MotionPreset(20f, 0.00010f, 0.36f, 0.82f),
             transparent = true,
             opacity = 0.34f,
             shallow = new Color(0.68f, 1f, 0.99f, 1f),
@@ -388,7 +388,7 @@ namespace Siliq.Water.Editor
             reflectionPatternScale = 0.82f,
             displacementStrength = 0.004f,
             displacementScale = 0.90f,
-            displacementSpeed = 0.0007f,
+            displacementSpeed = 0.00045f,
             heightMapInfluence = 0f,
             smoothness = 0.995f,
             macroVariation = 0.16f,
@@ -398,7 +398,7 @@ namespace Siliq.Water.Editor
             causticsGuid = CrystalLagoonHeroCausticsGuid,
             causticsStrength = 0.84f,
             causticsScale = 2.1f,
-            causticsSpeed = 0.00016f,
+            causticsSpeed = 0.00010f,
             causticsFocus = 2.4f,
             causticsPrismStrength = 0.24f,
             causticsScatterStrength = 0.74f,
@@ -412,7 +412,7 @@ namespace Siliq.Water.Editor
             displayName = "血の海",
             sourceGuid = StreamGuid,
             sourceLabel = "Stream",
-            motion = new MotionPreset(6f, 0.00035f, 0.82f, 1.18f),
+            motion = new MotionPreset(6f, 0.00022f, 0.82f, 1.18f),
             transparent = true,
             opacity = 0.68f,
             shallow = new Color(0.48f, 0.02f, 0.025f, 1f),
@@ -440,7 +440,7 @@ namespace Siliq.Water.Editor
             reflectionPatternScale = 1.2f,
             displacementStrength = 0.035f,
             displacementScale = 0.65f,
-            displacementSpeed = 0.0011f,
+            displacementSpeed = 0.0007f,
             heightMapInfluence = 0f,
             smoothness = 0.86f,
             macroVariation = 0.52f,
@@ -450,7 +450,7 @@ namespace Siliq.Water.Editor
             causticsGuid = CrystalCausticsGuid,
             causticsStrength = 0.06f,
             causticsScale = 1.4f,
-            causticsSpeed = 0.00018f,
+            causticsSpeed = 0.00012f,
             causticsFocus = 1.1f,
             causticsPrismStrength = 0.02f,
             causticsScatterStrength = 0.04f,
@@ -464,7 +464,7 @@ namespace Siliq.Water.Editor
             displayName = "液体金属",
             sourceGuid = CyberGuid,
             sourceLabel = "Cyber",
-            motion = new MotionPreset(18f, 0.00040f, 0.72f, 1.38f),
+            motion = new MotionPreset(18f, 0.00025f, 0.72f, 1.38f),
             transparent = false,
             opacity = 1f,
             shallow = new Color(0.86f, 0.88f, 0.90f, 1f),
@@ -492,7 +492,7 @@ namespace Siliq.Water.Editor
             reflectionPatternScale = 1.4f,
             displacementStrength = 0.025f,
             displacementScale = 0.85f,
-            displacementSpeed = 0.0011f,
+            displacementSpeed = 0.0007f,
             heightMapInfluence = 0f,
             smoothness = 0.99f,
             macroVariation = 0.40f,
@@ -1170,7 +1170,7 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_SpecPower")) mat.SetFloat("_SpecPower", 220f);
             if (mat.HasProperty("_DisplacementStrength")) mat.SetFloat("_DisplacementStrength", 0.04f);
             if (mat.HasProperty("_DisplacementScale")) mat.SetFloat("_DisplacementScale", 0.70f);
-            if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.0009f);
+            if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.0006f);
             if (mat.HasProperty("_HeightMapInfluence")) mat.SetFloat("_HeightMapInfluence", 0f);
             if (mat.HasProperty("_CausticsMap"))
             {
@@ -1179,7 +1179,7 @@ namespace Siliq.Water.Editor
             }
             if (mat.HasProperty("_CausticsStrength")) mat.SetFloat("_CausticsStrength", 0.30f);
             if (mat.HasProperty("_CausticsScale")) mat.SetFloat("_CausticsScale", 1.8f);
-            if (mat.HasProperty("_CausticsSpeed")) mat.SetFloat("_CausticsSpeed", 0.00022f);
+            if (mat.HasProperty("_CausticsSpeed")) mat.SetFloat("_CausticsSpeed", 0.00014f);
             if (mat.HasProperty("_CausticsFocus")) mat.SetFloat("_CausticsFocus", 1.35f);
             if (mat.HasProperty("_CausticsPrismStrength")) mat.SetFloat("_CausticsPrismStrength", 0.08f);
             if (mat.HasProperty("_CausticsScatterStrength")) mat.SetFloat("_CausticsScatterStrength", 0.30f);
@@ -1239,7 +1239,7 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_Tiling2")) mat.SetFloat("_Tiling2", 2.1f);
             if (mat.HasProperty("_DisplacementStrength")) mat.SetFloat("_DisplacementStrength", 0.022f);
             if (mat.HasProperty("_DisplacementScale")) mat.SetFloat("_DisplacementScale", 0.90f);
-            if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.0007f);
+            if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.00045f);
             if (mat.HasProperty("_HeightMapInfluence")) mat.SetFloat("_HeightMapInfluence", 0f);
             mat.EnableKeyword("_USE_RIPPLES");
         }

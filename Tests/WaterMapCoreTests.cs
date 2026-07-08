@@ -233,11 +233,11 @@ namespace Siliq.Water.Tests
                 go = GameObject.CreatePrimitive(PrimitiveType.Plane);
                 var animator = go.AddComponent<WaterSurfaceAnimator>();
 
-                Assert.LessOrEqual(animator.speed, 0.003f,
+                Assert.LessOrEqual(animator.speed, 0.0015f,
                     "初期 speed は見た瞬間に流れすぎない低速値にする");
-                Assert.LessOrEqual(animator.displacementSpeed, 0.002f,
+                Assert.LessOrEqual(animator.displacementSpeed, 0.001f,
                     "初期 height animation も速すぎない値にする");
-                Assert.LessOrEqual(animator.causticsSpeed, 0.0004f,
+                Assert.LessOrEqual(animator.causticsSpeed, 0.0002f,
                     "初期 caustics animation もプールで流れすぎない値にする");
             }
             finally
@@ -275,12 +275,12 @@ namespace Siliq.Water.Tests
 
                 Assert.AreEqual(2f, st.x, 1e-5f, "tiling が _BumpMap_ST.x に反映されていない");
                 Assert.AreEqual(2f, st.y, 1e-5f, "tiling が _BumpMap_ST.y に反映されていない");
-                Assert.Greater(st.z, 0.00045f, "speed / direction による X offset が反映されていない");
-                Assert.LessOrEqual(st.z, 0.00075f, "Speed 0.3 でも水面として速すぎない内部減速が必要");
+                Assert.Greater(st.z, 0.00015f, "speed / direction による X offset が反映されていない");
+                Assert.LessOrEqual(st.z, 0.00030f, "Speed 0.3 でも水面として速すぎない内部減速が必要");
                 Assert.AreEqual(2f, mainSt.x, 1e-5f, "Standard の normal UV 用 _MainTex_ST.x に tiling が反映されていない");
                 Assert.AreEqual(2f, mainSt.y, 1e-5f, "Standard の normal UV 用 _MainTex_ST.y に tiling が反映されていない");
-                Assert.Greater(mainSt.z, 0.00045f, "Standard の normal UV 用 _MainTex_ST に offset が反映されていない");
-                Assert.LessOrEqual(mainSt.z, 0.00075f, "Standard の normal UV も Speed 0.3 で速すぎてはいけない");
+                Assert.Greater(mainSt.z, 0.00015f, "Standard の normal UV 用 _MainTex_ST に offset が反映されていない");
+                Assert.LessOrEqual(mainSt.z, 0.00030f, "Standard の normal UV も Speed 0.3 で速すぎてはいけない");
                 Assert.AreEqual(2f, block.GetFloat("_BumpScale"), 1e-5f, "strength が _BumpScale に反映されていない");
                 Color c = block.GetColor("_Color");
                 Assert.AreEqual(0.12f, c.r, 1e-5f, "shallowColor が Standard の _Color.r に反映されていない");
@@ -528,15 +528,15 @@ namespace Siliq.Water.Tests
                     $"{name} は水底光をぼやけた単色模様に戻さない");
                 Assert.GreaterOrEqual(mat.GetFloat("_CausticsScatterStrength"), 0.04f,
                     $"{name} は細い線だけでなく柔らかい水底光の広がりを持つ必要がある");
-                Assert.Greater(mat.GetVector("_Scroll1").sqrMagnitude, 0.00000005f,
+                Assert.Greater(mat.GetVector("_Scroll1").sqrMagnitude, 0.000000005f,
                     $"{name} は WaterSurfaceAnimator なしでも shader 側で波が動く scroll を持つ必要がある");
-                Assert.LessOrEqual(mat.GetVector("_Scroll1").magnitude, 0.00055f,
+                Assert.LessOrEqual(mat.GetVector("_Scroll1").magnitude, 0.00035f,
                     $"{name} の shader scroll が速すぎる");
-                Assert.LessOrEqual(mat.GetVector("_Scroll2").magnitude, 0.00040f,
+                Assert.LessOrEqual(mat.GetVector("_Scroll2").magnitude, 0.00025f,
                     $"{name} の shader scroll 2 が速すぎる");
-                Assert.LessOrEqual(mat.GetFloat("_DisplacementSpeed"), 0.0013f,
+                Assert.LessOrEqual(mat.GetFloat("_DisplacementSpeed"), 0.0008f,
                     $"{name} の高さアニメーションが速すぎる");
-                Assert.LessOrEqual(mat.GetFloat("_CausticsSpeed"), 0.00027f,
+                Assert.LessOrEqual(mat.GetFloat("_CausticsSpeed"), 0.00016f,
                     $"{name} の水底光アニメーションが速すぎる");
                 Assert.AreEqual((float)BlendMode.SrcAlpha, mat.GetFloat("_SrcBlend"), 1e-5f,
                     $"{name} は透明水としてすぐ使える blend 設定が必要");
@@ -550,10 +550,10 @@ namespace Siliq.Water.Tests
             var metal = LoadReadyMaterial("M_Siliq_LiquidMetal_Ready");
             Assert.AreEqual("Siliq/Water Mobile (Quest)", metal.shader.name);
             Assert.IsNotNull(metal.GetTexture("_NormalMap"));
-            Assert.Greater(metal.GetVector("_Scroll1").sqrMagnitude, 0.0000001f);
-            Assert.LessOrEqual(metal.GetVector("_Scroll1").magnitude, 0.00055f);
-            Assert.LessOrEqual(metal.GetVector("_Scroll2").magnitude, 0.00040f);
-            Assert.LessOrEqual(metal.GetFloat("_DisplacementSpeed"), 0.0013f);
+            Assert.Greater(metal.GetVector("_Scroll1").sqrMagnitude, 0.00000001f);
+            Assert.LessOrEqual(metal.GetVector("_Scroll1").magnitude, 0.00035f);
+            Assert.LessOrEqual(metal.GetVector("_Scroll2").magnitude, 0.00025f);
+            Assert.LessOrEqual(metal.GetFloat("_DisplacementSpeed"), 0.0008f);
             Assert.AreEqual((float)BlendMode.One, metal.GetFloat("_SrcBlend"), 1e-5f);
             Assert.AreEqual((float)BlendMode.Zero, metal.GetFloat("_DstBlend"), 1e-5f);
             Assert.AreEqual(1f, metal.GetFloat("_ZWrite"), 1e-5f);
@@ -635,9 +635,9 @@ namespace Siliq.Water.Tests
                 "Hero は高さで板状の模様を出さない");
             Assert.LessOrEqual(hero.GetVector("_Scroll1").magnitude, 0.00020f,
                 "Hero の shader scroll が速すぎてはいけない");
-            Assert.LessOrEqual(hero.GetFloat("_DisplacementSpeed"), 0.0013f,
+            Assert.LessOrEqual(hero.GetFloat("_DisplacementSpeed"), 0.0008f,
                 "Hero の高さアニメーションが速すぎてはいけない");
-            Assert.LessOrEqual(hero.GetFloat("_CausticsSpeed"), 0.00027f,
+            Assert.LessOrEqual(hero.GetFloat("_CausticsSpeed"), 0.00016f,
                 "Hero の水底光アニメーションが速すぎてはいけない");
             Assert.AreEqual((float)BlendMode.SrcAlpha, hero.GetFloat("_SrcBlend"), 1e-5f,
                 "Hero は透明水としてすぐ使える blend 設定にする");
@@ -770,8 +770,8 @@ namespace Siliq.Water.Tests
                     "Hero preview は透明な青系の水面として読める色比率が必要");
                 Assert.Greater(brightCausticPixels, pixels.Length * 0.20f,
                     "Hero preview は水底光と明るい反射を十分に含む必要がある");
-                Assert.Greater(whiteReflectionPixels, pixels.Length * 0.12f,
-                    "Hero preview は白い反射帯が確認できる必要がある");
+                Assert.Greater(whiteReflectionPixels, pixels.Length * 0.02f,
+                    "Hero preview は太い白帯ではなく、細い反射ハイライトが確認できる必要がある");
                 Assert.Greater(darkerBluePixels, pixels.Length * 0.004f,
                     "Hero preview は濃淡がなく単調な水色だけに戻ってはいけない");
                 Assert.Greater(averageLuminance, 180f, "Hero preview は暗く沈みすぎてはいけない");
@@ -901,6 +901,40 @@ namespace Siliq.Water.Tests
                     "Hero 水底光には商品品質で見える明るい光筋が必要");
                 Assert.Less(brightPixels, pixels.Length * 0.20f,
                     "Hero 水底光の明るい領域が広すぎると床が白い板になる");
+
+                int[] orientationBins = new int[18];
+                int orientationSamples = 0;
+                const int stride = 8;
+                for (int y = stride; y < readable.height - stride; y += stride)
+                {
+                    for (int x = stride; x < readable.width - stride; x += stride)
+                    {
+                        int index = y * readable.width + x;
+                        int center = pixels[index].r;
+                        if (center < 70) continue;
+
+                        int gx = pixels[index + stride].r - pixels[index - stride].r;
+                        int gy = pixels[index + stride * readable.width].r - pixels[index - stride * readable.width].r;
+                        float magnitude = Mathf.Sqrt(gx * gx + gy * gy);
+                        if (magnitude < 8f) continue;
+
+                        float angle = Mathf.Atan2(gy, gx);
+                        if (angle < 0f) angle += Mathf.PI;
+                        int bin = Mathf.Clamp(Mathf.FloorToInt(angle / Mathf.PI * orientationBins.Length), 0, orientationBins.Length - 1);
+                        orientationBins[bin]++;
+                        orientationSamples++;
+                    }
+                }
+
+                int dominantBin = 0;
+                for (int i = 0; i < orientationBins.Length; i++)
+                {
+                    dominantBin = Mathf.Max(dominantBin, orientationBins[i]);
+                }
+
+                Assert.Greater(orientationSamples, 1000, "Hero 水底光は方向性を評価できるだけの曲線ディテールが必要");
+                Assert.Less(dominantBin / (float)orientationSamples, 0.16f,
+                    "Hero 水底光が一方向の長い線や格子に戻っている");
             }
             finally
             {

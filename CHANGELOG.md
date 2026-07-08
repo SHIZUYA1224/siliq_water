@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.63] - 2026-07-09
+
+### 修正: Hero 水底光と水面速度の再調整
+- `WaterSurfaceAnimator` の内部速度倍率と初期 speed / height / caustics speed をさらに下げ、Speed を上げても水面が早く滑って見えにくい基準へ変更
+- Quick Apply / Studio 生成 / ReadyMaterials の shader scroll、height animation、caustics animation を低速化し、貼った直後から静かな透明水に見えるようにした
+- Hero 専用 caustics texture と完成 preview を作り直し、太い白い格子や幾何学模様ではなく、柔らかい有機的な水底光に寄せた
+- Hero caustics が一方向の長い線や格子へ戻らないよう、方向分布の回帰テストを追加
+
 ## [2.3.62] - 2026-07-09
 
 ### 改善: 透明水越しの柔らかい水底光

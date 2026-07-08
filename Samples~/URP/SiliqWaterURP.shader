@@ -25,7 +25,7 @@ Shader "Siliq/Water URP"
         [NoScaleOffset] _CausticsMap ("水底の光マップ", 2D) = "black" {}
         _CausticsStrength ("水底の光の強さ", Range(0, 1)) = 0
         _CausticsScale ("水底の光の細かさ", Range(0.2, 8)) = 1.8
-        _CausticsSpeed ("水底の光の速度", Range(0, 0.25)) = 0.00025
+        _CausticsSpeed ("水底の光の速度", Range(0, 0.25)) = 0.00016
         _CausticsFocus ("水底光の焦点", Range(0.5, 4)) = 1.4
         _CausticsPrismStrength ("水底光の色分散", Range(0, 1)) = 0.12
         _CausticsScatterStrength ("水底光の柔らかい広がり", Range(0, 1)) = 0.25

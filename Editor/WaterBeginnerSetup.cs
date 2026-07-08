@@ -194,13 +194,13 @@ namespace Siliq.Water.Editor
                 var mat = renderer.sharedMaterial;
                 animator.texturePropertyName = mat != null && mat.HasProperty("_NormalMap") ? "_NormalMap" : "_BumpMap";
                 animator.SyncLookFromMaterial();
-                if (animator.speed <= 0f) animator.speed = 0.003f;
+                if (animator.speed <= 0f) animator.speed = 0.0015f;
                 if (animator.opacity < 0.35f) animator.opacity = 0.52f;
                 if (animator.reflectionStrength < 0.8f) animator.reflectionStrength = 1f;
                 if (animator.edgeReflection < 0.65f) animator.edgeReflection = 0.88f;
                 if (animator.displacementStrength <= 0f) animator.displacementStrength = 0.012f;
-                if (animator.displacementSpeed > 0.0013f) animator.displacementSpeed = 0.0013f;
-                if (animator.causticsSpeed > 0.00027f) animator.causticsSpeed = 0.00027f;
+                if (animator.displacementSpeed > 0.0008f) animator.displacementSpeed = 0.0008f;
+                if (animator.causticsSpeed > 0.00016f) animator.causticsSpeed = 0.00016f;
                 animator.ApplyImmediate(0f);
                 EditorUtility.SetDirty(animator);
             }
