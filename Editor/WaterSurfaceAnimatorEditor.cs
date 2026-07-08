@@ -35,6 +35,9 @@ namespace Siliq.Water.Editor
         SerializedProperty transmissionStrength;
         SerializedProperty sparkle;
         SerializedProperty highlightStrength;
+        SerializedProperty minLighting;
+        SerializedProperty darkReflectionDamping;
+        SerializedProperty darkDetailDamping;
         SerializedProperty causticsStrength;
         SerializedProperty causticsScale;
         SerializedProperty causticsSpeed;
@@ -75,6 +78,9 @@ namespace Siliq.Water.Editor
             transmissionStrength = serializedObject.FindProperty("transmissionStrength");
             sparkle = serializedObject.FindProperty("sparkle");
             highlightStrength = serializedObject.FindProperty("highlightStrength");
+            minLighting = serializedObject.FindProperty("minLighting");
+            darkReflectionDamping = serializedObject.FindProperty("darkReflectionDamping");
+            darkDetailDamping = serializedObject.FindProperty("darkDetailDamping");
             causticsStrength = serializedObject.FindProperty("causticsStrength");
             causticsScale = serializedObject.FindProperty("causticsScale");
             causticsSpeed = serializedObject.FindProperty("causticsSpeed");
@@ -97,6 +103,7 @@ namespace Siliq.Water.Editor
             DrawHeightSection();
             DrawColorSection();
             DrawOpticalSection();
+            DrawDarkSceneSection();
             DrawCausticsSection();
             bool changed = EditorGUI.EndChangeCheck();
 
@@ -179,6 +186,15 @@ namespace Siliq.Water.Editor
             EditorGUILayout.PropertyField(transmissionStrength, new GUIContent("透過光量"));
             EditorGUILayout.PropertyField(sparkle, new GUIContent("きらめき"));
             EditorGUILayout.PropertyField(highlightStrength, new GUIContent("ハイライト"));
+            EditorGUILayout.Space(4f);
+        }
+
+        void DrawDarkSceneSection()
+        {
+            EditorGUILayout.LabelField("暗所", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(minLighting, new GUIContent("暗所の最低明るさ"));
+            EditorGUILayout.PropertyField(darkReflectionDamping, new GUIContent("暗所の反射抑制"));
+            EditorGUILayout.PropertyField(darkDetailDamping, new GUIContent("暗所の細部抑制"));
             EditorGUILayout.Space(4f);
         }
 

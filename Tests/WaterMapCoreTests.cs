@@ -330,6 +330,9 @@ namespace Siliq.Water.Tests
                 animator.transmissionStrength = 0.58f;
                 animator.sparkle = 0.31f;
                 animator.highlightStrength = 1.42f;
+                animator.minLighting = 0.18f;
+                animator.darkReflectionDamping = 0.61f;
+                animator.darkDetailDamping = 0.74f;
                 animator.displacementStrength = 0.07f;
                 animator.displacementScale = 0.66f;
                 animator.displacementSpeed = 0.44f;
@@ -365,6 +368,9 @@ namespace Siliq.Water.Tests
                 Assert.AreEqual(0.31f, block.GetFloat("_GlimmerIntensity"), 1e-5f);
                 Assert.AreEqual(0.62f, block.GetFloat("_GlintIntensity"), 1e-5f);
                 Assert.AreEqual(1.42f, block.GetFloat("_SpecIntensity"), 1e-5f);
+                Assert.AreEqual(0.18f, block.GetFloat("_MinLighting"), 1e-5f);
+                Assert.AreEqual(0.61f, block.GetFloat("_DarkReflectionDamping"), 1e-5f);
+                Assert.AreEqual(0.74f, block.GetFloat("_DarkDetailDamping"), 1e-5f);
                 Assert.AreEqual(0.07f, block.GetFloat("_DisplacementStrength"), 1e-5f);
                 Assert.AreEqual(0.66f, block.GetFloat("_DisplacementScale"), 1e-5f);
                 Assert.AreEqual(0.44f, block.GetFloat("_DisplacementSpeed"), 1e-5f);
@@ -2159,6 +2165,43 @@ namespace Siliq.Water.Tests
                 sum += WaterMapCore.EvaluateLayer(layer, u, v, t, s.globalSeed) * layer.amplitude;
             }
             return sum;
+        }
+
+        [Test]
+        public void WaterSurfaceAnimator_SyncsDarkSceneControlsFromMaterial()
+        {
+            GameObject go = null;
+            Material mat = null;
+            try
+            {
+                Shader shader = Shader.Find("Siliq/Water Mobile (Quest)");
+                Assert.IsNotNull(shader, "Siliq/Water Mobile (Quest) シェーダーが見つからない");
+
+                go = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                mat = new Material(shader);
+                mat.SetFloat("_MinLighting", 0.21f);
+                mat.SetFloat("_DarkReflectionDamping", 0.64f);
+                mat.SetFloat("_DarkDetailDamping", 0.79f);
+                go.GetComponent<Renderer>().sharedMaterial = mat;
+
+                var animator = go.AddComponent<WaterSurfaceAnimator>();
+                animator.minLighting = 0f;
+                animator.darkReflectionDamping = 0f;
+                animator.darkDetailDamping = 0f;
+                animator.SyncLookFromMaterial();
+
+                Assert.AreEqual(0.21f, animator.minLighting, 1e-5f,
+                    "マテリアルから読み込む時に暗所の最低明るさを同期する必要がある");
+                Assert.AreEqual(0.64f, animator.darkReflectionDamping, 1e-5f,
+                    "マテリアルから読み込む時に暗所の反射抑制を同期する必要がある");
+                Assert.AreEqual(0.79f, animator.darkDetailDamping, 1e-5f,
+                    "マテリアルから読み込む時に暗所の細部抑制を同期する必要がある");
+            }
+            finally
+            {
+                if (go != null) Object.DestroyImmediate(go);
+                if (mat != null) Object.DestroyImmediate(mat);
+            }
         }
 
         static void AssertColor(Color expected, Color actual, string label)

@@ -109,6 +109,16 @@ namespace Siliq.Water
         [Tooltip("強いハイライトの量。反射が弱く見える時はここを上げます。Siliq 水シェーダーで有効。")]
         [Range(0f, 2f)] public float highlightStrength = 1.15f;
 
+        [Header("暗所")]
+        [Tooltip("暗い場所でも透明水と水底光が完全に沈まない最低明るさ。上げると暗所でも水底が見えやすくなります。Siliq 水シェーダーで有効。")]
+        [Range(0f, 0.5f)] public float minLighting = 0.10f;
+
+        [Tooltip("暗い場所で反射をどれだけ抑えるか。高いほど暗所で水面だけが白く浮きにくくなります。Siliq 水シェーダーで有効。")]
+        [Range(0f, 1f)] public float darkReflectionDamping = 0.72f;
+
+        [Tooltip("暗い場所できらめきや細部をどれだけ抑えるか。高いほど暗所でノイズっぽくなりにくくなります。Siliq 水シェーダーで有効。")]
+        [Range(0f, 1f)] public float darkDetailDamping = 0.70f;
+
         [Header("水底の光")]
         [Tooltip("水底に揺れるコースティクス光の強さ。Siliq 水シェーダーで有効。")]
         [Range(0f, 1f)] public float causticsStrength = 0.35f;
@@ -178,6 +188,9 @@ namespace Siliq.Water
         int glimmerIntensityPropertyId;
         int glintIntensityPropertyId;
         int specIntensityPropertyId;
+        int minLightingPropertyId;
+        int darkReflectionDampingPropertyId;
+        int darkDetailDampingPropertyId;
         int causticsStrengthPropertyId;
         int causticsScalePropertyId;
         int causticsSpeedPropertyId;
@@ -274,6 +287,9 @@ namespace Siliq.Water
             glimmerIntensityPropertyId = Shader.PropertyToID("_GlimmerIntensity");
             glintIntensityPropertyId = Shader.PropertyToID("_GlintIntensity");
             specIntensityPropertyId = Shader.PropertyToID("_SpecIntensity");
+            minLightingPropertyId = Shader.PropertyToID("_MinLighting");
+            darkReflectionDampingPropertyId = Shader.PropertyToID("_DarkReflectionDamping");
+            darkDetailDampingPropertyId = Shader.PropertyToID("_DarkDetailDamping");
             causticsStrengthPropertyId = Shader.PropertyToID("_CausticsStrength");
             causticsScalePropertyId = Shader.PropertyToID("_CausticsScale");
             causticsSpeedPropertyId = Shader.PropertyToID("_CausticsSpeed");
@@ -351,6 +367,9 @@ namespace Siliq.Water
             transmissionStrength = Mathf.Clamp01(transmissionStrength);
             sparkle = Mathf.Clamp01(sparkle);
             highlightStrength = Mathf.Clamp(highlightStrength, 0f, 2f);
+            minLighting = Mathf.Clamp(minLighting, 0f, 0.5f);
+            darkReflectionDamping = Mathf.Clamp01(darkReflectionDamping);
+            darkDetailDamping = Mathf.Clamp01(darkDetailDamping);
             causticsStrength = Mathf.Clamp01(causticsStrength);
             causticsScale = Mathf.Clamp(causticsScale, 0.2f, 8f);
             causticsSpeed = Mathf.Clamp01(causticsSpeed);
@@ -469,6 +488,18 @@ namespace Siliq.Water
             if (targetMaterial.HasProperty(specIntensityPropertyId))
             {
                 highlightStrength = Mathf.Clamp(targetMaterial.GetFloat(specIntensityPropertyId), 0f, 2f);
+            }
+            if (targetMaterial.HasProperty(minLightingPropertyId))
+            {
+                minLighting = Mathf.Clamp(targetMaterial.GetFloat(minLightingPropertyId), 0f, 0.5f);
+            }
+            if (targetMaterial.HasProperty(darkReflectionDampingPropertyId))
+            {
+                darkReflectionDamping = Mathf.Clamp01(targetMaterial.GetFloat(darkReflectionDampingPropertyId));
+            }
+            if (targetMaterial.HasProperty(darkDetailDampingPropertyId))
+            {
+                darkDetailDamping = Mathf.Clamp01(targetMaterial.GetFloat(darkDetailDampingPropertyId));
             }
             if (targetMaterial.HasProperty(causticsStrengthPropertyId))
             {
@@ -790,6 +821,18 @@ namespace Siliq.Water
             if (targetMaterial.HasProperty(specIntensityPropertyId))
             {
                 propertyBlock.SetFloat(specIntensityPropertyId, Mathf.Clamp(highlightStrength, 0f, 2f));
+            }
+            if (targetMaterial.HasProperty(minLightingPropertyId))
+            {
+                propertyBlock.SetFloat(minLightingPropertyId, Mathf.Clamp(minLighting, 0f, 0.5f));
+            }
+            if (targetMaterial.HasProperty(darkReflectionDampingPropertyId))
+            {
+                propertyBlock.SetFloat(darkReflectionDampingPropertyId, Mathf.Clamp01(darkReflectionDamping));
+            }
+            if (targetMaterial.HasProperty(darkDetailDampingPropertyId))
+            {
+                propertyBlock.SetFloat(darkDetailDampingPropertyId, Mathf.Clamp01(darkDetailDamping));
             }
             if (targetMaterial.HasProperty(causticsStrengthPropertyId))
             {

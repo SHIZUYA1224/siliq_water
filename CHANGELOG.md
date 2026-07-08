@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.75] - 2026-07-09
+
+### 改善: 暗所の透明水調整を Inspector に追加
+- `WaterSurfaceAnimator` と専用 Inspector から `_MinLighting` / `_DarkReflectionDamping` / `_DarkDetailDamping` を操作できるようにした
+- 「マテリアルから読み込む」でも暗所設定を同期し、共有 material を汚さず PropertyBlock 経由で暗所の最低明るさ、反射抑制、細部抑制を反映するようにした
+- テストとガイドを更新し、暗い室内や夜寄りのシーンでも透明水の見た目を調整しやすくした
+
 ## [2.3.74] - 2026-07-09
 
 ### 追加: 透明プール向け SunlitPool 水底光 texture

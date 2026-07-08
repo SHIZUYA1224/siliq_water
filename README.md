@@ -176,6 +176,7 @@ Renderer にドラッグ&ドロップするだけで水として動きます。`
 | **輪郭反射 / 反射量** | 斜め視線の反射と全体の映り込み |
 | **反射パターン** | 空や窓の帯が水面に映る量と大きさ |
 | **透過光量 / ハイライト / きらめき** | 透明感、強い光、細い揺らぎの量 |
+| **暗所** | 暗い部屋や夜寄りのシーンで、水底光の最低明るさ、反射の浮き、細部の光りすぎを調整 |
 | **水底の光** | Caustics map の強さ、細かさ、速度、焦点、色分散、柔らかい広がり、水底の柔らかい明るさ、奥行きの青み、色。透明プールや浅い海の床に揺れる光を作る |
 | **水底光の透け** | 水底光が水面越しに見える量。Crystal Lagoon では高め |
 
@@ -185,7 +186,8 @@ Standard / URP Lit / VRChat Mobile 系では `_BumpMap` の UV、`_BumpScale`、
 `_DisplacementStrength` / `_DisplacementScale` / `_DisplacementSpeed` /
 `_CausticsStrength` / `_CausticsScale` / `_CausticsSpeed` / `_CausticsFocus` / `_CausticsPrismStrength` / `_CausticsScatterStrength` / `_BottomLightStrength` / `_BottomGlowStrength` / `_DepthTintStrength` を
 `_ShallowColor` / `_DeepColor` / `_HorizonColor` / `_TransmissionColor` /
-`_Opacity` / `_Clarity` / `_RefractionStrength` / `_EdgeReflection` / `_ReflStrength` / `_ReflectionPatternStrength` / `_ReflectionPatternScale` / `_CausticsTint` などと一緒に
+`_Opacity` / `_Clarity` / `_RefractionStrength` / `_EdgeReflection` / `_ReflStrength` / `_ReflectionPatternStrength` / `_ReflectionPatternScale` /
+`_MinLighting` / `_DarkReflectionDamping` / `_DarkDetailDamping` / `_CausticsTint` などと一緒に
 `MaterialPropertyBlock` 経由で動かすため、共有マテリアルを汚さずに調整できます。
 実際の高さは頂点変位なので、1 枚ポリゴンの Quad では見えにくいです。Unity 標準の Plane や細分化された水面メッシュを使ってください。
 PC の発熱を避けるため、編集モードの連続プレビューは**選択中の水面だけ**最大 10fps で更新されます。
@@ -243,8 +245,8 @@ Quest / モバイルでは不透明のまま使うことを推奨します。PC 
 製品デモやメインビジュアル用に最高品質を優先する場合は、`目的から始める > フラッグシップ透明水` を使うと、4096px、48 フレーム、Height / Flow / DUDV / Caustics 付きの重めの設定になります。
 iOS 透明版はさらに `_TransmissionStrength` / `_GlimmerIntensity` / `_GlintIntensity` で
 透過光、細い光の揺らぎ、強いハイライトを足し、透明なだけの板に見えにくい設定にしています。
-暗い場所で水面だけ明るく浮く場合は、`_DarkReflectionDamping` と `_DarkDetailDamping` を上げると、
-空反射と細かい光が暗さに追従しやすくなります。
+暗い場所で水面だけ明るく浮く場合は、WaterSurfaceAnimator の **暗所の反射抑制** と **暗所の細部抑制** を上げると、
+空反射と細かい光が暗さに追従しやすくなります。暗すぎて水底光が沈む場合は **暗所の最低明るさ** を少し上げます。
 iOS 透明版は GrabPass や深度依存なしの alpha blend なので軽量ですが、
 透明描画はソート順と重なりに弱い点に注意してください。Quest 用の不透明運用と混ぜないこと。
 
