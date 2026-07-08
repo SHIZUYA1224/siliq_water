@@ -1,0 +1,98 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: M_Siliq_CrystalLagoon_Hero_Ready
+  m_Shader: {fileID: 4800000, guid: 69cb890cc94ff55f17cd24e13d86fa02, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3000
+  stringTagMap:
+    RenderType: Transparent
+  disabledShaderPasses: []
+  m_LockedProperties:
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _CausticsMap:
+        m_Texture: {fileID: 2800000, guid: a171aabb01c34e01a1b2c3d4e5f60407, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _HeightMap:
+        m_Texture: {fileID: 2800000, guid: a171aabb01c34e01a1b2c3d4e5f60307, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: a171aabb01c34e01a1b2c3d4e5f60107, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ReflCube:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _AlphaFresnel: 0.88
+    - _AlphaPower: 1.55
+    - _BottomLightStrength: 1.9
+    - _CausticsScale: 2.1
+    - _CausticsSpeed: 0.00035
+    - _CausticsStrength: 0.84
+    - _Clarity: 0.98
+    - _DarkDetailDamping: 0.72
+    - _DarkReflectionDamping: 0.68
+    - _DisplacementScale: 0.9
+    - _DisplacementSpeed: 0.0015
+    - _DisplacementStrength: 0.004
+    - _DstBlend: 10
+    - _EdgeReflection: 0.96
+    - _FresnelPower: 1.55
+    - _GlimmerIntensity: 0.44
+    - _GlimmerSharpness: 22
+    - _GlintIntensity: 1.2
+    - _GlintPower: 400
+    - _HeightMapInfluence: 0
+    - _MacroColorVariation: 0.07
+    - _MacroDirectionBreakup: 0.16
+    - _MacroScale: 0.05
+    - _MacroVariation: 0.16
+    - _MinLighting: 0.12
+    - _NormalStrength: 0.36
+    - _Opacity: 0.34
+    - _ReflStrength: 1
+    - _ReflectionPatternScale: 0.82
+    - _ReflectionPatternStrength: 0.58
+    - _RippleAmplitude: 0.42
+    - _RippleChannel: 0
+    - _RippleLifetime: 4.5
+    - _RippleSpeed: 1.65
+    - _RippleWidth: 0.50
+    - _SpecIntensity: 2
+    - _SpecPower: 420
+    - _SrcBlend: 5
+    - _Tiling1: 1
+    - _Tiling2: 3
+    - _TransmissionStrength: 0.98
+    - _UseCube: 0
+    - _UseRipples: 0
+    - _ZWrite: 0
+    m_Colors:
+    - _CausticsTint: {r: 0.88, g: 1, b: 0.97, a: 1}
+    - _DeepColor: {r: 0.002, g: 0.10, b: 0.24, a: 1}
+    - _GlimmerColor: {r: 1, g: 1, b: 0.98, a: 1}
+    - _HorizonColor: {r: 0.98, g: 1, b: 1, a: 1}
+    - _Scroll1: {r: 0.000740, g: 0.000270, b: 0, a: 0}
+    - _Scroll2: {r: -0.000216, g: 0.000534, b: 0, a: 0}
+    - _ShallowColor: {r: 0.68, g: 1, b: 0.99, a: 1}
+    - _TransmissionColor: {r: 0.72, g: 1, b: 0.97, a: 1}
+  m_BuildTextureStacks: []

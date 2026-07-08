@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.54] - 2026-07-09
+
+### 追加: Crystal Lagoon Hero ready material
+- `M_Siliq_CrystalLagoon_Hero_Ready` を追加し、透明感・反射帯・水底光を強めた最高品質確認用 material をドラッグ&ドロップで使えるようにした
+- はじめてガイドから Hero material を直接選択できる導線を追加
+- README / 用途別ガイド / テストで、Hero material が専用 Crystal Lagoon texture と強い光学パラメータを使うことを固定
+
 ## [2.3.53] - 2026-07-09
 
 ### 修正: 水面速度をさらに穏やかに調整

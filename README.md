@@ -89,7 +89,7 @@ README / 用途別ガイド / PrebakedPack の確認に進めます。
 | `Water_Normal_Pool_01.png` | プール・浅い水 (控えめな光の網目) | `M_Water_Pool` |
 | `Water_Normal_Cyber_01.png` | 近未来・ホログラム水面 (細いデータ流) | `M_Water_Cyber` |
 | `Water_Normal_FlagshipCrystal_01.png` + `Water_Height_FlagshipCrystal_01.png` | 製品デモ向けの透明水・高反射・実高さ | `M_Water_FlagshipCrystal` |
-| `Water_Normal_CrystalLagoon_01.png` + `Water_Height_CrystalLagoon_01.png` + `Water_Caustics_CrystalLagoon_01.png` | 透き通った浅い水・美しさ特化 | `M_Siliq_CrystalLagoon_Ready` |
+| `Water_Normal_CrystalLagoon_01.png` + `Water_Height_CrystalLagoon_01.png` + `Water_Caustics_CrystalLagoon_01.png` | 透き通った浅い水・美しさ特化 | `M_Siliq_CrystalLagoon_Ready` / `M_Siliq_CrystalLagoon_Hero_Ready` |
 
 基本 5 種は **1024×1024 PNG / シームレス / インポート設定済み (NormalMap・Repeat・Android/iOS は ASTC 6x6)**。
 フラッグシップ透明水と Crystal Lagoon は専用 **2048×2048 normal map + 2048×2048 height map** を同梱し、用途別 Quick Apply では両方を Siliq 水シェーダーへ割り当てます。
@@ -106,11 +106,13 @@ Crystal Lagoon だけは水底光も専用 **2048×2048 `Water_Caustics_CrystalL
 | `M_Siliq_IndoorBluePool_Ready` | 明るい室内プール |
 | `M_Siliq_FlagshipCrystal_Ready` | 製品デモ向けのフラッグシップ透明水 |
 | `M_Siliq_CrystalLagoon_Ready` | 透き通った美しさ特化の水面 |
+| `M_Siliq_CrystalLagoon_Hero_Ready` | 透明感・反射・水底光を強めた最高品質確認用の水面 |
 | `M_Siliq_PalePoolFloor` | Crystal Lagoon 完成 Prefab 用の明るい床。薄いタイル感と水底光の受け皿を持つ |
 | `M_Siliq_CrystalLagoon_CausticsOverlay` | プール床・浅い海底に重ねる Crystal Lagoon 専用の水底光 |
 | `M_Siliq_BloodSea_Ready` | 血の海・赤い液体 |
 | `M_Siliq_LiquidMetal_Ready` | 液体金属 |
 
+美しさを最優先する場合は、まず `M_Siliq_CrystalLagoon_Hero_Ready` か完成 Prefab から確認してください。
 これらは normal map、色、透明度、反射、scroll、実高さ、水底の光の初期値まで設定済みなので、
 Renderer にドラッグ&ドロップするだけで水として動きます。`WaterSurfaceAnimator` は必須ではありません。
 床そのものに光を出したい場合は、水底の少し上に薄い Plane を置き、`M_Siliq_CrystalLagoon_CausticsOverlay` を貼ります。これは `Siliq/Caustics Overlay Mobile` を使う軽量な加算 material で、Crystal Lagoon 専用 caustics を床に重ねます。
@@ -462,7 +464,7 @@ Tests/
   WaterMapCoreTests.cs      Unity Test Runner (EditMode) 用の自動テスト
 PrebakedPack/
   Textures/                 基本 normal 5 種 (1024px) + flagship normal/height (2048px)
-  ReadyMaterials/           アタッチするだけで動く Siliq 水マテリアル 7 種 + 床用 caustics overlay
+  ReadyMaterials/           アタッチするだけで動く Siliq 水マテリアル 8 種 + 床用 caustics overlay
   Prefabs/                  PF_Siliq_CrystalLagoon_Complete.prefab
   Materials/                設定済み Standard マテリアル 6 種
   SampleScene/              SC_CrystalLagoon_Showcase.unity + 基本 5 種比較シーン

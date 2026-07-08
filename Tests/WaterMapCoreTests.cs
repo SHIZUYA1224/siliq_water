@@ -548,6 +548,43 @@ namespace Siliq.Water.Tests
                 "Crystal Lagoon は水底光を強めに持つ必要がある");
             Assert.GreaterOrEqual(lagoon.GetFloat("_BottomLightStrength"), 1.65f,
                 "Crystal Lagoon は水底光が水越しに強く見える必要がある");
+
+            var hero = LoadReadyMaterial("M_Siliq_CrystalLagoon_Hero_Ready");
+            Assert.AreEqual("Siliq/Water Mobile (Quest)", hero.shader.name,
+                "Hero ready material はドラッグ&ドロップで使える Siliq Mobile 水シェーダーにする");
+            Assert.AreEqual(AssetDatabase.GetAssetPath(lagoon.GetTexture("_NormalMap")), AssetDatabase.GetAssetPath(hero.GetTexture("_NormalMap")),
+                "Hero ready material は Crystal Lagoon 専用 normal map を使う");
+            Assert.AreEqual(AssetDatabase.GetAssetPath(lagoon.GetTexture("_HeightMap")), AssetDatabase.GetAssetPath(hero.GetTexture("_HeightMap")),
+                "Hero ready material は Crystal Lagoon 専用 height map を使う");
+            Assert.AreEqual(AssetDatabase.GetAssetPath(lagoon.GetTexture("_CausticsMap")), AssetDatabase.GetAssetPath(hero.GetTexture("_CausticsMap")),
+                "Hero ready material は Crystal Lagoon 専用 caustics map を使う");
+            Assert.LessOrEqual(hero.GetFloat("_Opacity"), 0.36f,
+                "Hero は透明な抜け感を最優先にするため正面 opacity を低めにする");
+            Assert.GreaterOrEqual(hero.GetFloat("_Clarity"), 0.97f,
+                "Hero は通常 Lagoon より高い透明な抜け感を持つ必要がある");
+            Assert.GreaterOrEqual(hero.GetFloat("_TransmissionStrength"), 0.97f,
+                "Hero は透過光を強めて水の厚みを出す");
+            Assert.GreaterOrEqual(hero.GetFloat("_ReflectionPatternStrength"), 0.55f,
+                "Hero は空や窓の反射帯が見える強さにする");
+            Assert.GreaterOrEqual(hero.GetFloat("_CausticsStrength"), 0.80f,
+                "Hero は水底光をはっきり見せる");
+            Assert.GreaterOrEqual(hero.GetFloat("_BottomLightStrength"), 1.85f,
+                "Hero は水底光が水越しに強く透ける必要がある");
+            Assert.LessOrEqual(hero.GetFloat("_NormalStrength"), 0.40f,
+                "Hero は凹凸を抑え、変な模様ではなく透明感を優先する");
+            Assert.LessOrEqual(hero.GetFloat("_DisplacementStrength"), 0.006f,
+                "Hero は高さで板状の模様を出さない");
+            Assert.LessOrEqual(hero.GetVector("_Scroll1").magnitude, 0.004f,
+                "Hero の shader scroll が速すぎてはいけない");
+            Assert.LessOrEqual(hero.GetFloat("_DisplacementSpeed"), 0.003f,
+                "Hero の高さアニメーションが速すぎてはいけない");
+            Assert.LessOrEqual(hero.GetFloat("_CausticsSpeed"), 0.0006f,
+                "Hero の水底光アニメーションが速すぎてはいけない");
+            Assert.AreEqual((float)BlendMode.SrcAlpha, hero.GetFloat("_SrcBlend"), 1e-5f,
+                "Hero は透明水としてすぐ使える blend 設定にする");
+            Assert.AreEqual((float)BlendMode.OneMinusSrcAlpha, hero.GetFloat("_DstBlend"), 1e-5f);
+            Assert.AreEqual(0f, hero.GetFloat("_ZWrite"), 1e-5f);
+            Assert.AreEqual((int)RenderQueue.Transparent, hero.renderQueue);
         }
 
         static Material LoadReadyMaterial(string name)
@@ -1082,6 +1119,14 @@ namespace Siliq.Water.Tests
                 "Crystal Lagoon ready material が専用 height map を参照していない");
             Assert.AreEqual(causticsPath, AssetDatabase.GetAssetPath(ready.GetTexture("_CausticsMap")),
                 "Crystal Lagoon ready material が専用 caustics map を参照していない");
+
+            var hero = LoadReadyMaterial("M_Siliq_CrystalLagoon_Hero_Ready");
+            Assert.AreEqual(normalPath, AssetDatabase.GetAssetPath(hero.GetTexture("_NormalMap")),
+                "Crystal Lagoon Hero ready material が専用 normal map を参照していない");
+            Assert.AreEqual(heightPath, AssetDatabase.GetAssetPath(hero.GetTexture("_HeightMap")),
+                "Crystal Lagoon Hero ready material が専用 height map を参照していない");
+            Assert.AreEqual(causticsPath, AssetDatabase.GetAssetPath(hero.GetTexture("_CausticsMap")),
+                "Crystal Lagoon Hero ready material が専用 caustics map を参照していない");
         }
 
         [Test]
@@ -1145,6 +1190,8 @@ namespace Siliq.Water.Tests
                 "ガイドには Crystal Lagoon 専用 height map を明記する");
             StringAssert.Contains("Water_Caustics_CrystalLagoon_01.png", guide,
                 "ガイドには Crystal Lagoon 専用 caustics map を明記する");
+            StringAssert.Contains("M_Siliq_CrystalLagoon_Hero_Ready", guide,
+                "最高品質確認用 Hero material の説明がない");
             StringAssert.Contains("クリスタルラグーンでは専用 2048px normal map、height map、`Water_Caustics_CrystalLagoon_01.png` を割り当てる", guide,
                 "Crystal Lagoon が Flagship / 共通 caustics の流用ではないことをガイドで説明する");
             StringAssert.Contains("透明な海・プール・フラッグシップ水では `Water_Caustics_Crystal_01.png`", guide,
@@ -1299,6 +1346,8 @@ namespace Siliq.Water.Tests
                 WaterBeginnerGuideWindow.CrystalLagoonCompletePrefabPath);
             Assert.AreEqual("PrebakedPack/Preview/preview_crystal_lagoon_complete.png",
                 WaterBeginnerGuideWindow.CrystalLagoonCompletePreviewPath);
+            Assert.AreEqual("PrebakedPack/ReadyMaterials/M_Siliq_CrystalLagoon_Hero_Ready.mat",
+                WaterBeginnerGuideWindow.CrystalLagoonHeroMaterialPath);
         }
 
         [Test]

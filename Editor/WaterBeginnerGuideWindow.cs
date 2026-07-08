@@ -15,6 +15,7 @@ namespace Siliq.Water.Editor
         internal const string CrystalLagoonShowcaseScenePath = "PrebakedPack/SampleScene/SC_CrystalLagoon_Showcase.unity";
         internal const string CrystalLagoonCompletePrefabPath = "PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab";
         internal const string CrystalLagoonCompletePreviewPath = "PrebakedPack/Preview/preview_crystal_lagoon_complete.png";
+        internal const string CrystalLagoonHeroMaterialPath = "PrebakedPack/ReadyMaterials/M_Siliq_CrystalLagoon_Hero_Ready.mat";
 
         Vector2 scroll;
 
@@ -112,22 +113,30 @@ namespace Siliq.Water.Editor
 
             using (new EditorGUILayout.HorizontalScope())
             {
+                if (GUILayout.Button("最高品質 Material を選択"))
+                {
+                    PingPackageAsset(CrystalLagoonHeroMaterialPath);
+                }
                 if (GUILayout.Button("完成プレビューを選択"))
                 {
                     PingPackageAsset(CrystalLagoonCompletePreviewPath);
-                }
-                if (GUILayout.Button("Crystal Lagoon シーンを選択"))
-                {
-                    PingPackageAsset(CrystalLagoonShowcaseScenePath);
                 }
             }
 
             using (new EditorGUILayout.HorizontalScope())
             {
+                if (GUILayout.Button("Crystal Lagoon シーンを選択"))
+                {
+                    PingPackageAsset(CrystalLagoonShowcaseScenePath);
+                }
                 if (GUILayout.Button("Crystal Lagoon Prefab を選択"))
                 {
                     PingPackageAsset(CrystalLagoonCompletePrefabPath);
                 }
+            }
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
                 if (GUILayout.Button("PrebakedPack を選択"))
                 {
                     PingPackageAsset("PrebakedPack");
