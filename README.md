@@ -96,7 +96,7 @@ README / 用途別ガイド / PrebakedPack の確認に進めます。
 Crystal Lagoon は水底光も専用 **2048×2048 `Water_Caustics_CrystalLagoon_01.png`** を使い、透明な浅い水の床に柔らかい光筋が出るようにしています。Hero material だけはさらに明るい焦点線を増やした **2048×2048 `Water_Caustics_CrystalLagoon_Hero_01.png`** を使います。
 さらに共通の `Water_Caustics_Crystal_01.png` を同梱し、透明な海・プール・フラッグシップ水では水底に揺れる光模様として使います。これは強い多角形セルではなく、淡く重なる光の筋として調整しています。
 `PrebakedPack/ReadyMaterials/` には `Siliq/Water Mobile (Quest)` 設定済みの完成マテリアルが入っています。
-`PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab` は、分割済み水面、明るいプール床、床用 caustics overlay、確認用ライトを一体化した完成セットです。Prefab を Hierarchy へ置くだけで、透明感と水底光を同時に確認できます。
+`PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab` は、分割済み水面、明るいプール床、床用 caustics overlay、確認用ライトを一体化した完成セットです。さらに `PF_Siliq_CrystalLagoon_Hero_Complete.prefab` は Hero material と Hero caustics overlay を貼った最高品質確認用です。Prefab を Hierarchy へ置くだけで、透明感と水底光を同時に確認できます。
 完成形の方向性は `PrebakedPack/Preview/preview_crystal_lagoon_complete.png` で確認できます。薄い床、透明な水面、反射、水底光が一枚で見える初心者向けの目安画像です。
 
 | Ready material | 用途 |
@@ -109,10 +109,11 @@ Crystal Lagoon は水底光も専用 **2048×2048 `Water_Caustics_CrystalLagoon_
 | `M_Siliq_CrystalLagoon_Hero_Ready` | 専用 Hero caustics で透明感・反射・水底光を強めた最高品質確認用の水面 |
 | `M_Siliq_PalePoolFloor` | Crystal Lagoon 完成 Prefab 用の明るい床。薄いタイル感と水底光の受け皿を持つ |
 | `M_Siliq_CrystalLagoon_CausticsOverlay` | プール床・浅い海底に重ねる Crystal Lagoon 専用の水底光 |
+| `M_Siliq_CrystalLagoon_Hero_CausticsOverlay` | Hero 完成 Prefab 用の強めの床用水底光 |
 | `M_Siliq_BloodSea_Ready` | 血の海・赤い液体 |
 | `M_Siliq_LiquidMetal_Ready` | 液体金属 |
 
-美しさを最優先する場合は、まず `M_Siliq_CrystalLagoon_Hero_Ready` か完成 Prefab から確認してください。
+美しさを最優先する場合は、まず `PF_Siliq_CrystalLagoon_Hero_Complete.prefab` か `M_Siliq_CrystalLagoon_Hero_Ready` から確認してください。
 これらは normal map、色、透明度、反射、scroll、実高さ、水底の光の初期値まで設定済みなので、
 Renderer にドラッグ&ドロップするだけで水として動きます。`WaterSurfaceAnimator` は必須ではありません。
 床そのものに光を出したい場合は、水底の少し上に薄い Plane を置き、`M_Siliq_CrystalLagoon_CausticsOverlay` を貼ります。これは `Siliq/Caustics Overlay Mobile` を使う軽量な加算 material で、Crystal Lagoon 専用 caustics を床に重ねます。
@@ -120,7 +121,7 @@ Renderer にドラッグ&ドロップするだけで水として動きます。`
 
 ### 一瞬で水面にする 4 つの方法
 
-1. **完成 Prefab を置く**: `PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab` を Hierarchy へドラッグ。
+1. **完成 Prefab を置く**: 最高品質確認は `PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Hero_Complete.prefab`、通常確認は `PF_Siliq_CrystalLagoon_Complete.prefab` を Hierarchy へドラッグ。
    水面、薄いタイル感のある明るい床、床用 caustics overlay、ライトが一体なので、初心者でも組み立てずに Crystal Lagoon の完成形を確認できます。
 2. **ドラッグ & ドロップ**: `PrebakedPack/ReadyMaterials/` の `M_Siliq_*_Ready` をシーンのオブジェクトへドラッグ。
    同梱 Siliq shader の scroll が最初から入っているため、material だけで波が動きます。
@@ -464,8 +465,8 @@ Tests/
   WaterMapCoreTests.cs      Unity Test Runner (EditMode) 用の自動テスト
 PrebakedPack/
   Textures/                 基本 normal 5 種 (1024px) + flagship normal/height (2048px)
-  ReadyMaterials/           アタッチするだけで動く Siliq 水マテリアル 8 種 + 床用 caustics overlay
-  Prefabs/                  PF_Siliq_CrystalLagoon_Complete.prefab
+  ReadyMaterials/           アタッチするだけで動く Siliq 水マテリアル 8 種 + 床用 caustics overlay 2 種
+  Prefabs/                  PF_Siliq_CrystalLagoon_Complete.prefab + PF_Siliq_CrystalLagoon_Hero_Complete.prefab
   Materials/                設定済み Standard マテリアル 6 種
   SampleScene/              SC_CrystalLagoon_Showcase.unity + 基本 5 種比較シーン
   Preview/                  Plane に貼った状態のプレビュー画像、Crystal Lagoon の美しさ確認用画像

@@ -14,6 +14,7 @@ namespace Siliq.Water.Editor
         internal const string RepairSelectionActionLabel = "選択中の水面を診断して自動修復";
         internal const string CrystalLagoonShowcaseScenePath = "PrebakedPack/SampleScene/SC_CrystalLagoon_Showcase.unity";
         internal const string CrystalLagoonCompletePrefabPath = "PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab";
+        internal const string CrystalLagoonHeroCompletePrefabPath = "PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Hero_Complete.prefab";
         internal const string CrystalLagoonCompletePreviewPath = "PrebakedPack/Preview/preview_crystal_lagoon_complete.png";
         internal const string CrystalLagoonHeroMaterialPath = "PrebakedPack/ReadyMaterials/M_Siliq_CrystalLagoon_Hero_Ready.mat";
 
@@ -129,14 +130,18 @@ namespace Siliq.Water.Editor
                 {
                     PingPackageAsset(CrystalLagoonShowcaseScenePath);
                 }
-                if (GUILayout.Button("Crystal Lagoon Prefab を選択"))
+                if (GUILayout.Button("Hero Prefab を選択"))
                 {
-                    PingPackageAsset(CrystalLagoonCompletePrefabPath);
+                    PingPackageAsset(CrystalLagoonHeroCompletePrefabPath);
                 }
             }
 
             using (new EditorGUILayout.HorizontalScope())
             {
+                if (GUILayout.Button("通常 Prefab を選択"))
+                {
+                    PingPackageAsset(CrystalLagoonCompletePrefabPath);
+                }
                 if (GUILayout.Button("PrebakedPack を選択"))
                 {
                     PingPackageAsset("PrebakedPack");

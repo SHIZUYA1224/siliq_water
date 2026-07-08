@@ -796,7 +796,9 @@ namespace Siliq.Water.Tests
         {
             const string shaderPath = "Packages/com.siliq.water-normalmap/Runtime/Shaders/SiliqCausticsOverlay.shader";
             const string materialPath = "Packages/com.siliq.water-normalmap/PrebakedPack/ReadyMaterials/M_Siliq_CrystalLagoon_CausticsOverlay.mat";
+            const string heroMaterialPath = "Packages/com.siliq.water-normalmap/PrebakedPack/ReadyMaterials/M_Siliq_CrystalLagoon_Hero_CausticsOverlay.mat";
             const string causticsPath = "Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Caustics_CrystalLagoon_01.png";
+            const string heroCausticsPath = "Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Caustics_CrystalLagoon_Hero_01.png";
 
             Assert.IsTrue(File.Exists(shaderPath), "床用 caustics overlay shader が同梱されていない");
             string shaderText = File.ReadAllText(shaderPath);
@@ -810,18 +812,29 @@ namespace Siliq.Water.Tests
             Assert.IsNotNull(shader, "Siliq/Caustics Overlay Mobile shader が見つからない");
 
             var material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+            var heroMaterial = AssetDatabase.LoadAssetAtPath<Material>(heroMaterialPath);
             Assert.IsNotNull(material, "Crystal Lagoon 床用 caustics overlay material が同梱されていない");
+            Assert.IsNotNull(heroMaterial, "Hero 床用 caustics overlay material が同梱されていない");
             Assert.AreEqual("Siliq/Caustics Overlay Mobile", material.shader.name);
+            Assert.AreEqual("Siliq/Caustics Overlay Mobile", heroMaterial.shader.name);
             Assert.AreEqual(causticsPath, AssetDatabase.GetAssetPath(material.GetTexture("_CausticsMap")),
                 "床用 caustics overlay が Crystal Lagoon 専用 caustics を参照していない");
+            Assert.AreEqual(heroCausticsPath, AssetDatabase.GetAssetPath(heroMaterial.GetTexture("_CausticsMap")),
+                "Hero 床用 caustics overlay が Hero 専用 caustics を参照していない");
             Assert.GreaterOrEqual(material.GetFloat("_Intensity"), 0.4f,
                 "床用 caustics overlay が弱すぎると水底光として見えない");
             Assert.LessOrEqual(material.GetFloat("_Intensity"), 0.75f,
                 "床用 caustics overlay が強すぎると床が発光しすぎる");
+            Assert.GreaterOrEqual(heroMaterial.GetFloat("_Intensity"), 0.60f,
+                "Hero 床用 caustics overlay は通常版より強い水底光を持つ必要がある");
+            Assert.LessOrEqual(heroMaterial.GetFloat("_Intensity"), 0.80f,
+                "Hero 床用 caustics overlay が強すぎると床が発光しすぎる");
             Assert.GreaterOrEqual(material.GetFloat("_Tiling"), 1.0f);
             Assert.LessOrEqual(material.GetFloat("_Tiling"), 2.0f);
             Assert.AreEqual((int)RenderQueue.Transparent, material.renderQueue,
                 "床用 caustics overlay は透明キューで床の上に重ねる");
+            Assert.AreEqual((int)RenderQueue.Transparent, heroMaterial.renderQueue,
+                "Hero 床用 caustics overlay は透明キューで床の上に重ねる");
         }
 
         [Test]
@@ -1401,6 +1414,8 @@ namespace Siliq.Water.Tests
                 WaterBeginnerGuideWindow.CrystalLagoonShowcaseScenePath);
             Assert.AreEqual("PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab",
                 WaterBeginnerGuideWindow.CrystalLagoonCompletePrefabPath);
+            Assert.AreEqual("PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Hero_Complete.prefab",
+                WaterBeginnerGuideWindow.CrystalLagoonHeroCompletePrefabPath);
             Assert.AreEqual("PrebakedPack/Preview/preview_crystal_lagoon_complete.png",
                 WaterBeginnerGuideWindow.CrystalLagoonCompletePreviewPath);
             Assert.AreEqual("PrebakedPack/ReadyMaterials/M_Siliq_CrystalLagoon_Hero_Ready.mat",
@@ -1545,6 +1560,68 @@ namespace Siliq.Water.Tests
             Assert.GreaterOrEqual(animator.reflectionPatternStrength, 0.42f, "完成 Prefab は反射パターンを強めに確認できる必要がある");
             Assert.GreaterOrEqual(animator.causticsStrength, 0.70f, "完成 Prefab は水底光を強めに確認できる必要がある");
             Assert.GreaterOrEqual(animator.bottomLightStrength, 1.65f, "完成 Prefab は水底光が水越しに見える必要がある");
+        }
+
+        [Test]
+        public void CrystalLagoonHeroCompletePrefab_IsBundledForBeautyFirstDragAndDrop()
+        {
+            const string prefabGuid = "a171aabb01c34e01a1b2c3d4e5f60708";
+            const string gridGuid = "c372220d922244035b21bdd3e4ff000a";
+            const string heroWaterMaterialGuid = "a171aabb01c34e01a1b2c3d4e5f60807";
+            const string heroOverlayMaterialGuid = "f2c657c8bc4a4c7080e6a1327818898c";
+            const string floorMaterialGuid = "42443abe313b246949f1b9f8504234ce";
+
+            string prefabPath = AssetDatabase.GUIDToAssetPath(prefabGuid);
+            Assert.AreEqual("Packages/com.siliq.water-normalmap/PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Hero_Complete.prefab", prefabPath);
+
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            Assert.IsNotNull(prefab, "Crystal Lagoon Hero 完成 Prefab が読み込めない");
+            Assert.AreEqual("PF_Siliq_CrystalLagoon_Hero_Complete", prefab.name);
+
+            var water = prefab.transform.Find("Crystal Lagoon Hero Water - premium transparent beauty");
+            var floor = prefab.transform.Find("Pale Pool Floor - transparency and caustics receiver");
+            var overlay = prefab.transform.Find("Crystal Lagoon Hero Floor Caustics Overlay");
+            var light = prefab.transform.Find("Crystal Lagoon Hero Soft Preview Light");
+            Assert.IsNotNull(water, "Hero 完成 Prefab に水面がない");
+            Assert.IsNotNull(floor, "Hero 完成 Prefab に明るい床がない");
+            Assert.IsNotNull(overlay, "Hero 完成 Prefab に Hero caustics overlay がない");
+            Assert.IsNotNull(light, "Hero 完成 Prefab に確認用ライトがない");
+
+            var waterFilter = water.GetComponent<MeshFilter>();
+            var waterRenderer = water.GetComponent<MeshRenderer>();
+            var floorRenderer = floor.GetComponent<MeshRenderer>();
+            var overlayRenderer = overlay.GetComponent<MeshRenderer>();
+            var animator = water.GetComponent<WaterSurfaceAnimator>();
+            Assert.IsNotNull(waterFilter, "Hero 完成 Prefab の水面に MeshFilter がない");
+            Assert.IsNotNull(waterRenderer, "Hero 完成 Prefab の水面に MeshRenderer がない");
+            Assert.IsNotNull(floorRenderer, "Hero 完成 Prefab の床に MeshRenderer がない");
+            Assert.IsNotNull(overlayRenderer, "Hero 完成 Prefab の caustics overlay に MeshRenderer がない");
+            Assert.IsNotNull(animator, "Hero 完成 Prefab の水面に WaterSurfaceAnimator がない");
+
+            Assert.AreEqual(gridGuid, AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(waterFilter.sharedMesh)),
+                "Hero 完成 Prefab は分割済み Crystal Lagoon grid mesh を使う必要がある");
+            Assert.AreEqual(heroWaterMaterialGuid, AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(waterRenderer.sharedMaterial)),
+                "Hero 完成 Prefab の水面は Hero ready material を直接参照する必要がある");
+            Assert.AreEqual(heroOverlayMaterialGuid, AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(overlayRenderer.sharedMaterial)),
+                "Hero 完成 Prefab の overlay は Hero caustics overlay material を直接参照する必要がある");
+            Assert.AreEqual(floorMaterialGuid, AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(floorRenderer.sharedMaterial)),
+                "Hero 完成 Prefab の床は明るい確認用 material を直接参照する必要がある");
+
+            Assert.AreEqual("Siliq/Water Mobile (Quest)", waterRenderer.sharedMaterial.shader.name);
+            Assert.AreEqual("Siliq/Caustics Overlay Mobile", overlayRenderer.sharedMaterial.shader.name);
+            Assert.GreaterOrEqual(overlayRenderer.sharedMaterial.GetFloat("_Intensity"), 0.60f,
+                "Hero 完成 Prefab は床側にも強めの水底光を持つ必要がある");
+
+            Assert.IsNull(floor.GetComponent<Collider>(), "Hero 完成 Prefab の床は置いた瞬間に不要な物理 collider を増やさない");
+            Assert.IsNull(overlay.GetComponent<Collider>(), "Hero 完成 Prefab の caustics overlay は不要な collider を持たない");
+            Assert.LessOrEqual(animator.speed, 0.001f, "Hero 完成 Prefab は静かな速度から始める");
+            Assert.LessOrEqual(animator.displacementStrength, 0.004f, "Hero 完成 Prefab は板状の高さ模様を避ける");
+            Assert.LessOrEqual(animator.opacity, 0.36f, "Hero 完成 Prefab は透明感を最優先にする");
+            Assert.GreaterOrEqual(animator.clarity, 0.97f, "Hero 完成 Prefab は透明な抜け感を最大寄りにしておく");
+            Assert.GreaterOrEqual(animator.reflectionPatternStrength, 0.55f, "Hero 完成 Prefab は反射帯を確認できる必要がある");
+            Assert.GreaterOrEqual(animator.transmissionStrength, 0.97f, "Hero 完成 Prefab は透過光を強めにする");
+            Assert.GreaterOrEqual(animator.causticsStrength, 0.80f, "Hero 完成 Prefab は水底光を強めに確認できる必要がある");
+            Assert.GreaterOrEqual(animator.bottomLightStrength, 1.85f, "Hero 完成 Prefab は水底光が水越しに強く見える必要がある");
         }
 
         [Test]

@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.56] - 2026-07-09
+
+### 追加: Hero 完成 Prefab
+- `PF_Siliq_CrystalLagoon_Hero_Complete.prefab` を追加し、Hero water material、明るい床、Hero caustics overlay、確認用ライトを一体で配置できるようにした
+- `M_Siliq_CrystalLagoon_Hero_CausticsOverlay` を追加し、床側も Hero 専用水底光 texture を使うようにした
+- はじめてガイド / README / 用途別ガイド / テストで、初心者が Hero 完成形を直接選べる導線を固定
+
 ## [2.3.55] - 2026-07-09
 
 ### 追加: Hero 専用水底光 texture
