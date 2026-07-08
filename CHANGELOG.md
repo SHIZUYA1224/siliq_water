@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.3.32] - 2026-07-08
+
+### 追加: アタッチするだけで動く完成済み水マテリアル
+- `PrebakedPack/ReadyMaterials/` に `Siliq/Water Mobile (Quest)` 設定済みの完成 material を追加
+- `M_Siliq_ClearSea_Ready` / `M_Siliq_ClearPool_Ready` / `M_Siliq_IndoorBluePool_Ready` / `M_Siliq_FlagshipCrystal_Ready` / `M_Siliq_BloodSea_Ready` / `M_Siliq_LiquidMetal_Ready` を同梱
+- 各 ready material に normal map、透明/不透明 blend、色、反射、scroll、macro、実高さ初期値を設定し、`WaterSurfaceAnimator` なしでも shader 側で波が動くようにした
+- 既存の `PrebakedPack/Materials/` は互換・確認用の Standard material として残し、製品利用の第一選択を `ReadyMaterials` に変更
+- ready material が Standard へ戻ったり normal / scroll / blend を失ったりしないようテストを追加
+
 ## [2.3.31] - 2026-07-08
 
 ### 修正: 波紋・波アニメーションのピクつき抑制

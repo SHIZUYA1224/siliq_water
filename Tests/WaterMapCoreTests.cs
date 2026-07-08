@@ -426,6 +426,59 @@ namespace Siliq.Water.Tests
         }
 
         [Test]
+        public void ReadyMaterials_AreBundledForDragAndDropUse()
+        {
+            string[] transparentReadyMaterials =
+            {
+                "M_Siliq_ClearSea_Ready",
+                "M_Siliq_ClearPool_Ready",
+                "M_Siliq_IndoorBluePool_Ready",
+                "M_Siliq_FlagshipCrystal_Ready",
+                "M_Siliq_BloodSea_Ready",
+            };
+
+            foreach (string name in transparentReadyMaterials)
+            {
+                var mat = LoadReadyMaterial(name);
+                Assert.AreEqual("Siliq/Water Mobile (Quest)", mat.shader.name,
+                    $"{name} は最初から使える Siliq 水マテリアルである必要がある");
+                Assert.IsNotNull(mat.GetTexture("_NormalMap"),
+                    $"{name} はドラッグ&ドロップだけで凹凸が出るよう normal map を持つ必要がある");
+                Assert.Greater(mat.GetVector("_Scroll1").sqrMagnitude, 0.0001f,
+                    $"{name} は WaterSurfaceAnimator なしでも shader 側で波が動く scroll を持つ必要がある");
+                Assert.AreEqual((float)BlendMode.SrcAlpha, mat.GetFloat("_SrcBlend"), 1e-5f,
+                    $"{name} は透明水としてすぐ使える blend 設定が必要");
+                Assert.AreEqual((float)BlendMode.OneMinusSrcAlpha, mat.GetFloat("_DstBlend"), 1e-5f);
+                Assert.AreEqual(0f, mat.GetFloat("_ZWrite"), 1e-5f);
+                Assert.AreEqual((int)RenderQueue.Transparent, mat.renderQueue);
+                Assert.LessOrEqual(mat.GetFloat("_HeightMapInfluence"), 0.05f,
+                    $"{name} は初期状態で height map を強く使って板模様にしない");
+            }
+
+            var metal = LoadReadyMaterial("M_Siliq_LiquidMetal_Ready");
+            Assert.AreEqual("Siliq/Water Mobile (Quest)", metal.shader.name);
+            Assert.IsNotNull(metal.GetTexture("_NormalMap"));
+            Assert.Greater(metal.GetVector("_Scroll1").sqrMagnitude, 0.0001f);
+            Assert.AreEqual((float)BlendMode.One, metal.GetFloat("_SrcBlend"), 1e-5f);
+            Assert.AreEqual((float)BlendMode.Zero, metal.GetFloat("_DstBlend"), 1e-5f);
+            Assert.AreEqual(1f, metal.GetFloat("_ZWrite"), 1e-5f);
+            Assert.AreEqual((int)RenderQueue.Geometry, metal.renderQueue);
+
+            var flagship = LoadReadyMaterial("M_Siliq_FlagshipCrystal_Ready");
+            Assert.IsNotNull(flagship.GetTexture("_HeightMap"),
+                "Flagship ready material は専用 height map を持つが、初期 influence は 0 にする");
+            Assert.LessOrEqual(flagship.GetFloat("_DisplacementStrength"), 0.02f);
+        }
+
+        static Material LoadReadyMaterial(string name)
+        {
+            string path = $"Packages/com.siliq.water-normalmap/PrebakedPack/ReadyMaterials/{name}.mat";
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+            Assert.IsNotNull(mat, $"{path} が同梱されていない");
+            return mat;
+        }
+
+        [Test]
         public void SiliqMobileShader_ExposesMacroVariationControls()
         {
             Material mat = null;

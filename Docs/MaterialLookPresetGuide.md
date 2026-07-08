@@ -1,6 +1,8 @@
 # 用途別マテリアルプリセットガイド
 
-Siliq Water は、ノーマルマップ単体ではなく「用途別の見た目プリセット」として使うことを前提にする。水面オブジェクトを選択して、Hierarchy 右クリックから以下を適用する。
+Siliq Water は、ノーマルマップ単体ではなく「用途別の見た目プリセット」として使うことを前提にする。まずアタッチだけで使う場合は `PrebakedPack/ReadyMaterials/` の `M_Siliq_*_Ready` を Renderer にドラッグする。これらは normal、色、透明度、反射、scroll が設定済みで、`WaterSurfaceAnimator` なしでも shader 側で波が動く。
+
+水面オブジェクトを選択して作成・再適用したい場合は、Hierarchy 右クリックから以下を適用する。
 
 `Siliq Water > 用途別マテリアルを適用`
 

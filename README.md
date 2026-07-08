@@ -79,9 +79,9 @@ README / 用途別ガイド / PrebakedPack の確認に進めます。
 
 ## 焼き済みパック (PrebakedPack) — ツール不要ですぐ使える基本 5 種 + 旗艦 1 種
 
-ツールを触らなくても、`PrebakedPack/` に**すぐ使える水ノーマルマップ基本 5 種 + フラッグシップ専用 normal / height + 設定済みマテリアル + サンプルシーン**が入っています。
+ツールを触らなくても、`PrebakedPack/` に**すぐ使える水ノーマルマップ基本 5 種 + フラッグシップ専用 normal / height + アタッチ用完成マテリアル + サンプルシーン**が入っています。
 
-| ファイル | 用途 | マテリアル |
+| ファイル | 用途 | 確認用マテリアル |
 |---|---|---|
 | `Water_Normal_Calm_01.png` | 静かな湖・穏やかな水面 | `M_Water_Calm` |
 | `Water_Normal_Ripple_01.png` | 雨の波紋 | `M_Water_Ripple` |
@@ -92,12 +92,26 @@ README / 用途別ガイド / PrebakedPack の確認に進めます。
 
 基本 5 種は **1024×1024 PNG / シームレス / インポート設定済み (NormalMap・Repeat・Android/iOS は ASTC 6x6)**。
 フラッグシップ透明水は専用 **2048×2048 normal map + 2048×2048 height map** を同梱し、用途別 Quick Apply では両方を Siliq 水シェーダーへ割り当てます。
-マテリアルは Standard シェーダー(Metallic 0 / Smoothness 高め / 不透明)なので、
-ビルトイン RP と VRChat (PC / Quest ワールド) でそのまま使えます。
+`PrebakedPack/ReadyMaterials/` には `Siliq/Water Mobile (Quest)` 設定済みの完成マテリアルが入っています。
+
+| Ready material | 用途 |
+|---|---|
+| `M_Siliq_ClearSea_Ready` | 綺麗な海・透明感のある水面 |
+| `M_Siliq_ClearPool_Ready` | 透明プール |
+| `M_Siliq_IndoorBluePool_Ready` | 明るい室内プール |
+| `M_Siliq_FlagshipCrystal_Ready` | 製品デモ向けのフラッグシップ透明水 |
+| `M_Siliq_BloodSea_Ready` | 血の海・赤い液体 |
+| `M_Siliq_LiquidMetal_Ready` | 液体金属 |
+
+これらは normal map、色、透明度、反射、scroll、実高さの初期値まで設定済みなので、
+Renderer にドラッグ&ドロップするだけで水として動きます。`WaterSurfaceAnimator` は必須ではありません。
+既存の `PrebakedPack/Materials/M_Water_*` は Standard シェーダーの互換・確認用です。
 
 ### 一瞬で水面にする 3 つの方法
 
-1. **右クリック一発**: Hierarchy でオブジェクトを選択 → 右クリック →
+1. **ドラッグ & ドロップ**: `PrebakedPack/ReadyMaterials/` の `M_Siliq_*_Ready` をシーンのオブジェクトへドラッグ。
+   同梱 Siliq shader の scroll が最初から入っているため、material だけで波が動きます。
+2. **右クリック一発**: Hierarchy でオブジェクトを選択 → 右クリック →
    `Siliq Water > 水マテリアルを適用 > 好きな水` — マテリアル適用と同時に
    `WaterSurfaceAnimator` コンポーネントも自動で付き、**再生すると波が流れます**
    `波紋 (Ripple)` だけは例外で、ノーマルを横へ流さず、
@@ -111,14 +125,13 @@ README / 用途別ガイド / PrebakedPack の確認に進めます。
    同梱の `Siliq/Water Mobile (Quest)` を alpha blend 設定にしたマテリアルを生成します。
    正面は透け、斜め視線では Fresnel で反射と不透明感が増え、透過光・細い光・きらめきで水らしさが出るように調整済みです。
    暗い部屋では反射ときらめきを自動で抑えるため、黒背景で水面だけ銀色に浮きにくくなります。
-2. **ドラッグ & ドロップ**: `PrebakedPack/Materials/` の `M_Water_*` をシーンのオブジェクトへドラッグ
-   (この方法では静止したままなので、動かしたい場合は次項のコンポーネントを手動で追加してください)
 3. **サンプルシーンで見比べる**: `PrebakedPack/SampleScene/SC_WaterNormalMap_Preview.unity` を開くと
    基本 5 種の水面が Plane に貼られた状態で比較できます (このシーンは静止状態です)
 
 ### 水面を動かす (WaterSurfaceAnimator)
 
-`PrebakedPack` のマテリアルは Standard シェーダーで UV アニメーション機能を持たないため、
+`PrebakedPack/ReadyMaterials/` の `M_Siliq_*_Ready` は shader 側に UV アニメーションが入っているため、基本的にこのコンポーネントは不要です。
+一方で `PrebakedPack/Materials/` の `M_Water_*` は Standard シェーダーで UV アニメーション機能を持たないため、
 静止画のままだと波が流れません。**右クリック適用なら自動で付与**されますが、
 手動でドラッグ&ドロップした場合は `Runtime/Components/WaterSurfaceAnimator.cs` を
 対象オブジェクトにアタッチしてください。Standard / URP Lit / VRChat Mobile など、
@@ -429,6 +442,7 @@ Tests/
   WaterMapCoreTests.cs      Unity Test Runner (EditMode) 用の自動テスト
 PrebakedPack/
   Textures/                 基本 normal 5 種 (1024px) + flagship normal/height (2048px)
+  ReadyMaterials/           アタッチするだけで動く Siliq 水マテリアル 6 種
   Materials/                設定済み Standard マテリアル 6 種
   SampleScene/              SC_WaterNormalMap_Preview.unity (基本 5 種比較シーン)
   Preview/                  Plane に貼った状態のプレビュー画像

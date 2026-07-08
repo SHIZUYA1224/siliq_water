@@ -68,7 +68,8 @@ namespace Siliq.Water.Editor
         static void DrawBeginnerChecks()
         {
             EditorGUILayout.LabelField("水が安っぽく見える時の確認", EditorStyles.boldLabel);
-            Bullet("normal だけでは透明感は出ません。用途別マテリアルで色、透明度、反射、ハイライトも設定します。");
+            Bullet("すぐ使う場合は PrebakedPack/ReadyMaterials の M_Siliq_*_Ready をドラッグします。material だけで波が動きます。");
+            Bullet("normal だけでは透明感は出ません。ReadyMaterials か用途別マテリアルで色、透明度、反射、ハイライトも設定します。");
             Bullet("高さはメッシュの頂点変位です。1 枚 Quad では見えないため、分割メッシュを使います。");
             Bullet("ピンク material は shader 不一致です。診断修復で現在の Render Pipeline に合う material へ差し替えます。");
             Bullet("編集中に重い場合は WaterSurfaceAnimator の Animate In Edit Mode を OFF、または Preview FPS を下げます。");
@@ -109,6 +110,11 @@ namespace Siliq.Water.Editor
                 {
                     PingPackageAsset("PrebakedPack");
                 }
+            }
+
+            if (GUILayout.Button("ReadyMaterials を選択"))
+            {
+                PingPackageAsset("PrebakedPack/ReadyMaterials");
             }
         }
 
