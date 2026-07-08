@@ -97,6 +97,7 @@ Crystal Lagoon だけは水底光も専用 **2048×2048 `Water_Caustics_CrystalL
 さらに共通の `Water_Caustics_Crystal_01.png` を同梱し、透明な海・プール・フラッグシップ水では水底に揺れる光模様として使います。これは強い多角形セルではなく、淡く重なる光の筋として調整しています。
 `PrebakedPack/ReadyMaterials/` には `Siliq/Water Mobile (Quest)` 設定済みの完成マテリアルが入っています。
 `PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab` は、分割済み水面、明るいプール床、床用 caustics overlay、確認用ライトを一体化した完成セットです。Prefab を Hierarchy へ置くだけで、透明感と水底光を同時に確認できます。
+完成形の方向性は `PrebakedPack/Preview/preview_crystal_lagoon_complete.png` で確認できます。薄い床、透明な水面、反射、水底光が一枚で見える初心者向けの目安画像です。
 
 | Ready material | 用途 |
 |---|---|

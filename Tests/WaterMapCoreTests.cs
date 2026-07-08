@@ -553,6 +553,62 @@ namespace Siliq.Water.Tests
         }
 
         [Test]
+        public void CrystalLagoonCompletePreview_ShowsPrefabBeautyDirection()
+        {
+            const string path = "Packages/com.siliq.water-normalmap/PrebakedPack/Preview/preview_crystal_lagoon_complete.png";
+            var preview = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+            Assert.IsNotNull(preview, "Crystal Lagoon 完成 Prefab の方向性が分かる preview が同梱されていない");
+            Assert.GreaterOrEqual(preview.width, 1024, "完成 preview は Unity 上でも水面、床、反射、水底光が読める横長解像度が必要");
+            Assert.GreaterOrEqual(preview.height, 512, "完成 preview は Unity 上でも完成形を確認できる高さが必要");
+
+            var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            Assert.IsNotNull(importer, "完成 preview の import 設定が読めない");
+            Assert.IsTrue(importer.sRGBTexture, "完成 preview は見た目確認用なので sRGB で読み込む");
+            Assert.GreaterOrEqual(importer.maxTextureSize, 2048, "完成 preview は 1280px 以上で潰さず表示できる import 上限が必要");
+
+            var readable = new Texture2D(2, 2, TextureFormat.RGB24, false);
+            try
+            {
+                Assert.IsTrue(readable.LoadImage(File.ReadAllBytes(path)), "完成 preview を PNG として読めない");
+                Assert.GreaterOrEqual(readable.width, 1280, "完成 preview の元 PNG は十分な横解像度が必要");
+                Assert.GreaterOrEqual(readable.height, 720, "完成 preview の元 PNG は十分な縦解像度が必要");
+                var pixels = readable.GetPixels32();
+                int blueWaterPixels = 0;
+                int brightCausticPixels = 0;
+                int darkerReflectionPixels = 0;
+                float luminanceSum = 0f;
+                byte minLum = byte.MaxValue;
+                byte maxLum = 0;
+
+                foreach (var p in pixels)
+                {
+                    byte lum = (byte)((p.r + p.g + p.b) / 3);
+                    luminanceSum += lum;
+                    if (lum < minLum) minLum = lum;
+                    if (lum > maxLum) maxLum = lum;
+                    if (p.b > p.r + 18 && p.g > p.r + 8) blueWaterPixels++;
+                    if (lum > 225) brightCausticPixels++;
+                    if (lum < 115) darkerReflectionPixels++;
+                }
+
+                float averageLuminance = luminanceSum / pixels.Length;
+                Assert.Greater(blueWaterPixels, pixels.Length * 0.65f,
+                    "完成 preview は透明な青系の水面として読める色比率が必要");
+                Assert.Greater(brightCausticPixels, pixels.Length * 0.03f,
+                    "完成 preview は水底光や反射の明るい筋を含む必要がある");
+                Assert.Greater(darkerReflectionPixels, pixels.Length * 0.00005f,
+                    "完成 preview は反射の濃淡がなく単調な水色だけに戻ってはいけない");
+                Assert.Greater(averageLuminance, 150f, "完成 preview は暗く沈みすぎてはいけない");
+                Assert.Less(averageLuminance, 220f, "完成 preview は白飛びした単色に近づけない");
+                Assert.Greater(maxLum - minLum, 120, "完成 preview は床、光、反射の明暗差が必要");
+            }
+            finally
+            {
+                Object.DestroyImmediate(readable);
+            }
+        }
+
+        [Test]
         public void CrystalCausticsTexture_UsesSoftNonPolygonalLight()
         {
             const string path = "Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Caustics_Crystal_01.png";
@@ -1211,6 +1267,8 @@ namespace Siliq.Water.Tests
                 WaterBeginnerGuideWindow.CrystalLagoonShowcaseScenePath);
             Assert.AreEqual("PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab",
                 WaterBeginnerGuideWindow.CrystalLagoonCompletePrefabPath);
+            Assert.AreEqual("PrebakedPack/Preview/preview_crystal_lagoon_complete.png",
+                WaterBeginnerGuideWindow.CrystalLagoonCompletePreviewPath);
         }
 
         [Test]
