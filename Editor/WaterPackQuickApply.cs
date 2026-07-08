@@ -49,6 +49,7 @@ namespace Siliq.Water.Editor
             public float tiling2;
             public float alphaFresnel;
             public float alphaPower;
+            public float clarity;
             public float edgeReflection;
             public float transmissionStrength;
             public float glimmerIntensity;
@@ -72,6 +73,7 @@ namespace Siliq.Water.Editor
             public float causticsStrength;
             public float causticsScale;
             public float causticsSpeed;
+            public float bottomLightStrength;
             public Color causticsTint;
         }
 
@@ -101,6 +103,7 @@ namespace Siliq.Water.Editor
             tiling2 = 3.1f,
             alphaFresnel = 0.74f,
             alphaPower = 2.20f,
+            clarity = 0.64f,
             edgeReflection = 0.72f,
             transmissionStrength = 0.72f,
             glimmerIntensity = 0.26f,
@@ -124,6 +127,7 @@ namespace Siliq.Water.Editor
             causticsStrength = 0.28f,
             causticsScale = 1.9f,
             causticsSpeed = 0.0012f,
+            bottomLightStrength = 1.15f,
             causticsTint = new Color(0.68f, 1f, 1f, 1f),
         };
 
@@ -146,6 +150,7 @@ namespace Siliq.Water.Editor
             tiling2 = 2.15f,
             alphaFresnel = 0.70f,
             alphaPower = 2.0f,
+            clarity = 0.76f,
             edgeReflection = 0.60f,
             transmissionStrength = 0.76f,
             glimmerIntensity = 0.20f,
@@ -169,6 +174,7 @@ namespace Siliq.Water.Editor
             causticsStrength = 0.46f,
             causticsScale = 2.4f,
             causticsSpeed = 0.001f,
+            bottomLightStrength = 1.35f,
             causticsTint = new Color(0.84f, 1f, 1f, 1f),
         };
 
@@ -191,6 +197,7 @@ namespace Siliq.Water.Editor
             tiling2 = 1.55f,
             alphaFresnel = 0.78f,
             alphaPower = 1.85f,
+            clarity = 0.72f,
             edgeReflection = 0.82f,
             transmissionStrength = 0.82f,
             glimmerIntensity = 0.24f,
@@ -214,6 +221,7 @@ namespace Siliq.Water.Editor
             causticsStrength = 0.58f,
             causticsScale = 1.7f,
             causticsSpeed = 0.001f,
+            bottomLightStrength = 1.35f,
             causticsTint = new Color(0.82f, 0.98f, 1f, 1f),
         };
 
@@ -237,6 +245,7 @@ namespace Siliq.Water.Editor
             tiling2 = 4.60f,
             alphaFresnel = 0.72f,
             alphaPower = 1.85f,
+            clarity = 0.82f,
             edgeReflection = 0.88f,
             transmissionStrength = 0.84f,
             glimmerIntensity = 0.32f,
@@ -260,6 +269,7 @@ namespace Siliq.Water.Editor
             causticsStrength = 0.64f,
             causticsScale = 2.1f,
             causticsSpeed = 0.001f,
+            bottomLightStrength = 1.45f,
             causticsTint = new Color(0.76f, 1f, 0.98f, 1f),
         };
 
@@ -284,6 +294,7 @@ namespace Siliq.Water.Editor
             tiling2 = 3.40f,
             alphaFresnel = 0.82f,
             alphaPower = 1.70f,
+            clarity = 0.92f,
             edgeReflection = 0.92f,
             transmissionStrength = 0.92f,
             glimmerIntensity = 0.38f,
@@ -307,6 +318,7 @@ namespace Siliq.Water.Editor
             causticsStrength = 0.72f,
             causticsScale = 2.25f,
             causticsSpeed = 0.0006f,
+            bottomLightStrength = 1.70f,
             causticsTint = new Color(0.84f, 1f, 0.96f, 1f),
         };
 
@@ -329,6 +341,7 @@ namespace Siliq.Water.Editor
             tiling2 = 2.35f,
             alphaFresnel = 0.18f,
             alphaPower = 2.9f,
+            clarity = 0.10f,
             edgeReflection = 0.30f,
             transmissionStrength = 0.18f,
             glimmerIntensity = 0.08f,
@@ -352,6 +365,7 @@ namespace Siliq.Water.Editor
             causticsStrength = 0.06f,
             causticsScale = 1.4f,
             causticsSpeed = 0.0008f,
+            bottomLightStrength = 0.35f,
             causticsTint = new Color(1f, 0.22f, 0.16f, 1f),
         };
 
@@ -374,6 +388,7 @@ namespace Siliq.Water.Editor
             tiling2 = 2.45f,
             alphaFresnel = 0f,
             alphaPower = 3.4f,
+            clarity = 0f,
             edgeReflection = 0.95f,
             transmissionStrength = 0f,
             glimmerIntensity = 0.12f,
@@ -396,6 +411,7 @@ namespace Siliq.Water.Editor
             causticsStrength = 0f,
             causticsScale = 1.8f,
             causticsSpeed = 0f,
+            bottomLightStrength = 0f,
             causticsTint = Color.white,
         };
 
@@ -1018,6 +1034,7 @@ namespace Siliq.Water.Editor
 
             SetupDarkSceneResponse(mat);
             if (mat.HasProperty("_Opacity")) mat.SetFloat("_Opacity", 1f);
+            if (mat.HasProperty("_Clarity")) mat.SetFloat("_Clarity", 0f);
             if (mat.HasProperty("_AlphaFresnel")) mat.SetFloat("_AlphaFresnel", 0f);
             if (mat.HasProperty("_EdgeReflection")) mat.SetFloat("_EdgeReflection", 0f);
             if (mat.HasProperty("_SrcBlend")) mat.SetFloat("_SrcBlend", (float)BlendMode.One);
@@ -1034,6 +1051,7 @@ namespace Siliq.Water.Editor
 
             SetupDarkSceneResponse(mat);
             if (mat.HasProperty("_Opacity")) mat.SetFloat("_Opacity", Mathf.Clamp01(opacity));
+            if (mat.HasProperty("_Clarity")) mat.SetFloat("_Clarity", 0.70f);
             if (mat.HasProperty("_AlphaFresnel")) mat.SetFloat("_AlphaFresnel", 0.74f);
             if (mat.HasProperty("_AlphaPower")) mat.SetFloat("_AlphaPower", 2.05f);
             if (mat.HasProperty("_EdgeReflection")) mat.SetFloat("_EdgeReflection", 0.70f);
@@ -1058,6 +1076,7 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_CausticsStrength")) mat.SetFloat("_CausticsStrength", 0.30f);
             if (mat.HasProperty("_CausticsScale")) mat.SetFloat("_CausticsScale", 1.8f);
             if (mat.HasProperty("_CausticsSpeed")) mat.SetFloat("_CausticsSpeed", 0.001f);
+            if (mat.HasProperty("_BottomLightStrength")) mat.SetFloat("_BottomLightStrength", 1.20f);
             if (mat.HasProperty("_CausticsTint")) mat.SetColor("_CausticsTint", new Color(0.78f, 1f, 1f, 1f));
             if (mat.HasProperty("_SrcBlend")) mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
             if (mat.HasProperty("_DstBlend")) mat.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
@@ -1243,6 +1262,7 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_Tiling2")) mat.SetFloat("_Tiling2", preset.tiling2);
             if (mat.HasProperty("_AlphaFresnel")) mat.SetFloat("_AlphaFresnel", preset.alphaFresnel);
             if (mat.HasProperty("_AlphaPower")) mat.SetFloat("_AlphaPower", preset.alphaPower);
+            if (mat.HasProperty("_Clarity")) mat.SetFloat("_Clarity", preset.clarity);
             if (mat.HasProperty("_EdgeReflection")) mat.SetFloat("_EdgeReflection", preset.edgeReflection);
             if (mat.HasProperty("_TransmissionStrength")) mat.SetFloat("_TransmissionStrength", preset.transmissionStrength);
             if (mat.HasProperty("_GlimmerIntensity")) mat.SetFloat("_GlimmerIntensity", preset.glimmerIntensity);
@@ -1261,6 +1281,7 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_CausticsStrength")) mat.SetFloat("_CausticsStrength", preset.causticsStrength);
             if (mat.HasProperty("_CausticsScale")) mat.SetFloat("_CausticsScale", preset.causticsScale);
             if (mat.HasProperty("_CausticsSpeed")) mat.SetFloat("_CausticsSpeed", preset.causticsSpeed);
+            if (mat.HasProperty("_BottomLightStrength")) mat.SetFloat("_BottomLightStrength", preset.bottomLightStrength);
             if (mat.HasProperty("_CausticsTint")) mat.SetColor("_CausticsTint", preset.causticsTint);
 
             if (mat.HasProperty("_Scroll1"))

@@ -308,6 +308,7 @@ MonoBehaviour:
   transmissionColor: {r: 0.62, g: 1, b: 0.96, a: 1}
   sparkleColor: {r: 1, g: 1, b: 0.96, a: 1}
   opacity: 0.4
+  clarity: 0.92
   edgeReflection: 0.92
   reflectionStrength: 1
   transmissionStrength: 0.92
@@ -316,6 +317,7 @@ MonoBehaviour:
   causticsStrength: 0.72
   causticsScale: 2.25
   causticsSpeed: 0.0006
+  bottomLightStrength: 1.7
   causticsTint: {r: 0.84, g: 1, b: 0.96, a: 1}
 --- !u!1 &8641218449220747125
 GameObject:

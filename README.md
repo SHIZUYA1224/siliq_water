@@ -164,18 +164,20 @@ Renderer にドラッグ&ドロップするだけで水として動きます。`
 | **明るい水色 / 深い水色** | 水面の基本色。Standard / URP Lit では明るい水色がベースカラーになる |
 | **反射色** | 空や環境が映り込む色 |
 | **透過光** | 透明水の内側から出る色。水の厚みと透明感を作る |
+| **透明な抜け感** | 水色の濁りを抑え、水底と透過光を見えやすくする |
 | **不透明度** | 1 に近いほど濃く、低いほど透ける |
 | **輪郭反射 / 反射量** | 斜め視線の反射と全体の映り込み |
 | **透過光量 / ハイライト / きらめき** | 透明感、強い光、細い揺らぎの量 |
 | **水底の光** | Caustics map の強さ、細かさ、速度、色。透明プールや浅い海の床に揺れる光を作る |
+| **水底光の透け** | 水底光が水面越しに見える量。Crystal Lagoon では高め |
 
 **Play ボタンを押さなくても、値を変えるとシーンビュー上でその場に反映**されます。
 Standard / URP Lit / VRChat Mobile 系では `_BumpMap` の UV、`_BumpScale`、色 alpha を、
 同梱の Siliq 水シェーダーでは `_Scroll1` / `_Scroll2` / `_NormalStrength` / `_Tiling*` /
 `_DisplacementStrength` / `_DisplacementScale` / `_DisplacementSpeed` /
-`_CausticsStrength` / `_CausticsScale` / `_CausticsSpeed` を
+`_CausticsStrength` / `_CausticsScale` / `_CausticsSpeed` / `_BottomLightStrength` を
 `_ShallowColor` / `_DeepColor` / `_HorizonColor` / `_TransmissionColor` /
-`_Opacity` / `_EdgeReflection` / `_ReflStrength` / `_CausticsTint` などと一緒に
+`_Opacity` / `_Clarity` / `_EdgeReflection` / `_ReflStrength` / `_CausticsTint` などと一緒に
 `MaterialPropertyBlock` 経由で動かすため、共有マテリアルを汚さずに調整できます。
 実際の高さは頂点変位なので、1 枚ポリゴンの Quad では見えにくいです。Unity 標準の Plane や細分化された水面メッシュを使ってください。
 PC の発熱を避けるため、編集モードの連続プレビューは**選択中の水面だけ**最大 10fps で更新されます。
@@ -304,7 +306,7 @@ Built-in / VRChat / Quest / iOS 向けの通常導入ではコンパイル対象
 - ノーマルマップ 1 枚を 2 回スクロールサンプリング
 - `_DisplacementStrength` による実頂点変位。ハイトマップがある場合は `_HeightMapInfluence` で混ぜられます
 - 深い色 ⇔ 浅い色 + フレネル + 透過光 + 細い光の揺らぎ + スペキュラ + 任意のキューブマップ反射
-- `_CausticsMap` / `_CausticsStrength` / `_CausticsScale` / `_CausticsSpeed` / `_CausticsTint` による水底の光模様
+- `_CausticsMap` / `_CausticsStrength` / `_CausticsScale` / `_CausticsSpeed` / `_BottomLightStrength` / `_CausticsTint` による水底の光模様
 - `_ReflStrength` はキューブマップ未使用時も反射量として効くため、反射が足りない時に直接上げられます
 - `_MinLighting` / `_DarkReflectionDamping` / `_DarkDetailDamping` により、暗い部屋では反射ときらめきを減衰
 - `_MacroVariation` / `_MacroScale` / `_MacroDirectionBreakup` /

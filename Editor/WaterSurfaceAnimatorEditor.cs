@@ -26,6 +26,7 @@ namespace Siliq.Water.Editor
         SerializedProperty transmissionColor;
         SerializedProperty sparkleColor;
         SerializedProperty opacity;
+        SerializedProperty clarity;
         SerializedProperty edgeReflection;
         SerializedProperty reflectionStrength;
         SerializedProperty transmissionStrength;
@@ -34,6 +35,7 @@ namespace Siliq.Water.Editor
         SerializedProperty causticsStrength;
         SerializedProperty causticsScale;
         SerializedProperty causticsSpeed;
+        SerializedProperty bottomLightStrength;
         SerializedProperty causticsTint;
 
         void OnEnable()
@@ -56,6 +58,7 @@ namespace Siliq.Water.Editor
             transmissionColor = serializedObject.FindProperty("transmissionColor");
             sparkleColor = serializedObject.FindProperty("sparkleColor");
             opacity = serializedObject.FindProperty("opacity");
+            clarity = serializedObject.FindProperty("clarity");
             edgeReflection = serializedObject.FindProperty("edgeReflection");
             reflectionStrength = serializedObject.FindProperty("reflectionStrength");
             transmissionStrength = serializedObject.FindProperty("transmissionStrength");
@@ -64,6 +67,7 @@ namespace Siliq.Water.Editor
             causticsStrength = serializedObject.FindProperty("causticsStrength");
             causticsScale = serializedObject.FindProperty("causticsScale");
             causticsSpeed = serializedObject.FindProperty("causticsSpeed");
+            bottomLightStrength = serializedObject.FindProperty("bottomLightStrength");
             causticsTint = serializedObject.FindProperty("causticsTint");
         }
 
@@ -150,6 +154,7 @@ namespace Siliq.Water.Editor
         {
             EditorGUILayout.LabelField("透明・反射", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(opacity, new GUIContent("不透明度"));
+            EditorGUILayout.PropertyField(clarity, new GUIContent("透明な抜け感"));
             EditorGUILayout.PropertyField(edgeReflection, new GUIContent("輪郭反射"));
             EditorGUILayout.PropertyField(reflectionStrength, new GUIContent("反射量"));
             EditorGUILayout.PropertyField(transmissionStrength, new GUIContent("透過光量"));
@@ -164,6 +169,7 @@ namespace Siliq.Water.Editor
             EditorGUILayout.PropertyField(causticsStrength, new GUIContent("光の強さ"));
             EditorGUILayout.PropertyField(causticsScale, new GUIContent("光の細かさ"));
             EditorGUILayout.PropertyField(causticsSpeed, new GUIContent("光の速度"));
+            EditorGUILayout.PropertyField(bottomLightStrength, new GUIContent("水底光の透け"));
             EditorGUILayout.PropertyField(causticsTint, new GUIContent("光の色"));
             EditorGUILayout.Space(4f);
         }

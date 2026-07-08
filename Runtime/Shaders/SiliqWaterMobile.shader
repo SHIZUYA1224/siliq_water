@@ -16,6 +16,7 @@ Shader "Siliq/Water Mobile (Quest)"
         _Opacity ("正面の不透明度", Range(0, 1)) = 1
         _AlphaFresnel ("斜め視線の不透明度加算", Range(0, 1)) = 0
         _AlphaPower ("透明フレネルの鋭さ", Range(0.5, 8)) = 3
+        _Clarity ("透明な抜け感", Range(0, 1)) = 0.45
         _EdgeReflection ("斜め視線の反射強調", Range(0, 1)) = 0
         _TransmissionColor ("透過光の色", Color) = (0.28, 0.75, 0.95, 1)
         _TransmissionStrength ("透過光の強さ", Range(0, 1)) = 0
@@ -43,6 +44,7 @@ Shader "Siliq/Water Mobile (Quest)"
         _CausticsStrength ("水底の光の強さ", Range(0, 1)) = 0
         _CausticsScale ("水底の光の細かさ", Range(0.2, 8)) = 1.8
         _CausticsSpeed ("水底の光の速度", Range(0, 0.25)) = 0.0015
+        _BottomLightStrength ("水底光の透け", Range(0, 2)) = 1
         _CausticsTint ("水底の光の色", Color) = (0.75, 1, 1, 1)
         _SpecPower ("ハイライトの鋭さ", Range(8, 512)) = 160
         _SpecIntensity ("ハイライトの強さ", Range(0, 2)) = 0.8
@@ -97,6 +99,7 @@ Shader "Siliq/Water Mobile (Quest)"
             half _Opacity;
             half _AlphaFresnel;
             half _AlphaPower;
+            half _Clarity;
             half _EdgeReflection;
             half4 _TransmissionColor;
             half _TransmissionStrength;
@@ -121,6 +124,7 @@ Shader "Siliq/Water Mobile (Quest)"
             half _CausticsStrength;
             half _CausticsScale;
             half _CausticsSpeed;
+            half _BottomLightStrength;
             half4 _CausticsTint;
             half _SpecPower;
             half _SpecIntensity;
@@ -309,6 +313,9 @@ Shader "Siliq/Water Mobile (Quest)"
                 half colorLift = (macro01 - 0.5h) * _MacroColorVariation;
                 half colorMix = saturate(0.12h + directLum * 0.68h + ambientLum * 0.32h + colorLift);
                 half3 baseCol = lerp(_DeepColor.rgb, _ShallowColor.rgb, colorMix) * baseVisibility;
+                half clarity = saturate(_Clarity);
+                half3 clearWaterCol = lerp(_ShallowColor.rgb, _TransmissionColor.rgb, 0.68h) * baseVisibility;
+                baseCol = lerp(baseCol, clearWaterCol, clarity * viewFacing * 0.62h);
 
                 half3 reflCol = _HorizonColor.rgb;
                 #ifdef USE_REFLECTION_CUBE
@@ -334,16 +341,18 @@ Shader "Siliq/Water Mobile (Quest)"
                 float2 causticsUvB = SiliqRotate2D(i.worldPos.xz, 1.17) * causticsScale * 0.09 - worldN.xz * 0.08 - _Time.y * _CausticsSpeed * float2(0.19, 0.29);
                 half causticsA = tex2D(_CausticsMap, causticsUvA).r;
                 half causticsB = tex2D(_CausticsMap, causticsUvB).r;
-                half caustics = saturate((causticsA * 0.68h + causticsB * 0.45h - 0.22h) * _CausticsStrength);
-                caustics *= viewFacing * detailVisibility * saturate(0.45h + _TransmissionStrength);
+                half bottomLight = saturate(_BottomLightStrength * 0.5h);
+                half caustics = saturate((causticsA * 0.68h + causticsB * 0.45h - 0.22h) * _CausticsStrength * lerp(0.82h, 1.55h, bottomLight));
+                caustics *= viewFacing * detailVisibility * saturate(0.32h + _TransmissionStrength + bottomLight * 0.28h);
                 half3 transmission = _TransmissionColor.rgb * _TransmissionStrength * viewFacing * saturate(0.2h + surfaceLight) * baseVisibility;
+                transmission *= lerp(1.0h, 1.38h, clarity);
 
                 half4 col;
                 col.rgb = lerp(baseCol + transmission, reflCol, fresnel) + (spec + glint) * _LightColor0.rgb;
                 col.rgb += _CausticsTint.rgb * caustics;
                 col.rgb += _GlimmerColor.rgb * (glimmer + rippleLight * 0.35h * detailVisibility);
                 col.rgb = lerp(col.rgb, reflCol + (spec + glint) * _LightColor0.rgb, alphaFresnel * _EdgeReflection);
-                col.a = saturate(_Opacity + alphaFresnel * _AlphaFresnel + glimmer * 0.08h + rippleLight * 0.05h);
+                col.a = saturate(_Opacity - clarity * viewFacing * 0.12h + alphaFresnel * _AlphaFresnel + glimmer * 0.08h + rippleLight * 0.05h);
 
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;

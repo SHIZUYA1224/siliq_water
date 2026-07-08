@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.51] - 2026-07-09
+
+### 改善: 透明な抜け感と水底光の透過
+- `Siliq/Water Mobile (Quest)` に `_Clarity` と `_BottomLightStrength` を追加し、透明水の濁りにくさと水底光の見え方を直接調整できるようにした
+- `WaterSurfaceAnimator` / Inspector / Quick Apply / ReadyMaterials / Crystal Lagoon 完成 Prefab が新しい光学パラメータを扱うよう更新
+- Crystal Lagoon と Flagship Crystal の初期値を、透明な抜け感と水底光が強く見える方向へ固定
+
 ## [2.3.50] - 2026-07-09
 
 ### 追加: Crystal Lagoon 完成形プレビュー

@@ -321,6 +321,7 @@ namespace Siliq.Water.Tests
                 animator.reflectionColor = new Color(0.9f, 1f, 1f, 1f);
                 animator.transmissionColor = new Color(0.4f, 0.95f, 1f, 1f);
                 animator.sparkleColor = new Color(1f, 0.95f, 0.85f, 1f);
+                animator.clarity = 0.67f;
                 animator.edgeReflection = 0.73f;
                 animator.reflectionStrength = 0.64f;
                 animator.transmissionStrength = 0.58f;
@@ -333,6 +334,7 @@ namespace Siliq.Water.Tests
                 animator.causticsStrength = 0.42f;
                 animator.causticsScale = 2.3f;
                 animator.causticsSpeed = 0.05f;
+                animator.bottomLightStrength = 1.33f;
                 animator.causticsTint = new Color(0.8f, 1f, 0.95f, 1f);
                 animator.ApplyImmediate(0f);
 
@@ -345,6 +347,7 @@ namespace Siliq.Water.Tests
                 AssertColor(animator.reflectionColor, block.GetColor("_HorizonColor"), "_HorizonColor");
                 AssertColor(animator.transmissionColor, block.GetColor("_TransmissionColor"), "_TransmissionColor");
                 AssertColor(animator.sparkleColor, block.GetColor("_GlimmerColor"), "_GlimmerColor");
+                Assert.AreEqual(0.67f, block.GetFloat("_Clarity"), 1e-5f);
                 Assert.AreEqual(0.73f, block.GetFloat("_EdgeReflection"), 1e-5f);
                 Assert.AreEqual(0.64f, block.GetFloat("_ReflStrength"), 1e-5f);
                 Assert.AreEqual(0.58f, block.GetFloat("_TransmissionStrength"), 1e-5f);
@@ -358,6 +361,7 @@ namespace Siliq.Water.Tests
                 Assert.AreEqual(0.42f, block.GetFloat("_CausticsStrength"), 1e-5f);
                 Assert.AreEqual(2.3f, block.GetFloat("_CausticsScale"), 1e-5f);
                 Assert.AreEqual(0.05f, block.GetFloat("_CausticsSpeed"), 1e-5f);
+                Assert.AreEqual(1.33f, block.GetFloat("_BottomLightStrength"), 1e-5f);
                 AssertColor(animator.causticsTint, block.GetColor("_CausticsTint"), "_CausticsTint");
                 Assert.AreEqual(1f, mat.GetFloat("_Opacity"), 1e-5f, "共有マテリアルの _Opacity を直接変更してはならない");
             }
@@ -516,8 +520,12 @@ namespace Siliq.Water.Tests
             Assert.IsNotNull(flagship.GetTexture("_HeightMap"),
                 "Flagship ready material は専用 height map を持つが、初期 influence は 0 にする");
             Assert.LessOrEqual(flagship.GetFloat("_DisplacementStrength"), 0.02f);
+            Assert.GreaterOrEqual(flagship.GetFloat("_Clarity"), 0.80f,
+                "美しさ特化の Flagship ready material は透明な抜け感を高めに持つ必要がある");
             Assert.GreaterOrEqual(flagship.GetFloat("_CausticsStrength"), 0.60f,
                 "美しさ特化の Flagship ready material は水底光をはっきり持つ必要がある");
+            Assert.GreaterOrEqual(flagship.GetFloat("_BottomLightStrength"), 1.40f,
+                "美しさ特化の Flagship ready material は水底光が水越しに見える必要がある");
 
             var lagoon = LoadReadyMaterial("M_Siliq_CrystalLagoon_Ready");
             Assert.LessOrEqual(lagoon.GetFloat("_NormalStrength"), 0.45f,
@@ -526,8 +534,12 @@ namespace Siliq.Water.Tests
                 "Crystal Lagoon は板模様を避けるため実高さを控えめにする");
             Assert.GreaterOrEqual(lagoon.GetFloat("_TransmissionStrength"), 0.90f,
                 "Crystal Lagoon は透き通った見た目を最優先にする");
+            Assert.GreaterOrEqual(lagoon.GetFloat("_Clarity"), 0.90f,
+                "Crystal Lagoon は濁りを抑えた透明な抜け感を最優先にする");
             Assert.GreaterOrEqual(lagoon.GetFloat("_CausticsStrength"), 0.70f,
                 "Crystal Lagoon は水底光を強めに持つ必要がある");
+            Assert.GreaterOrEqual(lagoon.GetFloat("_BottomLightStrength"), 1.65f,
+                "Crystal Lagoon は水底光が水越しに強く見える必要がある");
         }
 
         static Material LoadReadyMaterial(string name)
@@ -738,6 +750,7 @@ namespace Siliq.Water.Tests
                 Assert.IsTrue(mat.HasProperty("_MinLighting"));
                 Assert.IsTrue(mat.HasProperty("_DarkReflectionDamping"));
                 Assert.IsTrue(mat.HasProperty("_DarkDetailDamping"));
+                Assert.IsTrue(mat.HasProperty("_Clarity"));
                 Assert.IsTrue(mat.HasProperty("_HeightMap"));
                 Assert.IsTrue(mat.HasProperty("_DisplacementStrength"));
                 Assert.IsTrue(mat.HasProperty("_DisplacementScale"));
@@ -747,6 +760,7 @@ namespace Siliq.Water.Tests
                 Assert.IsTrue(mat.HasProperty("_CausticsStrength"));
                 Assert.IsTrue(mat.HasProperty("_CausticsScale"));
                 Assert.IsTrue(mat.HasProperty("_CausticsSpeed"));
+                Assert.IsTrue(mat.HasProperty("_BottomLightStrength"));
                 Assert.IsTrue(mat.HasProperty("_CausticsTint"));
             }
             finally
@@ -1092,8 +1106,12 @@ namespace Siliq.Water.Tests
                     "Crystal Lagoon Quick Apply が専用 caustics map を割り当てていない");
                 Assert.GreaterOrEqual(mat.GetFloat("_TransmissionStrength"), 0.90f,
                     "Crystal Lagoon Quick Apply は透き通った見た目を優先する");
+                Assert.GreaterOrEqual(mat.GetFloat("_Clarity"), 0.90f,
+                    "Crystal Lagoon Quick Apply は透明な抜け感を最優先する");
                 Assert.GreaterOrEqual(mat.GetFloat("_CausticsStrength"), 0.70f,
                     "Crystal Lagoon Quick Apply は水底光を強めに持つ必要がある");
+                Assert.GreaterOrEqual(mat.GetFloat("_BottomLightStrength"), 1.65f,
+                    "Crystal Lagoon Quick Apply は水底光が水越しに見える必要がある");
             }
             finally
             {
@@ -1405,7 +1423,9 @@ namespace Siliq.Water.Tests
             Assert.IsNull(overlay.GetComponent<Collider>(), "完成 Prefab の caustics overlay は不要な collider を持たない");
             Assert.LessOrEqual(animator.speed, 0.0018f, "完成 Prefab は静かな Crystal Lagoon 速度から始める");
             Assert.LessOrEqual(animator.displacementStrength, 0.006f, "完成 Prefab は板状の高さ模様を避ける");
+            Assert.GreaterOrEqual(animator.clarity, 0.90f, "完成 Prefab は透明な抜け感を高くしておく");
             Assert.GreaterOrEqual(animator.causticsStrength, 0.70f, "完成 Prefab は水底光を強めに確認できる必要がある");
+            Assert.GreaterOrEqual(animator.bottomLightStrength, 1.65f, "完成 Prefab は水底光が水越しに見える必要がある");
         }
 
         [Test]
