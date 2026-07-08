@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.33] - 2026-07-08
+
+### 修正: 水面アニメーションの初期速度を低速化
+- `WaterSurfaceAnimator` の初期 `Speed` / `高さの速度` を落とし、アタッチ直後に水面が速く流れすぎないようにした
+- Quick Apply / Water Maps Studio / はじめてガイド修復で作る水マテリアルの高さアニメーション速度を低速基準へ統一
+- `PrebakedPack/ReadyMaterials/` の shader scroll と `_DisplacementSpeed` を抑え、ドラッグ&ドロップだけでも落ち着いた水面になるようにした
+- Ready material と animator の初期速度が速すぎる値へ戻らないようテストを追加
+
 ## [2.3.32] - 2026-07-08
 
 ### 追加: アタッチするだけで動く完成済み水マテリアル

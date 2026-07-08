@@ -28,7 +28,7 @@ Shader "Siliq/Water Mobile (Quest)"
         [NoScaleOffset] _HeightMap ("水面ハイトマップ", 2D) = "gray" {}
         _DisplacementStrength ("実際の高さ", Range(0, 0.5)) = 0
         _DisplacementScale ("高さの波長", Range(0.05, 4)) = 0.75
-        _DisplacementSpeed ("高さの速度", Range(0, 2)) = 0.28
+        _DisplacementSpeed ("高さの速度", Range(0, 2)) = 0.08
         _HeightMapInfluence ("ハイトマップの影響", Range(0, 1)) = 0
         _NormalStrength ("ノーマル強度", Range(0, 2)) = 1
         _Tiling1 ("レイヤー1 タイリング", Float) = 1

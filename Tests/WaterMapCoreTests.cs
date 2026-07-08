@@ -225,6 +225,26 @@ namespace Siliq.Water.Tests
         }
 
         [Test]
+        public void WaterSurfaceAnimator_DefaultsUseSlowProductMotion()
+        {
+            GameObject go = null;
+            try
+            {
+                go = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                var animator = go.AddComponent<WaterSurfaceAnimator>();
+
+                Assert.LessOrEqual(animator.speed, 0.10f,
+                    "初期 speed は見た瞬間に流れすぎない低速値にする");
+                Assert.LessOrEqual(animator.displacementSpeed, 0.10f,
+                    "初期 height animation も速すぎない値にする");
+            }
+            finally
+            {
+                if (go != null) Object.DestroyImmediate(go);
+            }
+        }
+
+        [Test]
         public void WaterSurfaceAnimator_AppliesMotionAndLookThroughPropertyBlock()
         {
             GameObject go = null;
@@ -446,6 +466,12 @@ namespace Siliq.Water.Tests
                     $"{name} はドラッグ&ドロップだけで凹凸が出るよう normal map を持つ必要がある");
                 Assert.Greater(mat.GetVector("_Scroll1").sqrMagnitude, 0.0001f,
                     $"{name} は WaterSurfaceAnimator なしでも shader 側で波が動く scroll を持つ必要がある");
+                Assert.LessOrEqual(mat.GetVector("_Scroll1").magnitude, 0.08f,
+                    $"{name} の shader scroll が速すぎる");
+                Assert.LessOrEqual(mat.GetVector("_Scroll2").magnitude, 0.08f,
+                    $"{name} の shader scroll 2 が速すぎる");
+                Assert.LessOrEqual(mat.GetFloat("_DisplacementSpeed"), 0.12f,
+                    $"{name} の高さアニメーションが速すぎる");
                 Assert.AreEqual((float)BlendMode.SrcAlpha, mat.GetFloat("_SrcBlend"), 1e-5f,
                     $"{name} は透明水としてすぐ使える blend 設定が必要");
                 Assert.AreEqual((float)BlendMode.OneMinusSrcAlpha, mat.GetFloat("_DstBlend"), 1e-5f);
@@ -459,6 +485,9 @@ namespace Siliq.Water.Tests
             Assert.AreEqual("Siliq/Water Mobile (Quest)", metal.shader.name);
             Assert.IsNotNull(metal.GetTexture("_NormalMap"));
             Assert.Greater(metal.GetVector("_Scroll1").sqrMagnitude, 0.0001f);
+            Assert.LessOrEqual(metal.GetVector("_Scroll1").magnitude, 0.08f);
+            Assert.LessOrEqual(metal.GetVector("_Scroll2").magnitude, 0.08f);
+            Assert.LessOrEqual(metal.GetFloat("_DisplacementSpeed"), 0.12f);
             Assert.AreEqual((float)BlendMode.One, metal.GetFloat("_SrcBlend"), 1e-5f);
             Assert.AreEqual((float)BlendMode.Zero, metal.GetFloat("_DstBlend"), 1e-5f);
             Assert.AreEqual(1f, metal.GetFloat("_ZWrite"), 1e-5f);

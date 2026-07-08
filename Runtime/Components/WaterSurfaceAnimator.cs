@@ -38,8 +38,8 @@ namespace Siliq.Water
         [Tooltip("波が流れる向き (度)。0=右、90=上、180=左、270=下。")]
         [Range(0f, 360f)] public float directionDegrees = 30f;
 
-        [Tooltip("流れる速さ。0で静止、0.3が標準、0.6が速め。")]
-        [Range(0f, MaxSurfaceSpeed)] public float speed = 0.3f;
+        [Tooltip("流れる速さ。0で静止、0.04がゆっくり、0.08が標準、0.16が速め。")]
+        [Range(0f, MaxSurfaceSpeed)] public float speed = 0.08f;
 
         [Header("見た目")]
         [Tooltip("凹凸の強さ。シェーダーに _BumpScale (Standard 等) がある場合のみ有効。")]
@@ -56,7 +56,7 @@ namespace Siliq.Water
         [Range(0.05f, 4f)] public float displacementScale = 0.75f;
 
         [Tooltip("高さ変位の動く速さ。")]
-        [Range(0f, 2f)] public float displacementSpeed = 0.28f;
+        [Range(0f, 2f)] public float displacementSpeed = 0.08f;
 
         [Tooltip("書き出したハイトマップを高さに使う割合。0 なら手続き的なうねりのみ、1 ならハイトマップ中心。")]
         [Range(0f, 1f)] public float heightMapInfluence = 0f;

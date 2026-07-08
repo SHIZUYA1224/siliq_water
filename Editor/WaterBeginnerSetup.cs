@@ -155,7 +155,7 @@ namespace Siliq.Water.Editor
                 var mat = renderer.sharedMaterial;
                 animator.texturePropertyName = mat != null && mat.HasProperty("_NormalMap") ? "_NormalMap" : "_BumpMap";
                 animator.SyncLookFromMaterial();
-                if (animator.speed <= 0f) animator.speed = 0.22f;
+                if (animator.speed <= 0f) animator.speed = 0.05f;
                 if (animator.opacity < 0.35f) animator.opacity = 0.52f;
                 if (animator.reflectionStrength < 0.8f) animator.reflectionStrength = 1f;
                 if (animator.edgeReflection < 0.65f) animator.edgeReflection = 0.88f;

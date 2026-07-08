@@ -69,12 +69,12 @@ namespace Siliq.Water.Editor
             public float macroColorVariation;
         }
 
-        // 各水の雰囲気に合わせた動き。Standard のノーマルだけでも見えるよう少し強めにしている。
-        static readonly MotionPreset CalmMotion = new MotionPreset(35f, 0.30f, 1.35f, 1.35f);
+        // 各水の雰囲気に合わせた動き。初期値はゆっくり動く水に見える速度に抑える。
+        static readonly MotionPreset CalmMotion = new MotionPreset(35f, 0.06f, 1.35f, 1.35f);
         static readonly MotionPreset RippleMotion = new MotionPreset(0f, 0f, 0.55f, 1.15f);
-        static readonly MotionPreset StreamMotion = new MotionPreset(0f, 0.55f, 1.45f, 1.8f);
-        static readonly MotionPreset PoolMotion = new MotionPreset(50f, 0.24f, 0.55f, 1.08f);
-        static readonly MotionPreset CyberMotion = new MotionPreset(18f, 0.34f, 0.78f, 1.24f);
+        static readonly MotionPreset StreamMotion = new MotionPreset(0f, 0.12f, 1.45f, 1.8f);
+        static readonly MotionPreset PoolMotion = new MotionPreset(50f, 0.04f, 0.55f, 1.08f);
+        static readonly MotionPreset CyberMotion = new MotionPreset(18f, 0.06f, 0.78f, 1.24f);
 
         static readonly LookPreset ClearSeaLook = new LookPreset
         {
@@ -82,7 +82,7 @@ namespace Siliq.Water.Editor
             displayName = "美しい海",
             sourceGuid = CalmGuid,
             sourceLabel = "Calm",
-            motion = new MotionPreset(22f, 0.30f, 0.92f, 1.45f),
+            motion = new MotionPreset(22f, 0.055f, 0.92f, 1.45f),
             transparent = true,
             opacity = 0.46f,
             shallow = new Color(0.30f, 0.88f, 1f, 1f),
@@ -107,7 +107,7 @@ namespace Siliq.Water.Editor
             reflStrength = 1f,
             displacementStrength = 0.055f,
             displacementScale = 0.55f,
-            displacementSpeed = 0.28f,
+            displacementSpeed = 0.10f,
             heightMapInfluence = 0f,
             smoothness = 0.96f,
             macroVariation = 0.46f,
@@ -122,7 +122,7 @@ namespace Siliq.Water.Editor
             displayName = "透明プール",
             sourceGuid = PoolGuid,
             sourceLabel = "Pool",
-            motion = new MotionPreset(50f, 0.18f, 0.38f, 1.0f),
+            motion = new MotionPreset(50f, 0.035f, 0.38f, 1.0f),
             transparent = true,
             opacity = 0.34f,
             shallow = new Color(0.74f, 0.99f, 1f, 1f),
@@ -147,7 +147,7 @@ namespace Siliq.Water.Editor
             reflStrength = 0.92f,
             displacementStrength = 0.018f,
             displacementScale = 1.10f,
-            displacementSpeed = 0.18f,
+            displacementSpeed = 0.08f,
             heightMapInfluence = 0f,
             smoothness = 0.94f,
             macroVariation = 0.24f,
@@ -162,7 +162,7 @@ namespace Siliq.Water.Editor
             displayName = "室内ブループール",
             sourceGuid = CalmGuid,
             sourceLabel = "Calm",
-            motion = new MotionPreset(18f, 0.16f, 0.46f, 0.82f),
+            motion = new MotionPreset(18f, 0.030f, 0.46f, 0.82f),
             transparent = true,
             opacity = 0.38f,
             shallow = new Color(0.48f, 0.92f, 1f, 1f),
@@ -187,7 +187,7 @@ namespace Siliq.Water.Editor
             reflStrength = 1f,
             displacementStrength = 0.025f,
             displacementScale = 0.42f,
-            displacementSpeed = 0.16f,
+            displacementSpeed = 0.07f,
             heightMapInfluence = 0f,
             smoothness = 0.98f,
             macroVariation = 0.30f,
@@ -203,7 +203,7 @@ namespace Siliq.Water.Editor
             sourceGuid = FlagshipCrystalGuid,
             sourceLabel = "FlagshipCrystal",
             heightGuid = FlagshipCrystalHeightGuid,
-            motion = new MotionPreset(26f, 0.22f, 0.58f, 1.18f),
+            motion = new MotionPreset(26f, 0.040f, 0.58f, 1.18f),
             transparent = true,
             opacity = 0.52f,
             shallow = new Color(0.24f, 0.92f, 1f, 1f),
@@ -228,7 +228,7 @@ namespace Siliq.Water.Editor
             reflStrength = 1f,
             displacementStrength = 0.012f,
             displacementScale = 0.85f,
-            displacementSpeed = 0.18f,
+            displacementSpeed = 0.06f,
             heightMapInfluence = 0f,
             smoothness = 0.99f,
             macroVariation = 0.22f,
@@ -243,7 +243,7 @@ namespace Siliq.Water.Editor
             displayName = "血の海",
             sourceGuid = StreamGuid,
             sourceLabel = "Stream",
-            motion = new MotionPreset(6f, 0.22f, 0.82f, 1.18f),
+            motion = new MotionPreset(6f, 0.035f, 0.82f, 1.18f),
             transparent = true,
             opacity = 0.68f,
             shallow = new Color(0.48f, 0.02f, 0.025f, 1f),
@@ -268,7 +268,7 @@ namespace Siliq.Water.Editor
             reflStrength = 0.35f,
             displacementStrength = 0.035f,
             displacementScale = 0.65f,
-            displacementSpeed = 0.18f,
+            displacementSpeed = 0.07f,
             heightMapInfluence = 0f,
             smoothness = 0.86f,
             macroVariation = 0.52f,
@@ -283,7 +283,7 @@ namespace Siliq.Water.Editor
             displayName = "液体金属",
             sourceGuid = CyberGuid,
             sourceLabel = "Cyber",
-            motion = new MotionPreset(18f, 0.30f, 0.72f, 1.38f),
+            motion = new MotionPreset(18f, 0.045f, 0.72f, 1.38f),
             transparent = false,
             opacity = 1f,
             shallow = new Color(0.86f, 0.88f, 0.90f, 1f),
@@ -308,7 +308,7 @@ namespace Siliq.Water.Editor
             reflStrength = 1f,
             displacementStrength = 0.025f,
             displacementScale = 0.85f,
-            displacementSpeed = 0.22f,
+            displacementSpeed = 0.08f,
             heightMapInfluence = 0f,
             smoothness = 0.99f,
             macroVariation = 0.40f,
@@ -958,7 +958,7 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_SpecPower")) mat.SetFloat("_SpecPower", 220f);
             if (mat.HasProperty("_DisplacementStrength")) mat.SetFloat("_DisplacementStrength", 0.04f);
             if (mat.HasProperty("_DisplacementScale")) mat.SetFloat("_DisplacementScale", 0.70f);
-            if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.28f);
+            if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.08f);
             if (mat.HasProperty("_HeightMapInfluence")) mat.SetFloat("_HeightMapInfluence", 0f);
             if (mat.HasProperty("_SrcBlend")) mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
             if (mat.HasProperty("_DstBlend")) mat.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
@@ -1014,7 +1014,7 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_Tiling2")) mat.SetFloat("_Tiling2", 2.1f);
             if (mat.HasProperty("_DisplacementStrength")) mat.SetFloat("_DisplacementStrength", 0.022f);
             if (mat.HasProperty("_DisplacementScale")) mat.SetFloat("_DisplacementScale", 0.90f);
-            if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.18f);
+            if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.06f);
             if (mat.HasProperty("_HeightMapInfluence")) mat.SetFloat("_HeightMapInfluence", 0f);
             mat.EnableKeyword("_USE_RIPPLES");
         }
