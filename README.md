@@ -182,12 +182,12 @@ Standard / URP Lit / VRChat Mobile 系では `_BumpMap` の UV、`_BumpScale`、
 `_DisplacementStrength` / `_DisplacementScale` / `_DisplacementSpeed` /
 `_CausticsStrength` / `_CausticsScale` / `_CausticsSpeed` / `_CausticsFocus` / `_CausticsPrismStrength` / `_CausticsScatterStrength` / `_BottomLightStrength` を
 `_ShallowColor` / `_DeepColor` / `_HorizonColor` / `_TransmissionColor` /
-`_Opacity` / `_Clarity` / `_EdgeReflection` / `_ReflStrength` / `_ReflectionPatternStrength` / `_ReflectionPatternScale` / `_CausticsTint` などと一緒に
+`_Opacity` / `_Clarity` / `_RefractionStrength` / `_EdgeReflection` / `_ReflStrength` / `_ReflectionPatternStrength` / `_ReflectionPatternScale` / `_CausticsTint` などと一緒に
 `MaterialPropertyBlock` 経由で動かすため、共有マテリアルを汚さずに調整できます。
 実際の高さは頂点変位なので、1 枚ポリゴンの Quad では見えにくいです。Unity 標準の Plane や細分化された水面メッシュを使ってください。
 PC の発熱を避けるため、編集モードの連続プレビューは**選択中の水面だけ**最大 10fps で更新されます。
 重い場合は `Animate In Edit Mode` を OFF にするか、`Edit Mode Preview Fps` を下げてください。
-右クリック適用時は、水の種類ごとに微速の初期値が入ります。Hero / Crystal Lagoon / 透明プールは特に低速です。速く見える場合はまず **速さ** を 0.01 以下、**高さの速度** を 0.0013 以下、**水底の光の速度** を 0.00027 以下まで下げてください。
+右クリック適用時は、水の種類ごとに微速の初期値が入ります。Hero / Crystal Lagoon / 透明プールは特に低速です。速く見える場合はまず **速さ** を 0.01 以下、**高さの速度** を 0.0008 以下、**水底の光の速度** を 0.00016 以下まで下げてください。
 ただし `波紋 (Ripple)` はスライドさせると水滴の波紋として不自然なので、
 このコンポーネントの速度は 0 にし、下記の `WaterRippleEmitter` で同心円が広がる表現にしています。
 
@@ -314,6 +314,7 @@ Built-in / VRChat / Quest / iOS 向けの通常導入ではコンパイル対象
 - `_DisplacementStrength` による実頂点変位。ハイトマップがある場合は `_HeightMapInfluence` で混ぜられます
 - 深い色 ⇔ 浅い色 + フレネル + 透過光 + 細い光の揺らぎ + スペキュラ + 任意のキューブマップ反射
 - `_ReflectionPatternStrength` / `_ReflectionPatternScale` による空や窓の帯状反射
+- `_RefractionStrength` による GrabPass なしの軽量な水越し揺らぎ
 - `_CausticsMap` / `_CausticsStrength` / `_CausticsScale` / `_CausticsSpeed` / `_CausticsFocus` / `_CausticsPrismStrength` / `_CausticsScatterStrength` / `_BottomLightStrength` / `_CausticsTint` による水底の光模様
 - `_ReflStrength` はキューブマップ未使用時も反射量として効くため、反射が足りない時に直接上げられます
 - `_MinLighting` / `_DarkReflectionDamping` / `_DarkDetailDamping` により、暗い部屋では反射ときらめきを減衰

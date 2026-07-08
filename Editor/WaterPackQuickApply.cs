@@ -51,6 +51,7 @@ namespace Siliq.Water.Editor
             public float alphaPower;
             public float clarity;
             public float edgeReflection;
+            public float refractionStrength;
             public float transmissionStrength;
             public float glimmerIntensity;
             public float glimmerSharpness;
@@ -110,6 +111,7 @@ namespace Siliq.Water.Editor
             alphaPower = 2.20f,
             clarity = 0.64f,
             edgeReflection = 0.72f,
+            refractionStrength = 0.28f,
             transmissionStrength = 0.72f,
             glimmerIntensity = 0.26f,
             glimmerSharpness = 13f,
@@ -162,6 +164,7 @@ namespace Siliq.Water.Editor
             alphaPower = 2.0f,
             clarity = 0.76f,
             edgeReflection = 0.60f,
+            refractionStrength = 0.34f,
             transmissionStrength = 0.76f,
             glimmerIntensity = 0.20f,
             glimmerSharpness = 18f,
@@ -214,6 +217,7 @@ namespace Siliq.Water.Editor
             alphaPower = 1.85f,
             clarity = 0.72f,
             edgeReflection = 0.82f,
+            refractionStrength = 0.38f,
             transmissionStrength = 0.82f,
             glimmerIntensity = 0.24f,
             glimmerSharpness = 16f,
@@ -267,6 +271,7 @@ namespace Siliq.Water.Editor
             alphaPower = 1.85f,
             clarity = 0.82f,
             edgeReflection = 0.88f,
+            refractionStrength = 0.32f,
             transmissionStrength = 0.84f,
             glimmerIntensity = 0.32f,
             glimmerSharpness = 18f,
@@ -321,6 +326,7 @@ namespace Siliq.Water.Editor
             alphaPower = 1.70f,
             clarity = 0.92f,
             edgeReflection = 0.92f,
+            refractionStrength = 0.36f,
             transmissionStrength = 0.92f,
             glimmerIntensity = 0.38f,
             glimmerSharpness = 20f,
@@ -375,6 +381,7 @@ namespace Siliq.Water.Editor
             alphaPower = 1.55f,
             clarity = 0.98f,
             edgeReflection = 0.96f,
+            refractionStrength = 0.42f,
             transmissionStrength = 0.98f,
             glimmerIntensity = 0.44f,
             glimmerSharpness = 22f,
@@ -427,6 +434,7 @@ namespace Siliq.Water.Editor
             alphaPower = 2.9f,
             clarity = 0.10f,
             edgeReflection = 0.30f,
+            refractionStrength = 0.12f,
             transmissionStrength = 0.18f,
             glimmerIntensity = 0.08f,
             glimmerSharpness = 9f,
@@ -479,6 +487,7 @@ namespace Siliq.Water.Editor
             alphaPower = 3.4f,
             clarity = 0f,
             edgeReflection = 0.95f,
+            refractionStrength = 0.10f,
             transmissionStrength = 0f,
             glimmerIntensity = 0.12f,
             glimmerSharpness = 22f,
@@ -1138,6 +1147,7 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_Clarity")) mat.SetFloat("_Clarity", 0f);
             if (mat.HasProperty("_AlphaFresnel")) mat.SetFloat("_AlphaFresnel", 0f);
             if (mat.HasProperty("_EdgeReflection")) mat.SetFloat("_EdgeReflection", 0f);
+            if (mat.HasProperty("_RefractionStrength")) mat.SetFloat("_RefractionStrength", 0f);
             if (mat.HasProperty("_ReflectionPatternStrength")) mat.SetFloat("_ReflectionPatternStrength", 0f);
             if (mat.HasProperty("_SrcBlend")) mat.SetFloat("_SrcBlend", (float)BlendMode.One);
             if (mat.HasProperty("_DstBlend")) mat.SetFloat("_DstBlend", (float)BlendMode.Zero);
@@ -1157,6 +1167,7 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_AlphaFresnel")) mat.SetFloat("_AlphaFresnel", 0.74f);
             if (mat.HasProperty("_AlphaPower")) mat.SetFloat("_AlphaPower", 2.05f);
             if (mat.HasProperty("_EdgeReflection")) mat.SetFloat("_EdgeReflection", 0.70f);
+            if (mat.HasProperty("_RefractionStrength")) mat.SetFloat("_RefractionStrength", 0.28f);
             if (mat.HasProperty("_TransmissionStrength")) mat.SetFloat("_TransmissionStrength", 0.70f);
             if (mat.HasProperty("_GlimmerIntensity")) mat.SetFloat("_GlimmerIntensity", 0.28f);
             if (mat.HasProperty("_GlimmerSharpness")) mat.SetFloat("_GlimmerSharpness", 14f);
@@ -1371,6 +1382,7 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_AlphaPower")) mat.SetFloat("_AlphaPower", preset.alphaPower);
             if (mat.HasProperty("_Clarity")) mat.SetFloat("_Clarity", preset.clarity);
             if (mat.HasProperty("_EdgeReflection")) mat.SetFloat("_EdgeReflection", preset.edgeReflection);
+            if (mat.HasProperty("_RefractionStrength")) mat.SetFloat("_RefractionStrength", preset.refractionStrength);
             if (mat.HasProperty("_TransmissionStrength")) mat.SetFloat("_TransmissionStrength", preset.transmissionStrength);
             if (mat.HasProperty("_GlimmerIntensity")) mat.SetFloat("_GlimmerIntensity", preset.glimmerIntensity);
             if (mat.HasProperty("_GlimmerSharpness")) mat.SetFloat("_GlimmerSharpness", preset.glimmerSharpness);

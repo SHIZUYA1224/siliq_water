@@ -10,6 +10,7 @@ Shader "Siliq/Water URP"
         _ShallowColor ("浅い水の色", Color) = (0.16, 0.55, 0.60, 1)
         _DeepColor ("深い水の色", Color) = (0.02, 0.15, 0.25, 1)
         _Opacity ("不透明度", Range(0, 1)) = 0.9
+        _RefractionStrength ("水越しの揺らぎ", Range(0, 1)) = 0.18
 
         [NoScaleOffset] _NormalMap ("水面ノーマルマップ", 2D) = "bump" {}
         _NormalStrength ("ノーマル強度", Range(0, 2)) = 1
@@ -99,6 +100,7 @@ Shader "Siliq/Water URP"
                 half4 _ShallowColor;
                 half4 _DeepColor;
                 half _Opacity;
+                half _RefractionStrength;
                 half _NormalStrength;
                 float _Tiling1;
                 float _Tiling2;
@@ -317,6 +319,10 @@ Shader "Siliq/Water URP"
                 #endif
                 depthLerp = saturate(depthLerp + (0.5h - macroMask) * _MacroColorVariation);
                 half3 baseCol = lerp(_ShallowColor.rgb, _DeepColor.rgb, depthLerp);
+                half refraction = saturate(_RefractionStrength);
+                half2 refractOffset = normalWS.xz * refraction;
+                half waterLens = saturate(0.5h + SiliqMacroNoise(input.positionWS.xz * 0.19h + refractOffset * 3.1h) * 0.5h);
+                baseCol *= lerp(0.92h, 1.12h, waterLens * refraction);
 
                 // 反射: リフレクションプローブ + フレネル
                 half3 reflectVector = reflect(-viewDir, normalWS);
@@ -334,8 +340,8 @@ Shader "Siliq/Water URP"
 
                 half3 color = lerp(baseCol, reflection, fresnel) + spec;
                 float causticsScale = max((float)_CausticsScale, 0.001);
-                float2 causticsUvA = input.positionWS.xz * causticsScale * 0.12 + normalWS.xz * 0.10 + _Time.y * _CausticsSpeed * float2(0.33, 0.21);
-                float2 causticsUvB = SiliqRotate2D(input.positionWS.xz, 1.17) * causticsScale * 0.09 - normalWS.xz * 0.08 - _Time.y * _CausticsSpeed * float2(0.19, 0.29);
+                float2 causticsUvA = input.positionWS.xz * causticsScale * 0.12 + normalWS.xz * (0.10 + refraction * 0.24) + _Time.y * _CausticsSpeed * float2(0.33, 0.21);
+                float2 causticsUvB = SiliqRotate2D(input.positionWS.xz + refractOffset * 0.42, 1.17) * causticsScale * 0.09 - normalWS.xz * (0.08 + refraction * 0.18) - _Time.y * _CausticsSpeed * float2(0.19, 0.29);
                 half causticsA = SAMPLE_TEXTURE2D(_CausticsMap, sampler_CausticsMap, causticsUvA).r;
                 half causticsB = SAMPLE_TEXTURE2D(_CausticsMap, sampler_CausticsMap, causticsUvB).r;
                 half causticsPrismR = SAMPLE_TEXTURE2D(_CausticsMap, sampler_CausticsMap, causticsUvA + normalWS.xz * 0.013 + float2(0.004, -0.002)).r;

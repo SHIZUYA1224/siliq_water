@@ -1471,6 +1471,7 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_AlphaFresnel")) mat.SetFloat("_AlphaFresnel", 0.74f);
             if (mat.HasProperty("_AlphaPower")) mat.SetFloat("_AlphaPower", 2.05f);
             if (mat.HasProperty("_EdgeReflection")) mat.SetFloat("_EdgeReflection", 0.70f);
+            if (mat.HasProperty("_RefractionStrength")) mat.SetFloat("_RefractionStrength", 0.28f);
             if (mat.HasProperty("_TransmissionStrength")) mat.SetFloat("_TransmissionStrength", 0.70f);
             if (mat.HasProperty("_GlimmerIntensity")) mat.SetFloat("_GlimmerIntensity", 0.28f);
             if (mat.HasProperty("_GlimmerSharpness")) mat.SetFloat("_GlimmerSharpness", 14f);
@@ -1505,6 +1506,7 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_AlphaFresnel")) mat.SetFloat("_AlphaFresnel", 0.78f);
             if (mat.HasProperty("_AlphaPower")) mat.SetFloat("_AlphaPower", 1.85f);
             if (mat.HasProperty("_EdgeReflection")) mat.SetFloat("_EdgeReflection", 0.82f);
+            if (mat.HasProperty("_RefractionStrength")) mat.SetFloat("_RefractionStrength", 0.38f);
             if (mat.HasProperty("_TransmissionStrength")) mat.SetFloat("_TransmissionStrength", 0.82f);
             if (mat.HasProperty("_GlimmerIntensity")) mat.SetFloat("_GlimmerIntensity", 0.24f);
             if (mat.HasProperty("_GlimmerSharpness")) mat.SetFloat("_GlimmerSharpness", 16f);
@@ -1539,6 +1541,7 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_AlphaFresnel")) mat.SetFloat("_AlphaFresnel", 0.72f);
             if (mat.HasProperty("_AlphaPower")) mat.SetFloat("_AlphaPower", 1.85f);
             if (mat.HasProperty("_EdgeReflection")) mat.SetFloat("_EdgeReflection", 0.88f);
+            if (mat.HasProperty("_RefractionStrength")) mat.SetFloat("_RefractionStrength", 0.36f);
             if (mat.HasProperty("_TransmissionStrength")) mat.SetFloat("_TransmissionStrength", 0.84f);
             if (mat.HasProperty("_GlimmerIntensity")) mat.SetFloat("_GlimmerIntensity", 0.32f);
             if (mat.HasProperty("_GlimmerSharpness")) mat.SetFloat("_GlimmerSharpness", 18f);

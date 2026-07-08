@@ -327,6 +327,10 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_Color")) mat.SetColor("_Color", new Color(0.24f, 0.92f, 1f, 0.52f));
             if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", new Color(0.24f, 0.92f, 1f, 0.52f));
             if (mat.HasProperty("_Opacity")) mat.SetFloat("_Opacity", 0.52f);
+            if (mat.HasProperty("_Clarity")) mat.SetFloat("_Clarity", 0.72f);
+            if (mat.HasProperty("_RefractionStrength")) mat.SetFloat("_RefractionStrength", 0.28f);
+            if (mat.HasProperty("_TransmissionStrength")) mat.SetFloat("_TransmissionStrength", 0.72f);
+            if (mat.HasProperty("_ReflStrength")) mat.SetFloat("_ReflStrength", 0.92f);
             renderer.sharedMaterial = mat;
         }
 

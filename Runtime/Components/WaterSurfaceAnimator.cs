@@ -88,6 +88,9 @@ namespace Siliq.Water
         [Tooltip("斜めから見た時に戻る輪郭反射と不透明感。Siliq 水シェーダーで有効。")]
         [Range(0f, 1f)] public float edgeReflection = 0.55f;
 
+        [Tooltip("水越しに床や水底光が揺らいで見える量。GrabPass なしの軽量な疑似屈折です。Siliq 水シェーダーで有効。")]
+        [Range(0f, 1f)] public float refractionStrength = 0.18f;
+
         [Tooltip("全体の反射の強さ。Siliq 水シェーダーで有効。")]
         [Range(0f, 1f)] public float reflectionStrength = 0.85f;
 
@@ -161,6 +164,7 @@ namespace Siliq.Water
         int transmissionColorPropertyId;
         int glimmerColorPropertyId;
         int edgeReflectionPropertyId;
+        int refractionStrengthPropertyId;
         int reflStrengthPropertyId;
         int reflectionPatternStrengthPropertyId;
         int reflectionPatternScalePropertyId;
@@ -254,6 +258,7 @@ namespace Siliq.Water
             transmissionColorPropertyId = Shader.PropertyToID("_TransmissionColor");
             glimmerColorPropertyId = Shader.PropertyToID("_GlimmerColor");
             edgeReflectionPropertyId = Shader.PropertyToID("_EdgeReflection");
+            refractionStrengthPropertyId = Shader.PropertyToID("_RefractionStrength");
             reflStrengthPropertyId = Shader.PropertyToID("_ReflStrength");
             reflectionPatternStrengthPropertyId = Shader.PropertyToID("_ReflectionPatternStrength");
             reflectionPatternScalePropertyId = Shader.PropertyToID("_ReflectionPatternScale");
@@ -331,6 +336,7 @@ namespace Siliq.Water
             heightMapInfluence = Mathf.Clamp01(heightMapInfluence);
             opacity = Mathf.Clamp(opacity, 0.05f, 1f);
             edgeReflection = Mathf.Clamp01(edgeReflection);
+            refractionStrength = Mathf.Clamp01(refractionStrength);
             reflectionStrength = Mathf.Clamp01(reflectionStrength);
             transmissionStrength = Mathf.Clamp01(transmissionStrength);
             sparkle = Mathf.Clamp01(sparkle);
@@ -404,6 +410,10 @@ namespace Siliq.Water
             if (targetMaterial.HasProperty(reflStrengthPropertyId))
             {
                 reflectionStrength = Mathf.Clamp01(targetMaterial.GetFloat(reflStrengthPropertyId));
+            }
+            if (targetMaterial.HasProperty(refractionStrengthPropertyId))
+            {
+                refractionStrength = Mathf.Clamp01(targetMaterial.GetFloat(refractionStrengthPropertyId));
             }
             if (targetMaterial.HasProperty(reflectionPatternStrengthPropertyId))
             {
@@ -725,6 +735,10 @@ namespace Siliq.Water
             if (targetMaterial.HasProperty(edgeReflectionPropertyId))
             {
                 propertyBlock.SetFloat(edgeReflectionPropertyId, Mathf.Clamp01(edgeReflection));
+            }
+            if (targetMaterial.HasProperty(refractionStrengthPropertyId))
+            {
+                propertyBlock.SetFloat(refractionStrengthPropertyId, Mathf.Clamp01(refractionStrength));
             }
             if (targetMaterial.HasProperty(reflStrengthPropertyId))
             {

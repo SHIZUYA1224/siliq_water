@@ -18,6 +18,7 @@ Shader "Siliq/Water Mobile (Quest)"
         _AlphaPower ("透明フレネルの鋭さ", Range(0.5, 8)) = 3
         _Clarity ("透明な抜け感", Range(0, 1)) = 0.45
         _EdgeReflection ("斜め視線の反射強調", Range(0, 1)) = 0
+        _RefractionStrength ("水越しの揺らぎ", Range(0, 1)) = 0.18
         _TransmissionColor ("透過光の色", Color) = (0.28, 0.75, 0.95, 1)
         _TransmissionStrength ("透過光の強さ", Range(0, 1)) = 0
         _GlimmerColor ("細い光の色", Color) = (0.85, 0.97, 1, 1)
@@ -106,6 +107,7 @@ Shader "Siliq/Water Mobile (Quest)"
             half _AlphaPower;
             half _Clarity;
             half _EdgeReflection;
+            half _RefractionStrength;
             half4 _TransmissionColor;
             half _TransmissionStrength;
             half4 _GlimmerColor;
@@ -323,9 +325,13 @@ Shader "Siliq/Water Mobile (Quest)"
                 half colorLift = (macro01 - 0.5h) * _MacroColorVariation;
                 half colorMix = saturate(0.12h + directLum * 0.68h + ambientLum * 0.32h + colorLift);
                 half viewFacing = saturate(dot(worldN, viewDir));
+                half refraction = saturate(_RefractionStrength) * saturate(0.35h + _Clarity * 0.65h);
+                half2 refractOffset = worldN.xz * refraction;
                 half3 baseCol = lerp(_DeepColor.rgb, _ShallowColor.rgb, colorMix) * baseVisibility;
                 half clarity = saturate(_Clarity);
                 half3 clearWaterCol = lerp(_ShallowColor.rgb, _TransmissionColor.rgb, 0.68h) * baseVisibility;
+                half waterLens = saturate(0.5h + SiliqMacroNoise(i.worldPos.xz * 0.19h + refractOffset * 3.1h) * 0.5h);
+                clearWaterCol *= lerp(0.92h, 1.12h, waterLens * refraction);
                 baseCol = lerp(baseCol, clearWaterCol, clarity * viewFacing * 0.62h);
 
                 half3 reflCol = _HorizonColor.rgb;
@@ -338,7 +344,7 @@ Shader "Siliq/Water Mobile (Quest)"
 
                 half fresnel = saturate(pow(1.0h - viewFacing, _FresnelPower) * lerp(0.72h, 1.18h, _ReflStrength));
                 half alphaFresnel = pow(1.0h - viewFacing, _AlphaPower);
-                float2 reflectionP = SiliqRotate2D(i.worldPos.xz + worldN.xz * 0.35, -0.38) * max((float)_ReflectionPatternScale, 0.1);
+                float2 reflectionP = SiliqRotate2D(i.worldPos.xz + worldN.xz * (0.35 + refraction * 0.85), -0.38) * max((float)_ReflectionPatternScale, 0.1);
                 half reflectionBand = pow(saturate(sin(reflectionP.x * 3.14159) * 0.5h + 0.5h), 18.0h);
                 half reflectionBreakup = saturate(0.55h + 0.45h * sin(reflectionP.y * 2.3h + macroA * 2.2h));
                 half reflectionPattern = reflectionBand * reflectionBreakup * _ReflectionPatternStrength;
@@ -352,8 +358,8 @@ Shader "Siliq/Water Mobile (Quest)"
                 half glimmer = pow(interference, _GlimmerSharpness) * _GlimmerIntensity * saturate(0.35h + surfaceLight);
                 glimmer *= lerp(0.65h, 1.35h, macro01) * detailVisibility;
                 float causticsScale = max((float)_CausticsScale, 0.001);
-                float2 causticsUvA = i.worldPos.xz * causticsScale * 0.12 + worldN.xz * 0.10 + _Time.y * _CausticsSpeed * float2(0.33, 0.21);
-                float2 causticsUvB = SiliqRotate2D(i.worldPos.xz, 1.17) * causticsScale * 0.09 - worldN.xz * 0.08 - _Time.y * _CausticsSpeed * float2(0.19, 0.29);
+                float2 causticsUvA = i.worldPos.xz * causticsScale * 0.12 + worldN.xz * (0.10 + refraction * 0.24) + _Time.y * _CausticsSpeed * float2(0.33, 0.21);
+                float2 causticsUvB = SiliqRotate2D(i.worldPos.xz + refractOffset * 0.42, 1.17) * causticsScale * 0.09 - worldN.xz * (0.08 + refraction * 0.18) - _Time.y * _CausticsSpeed * float2(0.19, 0.29);
                 half causticsA = tex2D(_CausticsMap, causticsUvA).r;
                 half causticsB = tex2D(_CausticsMap, causticsUvB).r;
                 half causticsPrismR = tex2D(_CausticsMap, causticsUvA + worldN.xz * 0.013 + float2(0.004, -0.002)).r;

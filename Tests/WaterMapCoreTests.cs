@@ -323,6 +323,7 @@ namespace Siliq.Water.Tests
                 animator.sparkleColor = new Color(1f, 0.95f, 0.85f, 1f);
                 animator.clarity = 0.67f;
                 animator.edgeReflection = 0.73f;
+                animator.refractionStrength = 0.37f;
                 animator.reflectionStrength = 0.64f;
                 animator.reflectionPatternStrength = 0.29f;
                 animator.reflectionPatternScale = 1.23f;
@@ -354,6 +355,7 @@ namespace Siliq.Water.Tests
                 AssertColor(animator.sparkleColor, block.GetColor("_GlimmerColor"), "_GlimmerColor");
                 Assert.AreEqual(0.67f, block.GetFloat("_Clarity"), 1e-5f);
                 Assert.AreEqual(0.73f, block.GetFloat("_EdgeReflection"), 1e-5f);
+                Assert.AreEqual(0.37f, block.GetFloat("_RefractionStrength"), 1e-5f);
                 Assert.AreEqual(0.64f, block.GetFloat("_ReflStrength"), 1e-5f);
                 Assert.AreEqual(0.29f, block.GetFloat("_ReflectionPatternStrength"), 1e-5f);
                 Assert.AreEqual(1.23f, block.GetFloat("_ReflectionPatternScale"), 1e-5f);
@@ -449,7 +451,7 @@ namespace Siliq.Water.Tests
         }
 
         [Test]
-        public void WaterShaders_SupportSoftCausticsScatter()
+        public void WaterShaders_SupportSoftCausticsScatterAndRefraction()
         {
             string[] shaderPaths =
             {
@@ -468,6 +470,10 @@ namespace Siliq.Water.Tests
                     $"{path}: 細い焦点線だけでなく柔らかい水底光を合成する必要がある");
                 StringAssert.Contains("_CausticsPrismStrength", text,
                     $"{path}: 水底光の薄い色分散を維持する必要がある");
+                StringAssert.Contains("_RefractionStrength", text,
+                    $"{path}: 透明水越しの軽量な揺らぎを調整できる必要がある");
+                StringAssert.Contains("refractOffset", text,
+                    $"{path}: 水底光や透明色を法線で歪ませる疑似屈折が必要");
             }
         }
 
@@ -522,12 +528,16 @@ namespace Siliq.Water.Tests
                     $"{name} は水底光の色分散調整を持つ必要がある");
                 Assert.IsTrue(mat.HasProperty("_CausticsScatterStrength"),
                     $"{name} は透明水越しの柔らかい水底光調整を持つ必要がある");
+                Assert.IsTrue(mat.HasProperty("_RefractionStrength"),
+                    $"{name} は透明水越しの揺らぎ調整を持つ必要がある");
                 Assert.Greater(mat.GetFloat("_CausticsStrength"), 0.04f,
                     $"{name} は水底の光が完全に死んだ初期値ではいけない");
                 Assert.GreaterOrEqual(mat.GetFloat("_CausticsFocus"), 1.1f,
                     $"{name} は水底光をぼやけた単色模様に戻さない");
                 Assert.GreaterOrEqual(mat.GetFloat("_CausticsScatterStrength"), 0.04f,
                     $"{name} は細い線だけでなく柔らかい水底光の広がりを持つ必要がある");
+                Assert.GreaterOrEqual(mat.GetFloat("_RefractionStrength"), 0.08f,
+                    $"{name} は水底や反射が平板に見えない程度の軽量屈折を持つ必要がある");
                 Assert.Greater(mat.GetVector("_Scroll1").sqrMagnitude, 0.000000005f,
                     $"{name} は WaterSurfaceAnimator なしでも shader 側で波が動く scroll を持つ必要がある");
                 Assert.LessOrEqual(mat.GetVector("_Scroll1").magnitude, 0.00035f,
@@ -573,6 +583,8 @@ namespace Siliq.Water.Tests
                 "美しさ特化の Flagship ready material は水底光が水越しに見える必要がある");
             Assert.GreaterOrEqual(flagship.GetFloat("_CausticsScatterStrength"), 0.45f,
                 "美しさ特化の Flagship ready material は水底光の柔らかい広がりを持つ必要がある");
+            Assert.GreaterOrEqual(flagship.GetFloat("_RefractionStrength"), 0.30f,
+                "美しさ特化の Flagship ready material は水越しの揺らぎを持つ必要がある");
 
             var lagoon = LoadReadyMaterial("M_Siliq_CrystalLagoon_Ready");
             Assert.LessOrEqual(lagoon.GetFloat("_NormalStrength"), 0.45f,
@@ -595,6 +607,8 @@ namespace Siliq.Water.Tests
                 "Crystal Lagoon は水底光を細い線だけでなく柔らかく広げる");
             Assert.GreaterOrEqual(lagoon.GetFloat("_BottomLightStrength"), 1.65f,
                 "Crystal Lagoon は水底光が水越しに強く見える必要がある");
+            Assert.GreaterOrEqual(lagoon.GetFloat("_RefractionStrength"), 0.30f,
+                "Crystal Lagoon は透明水越しの揺らぎで床と水底光をなじませる必要がある");
 
             var hero = LoadReadyMaterial("M_Siliq_CrystalLagoon_Hero_Ready");
             Assert.AreEqual("Siliq/Water Mobile (Quest)", hero.shader.name,
@@ -617,6 +631,8 @@ namespace Siliq.Water.Tests
                 "Hero は通常 Lagoon より高い透明な抜け感を持つ必要がある");
             Assert.GreaterOrEqual(hero.GetFloat("_TransmissionStrength"), 0.97f,
                 "Hero は透過光を強めて水の厚みを出す");
+            Assert.GreaterOrEqual(hero.GetFloat("_RefractionStrength"), 0.40f,
+                "Hero は水越しに床と水底光が揺らいで見える屈折感を持つ必要がある");
             Assert.GreaterOrEqual(hero.GetFloat("_ReflectionPatternStrength"), 0.55f,
                 "Hero は空や窓の反射帯が見える強さにする");
             Assert.GreaterOrEqual(hero.GetFloat("_CausticsStrength"), 0.80f,

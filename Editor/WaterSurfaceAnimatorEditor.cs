@@ -28,6 +28,7 @@ namespace Siliq.Water.Editor
         SerializedProperty opacity;
         SerializedProperty clarity;
         SerializedProperty edgeReflection;
+        SerializedProperty refractionStrength;
         SerializedProperty reflectionStrength;
         SerializedProperty reflectionPatternStrength;
         SerializedProperty reflectionPatternScale;
@@ -65,6 +66,7 @@ namespace Siliq.Water.Editor
             opacity = serializedObject.FindProperty("opacity");
             clarity = serializedObject.FindProperty("clarity");
             edgeReflection = serializedObject.FindProperty("edgeReflection");
+            refractionStrength = serializedObject.FindProperty("refractionStrength");
             reflectionStrength = serializedObject.FindProperty("reflectionStrength");
             reflectionPatternStrength = serializedObject.FindProperty("reflectionPatternStrength");
             reflectionPatternScale = serializedObject.FindProperty("reflectionPatternScale");
@@ -166,6 +168,7 @@ namespace Siliq.Water.Editor
             EditorGUILayout.PropertyField(opacity, new GUIContent("不透明度"));
             EditorGUILayout.PropertyField(clarity, new GUIContent("透明な抜け感"));
             EditorGUILayout.PropertyField(edgeReflection, new GUIContent("輪郭反射"));
+            EditorGUILayout.PropertyField(refractionStrength, new GUIContent("水越しの揺らぎ"));
             EditorGUILayout.PropertyField(reflectionStrength, new GUIContent("反射量"));
             EditorGUILayout.PropertyField(reflectionPatternStrength, new GUIContent("反射パターン"));
             EditorGUILayout.PropertyField(reflectionPatternScale, new GUIContent("反射パターンの大きさ"));

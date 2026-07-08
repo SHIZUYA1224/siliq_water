@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.64] - 2026-07-09
+
+### 改善: 透明水越しの軽量な屈折感
+- `Siliq/Water Mobile (Quest)` と URP サンプル shader に `_RefractionStrength` を追加し、GrabPass なしで水底光・反射・透明色が法線に沿って揺らぐ見た目を作れるようにした
+- `WaterSurfaceAnimator` / Inspector / Quick Apply / Studio 生成 / 初心者 fallback / ReadyMaterials へ屈折強度を反映
+- Crystal Lagoon / Hero / Flagship の初期値とテストを更新し、透明水が平板な色面に戻らないよう固定
+
 ## [2.3.63] - 2026-07-09
 
 ### 修正: Hero 水底光と水面速度の再調整

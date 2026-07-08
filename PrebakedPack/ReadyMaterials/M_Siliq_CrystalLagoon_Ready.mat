@@ -73,6 +73,7 @@ Material:
     - _NormalStrength: 0.42
     - _Opacity: 0.4
     - _ReflStrength: 1
+    - _RefractionStrength: 0.36
     - _ReflectionPatternScale: 0.92
     - _ReflectionPatternStrength: 0.46
     - _RippleAmplitude: 0.45

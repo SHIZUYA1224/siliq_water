@@ -3,7 +3,7 @@
 Siliq Water は、ノーマルマップ単体ではなく「用途別の見た目プリセット」として使うことを前提にする。まず完成形を確認する場合は `PrebakedPack/Preview/preview_crystal_lagoon_complete.png`、美しさ最優先なら `PrebakedPack/Preview/preview_crystal_lagoon_hero_complete.png` で方向性を見てから、Hero は `PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Hero_Complete.prefab`、通常確認は `PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab` を Hierarchy にドラッグする。水面、薄いタイル感のある明るいプール床、床用 caustics overlay、確認用ライトが一体で入っている。
 
 アタッチだけで使う場合は `PrebakedPack/ReadyMaterials/` の `M_Siliq_*_Ready` を Renderer にドラッグする。これらは normal、色、透明度、反射、scroll、水底の光が設定済みで、`WaterSurfaceAnimator` なしでも shader 側で波が動く。美しさを最優先して確認する場合は `M_Siliq_CrystalLagoon_Hero_Ready` から始める。
-Hero / Crystal Lagoon / 透明プールは、置いた瞬間に水面が滑って見えないよう shader scroll と Animator speed をかなり低速にしている。もっと静止に近づけたい場合は `Speed` を 0.01 以下、または material の `_Scroll1` / `_Scroll2` を 0 にする。Hero の水底光は直線格子ではなく、有機的に曲がる caustics の光筋として調整する。
+Hero / Crystal Lagoon / 透明プールは、置いた瞬間に水面が滑って見えないよう shader scroll と Animator speed をかなり低速にしている。もっと静止に近づけたい場合は `Speed` を 0.01 以下、または material の `_Scroll1` / `_Scroll2` を 0 にする。Hero の水底光は直線格子ではなく、有機的に曲がる caustics の光筋として調整する。透明水の平板さが気になる場合は `_RefractionStrength` を 0.25-0.45 の範囲で使い、水底光と反射を薄く歪ませる。
 
 水面オブジェクトを選択して作成・再適用したい場合は、Hierarchy 右クリックから以下を適用する。
 
