@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.59] - 2026-07-09
+
+### 追加: Hero 専用 normal / height texture
+- `Water_Normal_CrystalLagoon_Hero_01.png` と `Water_Height_CrystalLagoon_Hero_01.png` を追加し、最高品質 Hero material が通常 Crystal Lagoon の波面 texture を流用しないようにした
+- `M_Siliq_CrystalLagoon_Hero_Ready` を Hero 専用 normal / height / caustics の 3 点セットへ切り替え
+- README / 用途別ガイド / テストで、Hero が専用 2048px texture を持つことを固定
+
 ## [2.3.58] - 2026-07-09
 
 ### 改善: 水底光の焦点とプリズム表現

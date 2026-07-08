@@ -89,11 +89,12 @@ README / 用途別ガイド / PrebakedPack の確認に進めます。
 | `Water_Normal_Pool_01.png` | プール・浅い水 (控えめな光の網目) | `M_Water_Pool` |
 | `Water_Normal_Cyber_01.png` | 近未来・ホログラム水面 (細いデータ流) | `M_Water_Cyber` |
 | `Water_Normal_FlagshipCrystal_01.png` + `Water_Height_FlagshipCrystal_01.png` | 製品デモ向けの透明水・高反射・実高さ | `M_Water_FlagshipCrystal` |
-| `Water_Normal_CrystalLagoon_01.png` + `Water_Height_CrystalLagoon_01.png` + `Water_Caustics_CrystalLagoon_01.png` + `Water_Caustics_CrystalLagoon_Hero_01.png` | 透き通った浅い水・美しさ特化 | `M_Siliq_CrystalLagoon_Ready` / `M_Siliq_CrystalLagoon_Hero_Ready` |
+| `Water_Normal_CrystalLagoon_01.png` + `Water_Height_CrystalLagoon_01.png` + `Water_Caustics_CrystalLagoon_01.png` | 透き通った浅い水・美しさ特化 | `M_Siliq_CrystalLagoon_Ready` |
+| `Water_Normal_CrystalLagoon_Hero_01.png` + `Water_Height_CrystalLagoon_Hero_01.png` + `Water_Caustics_CrystalLagoon_Hero_01.png` | 最高品質確認用の透明水・柔らかい波面・強い水底光 | `M_Siliq_CrystalLagoon_Hero_Ready` |
 
 基本 5 種は **1024×1024 PNG / シームレス / インポート設定済み (NormalMap・Repeat・Android/iOS は ASTC 6x6)**。
 フラッグシップ透明水と Crystal Lagoon は専用 **2048×2048 normal map + 2048×2048 height map** を同梱し、用途別 Quick Apply では両方を Siliq 水シェーダーへ割り当てます。
-Crystal Lagoon は水底光も専用 **2048×2048 `Water_Caustics_CrystalLagoon_01.png`** を使い、透明な浅い水の床に柔らかい光筋が出るようにしています。Hero material だけはさらに明るい焦点線を増やした **2048×2048 `Water_Caustics_CrystalLagoon_Hero_01.png`** を使います。
+Crystal Lagoon は水底光も専用 **2048×2048 `Water_Caustics_CrystalLagoon_01.png`** を使い、透明な浅い水の床に柔らかい光筋が出るようにしています。Hero material は normal / height / caustics すべてを専用 texture にし、さらに明るい焦点線を増やした **2048×2048 `Water_Caustics_CrystalLagoon_Hero_01.png`** を使います。
 さらに共通の `Water_Caustics_Crystal_01.png` を同梱し、透明な海・プール・フラッグシップ水では水底に揺れる光模様として使います。これは強い多角形セルではなく、淡く重なる光の筋として調整しています。
 `PrebakedPack/ReadyMaterials/` には `Siliq/Water Mobile (Quest)` 設定済みの完成マテリアルが入っています。
 `PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab` は、分割済み水面、明るいプール床、床用 caustics overlay、確認用ライトを一体化した完成セットです。さらに `PF_Siliq_CrystalLagoon_Hero_Complete.prefab` は Hero material と Hero caustics overlay を貼った最高品質確認用です。Prefab を Hierarchy へ置くだけで、透明感と水底光を同時に確認できます。
@@ -106,7 +107,7 @@ Crystal Lagoon は水底光も専用 **2048×2048 `Water_Caustics_CrystalLagoon_
 | `M_Siliq_IndoorBluePool_Ready` | 明るい室内プール |
 | `M_Siliq_FlagshipCrystal_Ready` | 製品デモ向けのフラッグシップ透明水 |
 | `M_Siliq_CrystalLagoon_Ready` | 透き通った美しさ特化の水面 |
-| `M_Siliq_CrystalLagoon_Hero_Ready` | 専用 Hero caustics で透明感・反射・水底光を強めた最高品質確認用の水面 |
+| `M_Siliq_CrystalLagoon_Hero_Ready` | 専用 Hero normal / height / caustics で透明感・反射・水底光を強めた最高品質確認用の水面 |
 | `M_Siliq_PalePoolFloor` | Crystal Lagoon 完成 Prefab 用の明るい床。薄いタイル感と水底光の受け皿を持つ |
 | `M_Siliq_CrystalLagoon_CausticsOverlay` | プール床・浅い海底に重ねる Crystal Lagoon 専用の水底光 |
 | `M_Siliq_CrystalLagoon_Hero_CausticsOverlay` | Hero 完成 Prefab 用の強めの床用水底光 |

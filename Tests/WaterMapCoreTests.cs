@@ -566,10 +566,14 @@ namespace Siliq.Water.Tests
             var hero = LoadReadyMaterial("M_Siliq_CrystalLagoon_Hero_Ready");
             Assert.AreEqual("Siliq/Water Mobile (Quest)", hero.shader.name,
                 "Hero ready material はドラッグ&ドロップで使える Siliq Mobile 水シェーダーにする");
-            Assert.AreEqual(AssetDatabase.GetAssetPath(lagoon.GetTexture("_NormalMap")), AssetDatabase.GetAssetPath(hero.GetTexture("_NormalMap")),
-                "Hero ready material は Crystal Lagoon 専用 normal map を使う");
-            Assert.AreEqual(AssetDatabase.GetAssetPath(lagoon.GetTexture("_HeightMap")), AssetDatabase.GetAssetPath(hero.GetTexture("_HeightMap")),
-                "Hero ready material は Crystal Lagoon 専用 height map を使う");
+            Assert.AreEqual("Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Normal_CrystalLagoon_Hero_01.png", AssetDatabase.GetAssetPath(hero.GetTexture("_NormalMap")),
+                "Hero ready material は Hero 専用 normal map を使う");
+            Assert.AreEqual("Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Height_CrystalLagoon_Hero_01.png", AssetDatabase.GetAssetPath(hero.GetTexture("_HeightMap")),
+                "Hero ready material は Hero 専用 height map を使う");
+            Assert.AreNotEqual(AssetDatabase.GetAssetPath(lagoon.GetTexture("_NormalMap")), AssetDatabase.GetAssetPath(hero.GetTexture("_NormalMap")),
+                "Hero ready material は通常 Lagoon normal の流用に戻してはいけない");
+            Assert.AreNotEqual(AssetDatabase.GetAssetPath(lagoon.GetTexture("_HeightMap")), AssetDatabase.GetAssetPath(hero.GetTexture("_HeightMap")),
+                "Hero ready material は通常 Lagoon height の流用に戻してはいけない");
             Assert.AreEqual("Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Caustics_CrystalLagoon_Hero_01.png", AssetDatabase.GetAssetPath(hero.GetTexture("_CausticsMap")),
                 "Hero ready material は Hero 専用 caustics map を使う");
             Assert.AreNotEqual(AssetDatabase.GetAssetPath(lagoon.GetTexture("_CausticsMap")), AssetDatabase.GetAssetPath(hero.GetTexture("_CausticsMap")),
@@ -1213,6 +1217,8 @@ namespace Siliq.Water.Tests
             const string normalGuid = "a171aabb01c34e01a1b2c3d4e5f60107";
             const string heightGuid = "a171aabb01c34e01a1b2c3d4e5f60307";
             const string causticsGuid = "a171aabb01c34e01a1b2c3d4e5f60407";
+            const string heroNormalGuid = "a171aabb01c34e01a1b2c3d4e5f60108";
+            const string heroHeightGuid = "a171aabb01c34e01a1b2c3d4e5f60308";
             const string heroCausticsGuid = "a171aabb01c34e01a1b2c3d4e5f60408";
             const string sharedCausticsGuid = "00e6b1e9a23c24df69fe9558209de596";
             const string flagshipNormalGuid = "a171aabb01c34e01a1b2c3d4e5f60106";
@@ -1221,6 +1227,8 @@ namespace Siliq.Water.Tests
             string normalPath = AssetDatabase.GUIDToAssetPath(normalGuid);
             string heightPath = AssetDatabase.GUIDToAssetPath(heightGuid);
             string causticsPath = AssetDatabase.GUIDToAssetPath(causticsGuid);
+            string heroNormalPath = AssetDatabase.GUIDToAssetPath(heroNormalGuid);
+            string heroHeightPath = AssetDatabase.GUIDToAssetPath(heroHeightGuid);
             string heroCausticsPath = AssetDatabase.GUIDToAssetPath(heroCausticsGuid);
             string sharedCausticsPath = AssetDatabase.GUIDToAssetPath(sharedCausticsGuid);
             string flagshipNormalPath = AssetDatabase.GUIDToAssetPath(flagshipNormalGuid);
@@ -1229,9 +1237,13 @@ namespace Siliq.Water.Tests
             Assert.IsNotEmpty(normalPath, "Crystal Lagoon 専用 normal map が package に含まれていない");
             Assert.IsNotEmpty(heightPath, "Crystal Lagoon 専用 height map が package に含まれていない");
             Assert.IsNotEmpty(causticsPath, "Crystal Lagoon 専用 caustics map が package に含まれていない");
+            Assert.IsNotEmpty(heroNormalPath, "Crystal Lagoon Hero 専用 normal map が package に含まれていない");
+            Assert.IsNotEmpty(heroHeightPath, "Crystal Lagoon Hero 専用 height map が package に含まれていない");
             Assert.IsNotEmpty(heroCausticsPath, "Crystal Lagoon Hero 専用 caustics map が package に含まれていない");
             Assert.AreNotEqual(flagshipNormalPath, normalPath, "Crystal Lagoon normal が Flagship normal の流用に戻っている");
             Assert.AreNotEqual(flagshipHeightPath, heightPath, "Crystal Lagoon height が Flagship height の流用に戻っている");
+            Assert.AreNotEqual(normalPath, heroNormalPath, "Hero normal が通常 Crystal Lagoon normal の流用に戻っている");
+            Assert.AreNotEqual(heightPath, heroHeightPath, "Hero height が通常 Crystal Lagoon height の流用に戻っている");
             Assert.AreNotEqual(sharedCausticsPath, causticsPath, "Crystal Lagoon caustics が共通 caustics の流用に戻っている");
             Assert.AreNotEqual(causticsPath, heroCausticsPath, "Hero caustics が通常 Crystal Lagoon caustics の流用に戻っている");
             Assert.AreNotEqual(sharedCausticsPath, heroCausticsPath, "Hero caustics が共通 caustics の流用に戻っている");
@@ -1239,10 +1251,14 @@ namespace Siliq.Water.Tests
             var normal = AssetDatabase.LoadAssetAtPath<Texture2D>(normalPath);
             var height = AssetDatabase.LoadAssetAtPath<Texture2D>(heightPath);
             var caustics = AssetDatabase.LoadAssetAtPath<Texture2D>(causticsPath);
+            var heroNormal = AssetDatabase.LoadAssetAtPath<Texture2D>(heroNormalPath);
+            var heroHeight = AssetDatabase.LoadAssetAtPath<Texture2D>(heroHeightPath);
             var heroCaustics = AssetDatabase.LoadAssetAtPath<Texture2D>(heroCausticsPath);
             Assert.IsNotNull(normal, "Crystal Lagoon normal map を読み込めない");
             Assert.IsNotNull(height, "Crystal Lagoon height map を読み込めない");
             Assert.IsNotNull(caustics, "Crystal Lagoon caustics map を読み込めない");
+            Assert.IsNotNull(heroNormal, "Crystal Lagoon Hero normal map を読み込めない");
+            Assert.IsNotNull(heroHeight, "Crystal Lagoon Hero height map を読み込めない");
             Assert.IsNotNull(heroCaustics, "Crystal Lagoon Hero caustics map を読み込めない");
             Assert.GreaterOrEqual(normal.width, 2048, "美しさ特化 normal map は 2048px 以上にする");
             Assert.GreaterOrEqual(normal.height, 2048, "美しさ特化 normal map は 2048px 以上にする");
@@ -1250,6 +1266,10 @@ namespace Siliq.Water.Tests
             Assert.GreaterOrEqual(height.height, 2048, "美しさ特化 height map は 2048px 以上にする");
             Assert.GreaterOrEqual(caustics.width, 2048, "美しさ特化 caustics map は 2048px 以上にする");
             Assert.GreaterOrEqual(caustics.height, 2048, "美しさ特化 caustics map は 2048px 以上にする");
+            Assert.GreaterOrEqual(heroNormal.width, 2048, "Hero normal map は 2048px 以上にする");
+            Assert.GreaterOrEqual(heroNormal.height, 2048, "Hero normal map は 2048px 以上にする");
+            Assert.GreaterOrEqual(heroHeight.width, 2048, "Hero height map は 2048px 以上にする");
+            Assert.GreaterOrEqual(heroHeight.height, 2048, "Hero height map は 2048px 以上にする");
             Assert.GreaterOrEqual(heroCaustics.width, 2048, "Hero caustics map は 2048px 以上にする");
             Assert.GreaterOrEqual(heroCaustics.height, 2048, "Hero caustics map は 2048px 以上にする");
 
@@ -1257,6 +1277,11 @@ namespace Siliq.Water.Tests
             Assert.IsNotNull(normalImporter, "Crystal Lagoon normal importer が TextureImporter ではない");
             Assert.AreEqual(TextureImporterType.NormalMap, normalImporter.textureType,
                 "Crystal Lagoon normal map が NormalMap import になっていない");
+            var heroNormalImporter = AssetImporter.GetAtPath(heroNormalPath) as TextureImporter;
+            Assert.IsNotNull(heroNormalImporter, "Hero normal importer が TextureImporter ではない");
+            Assert.AreEqual(TextureImporterType.NormalMap, heroNormalImporter.textureType,
+                "Hero normal map が NormalMap import になっていない");
+            Assert.IsFalse(heroNormalImporter.sRGBTexture, "Hero normal map は sRGB ではなく linear import にする");
 
             var ready = LoadReadyMaterial("M_Siliq_CrystalLagoon_Ready");
             Assert.AreEqual(normalPath, AssetDatabase.GetAssetPath(ready.GetTexture("_NormalMap")),
@@ -1267,10 +1292,10 @@ namespace Siliq.Water.Tests
                 "Crystal Lagoon ready material が専用 caustics map を参照していない");
 
             var hero = LoadReadyMaterial("M_Siliq_CrystalLagoon_Hero_Ready");
-            Assert.AreEqual(normalPath, AssetDatabase.GetAssetPath(hero.GetTexture("_NormalMap")),
-                "Crystal Lagoon Hero ready material が専用 normal map を参照していない");
-            Assert.AreEqual(heightPath, AssetDatabase.GetAssetPath(hero.GetTexture("_HeightMap")),
-                "Crystal Lagoon Hero ready material が専用 height map を参照していない");
+            Assert.AreEqual(heroNormalPath, AssetDatabase.GetAssetPath(hero.GetTexture("_NormalMap")),
+                "Crystal Lagoon Hero ready material が Hero 専用 normal map を参照していない");
+            Assert.AreEqual(heroHeightPath, AssetDatabase.GetAssetPath(hero.GetTexture("_HeightMap")),
+                "Crystal Lagoon Hero ready material が Hero 専用 height map を参照していない");
             Assert.AreEqual(heroCausticsPath, AssetDatabase.GetAssetPath(hero.GetTexture("_CausticsMap")),
                 "Crystal Lagoon Hero ready material が Hero 専用 caustics map を参照していない");
         }
@@ -1336,12 +1361,18 @@ namespace Siliq.Water.Tests
                 "ガイドには Crystal Lagoon 専用 height map を明記する");
             StringAssert.Contains("Water_Caustics_CrystalLagoon_01.png", guide,
                 "ガイドには Crystal Lagoon 専用 caustics map を明記する");
+            StringAssert.Contains("Water_Normal_CrystalLagoon_Hero_01.png", guide,
+                "ガイドには Crystal Lagoon Hero 専用 normal map を明記する");
+            StringAssert.Contains("Water_Height_CrystalLagoon_Hero_01.png", guide,
+                "ガイドには Crystal Lagoon Hero 専用 height map を明記する");
             StringAssert.Contains("Water_Caustics_CrystalLagoon_Hero_01.png", guide,
                 "ガイドには Crystal Lagoon Hero 専用 caustics map を明記する");
             StringAssert.Contains("M_Siliq_CrystalLagoon_Hero_Ready", guide,
                 "最高品質確認用 Hero material の説明がない");
             StringAssert.Contains("クリスタルラグーンでは専用 2048px normal map、height map、`Water_Caustics_CrystalLagoon_01.png` を割り当てる", guide,
                 "Crystal Lagoon が Flagship / 共通 caustics の流用ではないことをガイドで説明する");
+            StringAssert.Contains("Hero では `Water_Normal_CrystalLagoon_Hero_01.png`、`Water_Height_CrystalLagoon_Hero_01.png`、`Water_Caustics_CrystalLagoon_Hero_01.png` を使う", guide,
+                "Hero が通常 Lagoon texture の流用ではないことをガイドで説明する");
             StringAssert.Contains("透明な海・プール・フラッグシップ水では `Water_Caustics_Crystal_01.png`", guide,
                 "共通水底光と Crystal Lagoon 専用水底光の対象を分けて説明する");
         }

@@ -32,7 +32,7 @@ Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイ�
 - 適したノーマルマップを割り当てる
 - フラッグシップ透明水では専用 2048px normal map と height map を割り当てる
 - クリスタルラグーンでは専用 2048px normal map、height map、`Water_Caustics_CrystalLagoon_01.png` を割り当てる
-- `M_Siliq_CrystalLagoon_Hero_Ready` は normal / height は Crystal Lagoon 専用 texture を使い、水底光だけ `Water_Caustics_CrystalLagoon_Hero_01.png` へ差し替える。`Clarity`、`Reflection Pattern`、`Transmission`、`Bottom Light Strength`、`Caustics Focus`、`Caustics Prism` を強めた最高品質確認用として同梱する
+- `M_Siliq_CrystalLagoon_Hero_Ready` は `Water_Normal_CrystalLagoon_Hero_01.png`、`Water_Height_CrystalLagoon_Hero_01.png`、`Water_Caustics_CrystalLagoon_Hero_01.png` を使い、通常 Crystal Lagoon texture の流用に戻さない。`Clarity`、`Reflection Pattern`、`Transmission`、`Bottom Light Strength`、`Caustics Focus`、`Caustics Prism` を強めた最高品質確認用として同梱する
 - 完成形をすぐ確認できるよう、`PF_Siliq_CrystalLagoon_Complete.prefab` には水面、`Siliq/Pale Pool Floor Mobile` の薄いタイル床、`M_Siliq_CrystalLagoon_CausticsOverlay` の床用光を同梱する。`PF_Siliq_CrystalLagoon_Hero_Complete.prefab` では Hero water material と `M_Siliq_CrystalLagoon_Hero_CausticsOverlay` を使う
 - 床に直接光を出したい場合は、床の少し上に薄い Plane を置いて `M_Siliq_CrystalLagoon_CausticsOverlay` を貼る
 - 透明な海・プール・フラッグシップ水では `Water_Caustics_Crystal_01.png` を水底の光として割り当てる
@@ -62,7 +62,7 @@ Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイ�
 - 透明感は normal map だけでは作れない。必ず用途別プリセットか透明マテリアルを使う。
 - 高品質に見せるには normal map、色、透明度、反射、ハイライト、実高さ、水底の光、ライト、分割メッシュの全部が必要。
 - フラッグシップ透明水は Calm の流用ではなく、`Water_Normal_FlagshipCrystal_01.png` と `Water_Height_FlagshipCrystal_01.png` を前提にする。
-- クリスタルラグーンは Flagship の流用ではなく、`Water_Normal_CrystalLagoon_01.png`、`Water_Height_CrystalLagoon_01.png`、`Water_Caustics_CrystalLagoon_01.png` を前提にする。Hero では `Water_Caustics_CrystalLagoon_Hero_01.png` を使う。
+- クリスタルラグーンは Flagship の流用ではなく、`Water_Normal_CrystalLagoon_01.png`、`Water_Height_CrystalLagoon_01.png`、`Water_Caustics_CrystalLagoon_01.png` を前提にする。Hero では `Water_Normal_CrystalLagoon_Hero_01.png`、`Water_Height_CrystalLagoon_Hero_01.png`、`Water_Caustics_CrystalLagoon_Hero_01.png` を使う。
 - `M_Siliq_CrystalLagoon_CausticsOverlay` と `M_Siliq_CrystalLagoon_Hero_CausticsOverlay` は水面 material ではなく床用の加算 overlay。水面には `M_Siliq_CrystalLagoon_Ready`、最高品質確認には `M_Siliq_CrystalLagoon_Hero_Ready` を使う。
 - 血や金属液体は「水」ではなく特殊液体なので、色だけでなく反射と凹凸の強さを変える。
 - 液体金属は透過させず、不透明で反射を強くした方が破綻しにくい。
