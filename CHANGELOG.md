@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.58] - 2026-07-09
+
+### 改善: 水底光の焦点とプリズム表現
+- `Siliq/Water Mobile (Quest)` に `_CausticsFocus` / `_CausticsPrismStrength` を追加し、水底光を単色の白模様ではなく細い焦点線と薄い色分散で表現できるようにした
+- `WaterSurfaceAnimator` / Inspector / Quick Apply / Studio 生成 material / ReadyMaterials / 完成 Prefab が新しい水底光パラメータを扱うよう更新
+- Crystal Lagoon / Hero の初期値を、透明水越しの水底光が締まって見える方向へ固定し、テストで品質基準を追加
+
 ## [2.3.57] - 2026-07-09
 
 ### 修正: 水面速度を静かな展示品質へ再調整

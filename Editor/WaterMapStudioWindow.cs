@@ -1577,6 +1577,8 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_CausticsStrength")) mat.SetFloat("_CausticsStrength", strength);
             if (mat.HasProperty("_CausticsScale")) mat.SetFloat("_CausticsScale", scale);
             if (mat.HasProperty("_CausticsSpeed")) mat.SetFloat("_CausticsSpeed", speed);
+            if (mat.HasProperty("_CausticsFocus")) mat.SetFloat("_CausticsFocus", Mathf.Lerp(1.15f, 2.0f, Mathf.Clamp01(strength)));
+            if (mat.HasProperty("_CausticsPrismStrength")) mat.SetFloat("_CausticsPrismStrength", Mathf.Lerp(0.04f, 0.18f, Mathf.Clamp01(strength)));
             if (mat.HasProperty("_CausticsTint")) mat.SetColor("_CausticsTint", tint);
         }
 

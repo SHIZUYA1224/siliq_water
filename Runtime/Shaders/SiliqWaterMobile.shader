@@ -44,6 +44,8 @@ Shader "Siliq/Water Mobile (Quest)"
         _CausticsStrength ("水底の光の強さ", Range(0, 1)) = 0
         _CausticsScale ("水底の光の細かさ", Range(0.2, 8)) = 1.8
         _CausticsSpeed ("水底の光の速度", Range(0, 0.25)) = 0.00025
+        _CausticsFocus ("水底光の焦点", Range(0.5, 4)) = 1.4
+        _CausticsPrismStrength ("水底光の色分散", Range(0, 1)) = 0.12
         _BottomLightStrength ("水底光の透け", Range(0, 2)) = 1
         _CausticsTint ("水底の光の色", Color) = (0.75, 1, 1, 1)
         _SpecPower ("ハイライトの鋭さ", Range(8, 512)) = 160
@@ -126,6 +128,8 @@ Shader "Siliq/Water Mobile (Quest)"
             half _CausticsStrength;
             half _CausticsScale;
             half _CausticsSpeed;
+            half _CausticsFocus;
+            half _CausticsPrismStrength;
             half _BottomLightStrength;
             half4 _CausticsTint;
             half _SpecPower;
@@ -350,16 +354,23 @@ Shader "Siliq/Water Mobile (Quest)"
                 float2 causticsUvB = SiliqRotate2D(i.worldPos.xz, 1.17) * causticsScale * 0.09 - worldN.xz * 0.08 - _Time.y * _CausticsSpeed * float2(0.19, 0.29);
                 half causticsA = tex2D(_CausticsMap, causticsUvA).r;
                 half causticsB = tex2D(_CausticsMap, causticsUvB).r;
+                half causticsPrismR = tex2D(_CausticsMap, causticsUvA + worldN.xz * 0.013 + float2(0.004, -0.002)).r;
+                half causticsPrismB = tex2D(_CausticsMap, causticsUvB - worldN.xz * 0.011 + float2(-0.003, 0.005)).r;
                 half bottomLight = saturate(_BottomLightStrength * 0.5h);
-                half caustics = saturate((causticsA * 0.68h + causticsB * 0.45h - 0.22h) * _CausticsStrength * lerp(0.82h, 1.55h, bottomLight));
+                half causticsRaw = saturate(causticsA * 0.62h + causticsB * 0.50h);
+                half causticsFocus = pow(saturate(causticsRaw), max(_CausticsFocus, 0.5h));
+                half caustics = saturate((causticsFocus - 0.10h) * _CausticsStrength * lerp(0.82h, 1.55h, bottomLight));
                 caustics *= viewFacing * detailVisibility * saturate(0.32h + _TransmissionStrength + bottomLight * 0.28h);
+                half3 causticsColor = _CausticsTint.rgb;
+                half3 prismColor = half3(causticsPrismR, causticsRaw, causticsPrismB) * _CausticsTint.rgb;
+                causticsColor = lerp(causticsColor, prismColor, saturate(_CausticsPrismStrength) * saturate(0.25h + clarity + bottomLight * 0.35h));
                 half3 transmission = _TransmissionColor.rgb * _TransmissionStrength * viewFacing * saturate(0.2h + surfaceLight) * baseVisibility;
                 transmission *= lerp(1.0h, 1.38h, clarity);
 
                 half4 col;
                 col.rgb = lerp(baseCol + transmission, reflCol, fresnel) + (spec + glint) * _LightColor0.rgb;
                 col.rgb += _HorizonColor.rgb * reflectionPattern;
-                col.rgb += _CausticsTint.rgb * caustics;
+                col.rgb += causticsColor * caustics;
                 col.rgb += _GlimmerColor.rgb * (glimmer + rippleLight * 0.35h * detailVisibility);
                 col.rgb = lerp(col.rgb, reflCol + (spec + glint) * _LightColor0.rgb, alphaFresnel * _EdgeReflection);
                 col.a = saturate(_Opacity - clarity * viewFacing * 0.12h + alphaFresnel * _AlphaFresnel + glimmer * 0.08h + rippleLight * 0.05h);

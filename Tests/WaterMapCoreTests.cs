@@ -336,6 +336,8 @@ namespace Siliq.Water.Tests
                 animator.causticsStrength = 0.42f;
                 animator.causticsScale = 2.3f;
                 animator.causticsSpeed = 0.05f;
+                animator.causticsFocus = 2.1f;
+                animator.causticsPrismStrength = 0.17f;
                 animator.bottomLightStrength = 1.33f;
                 animator.causticsTint = new Color(0.8f, 1f, 0.95f, 1f);
                 animator.ApplyImmediate(0f);
@@ -365,6 +367,8 @@ namespace Siliq.Water.Tests
                 Assert.AreEqual(0.42f, block.GetFloat("_CausticsStrength"), 1e-5f);
                 Assert.AreEqual(2.3f, block.GetFloat("_CausticsScale"), 1e-5f);
                 Assert.AreEqual(0.05f, block.GetFloat("_CausticsSpeed"), 1e-5f);
+                Assert.AreEqual(2.1f, block.GetFloat("_CausticsFocus"), 1e-5f);
+                Assert.AreEqual(0.17f, block.GetFloat("_CausticsPrismStrength"), 1e-5f);
                 Assert.AreEqual(1.33f, block.GetFloat("_BottomLightStrength"), 1e-5f);
                 AssertColor(animator.causticsTint, block.GetColor("_CausticsTint"), "_CausticsTint");
                 Assert.AreEqual(1f, mat.GetFloat("_Opacity"), 1e-5f, "共有マテリアルの _Opacity を直接変更してはならない");
@@ -487,8 +491,14 @@ namespace Siliq.Water.Tests
                     $"{name} はドラッグ&ドロップだけで凹凸が出るよう normal map を持つ必要がある");
                 Assert.IsNotNull(mat.GetTexture("_CausticsMap"),
                     $"{name} は水底の光表現用 caustics map を持つ必要がある");
+                Assert.IsTrue(mat.HasProperty("_CausticsFocus"),
+                    $"{name} は水底光の焦点調整を持つ必要がある");
+                Assert.IsTrue(mat.HasProperty("_CausticsPrismStrength"),
+                    $"{name} は水底光の色分散調整を持つ必要がある");
                 Assert.Greater(mat.GetFloat("_CausticsStrength"), 0.04f,
                     $"{name} は水底の光が完全に死んだ初期値ではいけない");
+                Assert.GreaterOrEqual(mat.GetFloat("_CausticsFocus"), 1.1f,
+                    $"{name} は水底光をぼやけた単色模様に戻さない");
                 Assert.Greater(mat.GetVector("_Scroll1").sqrMagnitude, 0.00000005f,
                     $"{name} は WaterSurfaceAnimator なしでも shader 側で波が動く scroll を持つ必要がある");
                 Assert.LessOrEqual(mat.GetVector("_Scroll1").magnitude, 0.001f,
@@ -546,6 +556,10 @@ namespace Siliq.Water.Tests
                 "Crystal Lagoon は透明水でも反射が薄すぎない初期値にする");
             Assert.GreaterOrEqual(lagoon.GetFloat("_CausticsStrength"), 0.70f,
                 "Crystal Lagoon は水底光を強めに持つ必要がある");
+            Assert.GreaterOrEqual(lagoon.GetFloat("_CausticsFocus"), 2.0f,
+                "Crystal Lagoon は水底光を細い焦点線として見せる");
+            Assert.GreaterOrEqual(lagoon.GetFloat("_CausticsPrismStrength"), 0.18f,
+                "Crystal Lagoon は水底光に薄い色分散を持たせる");
             Assert.GreaterOrEqual(lagoon.GetFloat("_BottomLightStrength"), 1.65f,
                 "Crystal Lagoon は水底光が水越しに強く見える必要がある");
 
@@ -570,6 +584,10 @@ namespace Siliq.Water.Tests
                 "Hero は空や窓の反射帯が見える強さにする");
             Assert.GreaterOrEqual(hero.GetFloat("_CausticsStrength"), 0.80f,
                 "Hero は水底光をはっきり見せる");
+            Assert.GreaterOrEqual(hero.GetFloat("_CausticsFocus"), 2.3f,
+                "Hero は水底光を高品質な焦点線として締める");
+            Assert.GreaterOrEqual(hero.GetFloat("_CausticsPrismStrength"), 0.22f,
+                "Hero は水底光に薄いプリズム色を持たせる");
             Assert.GreaterOrEqual(hero.GetFloat("_BottomLightStrength"), 1.85f,
                 "Hero は水底光が水越しに強く透ける必要がある");
             Assert.LessOrEqual(hero.GetFloat("_NormalStrength"), 0.40f,
@@ -1621,6 +1639,8 @@ namespace Siliq.Water.Tests
             Assert.GreaterOrEqual(animator.clarity, 0.90f, "完成 Prefab は透明な抜け感を高くしておく");
             Assert.GreaterOrEqual(animator.reflectionPatternStrength, 0.42f, "完成 Prefab は反射パターンを強めに確認できる必要がある");
             Assert.GreaterOrEqual(animator.causticsStrength, 0.70f, "完成 Prefab は水底光を強めに確認できる必要がある");
+            Assert.GreaterOrEqual(animator.causticsFocus, 2.0f, "完成 Prefab は水底光を細い焦点線として確認できる必要がある");
+            Assert.GreaterOrEqual(animator.causticsPrismStrength, 0.18f, "完成 Prefab は水底光の薄い色分散を確認できる必要がある");
             Assert.GreaterOrEqual(animator.bottomLightStrength, 1.65f, "完成 Prefab は水底光が水越しに見える必要がある");
         }
 
@@ -1683,6 +1703,8 @@ namespace Siliq.Water.Tests
             Assert.GreaterOrEqual(animator.reflectionPatternStrength, 0.55f, "Hero 完成 Prefab は反射帯を確認できる必要がある");
             Assert.GreaterOrEqual(animator.transmissionStrength, 0.97f, "Hero 完成 Prefab は透過光を強めにする");
             Assert.GreaterOrEqual(animator.causticsStrength, 0.80f, "Hero 完成 Prefab は水底光を強めに確認できる必要がある");
+            Assert.GreaterOrEqual(animator.causticsFocus, 2.3f, "Hero 完成 Prefab は水底光を細く締めて見せる必要がある");
+            Assert.GreaterOrEqual(animator.causticsPrismStrength, 0.22f, "Hero 完成 Prefab は水底光の薄いプリズム色を確認できる必要がある");
             Assert.GreaterOrEqual(animator.bottomLightStrength, 1.85f, "Hero 完成 Prefab は水底光が水越しに強く見える必要がある");
         }
 

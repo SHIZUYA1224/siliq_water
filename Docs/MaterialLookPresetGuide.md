@@ -32,7 +32,7 @@ Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイ�
 - 適したノーマルマップを割り当てる
 - フラッグシップ透明水では専用 2048px normal map と height map を割り当てる
 - クリスタルラグーンでは専用 2048px normal map、height map、`Water_Caustics_CrystalLagoon_01.png` を割り当てる
-- `M_Siliq_CrystalLagoon_Hero_Ready` は normal / height は Crystal Lagoon 専用 texture を使い、水底光だけ `Water_Caustics_CrystalLagoon_Hero_01.png` へ差し替える。`Clarity`、`Reflection Pattern`、`Transmission`、`Bottom Light Strength`、`Caustics` を強めた最高品質確認用として同梱する
+- `M_Siliq_CrystalLagoon_Hero_Ready` は normal / height は Crystal Lagoon 専用 texture を使い、水底光だけ `Water_Caustics_CrystalLagoon_Hero_01.png` へ差し替える。`Clarity`、`Reflection Pattern`、`Transmission`、`Bottom Light Strength`、`Caustics Focus`、`Caustics Prism` を強めた最高品質確認用として同梱する
 - 完成形をすぐ確認できるよう、`PF_Siliq_CrystalLagoon_Complete.prefab` には水面、`Siliq/Pale Pool Floor Mobile` の薄いタイル床、`M_Siliq_CrystalLagoon_CausticsOverlay` の床用光を同梱する。`PF_Siliq_CrystalLagoon_Hero_Complete.prefab` では Hero water material と `M_Siliq_CrystalLagoon_Hero_CausticsOverlay` を使う
 - 床に直接光を出したい場合は、床の少し上に薄い Plane を置いて `M_Siliq_CrystalLagoon_CausticsOverlay` を貼る
 - 透明な海・プール・フラッグシップ水では `Water_Caustics_Crystal_01.png` を水底の光として割り当てる
@@ -50,7 +50,7 @@ Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイ�
 - 室内ブループール: `Normal Strength` を 0.35-0.6、`Opacity` を 0.35-0.5、`Reflection` は高め
 - フラッグシップ透明水: `Normal Strength` を 0.55-0.65、`Opacity` を 0.48-0.62、`Reflection` は高め、`Height` は 0.02 以下から始める
 - クリスタルラグーン: `Normal Strength` は 0.4 前後、`Clarity` は 0.9 以上、`Reflection Pattern` は 0.42 以上、`Transmission` と `Caustics` は高め、`Bottom Light Strength` は 1.65 以上、`Height` は 0.01 以下に抑える
-- クリスタルラグーン Hero: `Normal Strength` は 0.36 前後、`Opacity` は 0.34 前後、`Clarity` は 0.98、`Reflection Pattern` は 0.58、`Transmission` は 0.98、`Caustics` は 0.84、`Bottom Light Strength` は 1.9 を基準にする
+- クリスタルラグーン Hero: `Normal Strength` は 0.36 前後、`Opacity` は 0.34 前後、`Clarity` は 0.98、`Reflection Pattern` は 0.58、`Transmission` は 0.98、`Caustics` は 0.84、`Caustics Focus` は 2.4、`Caustics Prism` は 0.24、`Bottom Light Strength` は 1.9 を基準にする
 - 水底の光: プールや浅い海では `Caustics Strength` を 0.3-0.65、暗い場所や深い水では 0.15 以下から始める
 - 床用 caustics overlay: `Intensity` は 0.4-0.7、`Tiling` は 1-2 から始める。床が発光しすぎる場合は `Floor Fade` を下げる。
 - 氷割れや多角形模様に見える場合: フラッグシップ透明水の `Height Map Influence` は 0 付近、`Height` は 0.02 以下から始める

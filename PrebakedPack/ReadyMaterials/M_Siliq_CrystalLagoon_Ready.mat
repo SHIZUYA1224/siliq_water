@@ -47,6 +47,8 @@ Material:
     - _BottomLightStrength: 1.7
     - _CausticsScale: 2.25
     - _CausticsSpeed: 0.00016
+    - _CausticsFocus: 2.0
+    - _CausticsPrismStrength: 0.18
     - _CausticsStrength: 0.72
     - _Clarity: 0.92
     - _DarkDetailDamping: 0.7
