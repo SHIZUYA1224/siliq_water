@@ -956,6 +956,23 @@ namespace Siliq.Water.Tests
         }
 
         [Test]
+        public void MaterialGuide_DocumentsCrystalLagoonDedicatedTextures()
+        {
+            const string guidePath = "Packages/com.siliq.water-normalmap/Docs/MaterialLookPresetGuide.md";
+            Assert.IsTrue(File.Exists(guidePath), "用途別マテリアルガイドが同梱されていない");
+            string guide = File.ReadAllText(guidePath);
+
+            StringAssert.Contains("Water_Normal_CrystalLagoon_01.png", guide,
+                "ガイドには Crystal Lagoon 専用 normal map を明記する");
+            StringAssert.Contains("Water_Height_CrystalLagoon_01.png", guide,
+                "ガイドには Crystal Lagoon 専用 height map を明記する");
+            StringAssert.Contains("クリスタルラグーンでは専用 2048px normal map と height map を割り当てる", guide,
+                "Crystal Lagoon が Flagship texture の流用ではないことをガイドで説明する");
+            StringAssert.Contains("透明な海・プール・フラッグシップ水・クリスタルラグーン", guide,
+                "水底光の対象に Crystal Lagoon が含まれていることを説明する");
+        }
+
+        [Test]
         public void BeginnerSetup_RepairsOldFlagshipHeightSettings()
         {
             GameObject go = null;

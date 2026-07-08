@@ -27,7 +27,7 @@ Use this before switching the GitHub repository to public or cutting a product r
 - [ ] URP shader is available only through `Samples > URP Shader` and imports cleanly in a URP project
 - [ ] water studio opens without layout errors at narrow and wide window sizes
 - [ ] purpose-first presets set reasonable maps, quality, and material options
-- [ ] Quick Apply creates moving, usable materials for clear sea, pool, blood sea, and liquid metal
+- [ ] Quick Apply creates moving, usable materials for Crystal Lagoon, clear sea, pool, blood sea, and liquid metal
 
 ## Security
 
