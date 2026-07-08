@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.44] - 2026-07-09
+
+### 追加: 水底用 caustics overlay material
+- `Siliq/Caustics Overlay Mobile` を追加し、プール床や浅い海底に軽量な加算 caustics を重ねられるようにした
+- `M_Siliq_CrystalLagoon_CausticsOverlay` を追加し、Crystal Lagoon 専用 caustics を床面にもそのまま使えるようにした
+- README / 用途別ガイド / テストで、水面 material と床用 overlay の使い分けを固定
+
 ## [2.3.43] - 2026-07-09
 
 ### 追加: Crystal Lagoon 専用の高解像度水底光

@@ -633,6 +633,39 @@ namespace Siliq.Water.Tests
         }
 
         [Test]
+        public void CrystalLagoonCausticsOverlay_IsBundledForPoolFloors()
+        {
+            const string shaderPath = "Packages/com.siliq.water-normalmap/Runtime/Shaders/SiliqCausticsOverlay.shader";
+            const string materialPath = "Packages/com.siliq.water-normalmap/PrebakedPack/ReadyMaterials/M_Siliq_CrystalLagoon_CausticsOverlay.mat";
+            const string causticsPath = "Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Caustics_CrystalLagoon_01.png";
+
+            Assert.IsTrue(File.Exists(shaderPath), "床用 caustics overlay shader が同梱されていない");
+            string shaderText = File.ReadAllText(shaderPath);
+            StringAssert.Contains("Shader \"Siliq/Caustics Overlay Mobile\"", shaderText);
+            StringAssert.Contains("Blend One One", shaderText,
+                "床用 caustics overlay は床を暗くせず加算で光だけを重ねる");
+            Assert.IsFalse(shaderText.Contains("com.unity.render-pipelines.universal"),
+                "床用 caustics overlay は URP package 未導入でも壊れない Built-in 互換にする");
+
+            var shader = Shader.Find("Siliq/Caustics Overlay Mobile");
+            Assert.IsNotNull(shader, "Siliq/Caustics Overlay Mobile shader が見つからない");
+
+            var material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+            Assert.IsNotNull(material, "Crystal Lagoon 床用 caustics overlay material が同梱されていない");
+            Assert.AreEqual("Siliq/Caustics Overlay Mobile", material.shader.name);
+            Assert.AreEqual(causticsPath, AssetDatabase.GetAssetPath(material.GetTexture("_CausticsMap")),
+                "床用 caustics overlay が Crystal Lagoon 専用 caustics を参照していない");
+            Assert.GreaterOrEqual(material.GetFloat("_Intensity"), 0.4f,
+                "床用 caustics overlay が弱すぎると水底光として見えない");
+            Assert.LessOrEqual(material.GetFloat("_Intensity"), 0.75f,
+                "床用 caustics overlay が強すぎると床が発光しすぎる");
+            Assert.GreaterOrEqual(material.GetFloat("_Tiling"), 1.0f);
+            Assert.LessOrEqual(material.GetFloat("_Tiling"), 2.0f);
+            Assert.AreEqual((int)RenderQueue.Transparent, material.renderQueue,
+                "床用 caustics overlay は透明キューで床の上に重ねる");
+        }
+
+        [Test]
         public void SiliqMobileShader_ExposesMacroVariationControls()
         {
             Material mat = null;

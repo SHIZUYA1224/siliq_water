@@ -104,11 +104,13 @@ Crystal Lagoon だけは水底光も専用 **2048×2048 `Water_Caustics_CrystalL
 | `M_Siliq_IndoorBluePool_Ready` | 明るい室内プール |
 | `M_Siliq_FlagshipCrystal_Ready` | 製品デモ向けのフラッグシップ透明水 |
 | `M_Siliq_CrystalLagoon_Ready` | 透き通った美しさ特化の水面 |
+| `M_Siliq_CrystalLagoon_CausticsOverlay` | プール床・浅い海底に重ねる Crystal Lagoon 専用の水底光 |
 | `M_Siliq_BloodSea_Ready` | 血の海・赤い液体 |
 | `M_Siliq_LiquidMetal_Ready` | 液体金属 |
 
 これらは normal map、色、透明度、反射、scroll、実高さ、水底の光の初期値まで設定済みなので、
 Renderer にドラッグ&ドロップするだけで水として動きます。`WaterSurfaceAnimator` は必須ではありません。
+床そのものに光を出したい場合は、水底の少し上に薄い Plane を置き、`M_Siliq_CrystalLagoon_CausticsOverlay` を貼ります。これは `Siliq/Caustics Overlay Mobile` を使う軽量な加算 material で、Crystal Lagoon 専用 caustics を床に重ねます。
 既存の `PrebakedPack/Materials/M_Water_*` は Standard シェーダーの互換・確認用です。
 
 ### 一瞬で水面にする 3 つの方法
@@ -451,7 +453,7 @@ Tests/
   WaterMapCoreTests.cs      Unity Test Runner (EditMode) 用の自動テスト
 PrebakedPack/
   Textures/                 基本 normal 5 種 (1024px) + flagship normal/height (2048px)
-  ReadyMaterials/           アタッチするだけで動く Siliq 水マテリアル 7 種
+  ReadyMaterials/           アタッチするだけで動く Siliq 水マテリアル 7 種 + 床用 caustics overlay
   Materials/                設定済み Standard マテリアル 6 種
   SampleScene/              SC_CrystalLagoon_Showcase.unity + 基本 5 種比較シーン
   Preview/                  Plane に貼った状態のプレビュー画像、Crystal Lagoon の美しさ確認用画像
