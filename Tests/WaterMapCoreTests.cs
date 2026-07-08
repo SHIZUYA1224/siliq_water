@@ -549,6 +549,48 @@ namespace Siliq.Water.Tests
         }
 
         [Test]
+        public void CrystalCausticsTexture_UsesSoftNonPolygonalLight()
+        {
+            const string path = "Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Caustics_Crystal_01.png";
+            var caustics = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+            Assert.IsNotNull(caustics, "水底光 texture が同梱されていない");
+            Assert.GreaterOrEqual(caustics.width, 1024, "水底光 texture は低解像度に戻さない");
+            Assert.GreaterOrEqual(caustics.height, 1024, "水底光 texture は低解像度に戻さない");
+
+            var readable = new Texture2D(2, 2, TextureFormat.RGB24, false);
+            try
+            {
+                Assert.IsTrue(readable.LoadImage(File.ReadAllBytes(path)), "水底光 texture を PNG として読めない");
+                var pixels = readable.GetPixels32();
+                int nearBlack = 0;
+                int nearWhite = 0;
+                int min = 255;
+                int max = 0;
+                long sum = 0;
+                foreach (var pixel in pixels)
+                {
+                    int v = pixel.r;
+                    if (v <= 2) nearBlack++;
+                    if (v >= 250) nearWhite++;
+                    if (v < min) min = v;
+                    if (v > max) max = v;
+                    sum += v;
+                }
+
+                float total = pixels.Length;
+                Assert.AreEqual(0, nearBlack, "水底光 texture に真っ黒な大面積セルを戻してはならない");
+                Assert.AreEqual(0, nearWhite, "水底光 texture に飽和した白い Voronoi 線を戻してはならない");
+                Assert.GreaterOrEqual(min, 8, "水底光は黒い多角形セルではなく、淡い光として扱う");
+                Assert.LessOrEqual(max, 220, "水底光は白飛びした線ではなく、shader 側で強度調整できる余地を残す");
+                Assert.Greater(sum / total, 24f, "水底光 texture が暗すぎる");
+            }
+            finally
+            {
+                Object.DestroyImmediate(readable);
+            }
+        }
+
+        [Test]
         public void SiliqMobileShader_ExposesMacroVariationControls()
         {
             Material mat = null;

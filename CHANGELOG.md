@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.40] - 2026-07-09
+
+### 改善: 水底光を自然な Crystal Lagoon 向けに再作成
+- `Water_Caustics_Crystal_01.png` を多角形セル状の強い Voronoi から、白飛びしない柔らかい光の筋へ差し替え
+- `preview_crystal_lagoon.png` を専用 normal / height / caustics の方向性に合わせて更新
+- 水底光 texture が真っ黒なセルや飽和した白線へ戻らないようテストを追加
+
 ## [2.3.39] - 2026-07-09
 
 ### 追加: Crystal Lagoon 専用 normal / height
