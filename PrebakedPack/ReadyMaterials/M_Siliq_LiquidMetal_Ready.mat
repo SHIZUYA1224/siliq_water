@@ -44,6 +44,7 @@ Material:
     m_Floats:
     - _AlphaFresnel: 0
     - _AlphaPower: 3.4
+    - _BottomGlowStrength: 0
     - _BottomLightStrength: 0
     - _CausticsScale: 1.8
     - _CausticsSpeed: 0
@@ -54,6 +55,7 @@ Material:
     - _Clarity: 0
     - _DarkDetailDamping: 0.7
     - _DarkReflectionDamping: 0.72
+    - _DepthTintStrength: 0.12
     - _DisplacementScale: 0.85
     - _DisplacementSpeed: 0.00024
     - _DisplacementStrength: 0.025

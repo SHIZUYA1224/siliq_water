@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.68] - 2026-07-09
+
+### 改善: 透明水の水底感と奥行き表現を強化
+- `Siliq/Water Mobile (Quest)` に `_BottomGlowStrength` と `_DepthTintStrength` を追加し、GrabPass なしで水底の柔らかい明るさと透明水の奥行きの青みを調整できるようにした
+- `WaterSurfaceAnimator` と専用 Inspector から、水底の柔らかい明るさ / 奥行きの青みを直接操作できるようにした
+- Ready material / Quick Apply / Studio 生成 / 初心者 fallback / Crystal Lagoon 完成 Prefab / Hero 完成 Prefab へ新しい水底表現の初期値を反映
+- テストを更新し、Hero / Crystal Lagoon が白い板状の透明水や平板な水底光へ戻らないよう固定
+
 ## [2.3.67] - 2026-07-09
 
 ### 改善: 水面速度と Crystal Lagoon 水底光の再調整

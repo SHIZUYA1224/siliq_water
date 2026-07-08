@@ -329,6 +329,8 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_Opacity")) mat.SetFloat("_Opacity", 0.52f);
             if (mat.HasProperty("_Clarity")) mat.SetFloat("_Clarity", 0.72f);
             if (mat.HasProperty("_RefractionStrength")) mat.SetFloat("_RefractionStrength", 0.28f);
+            if (mat.HasProperty("_BottomGlowStrength")) mat.SetFloat("_BottomGlowStrength", 0.55f);
+            if (mat.HasProperty("_DepthTintStrength")) mat.SetFloat("_DepthTintStrength", 0.28f);
             if (mat.HasProperty("_TransmissionStrength")) mat.SetFloat("_TransmissionStrength", 0.72f);
             if (mat.HasProperty("_ReflStrength")) mat.SetFloat("_ReflStrength", 0.92f);
             renderer.sharedMaterial = mat;
