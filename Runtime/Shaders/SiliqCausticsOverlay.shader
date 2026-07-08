@@ -11,8 +11,8 @@ Shader "Siliq/Caustics Overlay Mobile"
         _Focus ("Focus", Range(0.5, 4)) = 1.6
         _SoftScatter ("Soft Scatter", Range(0, 1)) = 0.32
         _PrismStrength ("Prism Tint", Range(0, 1)) = 0.10
-        _Scroll1 ("Layer 1 Scroll", Vector) = (0.0011, 0.0004, 0, 0)
-        _Scroll2 ("Layer 2 Scroll", Vector) = (-0.00035, 0.0007, 0, 0)
+        _Scroll1 ("Layer 1 Scroll", Vector) = (0.00010, 0.00004, 0, 0)
+        _Scroll2 ("Layer 2 Scroll", Vector) = (-0.00003, 0.00006, 0, 0)
         _FloorFade ("Floor Fade", Range(0, 1)) = 0.82
     }
 

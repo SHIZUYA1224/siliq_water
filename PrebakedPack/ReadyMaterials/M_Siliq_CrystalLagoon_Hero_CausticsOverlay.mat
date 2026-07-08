@@ -37,7 +37,7 @@ Material:
     - _Intensity: 0.68
     - _Tiling: 1.25
     m_Colors:
-    - _Scroll1: {r: 0.000034, g: 0.000012, b: 0, a: 0}
-    - _Scroll2: {r: -0.000011, g: 0.000023, b: 0, a: 0}
+    - _Scroll1: {r: 0.000010, g: 0.000004, b: 0, a: 0}
+    - _Scroll2: {r: -0.000003, g: 0.000007, b: 0, a: 0}
     - _Tint: {r: 0.80, g: 1, b: 0.95, a: 1}
   m_BuildTextureStacks: []

@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.69] - 2026-07-09
+
+### 改善: 水面速度をさらに低速化
+- `WaterSurfaceAnimator` の内部 UV 速度倍率を 1/4 に下げ、`Speed 0.3` でも透明水が速く滑って見えないようにした
+- Ready material / Quick Apply / Studio 生成 / 初心者 fallback / Crystal Lagoon 完成 Prefab / Hero 完成 Prefab の shader scroll、height animation、caustics animation をさらに低速化
+- Crystal Lagoon / Hero の完成プレビュー画像を、水底の柔らかい明るさ、奥行きの青み、反射線、caustics が一目で分かる方向へ更新
+- テストを更新し、初期速度、Ready material 速度、Hero / Crystal Lagoon 完成 Prefab 速度が速い値へ戻らないよう固定
+
 ## [2.3.68] - 2026-07-09
 
 ### 改善: 透明水の水底感と奥行き表現を強化
