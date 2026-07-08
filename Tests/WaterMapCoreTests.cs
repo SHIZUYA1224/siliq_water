@@ -1774,6 +1774,7 @@ namespace Siliq.Water.Tests
             }
 
             Assert.IsTrue(hasMenu, "Tools > Siliq Water > はじめてガイド menu が登録されていない");
+            Assert.AreEqual("最高品質 Hero 完成セットを配置", WaterBeginnerGuideWindow.PlaceCrystalLagoonHeroCompleteActionLabel);
             Assert.AreEqual("最高品質 Hero 水面を作成", WaterBeginnerGuideWindow.CreateCrystalLagoonHeroActionLabel);
             Assert.AreEqual("クリスタルラグーン水面を作成", WaterBeginnerGuideWindow.CreateCrystalLagoonActionLabel);
             Assert.AreEqual("フラッグシップ水面を作成", WaterBeginnerGuideWindow.CreateFlagshipActionLabel);
@@ -1790,6 +1791,39 @@ namespace Siliq.Water.Tests
                 WaterBeginnerGuideWindow.CrystalLagoonHeroCompletePreviewPath);
             Assert.AreEqual("PrebakedPack/ReadyMaterials/M_Siliq_CrystalLagoon_Hero_Ready.mat",
                 WaterBeginnerGuideWindow.CrystalLagoonHeroMaterialPath);
+        }
+
+        [Test]
+        public void BeginnerSetup_ProvidesHeroCompletePrefabPlacementMenu()
+        {
+            var method = typeof(WaterBeginnerSetup).GetMethod(
+                "PlaceCrystalLagoonHeroCompletePrefab",
+                BindingFlags.Public | BindingFlags.Static);
+            Assert.IsNotNull(method, "最高品質 Hero 完成セットの配置 entry point が見つからない");
+
+            bool hasToolsMenu = false;
+            bool hasGameObjectMenu = false;
+            foreach (var attribute in method.GetCustomAttributes(typeof(MenuItem), false))
+            {
+                var menuItem = attribute as MenuItem;
+                if (menuItem == null) continue;
+                if (menuItem.menuItem == "Tools/Siliq Water/かんたん作成/最高品質 Hero 完成セットを配置")
+                {
+                    hasToolsMenu = true;
+                }
+                if (menuItem.menuItem == "GameObject/Siliq Water/かんたん作成/最高品質 Hero 完成セットを配置")
+                {
+                    hasGameObjectMenu = true;
+                }
+            }
+
+            Assert.IsTrue(hasToolsMenu, "Tools の Hero 完成セット配置 menu が登録されていない");
+            Assert.IsTrue(hasGameObjectMenu, "GameObject の Hero 完成セット配置 menu が登録されていない");
+            Assert.AreEqual(
+                "Packages/com.siliq.water-normalmap/PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Hero_Complete.prefab",
+                WaterBeginnerSetup.CrystalLagoonHeroCompletePrefabPackagePath);
+            Assert.IsNotNull(AssetDatabase.LoadAssetAtPath<GameObject>(WaterBeginnerSetup.CrystalLagoonHeroCompletePrefabPackagePath),
+                "Hero 完成セット配置 menu が参照する Prefab が読み込めない");
         }
 
         [Test]

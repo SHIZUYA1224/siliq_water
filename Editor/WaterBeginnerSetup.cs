@@ -17,8 +17,50 @@ namespace Siliq.Water.Editor
         const string FlagshipMenuPath = "GameObject/Siliq Water/用途別マテリアルを適用/フラッグシップ透明水 (Flagship Crystal)";
         const string CrystalLagoonMenuPath = "GameObject/Siliq Water/用途別マテリアルを適用/クリスタルラグーン (Crystal Lagoon)";
         const string CrystalLagoonHeroMenuPath = "GameObject/Siliq Water/用途別マテリアルを適用/クリスタルラグーン Hero (Crystal Lagoon Hero)";
+        internal const string CrystalLagoonHeroCompletePrefabPackagePath = "Packages/com.siliq.water-normalmap/PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Hero_Complete.prefab";
         const int PremiumGridSegments = 96;
         const float PremiumGridSize = 20f;
+
+        [MenuItem(RootMenu + "最高品質 Hero 完成セットを配置", false, 0)]
+        [MenuItem(GameObjectRootMenu + "最高品質 Hero 完成セットを配置", false, 0)]
+        public static void PlaceCrystalLagoonHeroCompletePrefab()
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(CrystalLagoonHeroCompletePrefabPackagePath);
+            if (prefab == null)
+            {
+                EditorUtility.DisplayDialog(
+                    "Siliq Water",
+                    "Hero 完成 Prefab が見つかりません。Package が正しく読み込まれているか確認してください。",
+                    "OK");
+                return;
+            }
+
+            var parent = Selection.activeTransform;
+            var instance = PrefabUtility.InstantiatePrefab(prefab, parent) as GameObject;
+            if (instance == null)
+            {
+                instance = Object.Instantiate(prefab);
+                if (parent != null) instance.transform.SetParent(parent, false);
+            }
+
+            Undo.RegisterCreatedObjectUndo(instance, "Siliq 最高品質 Hero 完成セットを配置");
+            instance.transform.localPosition = Vector3.zero;
+            instance.transform.localRotation = Quaternion.identity;
+            Selection.activeGameObject = instance;
+            EnsurePreviewLight();
+            EnsurePreviewCamera(instance.transform.position);
+            if (SceneView.lastActiveSceneView != null)
+            {
+                SceneView.lastActiveSceneView.FrameSelected();
+            }
+
+            EditorUtility.DisplayDialog(
+                "Siliq Water",
+                "最高品質 Hero 完成セットを配置しました。\n\n" +
+                "水面、明るい床、Hero 専用 caustics overlay、確認用ライトが一体です。\n" +
+                "まずはこの状態で透明感、水底光、斜め反射を確認してください。",
+                "OK");
+        }
 
         [MenuItem(RootMenu + "最高品質 Hero 水面を作成", false, 1)]
         [MenuItem(GameObjectRootMenu + "最高品質 Hero 水面を作成", false, 1)]
