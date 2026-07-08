@@ -303,7 +303,7 @@ namespace Siliq.Water.Editor
             macroScale = 0.055f,
             macroDirectionBreakup = 0.14f,
             macroColorVariation = 0.08f,
-            causticsGuid = CrystalCausticsGuid,
+            causticsGuid = CrystalLagoonCausticsGuid,
             causticsStrength = 0.72f,
             causticsScale = 2.25f,
             causticsSpeed = 0.002f,
@@ -409,6 +409,7 @@ namespace Siliq.Water.Editor
         const string FlagshipCrystalHeightGuid = "a171aabb01c34e01a1b2c3d4e5f60306";
         const string CrystalLagoonNormalGuid = "a171aabb01c34e01a1b2c3d4e5f60107";
         const string CrystalLagoonHeightGuid = "a171aabb01c34e01a1b2c3d4e5f60307";
+        const string CrystalLagoonCausticsGuid = "a171aabb01c34e01a1b2c3d4e5f60407";
         const string CrystalCausticsGuid = "00e6b1e9a23c24df69fe9558209de596";
 
         const string MenuRoot = "GameObject/Siliq Water/水マテリアルを適用/";

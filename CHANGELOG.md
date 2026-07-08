@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.43] - 2026-07-09
+
+### 追加: Crystal Lagoon 専用の高解像度水底光
+- `Water_Caustics_CrystalLagoon_01.png` を追加し、Crystal Lagoon の水底光だけ 2048px の柔らかい光筋へ分離
+- Crystal Lagoon ready material と Quick Apply が専用 caustics を参照するように更新
+- Crystal Lagoon が normal / height だけでなく caustics も専用品を使うことをテストとドキュメントで固定
+
 ## [2.3.42] - 2026-07-09
 
 ### 修正: 水面速度をさらに低速化

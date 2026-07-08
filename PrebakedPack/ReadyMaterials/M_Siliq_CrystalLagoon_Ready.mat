@@ -25,7 +25,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _CausticsMap:
-        m_Texture: {fileID: 2800000, guid: 00e6b1e9a23c24df69fe9558209de596, type: 3}
+        m_Texture: {fileID: 2800000, guid: a171aabb01c34e01a1b2c3d4e5f60407, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _HeightMap:
