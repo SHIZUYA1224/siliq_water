@@ -531,6 +531,77 @@ namespace Siliq.Water.Tests
             Assert.IsTrue(foundSubtleCaustics, "フラッグシップ透明水には控えめなコースティクスが必要");
         }
 
+        [Test]
+        public void BeginnerSetup_BuildsDenseWaterGridMesh()
+        {
+            Mesh mesh = null;
+            try
+            {
+                mesh = WaterBeginnerSetup.BuildWaterGridMesh(16, 8f);
+                Assert.AreEqual((16 + 1) * (16 + 1), mesh.vertexCount, "水面の実高さに必要な分割が作られていない");
+                Assert.AreEqual(16 * 16 * 6, mesh.triangles.Length, "水面グリッドの三角形数が不正");
+                Assert.AreEqual(mesh.vertexCount, mesh.uv.Length, "UV が全頂点に入っていない");
+                Assert.AreEqual(mesh.vertexCount, mesh.tangents.Length, "ノーマルマップ用 tangent が全頂点に入っていない");
+                Assert.Greater(mesh.bounds.size.x, 7.9f);
+                Assert.Greater(mesh.bounds.size.z, 7.9f);
+            }
+            finally
+            {
+                if (mesh != null) Object.DestroyImmediate(mesh);
+            }
+        }
+
+        [Test]
+        public void BeginnerSetup_RepairsEmptyObjectIntoUsableWater()
+        {
+            GameObject go = null;
+            try
+            {
+                go = new GameObject("Beginner Water Test");
+                var report = new System.Collections.Generic.List<string>();
+
+                bool changed = WaterBeginnerSetup.RepairWaterObject(go, report);
+
+                Assert.IsTrue(changed, "空の GameObject を水面へ修復できていない");
+                Assert.IsNotNull(go.GetComponent<MeshFilter>(), "MeshFilter が追加されていない");
+                Assert.IsNotNull(go.GetComponent<Renderer>(), "Renderer が追加されていない");
+                Assert.IsNotNull(go.GetComponent<WaterSurfaceAnimator>(), "WaterSurfaceAnimator が追加されていない");
+                Assert.Greater(go.GetComponent<MeshFilter>().sharedMesh.vertexCount, 64, "実高さ用の分割メッシュに交換されていない");
+                Assert.IsNotEmpty(report, "初心者向けの診断結果が出ていない");
+            }
+            finally
+            {
+                if (go != null) Object.DestroyImmediate(go);
+            }
+        }
+
+        [Test]
+        public void BeginnerSetup_RepairsDefaultPlaneMaterialIntoWater()
+        {
+            GameObject go = null;
+            try
+            {
+                go = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                var report = new System.Collections.Generic.List<string>();
+
+                bool changed = WaterBeginnerSetup.RepairWaterObject(go, report);
+                var renderer = go.GetComponent<Renderer>();
+                var mat = renderer != null ? renderer.sharedMaterial : null;
+
+                Assert.IsTrue(changed, "Unity 標準 Plane の見た目を水へ修復できていない");
+                Assert.IsNotNull(mat, "水マテリアルが適用されていない");
+                Assert.IsNotNull(mat.shader, "水マテリアルの shader がない");
+                Assert.AreNotEqual("Hidden/InternalErrorShader", mat.shader.name, "ピンク shader が適用されている");
+                Assert.IsTrue(mat.shader.name.StartsWith("Siliq/Water") || mat.HasProperty("_BumpMap"),
+                    "水向けのマテリアルへ差し替わっていない");
+                Assert.IsNotNull(go.GetComponent<WaterSurfaceAnimator>(), "Animator が追加されていない");
+            }
+            finally
+            {
+                if (go != null) Object.DestroyImmediate(go);
+            }
+        }
+
         // ---------------------------------------------------------------
         // ヘルパー
         // ---------------------------------------------------------------

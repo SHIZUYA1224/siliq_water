@@ -410,6 +410,26 @@ namespace Siliq.Water
             dy = (h[yp * size + x] - h[ym * size + x]) * 0.5f;
         }
 
+        static void SobelGradientAt(float[] h, int size, int x, int y, out float dx, out float dy)
+        {
+            int xm = (x - 1 + size) % size;
+            int xp = (x + 1) % size;
+            int ym = (y - 1 + size) % size;
+            int yp = (y + 1) % size;
+
+            float h00 = h[ym * size + xm];
+            float h10 = h[ym * size + x];
+            float h20 = h[ym * size + xp];
+            float h01 = h[y * size + xm];
+            float h21 = h[y * size + xp];
+            float h02 = h[yp * size + xm];
+            float h12 = h[yp * size + x];
+            float h22 = h[yp * size + xp];
+
+            dx = (h20 + h21 * 2f + h22 - h00 - h01 * 2f - h02) * 0.125f;
+            dy = (h02 + h12 * 2f + h22 - h00 - h10 * 2f - h20) * 0.125f;
+        }
+
         static float LaplacianAt(float[] h, int size, int x, int y)
         {
             int xm = (x - 1 + size) % size;
@@ -434,7 +454,7 @@ namespace Siliq.Water
                 int row = y * size;
                 for (int x = 0; x < size; x++)
                 {
-                    GradientAt(heights, size, x, y, out float dx, out float dy);
+                    SobelGradientAt(heights, size, x, y, out float dx, out float dy);
                     dx *= k;
                     dy *= k;
                     if (flipY) dy = -dy;
