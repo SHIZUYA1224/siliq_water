@@ -1245,23 +1245,32 @@ namespace Siliq.Water.Tests
             const string sceneGuid = "b24c89703d3b34043b6907a31617c178";
             const string gridGuid = "c372220d922244035b21bdd3e4ff000a";
             const string materialGuid = "f2c657c8bc4a4c7080e6a1327818890d";
+            const string overlayMaterialGuid = "f2c657c8bc4a4c7080e6a1327818897c";
 
             string scenePath = AssetDatabase.GUIDToAssetPath(sceneGuid);
             string gridPath = AssetDatabase.GUIDToAssetPath(gridGuid);
             string materialPath = AssetDatabase.GUIDToAssetPath(materialGuid);
+            string overlayMaterialPath = AssetDatabase.GUIDToAssetPath(overlayMaterialGuid);
             Assert.AreEqual("Packages/com.siliq.water-normalmap/PrebakedPack/SampleScene/SC_CrystalLagoon_Showcase.unity", scenePath);
             Assert.AreEqual("Packages/com.siliq.water-normalmap/PrebakedPack/SampleScene/CrystalLagoon_Showcase_Grid.asset", gridPath);
             Assert.AreEqual("Packages/com.siliq.water-normalmap/PrebakedPack/ReadyMaterials/M_Siliq_CrystalLagoon_Ready.mat", materialPath);
+            Assert.AreEqual("Packages/com.siliq.water-normalmap/PrebakedPack/ReadyMaterials/M_Siliq_CrystalLagoon_CausticsOverlay.mat", overlayMaterialPath);
 
             var grid = AssetDatabase.LoadAssetAtPath<Mesh>(gridPath);
             var material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+            var overlayMaterial = AssetDatabase.LoadAssetAtPath<Material>(overlayMaterialPath);
             Assert.IsNotNull(grid, "Crystal Lagoon showcase 用の分割メッシュが読み込めない");
             Assert.IsNotNull(material, "Crystal Lagoon ready material が読み込めない");
+            Assert.IsNotNull(overlayMaterial, "Crystal Lagoon 床用 caustics overlay material が読み込めない");
             Assert.GreaterOrEqual(grid.vertexCount, 9000, "showcase は高さと反射が見える分割メッシュにする");
 
             string scene = File.ReadAllText(scenePath);
             StringAssert.Contains("Crystal Lagoon Water - transparent beauty preset", scene);
             StringAssert.Contains(materialGuid, scene, "showcase scene は Crystal Lagoon ready material を直接参照する");
+            StringAssert.Contains("Crystal Lagoon Floor Caustics Overlay", scene,
+                "showcase scene は開いた時点で水底光 overlay を確認できる必要がある");
+            StringAssert.Contains(overlayMaterialGuid, scene,
+                "showcase scene は Crystal Lagoon 床用 caustics overlay material を直接参照する");
             StringAssert.Contains(gridGuid, scene, "showcase scene は分割済み grid mesh を参照する");
             StringAssert.Contains("Pale pool floor for transparency check", scene, "showcase scene には透明度確認用の明るい床が必要");
             StringAssert.Contains("Crystal Lagoon Preview Camera", scene, "showcase scene には確認用 camera が必要");

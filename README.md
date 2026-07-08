@@ -132,7 +132,7 @@ Renderer にドラッグ&ドロップするだけで水として動きます。`
    正面は透け、斜め視線では Fresnel で反射と不透明感が増え、透過光・細い光・きらめきで水らしさが出るように調整済みです。
    暗い部屋では反射ときらめきを自動で抑えるため、黒背景で水面だけ銀色に浮きにくくなります。
 3. **Crystal Lagoon を確認する**: `PrebakedPack/SampleScene/SC_CrystalLagoon_Showcase.unity` を開くと
-   分割済み水面、Crystal Lagoon ready material、明るい床、ライト、カメラが入った状態で透明感と水底光を確認できます。
+   分割済み水面、Crystal Lagoon ready material、明るい床、床用 caustics overlay、ライト、カメラが入った状態で透明感と水底光を確認できます。
    基本 5 種を見比べる場合は `SC_WaterNormalMap_Preview.unity` を使います。
 
 ### 水面を動かす (WaterSurfaceAnimator)

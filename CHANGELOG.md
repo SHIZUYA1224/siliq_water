@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.45] - 2026-07-09
+
+### 改善: Crystal Lagoon showcase に水底光 overlay を配置
+- `SC_CrystalLagoon_Showcase.unity` に `Crystal Lagoon Floor Caustics Overlay` を追加し、開いた時点で床に揺れる光を確認できるようにした
+- Showcase scene が `M_Siliq_CrystalLagoon_CausticsOverlay` を直接参照することをテストで固定
+- README の Crystal Lagoon 確認手順に床用 caustics overlay を追記
+
 ## [2.3.44] - 2026-07-09
 
 ### 追加: 水底用 caustics overlay material
