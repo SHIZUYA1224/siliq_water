@@ -8,8 +8,8 @@ Shader "Siliq/Caustics Overlay Mobile"
         _Tint ("Light Tint", Color) = (0.72, 1, 0.92, 1)
         _Intensity ("Intensity", Range(0, 2)) = 0.55
         _Tiling ("Tiling", Range(0.1, 12)) = 1.4
-        _Scroll1 ("Layer 1 Scroll", Vector) = (0.004, 0.0015, 0, 0)
-        _Scroll2 ("Layer 2 Scroll", Vector) = (-0.0012, 0.0026, 0, 0)
+        _Scroll1 ("Layer 1 Scroll", Vector) = (0.0022, 0.0008, 0, 0)
+        _Scroll2 ("Layer 2 Scroll", Vector) = (-0.0007, 0.0014, 0, 0)
         _FloorFade ("Floor Fade", Range(0, 1)) = 0.82
     }
 

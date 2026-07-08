@@ -50,7 +50,7 @@ Material:
     - _DarkDetailDamping: 0.7
     - _DarkReflectionDamping: 0.72
     - _DisplacementScale: 0.85
-    - _DisplacementSpeed: 0.018
+    - _DisplacementSpeed: 0.010
     - _DisplacementStrength: 0.025
     - _DstBlend: 0
     - _EdgeReflection: 0.95
@@ -87,8 +87,8 @@ Material:
     - _DeepColor: {r: 0.16, g: 0.17, b: 0.18, a: 1}
     - _GlimmerColor: {r: 1, g: 1, b: 1, a: 1}
     - _HorizonColor: {r: 0.95, g: 0.97, b: 1, a: 1}
-    - _Scroll1: {r: 0.011413, g: 0.003708, b: 0, a: 0}
-    - _Scroll2: {r: -0.002708, g: 0.008331, b: 0, a: 0}
+    - _Scroll1: {r: 0.006657, g: 0.002163, b: 0, a: 0}
+    - _Scroll2: {r: -0.001748, g: 0.004802, b: 0, a: 0}
     - _ShallowColor: {r: 0.86, g: 0.88, b: 0.9, a: 1}
     - _TransmissionColor: {r: 0.7, g: 0.76, b: 0.82, a: 1}
   m_BuildTextureStacks: []

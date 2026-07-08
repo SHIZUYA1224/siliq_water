@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.46] - 2026-07-09
+
+### 修正: 水面速度を低速基準へ再調整
+- `WaterSurfaceAnimator` の内部速度倍率と初期 Speed / 高さ速度 / 水底光速度をさらに下げ、最大 Speed でも水面が流れすぎないようにした
+- 用途別 Quick Apply と同梱 ReadyMaterials の shader scroll / 高さ速度 / caustics 速度を全体的に再低速化
+- README とテストの速度基準を更新し、速すぎる既定値へ戻らないようにした
+
 ## [2.3.45] - 2026-07-09
 
 ### 改善: Crystal Lagoon showcase に水底光 overlay を配置
