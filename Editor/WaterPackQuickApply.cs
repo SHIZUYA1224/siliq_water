@@ -34,6 +34,7 @@ namespace Siliq.Water.Editor
             public string displayName;
             public string sourceGuid;
             public string sourceLabel;
+            public string heightGuid;
             public MotionPreset motion;
             public bool transparent;
             public float opacity;
@@ -199,8 +200,9 @@ namespace Siliq.Water.Editor
         {
             assetName = "FlagshipCrystal",
             displayName = "フラッグシップ透明水",
-            sourceGuid = CalmGuid,
-            sourceLabel = "Calm",
+            sourceGuid = FlagshipCrystalGuid,
+            sourceLabel = "FlagshipCrystal",
+            heightGuid = FlagshipCrystalHeightGuid,
             motion = new MotionPreset(26f, 0.22f, 0.74f, 1.18f),
             transparent = true,
             opacity = 0.52f,
@@ -227,7 +229,7 @@ namespace Siliq.Water.Editor
             displacementStrength = 0.045f,
             displacementScale = 0.58f,
             displacementSpeed = 0.22f,
-            heightMapInfluence = 0f,
+            heightMapInfluence = 0.35f,
             smoothness = 0.99f,
             macroVariation = 0.34f,
             macroScale = 0.065f,
@@ -321,6 +323,8 @@ namespace Siliq.Water.Editor
         const string StreamGuid = "a171aabb01c34e01a1b2c3d4e5f60203";
         const string PoolGuid = "a171aabb01c34e01a1b2c3d4e5f60204";
         const string CyberGuid = "a171aabb01c34e01a1b2c3d4e5f60205";
+        const string FlagshipCrystalGuid = "a171aabb01c34e01a1b2c3d4e5f60206";
+        const string FlagshipCrystalHeightGuid = "a171aabb01c34e01a1b2c3d4e5f60306";
 
         const string MenuRoot = "GameObject/Siliq Water/水マテリアルを適用/";
         const string TransparentMenuRoot = "GameObject/Siliq Water/透明な水マテリアルを適用 (PC)/";
@@ -568,6 +572,27 @@ namespace Siliq.Water.Editor
                 {
                     mat = AssetDatabase.LoadAssetAtPath<Material>(foundPath);
                     if (mat != null) return mat;
+                }
+            }
+            return null;
+        }
+
+        static Texture LoadTexture(string guid, string assetName)
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            var texture = string.IsNullOrEmpty(path) ? null : AssetDatabase.LoadAssetAtPath<Texture>(path);
+            if (texture != null) return texture;
+
+            if (string.IsNullOrEmpty(assetName)) return null;
+            string[] guids = AssetDatabase.FindAssets($"{assetName} t:Texture2D");
+            foreach (string foundGuid in guids)
+            {
+                string foundPath = AssetDatabase.GUIDToAssetPath(foundGuid);
+                if (foundPath.EndsWith($"/PrebakedPack/Textures/{assetName}.png") ||
+                    foundPath.EndsWith($"/{assetName}.png"))
+                {
+                    texture = AssetDatabase.LoadAssetAtPath<Texture>(foundPath);
+                    if (texture != null) return texture;
                 }
             }
             return null;
@@ -1027,6 +1052,30 @@ namespace Siliq.Water.Editor
             }
         }
 
+        static void ApplySiliqHeight(Material mat, Material source, string heightGuid, string sourceLabel, float influence)
+        {
+            if (mat == null || !mat.HasProperty("_HeightMap")) return;
+
+            Texture height = null;
+            if (!string.IsNullOrEmpty(heightGuid))
+            {
+                height = LoadTexture(heightGuid, $"Water_Height_{sourceLabel}_01");
+            }
+            if (height == null && source != null && source.HasProperty("_ParallaxMap"))
+            {
+                height = source.GetTexture("_ParallaxMap");
+            }
+
+            if (height != null)
+            {
+                mat.SetTexture("_HeightMap", height);
+            }
+            if (mat.HasProperty("_HeightMapInfluence"))
+            {
+                mat.SetFloat("_HeightMapInfluence", influence);
+            }
+        }
+
         static void ApplySiliqWaterPalette(Material mat, Material source)
         {
             if (mat == null) return;
@@ -1051,6 +1100,7 @@ namespace Siliq.Water.Editor
             if (mat == null) return;
 
             ApplySiliqNormal(mat, source);
+            ApplySiliqHeight(mat, source, preset.heightGuid, preset.sourceLabel, preset.heightMapInfluence);
             SetupSiliqBlend(mat, preset.transparent, preset.opacity);
 
             if (mat.HasProperty("_ShallowColor")) mat.SetColor("_ShallowColor", preset.shallow);

@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using Siliq.Water.Editor;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -502,9 +503,14 @@ namespace Siliq.Water.Tests
 
             bool foundBroadMirrorWave = false;
             bool foundFineRipples = false;
-            bool foundSubtleCaustics = false;
+            bool foundFineLightBreakup = false;
             foreach (var layer in settings.layers)
             {
+                Assert.AreNotEqual(WaveLayerType.VoronoiCaustics, layer.type,
+                    "フラッグシップ normal / height にセル境界を入れると氷やタイル状に見える");
+                Assert.AreNotEqual(WaveLayerType.VoronoiCells, layer.type,
+                    "フラッグシップ normal / height にセル面を入れると水面ではなく板状に見える");
+
                 if (layer.type == WaveLayerType.DirectionalWaves &&
                     layer.scale <= 4 &&
                     layer.amplitude >= 0.65f &&
@@ -520,15 +526,98 @@ namespace Siliq.Water.Tests
                     foundFineRipples = true;
                 }
 
-                if (layer.type != WaveLayerType.VoronoiCaustics) continue;
-                foundSubtleCaustics = true;
-                Assert.LessOrEqual(layer.amplitude, 0.10f, "フラッグシップ透明水のコースティクスを太い白模様にしてはならない");
-                Assert.GreaterOrEqual(layer.scale, 20, "フラッグシップ透明水のコースティクスは細かく上品にする");
+                if (layer.type == WaveLayerType.DirectionalWaves &&
+                    layer.scale >= 30 &&
+                    layer.amplitude <= 0.12f &&
+                    layer.waveCount >= 20)
+                {
+                    foundFineLightBreakup = true;
+                }
             }
 
             Assert.IsTrue(foundBroadMirrorWave, "フラッグシップ透明水には広い鏡面うねりが必要");
             Assert.IsTrue(foundFineRipples, "フラッグシップ透明水には反射を細かく割る細波が必要");
-            Assert.IsTrue(foundSubtleCaustics, "フラッグシップ透明水には控えめなコースティクスが必要");
+            Assert.IsTrue(foundFineLightBreakup, "フラッグシップ透明水にはセル境界ではない薄い光のゆらぎが必要");
+        }
+
+        [Test]
+        public void FlagshipCrystalPrebakedAssets_AreDedicatedHighResolutionAssets()
+        {
+            const string normalGuid = "a171aabb01c34e01a1b2c3d4e5f60106";
+            const string calmNormalGuid = "a171aabb01c34e01a1b2c3d4e5f60101";
+            const string heightGuid = "a171aabb01c34e01a1b2c3d4e5f60306";
+            const string materialGuid = "a171aabb01c34e01a1b2c3d4e5f60206";
+
+            string normalPath = AssetDatabase.GUIDToAssetPath(normalGuid);
+            string calmNormalPath = AssetDatabase.GUIDToAssetPath(calmNormalGuid);
+            string heightPath = AssetDatabase.GUIDToAssetPath(heightGuid);
+            string materialPath = AssetDatabase.GUIDToAssetPath(materialGuid);
+
+            Assert.IsNotEmpty(normalPath, "フラッグシップ専用 normal map が package に含まれていない");
+            Assert.IsNotEmpty(heightPath, "フラッグシップ専用 height map が package に含まれていない");
+            Assert.IsNotEmpty(materialPath, "フラッグシップ専用 material が package に含まれていない");
+            Assert.AreNotEqual(calmNormalPath, normalPath, "フラッグシップが Calm normal の流用に戻っている");
+
+            var normal = AssetDatabase.LoadAssetAtPath<Texture2D>(normalPath);
+            var height = AssetDatabase.LoadAssetAtPath<Texture2D>(heightPath);
+            var material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+            Assert.IsNotNull(normal, "フラッグシップ normal map を読み込めない");
+            Assert.IsNotNull(height, "フラッグシップ height map を読み込めない");
+            Assert.IsNotNull(material, "フラッグシップ material を読み込めない");
+            Assert.GreaterOrEqual(normal.width, 2048, "製品デモ向け normal map は 2048px 以上にする");
+            Assert.GreaterOrEqual(normal.height, 2048, "製品デモ向け normal map は 2048px 以上にする");
+            Assert.GreaterOrEqual(height.width, 2048, "実高さ用 height map は 2048px 以上にする");
+            Assert.GreaterOrEqual(height.height, 2048, "実高さ用 height map は 2048px 以上にする");
+
+            var normalImporter = AssetImporter.GetAtPath(normalPath) as TextureImporter;
+            Assert.IsNotNull(normalImporter, "normal map の importer が TextureImporter ではない");
+            Assert.AreEqual(TextureImporterType.NormalMap, normalImporter.textureType, "normal map が NormalMap import になっていない");
+            Assert.AreEqual(normalPath, AssetDatabase.GetAssetPath(material.GetTexture("_BumpMap")),
+                "フラッグシップ material が専用 normal map を参照していない");
+            Assert.AreEqual(heightPath, AssetDatabase.GetAssetPath(material.GetTexture("_ParallaxMap")),
+                "フラッグシップ material が専用 height map を参照していない");
+        }
+
+        [Test]
+        public void FlagshipQuickApply_UsesDedicatedNormalAndHeightMaps()
+        {
+            const string normalGuid = "a171aabb01c34e01a1b2c3d4e5f60106";
+            const string heightGuid = "a171aabb01c34e01a1b2c3d4e5f60306";
+            string normalPath = AssetDatabase.GUIDToAssetPath(normalGuid);
+            string heightPath = AssetDatabase.GUIDToAssetPath(heightGuid);
+
+            GameObject go = null;
+            try
+            {
+                go = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                Selection.activeGameObject = go;
+
+                bool executed = EditorApplication.ExecuteMenuItem(
+                    "GameObject/Siliq Water/用途別マテリアルを適用/フラッグシップ透明水 (Flagship Crystal)");
+                Assert.IsTrue(executed, "フラッグシップ透明水の Quick Apply menu を実行できない");
+
+                var renderer = go.GetComponent<Renderer>();
+                var mat = renderer != null ? renderer.sharedMaterial : null;
+                Assert.IsNotNull(mat, "Quick Apply で material が設定されていない");
+
+                string normalProperty = mat.HasProperty("_NormalMap") ? "_NormalMap" : "_BumpMap";
+                string heightProperty = mat.HasProperty("_HeightMap") ? "_HeightMap" : "_ParallaxMap";
+                Assert.AreEqual(normalPath, AssetDatabase.GetAssetPath(mat.GetTexture(normalProperty)),
+                    "Quick Apply が専用 flagship normal ではなく別 normal を割り当てている");
+                Assert.AreEqual(heightPath, AssetDatabase.GetAssetPath(mat.GetTexture(heightProperty)),
+                    "Quick Apply が専用 flagship height を割り当てていない");
+
+                if (mat.HasProperty("_HeightMapInfluence"))
+                {
+                    Assert.Greater(mat.GetFloat("_HeightMapInfluence"), 0.25f,
+                        "フラッグシップ透明水は height map を実高さへ使う必要がある");
+                }
+            }
+            finally
+            {
+                Selection.activeGameObject = null;
+                if (go != null) Object.DestroyImmediate(go);
+            }
         }
 
         [Test]

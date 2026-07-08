@@ -53,6 +53,7 @@ Unity / VRChat 初心者は、最初にこのメニューを使ってくださ�
 これだけで、分割済み水面メッシュ、フラッグシップ透明水マテリアル、`WaterSurfaceAnimator`、
 最低限のライト/カメラをまとめて作成します。1 枚 Quad では実高さが見えないため、
 このメニューで作る分割メッシュを基準にしてください。
+このフローは専用の 2048px normal map / height map を使うため、Calm などの基本素材を流用しません。
 
 すでに作った水面がピンク、透明すぎる、動かない、高さが出ない場合は、対象を選択して次を実行します。
 
@@ -69,9 +70,9 @@ Unity / VRChat 初心者は、最初にこのメニューを使ってくださ�
 - `CONTRIBUTING.md`: 変更時の品質基準と検証手順。
 - `.gitignore` / `.gitattributes`: Unity 生成物の混入防止と text/binary 管理。
 
-## 焼き済みパック (PrebakedPack) — ツール不要ですぐ使える 5 種
+## 焼き済みパック (PrebakedPack) — ツール不要ですぐ使える基本 5 種 + 旗艦 1 種
 
-ツールを触らなくても、`PrebakedPack/` に**すぐ使える水ノーマルマップ 5 種 + 設定済みマテリアル + サンプルシーン**が入っています。
+ツールを触らなくても、`PrebakedPack/` に**すぐ使える水ノーマルマップ基本 5 種 + フラッグシップ専用 normal / height + 設定済みマテリアル + サンプルシーン**が入っています。
 
 | ファイル | 用途 | マテリアル |
 |---|---|---|
@@ -80,8 +81,10 @@ Unity / VRChat 初心者は、最初にこのメニューを使ってくださ�
 | `Water_Normal_Stream_01.png` | 川・一方向に流れる水 | `M_Water_Stream` |
 | `Water_Normal_Pool_01.png` | プール・浅い水 (控えめな光の網目) | `M_Water_Pool` |
 | `Water_Normal_Cyber_01.png` | 近未来・ホログラム水面 (細いデータ流) | `M_Water_Cyber` |
+| `Water_Normal_FlagshipCrystal_01.png` + `Water_Height_FlagshipCrystal_01.png` | 製品デモ向けの透明水・高反射・実高さ | `M_Water_FlagshipCrystal` |
 
-すべて **1024×1024 PNG / シームレス / インポート設定済み (NormalMap・Repeat・Android/iOS は ASTC 6x6)**。
+基本 5 種は **1024×1024 PNG / シームレス / インポート設定済み (NormalMap・Repeat・Android/iOS は ASTC 6x6)**。
+フラッグシップ透明水は専用 **2048×2048 normal map + 2048×2048 height map** を同梱し、用途別 Quick Apply では両方を Siliq 水シェーダーへ割り当てます。
 マテリアルは Standard シェーダー(Metallic 0 / Smoothness 高め / 不透明)なので、
 ビルトイン RP と VRChat (PC / Quest ワールド) でそのまま使えます。
 
@@ -104,7 +107,7 @@ Unity / VRChat 初心者は、最初にこのメニューを使ってくださ�
 2. **ドラッグ & ドロップ**: `PrebakedPack/Materials/` の `M_Water_*` をシーンのオブジェクトへドラッグ
    (この方法では静止したままなので、動かしたい場合は次項のコンポーネントを手動で追加してください)
 3. **サンプルシーンで見比べる**: `PrebakedPack/SampleScene/SC_WaterNormalMap_Preview.unity` を開くと
-   5 種の水面が Plane に貼られた状態で比較できます (このシーンは静止状態です)
+   基本 5 種の水面が Plane に貼られた状態で比較できます (このシーンは静止状態です)
 
 ### 水面を動かす (WaterSurfaceAnimator)
 
@@ -166,6 +169,8 @@ Filter Mode  : Bilinear または Trilinear
 Max Size     : 1024
 Compression  : Normal Quality (Quest は Android オーバーライドで ASTC 6x6)
 ```
+
+フラッグシップ透明水の normal / height は 2048px を基準にしてください。Quest や iOS で軽くしたい場合だけ Android / iPhone override で 1024px に落とします。
 
 ### 改変方法
 
@@ -400,9 +405,9 @@ Samples~/
 Tests/
   WaterMapCoreTests.cs      Unity Test Runner (EditMode) 用の自動テスト
 PrebakedPack/
-  Textures/                 焼き済みノーマルマップ 5 種 (1024px, インポート設定済み)
-  Materials/                設定済み Standard マテリアル 5 種
-  SampleScene/              SC_WaterNormalMap_Preview.unity (5 種比較シーン)
+  Textures/                 基本 normal 5 種 (1024px) + flagship normal/height (2048px)
+  Materials/                設定済み Standard マテリアル 6 種
+  SampleScene/              SC_WaterNormalMap_Preview.unity (基本 5 種比較シーン)
   Preview/                  Plane に貼った状態のプレビュー画像
 ```
 

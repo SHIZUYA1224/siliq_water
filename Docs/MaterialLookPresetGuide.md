@@ -24,6 +24,7 @@ Unity / VRChat 初心者は、まず `Tools > Siliq Water > かんたん作成 >
 プリセット適用時に以下をまとめて行う。
 
 - 適したノーマルマップを割り当てる
+- フラッグシップ透明水では専用 2048px normal map と height map を割り当てる
 - 色、透明度、反射、透過光、きらめきを設定する
 - `WaterSurfaceAnimator` を追加または更新し、動きを付ける
 - Built-in / iOS 系では `Siliq/Water Mobile (Quest)` を使う
@@ -43,5 +44,6 @@ Unity / VRChat 初心者は、まず `Tools > Siliq Water > かんたん作成 >
 
 - 透明感は normal map だけでは作れない。必ず用途別プリセットか透明マテリアルを使う。
 - 高品質に見せるには normal map、色、透明度、反射、ハイライト、実高さ、ライト、分割メッシュの全部が必要。
+- フラッグシップ透明水は Calm の流用ではなく、`Water_Normal_FlagshipCrystal_01.png` と `Water_Height_FlagshipCrystal_01.png` を前提にする。
 - 血や金属液体は「水」ではなく特殊液体なので、色だけでなく反射と凹凸の強さを変える。
 - 液体金属は透過させず、不透明で反射を強くした方が破綻しにくい。

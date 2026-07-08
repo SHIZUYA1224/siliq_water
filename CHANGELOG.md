@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.28] - 2026-07-08
+
+### 改善: フラッグシップ水面を専用ベイクへ昇格
+- `PrebakedPack` に `Water_Normal_FlagshipCrystal_01.png` と `Water_Height_FlagshipCrystal_01.png` を追加し、フラッグシップ透明水だけ 2048px の専用 normal / height を同梱
+- `M_Water_FlagshipCrystal` を追加し、Calm normal の流用ではなく専用 normal と height を参照するようにした
+- 用途別 `フラッグシップ透明水 (Flagship Crystal)` の Quick Apply が専用 normal / height を Siliq 水シェーダーへ割り当て、実高さにも使うようにした
+- 専用アセットの解像度、NormalMap import、Quick Apply の割り当てが退化しないようテストを追加
+
 ## [2.3.27] - 2026-07-08
 
 ### 追加: Unity / VRChat 初心者向けのかんたん作成と診断

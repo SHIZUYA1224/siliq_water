@@ -332,7 +332,7 @@ namespace Siliq.Water
             return s;
         }
 
-        /// <summary>製品デモの主役にする透明水。広い鏡面、細波、淡いコースティクス、実高さ用の中周波を重ねる。</summary>
+        /// <summary>製品デモの主役にする透明水。セル境界を使わず、広い鏡面、細波、実高さ用の中周波を重ねる。</summary>
         static WaterMapSettings FlagshipCrystalWater()
         {
             var s = Base(0.72f);
@@ -374,9 +374,10 @@ namespace Siliq.Water
                 },
                 new WaveLayer
                 {
-                    name = "上品なコースティクス", type = WaveLayerType.VoronoiCaustics, blend = WaveBlendMode.Add,
-                    amplitude = 0.08f, scale = 24, sharpness = 2.10f, jitter = 0.98f, speed = 1,
-                    seed = 45, warpAmount = 0.28f, warpScale = 4, maskAmount = 0.45f, maskScale = 3,
+                    name = "薄い光のゆらぎ", type = WaveLayerType.DirectionalWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.09f, scale = 38, sharpness = 0.72f, directionDeg = -14f, spreadDeg = 82f,
+                    waveCount = 26, speed = 1, seed = 45, warpAmount = 0.12f, warpScale = 6,
+                    maskAmount = 0.40f, maskScale = 4,
                 },
             };
             return s;
