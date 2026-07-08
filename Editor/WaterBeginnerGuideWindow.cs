@@ -9,6 +9,7 @@ namespace Siliq.Water.Editor
     public sealed class WaterBeginnerGuideWindow : EditorWindow
     {
         internal const string MenuPath = "Tools/Siliq Water/はじめてガイド";
+        internal const string CreateCrystalLagoonHeroActionLabel = "最高品質 Hero 水面を作成";
         internal const string CreateCrystalLagoonActionLabel = "クリスタルラグーン水面を作成";
         internal const string CreateFlagshipActionLabel = "フラッグシップ水面を作成";
         internal const string RepairSelectionActionLabel = "選択中の水面を診断して自動修復";
@@ -53,6 +54,11 @@ namespace Siliq.Water.Editor
         static void DrawQuickActions()
         {
             EditorGUILayout.LabelField("まずやること", EditorStyles.boldLabel);
+            if (GUILayout.Button(CreateCrystalLagoonHeroActionLabel, GUILayout.Height(34)))
+            {
+                WaterBeginnerSetup.CreateCrystalLagoonHeroWater();
+            }
+
             if (GUILayout.Button(CreateCrystalLagoonActionLabel, GUILayout.Height(34)))
             {
                 WaterBeginnerSetup.CreateCrystalLagoonWater();

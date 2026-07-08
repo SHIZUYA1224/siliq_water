@@ -16,11 +16,26 @@ namespace Siliq.Water.Editor
         const string GeneratedMeshFolder = GeneratedRoot + "/GeneratedMeshes";
         const string FlagshipMenuPath = "GameObject/Siliq Water/用途別マテリアルを適用/フラッグシップ透明水 (Flagship Crystal)";
         const string CrystalLagoonMenuPath = "GameObject/Siliq Water/用途別マテリアルを適用/クリスタルラグーン (Crystal Lagoon)";
+        const string CrystalLagoonHeroMenuPath = "GameObject/Siliq Water/用途別マテリアルを適用/クリスタルラグーン Hero (Crystal Lagoon Hero)";
         const int PremiumGridSegments = 96;
         const float PremiumGridSize = 20f;
 
-        [MenuItem(RootMenu + "クリスタルラグーン水面を作成", false, 1)]
-        [MenuItem(GameObjectRootMenu + "クリスタルラグーン水面を作成", false, 1)]
+        [MenuItem(RootMenu + "最高品質 Hero 水面を作成", false, 1)]
+        [MenuItem(GameObjectRootMenu + "最高品質 Hero 水面を作成", false, 1)]
+        public static void CreateCrystalLagoonHeroWater()
+        {
+            CreatePremiumWater(
+                "Siliq Water - Crystal Lagoon Hero",
+                "Siliq 最高品質 Hero 水面を作成",
+                CrystalLagoonHeroMenuPath,
+                "最高品質 Hero 水面を作成しました。\n\n" +
+                "Hero 専用 normal / height / caustics を使う、透明感と水底光を最優先した水面です。\n" +
+                "まずはこのまま Scene View で、斜めからの反射と水底光を確認してください。\n" +
+                "水底の光が強すぎる場合は WaterSurfaceAnimator の「水底の光」を下げてください。");
+        }
+
+        [MenuItem(RootMenu + "クリスタルラグーン水面を作成", false, 2)]
+        [MenuItem(GameObjectRootMenu + "クリスタルラグーン水面を作成", false, 2)]
         public static void CreateCrystalLagoonWater()
         {
             CreatePremiumWater(
@@ -33,8 +48,8 @@ namespace Siliq.Water.Editor
                 "高さが見えない場合は、この水面メッシュのまま使ってください。1枚 Quad では実高さが出ません。");
         }
 
-        [MenuItem(RootMenu + "フラッグシップ水面を作成", false, 1)]
-        [MenuItem(GameObjectRootMenu + "フラッグシップ水面を作成", false, 1)]
+        [MenuItem(RootMenu + "フラッグシップ水面を作成", false, 3)]
+        [MenuItem(GameObjectRootMenu + "フラッグシップ水面を作成", false, 3)]
         public static void CreateFlagshipWater()
         {
             CreatePremiumWater(

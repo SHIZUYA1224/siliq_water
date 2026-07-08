@@ -1349,6 +1349,60 @@ namespace Siliq.Water.Tests
         }
 
         [Test]
+        public void CrystalLagoonHeroQuickApply_UsesDedicatedHeroBeautyTextures()
+        {
+            const string normalGuid = "a171aabb01c34e01a1b2c3d4e5f60108";
+            const string heightGuid = "a171aabb01c34e01a1b2c3d4e5f60308";
+            const string causticsGuid = "a171aabb01c34e01a1b2c3d4e5f60408";
+            string normalPath = AssetDatabase.GUIDToAssetPath(normalGuid);
+            string heightPath = AssetDatabase.GUIDToAssetPath(heightGuid);
+            string causticsPath = AssetDatabase.GUIDToAssetPath(causticsGuid);
+
+            GameObject go = null;
+            try
+            {
+                go = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                Selection.activeGameObject = go;
+
+                bool executed = EditorApplication.ExecuteMenuItem(
+                    "GameObject/Siliq Water/用途別マテリアルを適用/クリスタルラグーン Hero (Crystal Lagoon Hero)");
+                Assert.IsTrue(executed, "Crystal Lagoon Hero の Quick Apply menu を実行できない");
+
+                var renderer = go.GetComponent<Renderer>();
+                var animator = go.GetComponent<WaterSurfaceAnimator>();
+                var mat = renderer != null ? renderer.sharedMaterial : null;
+                Assert.IsNotNull(mat, "Crystal Lagoon Hero Quick Apply で material が設定されていない");
+                Assert.IsNotNull(animator, "Crystal Lagoon Hero Quick Apply で WaterSurfaceAnimator が追加されていない");
+
+                Assert.AreEqual(normalPath, AssetDatabase.GetAssetPath(mat.GetTexture("_NormalMap")),
+                    "Hero Quick Apply が専用 normal map を割り当てていない");
+                Assert.AreEqual(heightPath, AssetDatabase.GetAssetPath(mat.GetTexture("_HeightMap")),
+                    "Hero Quick Apply が専用 height map を割り当てていない");
+                Assert.AreEqual(causticsPath, AssetDatabase.GetAssetPath(mat.GetTexture("_CausticsMap")),
+                    "Hero Quick Apply が専用 caustics map を割り当てていない");
+                Assert.LessOrEqual(mat.GetFloat("_Opacity"), 0.36f,
+                    "Hero Quick Apply は透明な抜け感を最優先する");
+                Assert.GreaterOrEqual(mat.GetFloat("_Clarity"), 0.97f,
+                    "Hero Quick Apply は透明な抜け感を最大寄りにする");
+                Assert.GreaterOrEqual(mat.GetFloat("_ReflectionPatternStrength"), 0.55f,
+                    "Hero Quick Apply は反射帯を強めに持つ必要がある");
+                Assert.GreaterOrEqual(mat.GetFloat("_CausticsStrength"), 0.80f,
+                    "Hero Quick Apply は水底光を強めに持つ必要がある");
+                Assert.GreaterOrEqual(mat.GetFloat("_CausticsFocus"), 2.3f,
+                    "Hero Quick Apply は水底光を締めた焦点線にする");
+                Assert.GreaterOrEqual(mat.GetFloat("_BottomLightStrength"), 1.85f,
+                    "Hero Quick Apply は水底光が水越しに見える必要がある");
+                Assert.LessOrEqual(animator.speed, 0.001f,
+                    "Hero Quick Apply は静かな初期速度で始める");
+            }
+            finally
+            {
+                Selection.activeGameObject = null;
+                if (go != null) Object.DestroyImmediate(go);
+            }
+        }
+
+        [Test]
         public void MaterialGuide_DocumentsCrystalLagoonDedicatedTextures()
         {
             const string guidePath = "Packages/com.siliq.water-normalmap/Docs/MaterialLookPresetGuide.md";
@@ -1516,6 +1570,7 @@ namespace Siliq.Water.Tests
             }
 
             Assert.IsTrue(hasMenu, "Tools > Siliq Water > はじめてガイド menu が登録されていない");
+            Assert.AreEqual("最高品質 Hero 水面を作成", WaterBeginnerGuideWindow.CreateCrystalLagoonHeroActionLabel);
             Assert.AreEqual("クリスタルラグーン水面を作成", WaterBeginnerGuideWindow.CreateCrystalLagoonActionLabel);
             Assert.AreEqual("フラッグシップ水面を作成", WaterBeginnerGuideWindow.CreateFlagshipActionLabel);
             Assert.AreEqual("選択中の水面を診断して自動修復", WaterBeginnerGuideWindow.RepairSelectionActionLabel);
@@ -1531,6 +1586,34 @@ namespace Siliq.Water.Tests
                 WaterBeginnerGuideWindow.CrystalLagoonHeroCompletePreviewPath);
             Assert.AreEqual("PrebakedPack/ReadyMaterials/M_Siliq_CrystalLagoon_Hero_Ready.mat",
                 WaterBeginnerGuideWindow.CrystalLagoonHeroMaterialPath);
+        }
+
+        [Test]
+        public void BeginnerSetup_ProvidesHeroCreateMenu()
+        {
+            var method = typeof(WaterBeginnerSetup).GetMethod(
+                "CreateCrystalLagoonHeroWater",
+                BindingFlags.Public | BindingFlags.Static);
+            Assert.IsNotNull(method, "最高品質 Hero のかんたん作成 entry point が見つからない");
+
+            bool hasToolsMenu = false;
+            bool hasGameObjectMenu = false;
+            foreach (var attribute in method.GetCustomAttributes(typeof(MenuItem), false))
+            {
+                var menuItem = attribute as MenuItem;
+                if (menuItem == null) continue;
+                if (menuItem.menuItem == "Tools/Siliq Water/かんたん作成/最高品質 Hero 水面を作成")
+                {
+                    hasToolsMenu = true;
+                }
+                if (menuItem.menuItem == "GameObject/Siliq Water/かんたん作成/最高品質 Hero 水面を作成")
+                {
+                    hasGameObjectMenu = true;
+                }
+            }
+
+            Assert.IsTrue(hasToolsMenu, "Tools の Hero かんたん作成 menu が登録されていない");
+            Assert.IsTrue(hasGameObjectMenu, "GameObject の Hero かんたん作成 menu が登録されていない");
         }
 
         [Test]

@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.60] - 2026-07-09
+
+### 追加: Hero 水面のワンクリック作成
+- `Tools > Siliq Water > かんたん作成 > 最高品質 Hero 水面を作成` を追加し、Hero 専用 normal / height / caustics の水面を迷わず作れる入口を用意
+- 用途別 Quick Apply に `クリスタルラグーン Hero (Crystal Lagoon Hero)` を追加し、選択中の水面へ Hero material を直接適用できるようにした
+- はじめてガイド / README / 用途別ガイド / テストを Hero 優先の導線へ更新
+
 ## [2.3.59] - 2026-07-09
 
 ### 追加: Hero 専用 normal / height texture
