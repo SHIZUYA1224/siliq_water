@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.57] - 2026-07-09
+
+### 修正: 水面速度を静かな展示品質へ再調整
+- `WaterSurfaceAnimator` の実効速度と初期 Speed / 高さ速度 / 水底光速度をさらに下げ、Speed 0.3 でもゆっくり見える基準へ変更
+- ReadyMaterials / 完成 Prefab / Quick Apply / Studio 生成 material / shader 初期値のスクロールと水底光速度を同じ低速基準へ統一
+- Hero 完成プレビュー画像を追加し、はじめてガイド / README / 用途別ガイド / テストから確認できるようにした
+
 ## [2.3.56] - 2026-07-09
 
 ### 追加: Hero 完成 Prefab

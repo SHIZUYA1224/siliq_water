@@ -233,11 +233,11 @@ namespace Siliq.Water.Tests
                 go = GameObject.CreatePrimitive(PrimitiveType.Plane);
                 var animator = go.AddComponent<WaterSurfaceAnimator>();
 
-                Assert.LessOrEqual(animator.speed, 0.006f,
+                Assert.LessOrEqual(animator.speed, 0.003f,
                     "初期 speed は見た瞬間に流れすぎない低速値にする");
-                Assert.LessOrEqual(animator.displacementSpeed, 0.005f,
+                Assert.LessOrEqual(animator.displacementSpeed, 0.002f,
                     "初期 height animation も速すぎない値にする");
-                Assert.LessOrEqual(animator.causticsSpeed, 0.001f,
+                Assert.LessOrEqual(animator.causticsSpeed, 0.0004f,
                     "初期 caustics animation もプールで流れすぎない値にする");
             }
             finally
@@ -275,12 +275,12 @@ namespace Siliq.Water.Tests
 
                 Assert.AreEqual(2f, st.x, 1e-5f, "tiling が _BumpMap_ST.x に反映されていない");
                 Assert.AreEqual(2f, st.y, 1e-5f, "tiling が _BumpMap_ST.y に反映されていない");
-                Assert.Greater(st.z, 0.003f, "speed / direction による X offset が反映されていない");
-                Assert.LessOrEqual(st.z, 0.0045f, "Speed 0.3 でも水面として速すぎない内部減速が必要");
+                Assert.Greater(st.z, 0.001f, "speed / direction による X offset が反映されていない");
+                Assert.LessOrEqual(st.z, 0.002f, "Speed 0.3 でも水面として速すぎない内部減速が必要");
                 Assert.AreEqual(2f, mainSt.x, 1e-5f, "Standard の normal UV 用 _MainTex_ST.x に tiling が反映されていない");
                 Assert.AreEqual(2f, mainSt.y, 1e-5f, "Standard の normal UV 用 _MainTex_ST.y に tiling が反映されていない");
-                Assert.Greater(mainSt.z, 0.003f, "Standard の normal UV 用 _MainTex_ST に offset が反映されていない");
-                Assert.LessOrEqual(mainSt.z, 0.0045f, "Standard の normal UV も Speed 0.3 で速すぎてはいけない");
+                Assert.Greater(mainSt.z, 0.001f, "Standard の normal UV 用 _MainTex_ST に offset が反映されていない");
+                Assert.LessOrEqual(mainSt.z, 0.002f, "Standard の normal UV も Speed 0.3 で速すぎてはいけない");
                 Assert.AreEqual(2f, block.GetFloat("_BumpScale"), 1e-5f, "strength が _BumpScale に反映されていない");
                 Color c = block.GetColor("_Color");
                 Assert.AreEqual(0.12f, c.r, 1e-5f, "shallowColor が Standard の _Color.r に反映されていない");
@@ -489,15 +489,15 @@ namespace Siliq.Water.Tests
                     $"{name} は水底の光表現用 caustics map を持つ必要がある");
                 Assert.Greater(mat.GetFloat("_CausticsStrength"), 0.04f,
                     $"{name} は水底の光が完全に死んだ初期値ではいけない");
-                Assert.Greater(mat.GetVector("_Scroll1").sqrMagnitude, 0.0000005f,
+                Assert.Greater(mat.GetVector("_Scroll1").sqrMagnitude, 0.00000005f,
                     $"{name} は WaterSurfaceAnimator なしでも shader 側で波が動く scroll を持つ必要がある");
-                Assert.LessOrEqual(mat.GetVector("_Scroll1").magnitude, 0.004f,
+                Assert.LessOrEqual(mat.GetVector("_Scroll1").magnitude, 0.001f,
                     $"{name} の shader scroll が速すぎる");
-                Assert.LessOrEqual(mat.GetVector("_Scroll2").magnitude, 0.003f,
+                Assert.LessOrEqual(mat.GetVector("_Scroll2").magnitude, 0.00075f,
                     $"{name} の shader scroll 2 が速すぎる");
-                Assert.LessOrEqual(mat.GetFloat("_DisplacementSpeed"), 0.003f,
+                Assert.LessOrEqual(mat.GetFloat("_DisplacementSpeed"), 0.0013f,
                     $"{name} の高さアニメーションが速すぎる");
-                Assert.LessOrEqual(mat.GetFloat("_CausticsSpeed"), 0.0006f,
+                Assert.LessOrEqual(mat.GetFloat("_CausticsSpeed"), 0.00027f,
                     $"{name} の水底光アニメーションが速すぎる");
                 Assert.AreEqual((float)BlendMode.SrcAlpha, mat.GetFloat("_SrcBlend"), 1e-5f,
                     $"{name} は透明水としてすぐ使える blend 設定が必要");
@@ -511,10 +511,10 @@ namespace Siliq.Water.Tests
             var metal = LoadReadyMaterial("M_Siliq_LiquidMetal_Ready");
             Assert.AreEqual("Siliq/Water Mobile (Quest)", metal.shader.name);
             Assert.IsNotNull(metal.GetTexture("_NormalMap"));
-            Assert.Greater(metal.GetVector("_Scroll1").sqrMagnitude, 0.000002f);
-            Assert.LessOrEqual(metal.GetVector("_Scroll1").magnitude, 0.004f);
-            Assert.LessOrEqual(metal.GetVector("_Scroll2").magnitude, 0.003f);
-            Assert.LessOrEqual(metal.GetFloat("_DisplacementSpeed"), 0.003f);
+            Assert.Greater(metal.GetVector("_Scroll1").sqrMagnitude, 0.0000002f);
+            Assert.LessOrEqual(metal.GetVector("_Scroll1").magnitude, 0.001f);
+            Assert.LessOrEqual(metal.GetVector("_Scroll2").magnitude, 0.00075f);
+            Assert.LessOrEqual(metal.GetFloat("_DisplacementSpeed"), 0.0013f);
             Assert.AreEqual((float)BlendMode.One, metal.GetFloat("_SrcBlend"), 1e-5f);
             Assert.AreEqual((float)BlendMode.Zero, metal.GetFloat("_DstBlend"), 1e-5f);
             Assert.AreEqual(1f, metal.GetFloat("_ZWrite"), 1e-5f);
@@ -576,11 +576,11 @@ namespace Siliq.Water.Tests
                 "Hero は凹凸を抑え、変な模様ではなく透明感を優先する");
             Assert.LessOrEqual(hero.GetFloat("_DisplacementStrength"), 0.006f,
                 "Hero は高さで板状の模様を出さない");
-            Assert.LessOrEqual(hero.GetVector("_Scroll1").magnitude, 0.004f,
+            Assert.LessOrEqual(hero.GetVector("_Scroll1").magnitude, 0.001f,
                 "Hero の shader scroll が速すぎてはいけない");
-            Assert.LessOrEqual(hero.GetFloat("_DisplacementSpeed"), 0.003f,
+            Assert.LessOrEqual(hero.GetFloat("_DisplacementSpeed"), 0.0013f,
                 "Hero の高さアニメーションが速すぎてはいけない");
-            Assert.LessOrEqual(hero.GetFloat("_CausticsSpeed"), 0.0006f,
+            Assert.LessOrEqual(hero.GetFloat("_CausticsSpeed"), 0.00027f,
                 "Hero の水底光アニメーションが速すぎてはいけない");
             Assert.AreEqual((float)BlendMode.SrcAlpha, hero.GetFloat("_SrcBlend"), 1e-5f,
                 "Hero は透明水としてすぐ使える blend 設定にする");
@@ -660,6 +660,66 @@ namespace Siliq.Water.Tests
                 Assert.Greater(averageLuminance, 150f, "完成 preview は暗く沈みすぎてはいけない");
                 Assert.Less(averageLuminance, 220f, "完成 preview は白飛びした単色に近づけない");
                 Assert.Greater(maxLum - minLum, 120, "完成 preview は床、光、反射の明暗差が必要");
+            }
+            finally
+            {
+                Object.DestroyImmediate(readable);
+            }
+        }
+
+        [Test]
+        public void CrystalLagoonHeroCompletePreview_ShowsHeroPrefabBeautyDirection()
+        {
+            const string path = "Packages/com.siliq.water-normalmap/PrebakedPack/Preview/preview_crystal_lagoon_hero_complete.png";
+            var preview = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+            Assert.IsNotNull(preview, "Hero 完成 Prefab の方向性が分かる preview が同梱されていない");
+            Assert.GreaterOrEqual(preview.width, 1024, "Hero preview は Unity 上でも完成形を確認できる横長表示サイズが必要");
+            Assert.GreaterOrEqual(preview.height, 512, "Hero preview は Unity 上でも完成形を確認できる高さが必要");
+
+            var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            Assert.IsNotNull(importer, "Hero preview の import 設定が読めない");
+            Assert.IsTrue(importer.sRGBTexture, "Hero preview は見た目確認用なので sRGB で読み込む");
+            Assert.GreaterOrEqual(importer.maxTextureSize, 2048, "Hero preview は 1280px で潰さず表示できる import 上限が必要");
+
+            var readable = new Texture2D(2, 2, TextureFormat.RGB24, false);
+            try
+            {
+                Assert.IsTrue(readable.LoadImage(File.ReadAllBytes(path)), "Hero preview を PNG として読めない");
+                Assert.AreEqual(1280, readable.width, "Hero preview の元 PNG は十分な横解像度が必要");
+                Assert.AreEqual(720, readable.height, "Hero preview の元 PNG は十分な縦解像度が必要");
+                var pixels = readable.GetPixels32();
+                int blueWaterPixels = 0;
+                int brightCausticPixels = 0;
+                int whiteReflectionPixels = 0;
+                int darkerBluePixels = 0;
+                float luminanceSum = 0f;
+                byte minLum = byte.MaxValue;
+                byte maxLum = 0;
+
+                foreach (var p in pixels)
+                {
+                    byte lum = (byte)((p.r + p.g + p.b) / 3);
+                    luminanceSum += lum;
+                    if (lum < minLum) minLum = lum;
+                    if (lum > maxLum) maxLum = lum;
+                    if (p.b > p.r + 35 && p.g > p.r + 25 && p.b > 150) blueWaterPixels++;
+                    if (p.r > 185 && p.g > 215 && p.b > 205) brightCausticPixels++;
+                    if (p.r > 220 && p.g > 235 && p.b > 235) whiteReflectionPixels++;
+                    if (p.b > 100 && p.r < 100 && p.g < 190) darkerBluePixels++;
+                }
+
+                float averageLuminance = luminanceSum / pixels.Length;
+                Assert.Greater(blueWaterPixels, pixels.Length * 0.55f,
+                    "Hero preview は透明な青系の水面として読める色比率が必要");
+                Assert.Greater(brightCausticPixels, pixels.Length * 0.20f,
+                    "Hero preview は水底光と明るい反射を十分に含む必要がある");
+                Assert.Greater(whiteReflectionPixels, pixels.Length * 0.12f,
+                    "Hero preview は白い反射帯が確認できる必要がある");
+                Assert.Greater(darkerBluePixels, pixels.Length * 0.004f,
+                    "Hero preview は濃淡がなく単調な水色だけに戻ってはいけない");
+                Assert.Greater(averageLuminance, 180f, "Hero preview は暗く沈みすぎてはいけない");
+                Assert.Less(averageLuminance, 240f, "Hero preview は白飛びした単色に近づけない");
+                Assert.Greater(maxLum - minLum, 90, "Hero preview は床、光、反射の明暗差が必要");
             }
             finally
             {
@@ -1418,6 +1478,8 @@ namespace Siliq.Water.Tests
                 WaterBeginnerGuideWindow.CrystalLagoonHeroCompletePrefabPath);
             Assert.AreEqual("PrebakedPack/Preview/preview_crystal_lagoon_complete.png",
                 WaterBeginnerGuideWindow.CrystalLagoonCompletePreviewPath);
+            Assert.AreEqual("PrebakedPack/Preview/preview_crystal_lagoon_hero_complete.png",
+                WaterBeginnerGuideWindow.CrystalLagoonHeroCompletePreviewPath);
             Assert.AreEqual("PrebakedPack/ReadyMaterials/M_Siliq_CrystalLagoon_Hero_Ready.mat",
                 WaterBeginnerGuideWindow.CrystalLagoonHeroMaterialPath);
         }

@@ -16,6 +16,7 @@ namespace Siliq.Water.Editor
         internal const string CrystalLagoonCompletePrefabPath = "PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab";
         internal const string CrystalLagoonHeroCompletePrefabPath = "PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Hero_Complete.prefab";
         internal const string CrystalLagoonCompletePreviewPath = "PrebakedPack/Preview/preview_crystal_lagoon_complete.png";
+        internal const string CrystalLagoonHeroCompletePreviewPath = "PrebakedPack/Preview/preview_crystal_lagoon_hero_complete.png";
         internal const string CrystalLagoonHeroMaterialPath = "PrebakedPack/ReadyMaterials/M_Siliq_CrystalLagoon_Hero_Ready.mat";
 
         Vector2 scroll;
@@ -121,6 +122,10 @@ namespace Siliq.Water.Editor
                 if (GUILayout.Button("完成プレビューを選択"))
                 {
                     PingPackageAsset(CrystalLagoonCompletePreviewPath);
+                }
+                if (GUILayout.Button("Hero プレビューを選択"))
+                {
+                    PingPackageAsset(CrystalLagoonHeroCompletePreviewPath);
                 }
             }
 

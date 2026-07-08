@@ -97,7 +97,7 @@ Crystal Lagoon は水底光も専用 **2048×2048 `Water_Caustics_CrystalLagoon_
 さらに共通の `Water_Caustics_Crystal_01.png` を同梱し、透明な海・プール・フラッグシップ水では水底に揺れる光模様として使います。これは強い多角形セルではなく、淡く重なる光の筋として調整しています。
 `PrebakedPack/ReadyMaterials/` には `Siliq/Water Mobile (Quest)` 設定済みの完成マテリアルが入っています。
 `PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab` は、分割済み水面、明るいプール床、床用 caustics overlay、確認用ライトを一体化した完成セットです。さらに `PF_Siliq_CrystalLagoon_Hero_Complete.prefab` は Hero material と Hero caustics overlay を貼った最高品質確認用です。Prefab を Hierarchy へ置くだけで、透明感と水底光を同時に確認できます。
-完成形の方向性は `PrebakedPack/Preview/preview_crystal_lagoon_complete.png` で確認できます。薄い床、透明な水面、反射、水底光が一枚で見える初心者向けの目安画像です。
+完成形の方向性は `PrebakedPack/Preview/preview_crystal_lagoon_complete.png`、最高品質寄りは `PrebakedPack/Preview/preview_crystal_lagoon_hero_complete.png` で確認できます。薄い床、透明な水面、反射、水底光が一枚で見える初心者向けの目安画像です。
 
 | Ready material | 用途 |
 |---|---|
@@ -157,7 +157,7 @@ Renderer にドラッグ&ドロップするだけで水として動きます。`
 | 項目 | 内容 |
 |---|---|
 | **方向 (度)** | 波が流れる向き。0=右、90=上、180=左、270=下 |
-| **速さ** | 流れる速さ。0 で静止。内部で強く減速されるため、0.03 以下は静かな水、0.3 でも穏やかな中間速度 |
+| **速さ** | 流れる速さ。0 で静止。内部で強く減速されるため、0.03 以下はほぼ静止、0.3 でもゆっくりした水面 |
 | **Edit Mode Preview Fps** | 編集中プレビューの更新回数。低いほど軽い |
 | **強さ** | 凹凸の強さ (シェーダーに `_BumpScale` / `_NormalStrength` がある場合) |
 | **模様の大きさ** | 1 が元のサイズ、大きいほど模様が細かく見える |
@@ -186,7 +186,7 @@ Standard / URP Lit / VRChat Mobile 系では `_BumpMap` の UV、`_BumpScale`、
 実際の高さは頂点変位なので、1 枚ポリゴンの Quad では見えにくいです。Unity 標準の Plane や細分化された水面メッシュを使ってください。
 PC の発熱を避けるため、編集モードの連続プレビューは**選択中の水面だけ**最大 10fps で更新されます。
 重い場合は `Animate In Edit Mode` を OFF にするか、`Edit Mode Preview Fps` を下げてください。
-右クリック適用時は、水の種類ごとに微速の初期値が入ります。速く見える場合はまず **速さ** を 0.03 以下、**高さの速度** を 0.003 以下、**水底の光の速度** を 0.0006 以下まで下げてください。
+右クリック適用時は、水の種類ごとに微速の初期値が入ります。速く見える場合はまず **速さ** を 0.01 以下、**高さの速度** を 0.0013 以下、**水底の光の速度** を 0.00027 以下まで下げてください。
 ただし `波紋 (Ripple)` はスライドさせると水滴の波紋として不自然なので、
 このコンポーネントの速度は 0 にし、下記の `WaterRippleEmitter` で同心円が広がる表現にしています。
 
@@ -469,7 +469,7 @@ PrebakedPack/
   Prefabs/                  PF_Siliq_CrystalLagoon_Complete.prefab + PF_Siliq_CrystalLagoon_Hero_Complete.prefab
   Materials/                設定済み Standard マテリアル 6 種
   SampleScene/              SC_CrystalLagoon_Showcase.unity + 基本 5 種比較シーン
-  Preview/                  Plane に貼った状態のプレビュー画像、Crystal Lagoon の美しさ確認用画像
+  Preview/                  Plane に貼った状態のプレビュー画像、Crystal Lagoon / Hero 完成形の確認用画像
 ```
 
 ## テスト
