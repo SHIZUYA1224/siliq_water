@@ -117,7 +117,7 @@ Crystal Lagoon は水底光も専用 **2048×2048 `Water_Caustics_CrystalLagoon_
 美しさを最優先する場合は、まず `PF_Siliq_CrystalLagoon_Hero_Complete.prefab` か `M_Siliq_CrystalLagoon_Hero_Ready` から確認してください。
 これらは normal map、色、透明度、反射、scroll、実高さ、水底の光の初期値まで設定済みなので、
 Renderer にドラッグ&ドロップするだけで水として動きます。`WaterSurfaceAnimator` は必須ではありません。
-床そのものに光を出したい場合は、水底の少し上に薄い Plane を置き、`M_Siliq_CrystalLagoon_CausticsOverlay` を貼ります。これは `Siliq/Caustics Overlay Mobile` を使う軽量な加算 material で、Crystal Lagoon 専用 caustics を床に重ねます。
+床そのものに光を出したい場合は、水底の少し上に薄い Plane を置き、`M_Siliq_CrystalLagoon_CausticsOverlay` を貼ります。これは `Siliq/Caustics Overlay Mobile` を使う軽量な加算 material で、Crystal Lagoon 専用 caustics を床に重ねます。床用 overlay も `_Focus` / `_SoftScatter` / `_PrismStrength` を持ち、焦点線、柔らかい散光、薄い色分散を調整できます。
 既存の `PrebakedPack/Materials/M_Water_*` は Standard シェーダーの互換・確認用です。
 
 ### 一瞬で水面にする 4 つの方法
@@ -154,6 +154,7 @@ Renderer にドラッグ&ドロップするだけで水として動きます。`
 対象プロパティ (`_BumpMap` 等) を持つシェーダーであれば動作します。
 
 インスペクタで動き、色、透明・反射を直接調整できます。
+初期値はかなり低速です。速く見える場合は `Speed` だけでなく、Siliq 水マテリアル側の `_Scroll1` / `_Scroll2`、高さの `_DisplacementSpeed`、水底光の `_CausticsSpeed` も下げてください。
 
 | 項目 | 内容 |
 |---|---|

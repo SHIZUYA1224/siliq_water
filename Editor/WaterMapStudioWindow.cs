@@ -1344,21 +1344,21 @@ namespace Siliq.Water.Editor
                     {
                         mat.SetTexture("_NormalMap", normal);
                     }
-                    SetupSiliqCaustics(mat, caustics, 0.34f, 1.8f, 0.00016f, new Color(0.78f, 1f, 1f, 1f));
+                    SetupSiliqCaustics(mat, caustics, 0.34f, 1.8f, 0.00008f, new Color(0.78f, 1f, 1f, 1f));
                     if (height != null && mat.HasProperty("_HeightMap"))
                     {
                         mat.SetTexture("_HeightMap", height);
                         if (mat.HasProperty("_HeightMapInfluence")) mat.SetFloat("_HeightMapInfluence", 0.45f);
                         if (mat.HasProperty("_DisplacementStrength")) mat.SetFloat("_DisplacementStrength", settings.createTransparentMaterial ? 0.04f : 0.025f);
                         if (mat.HasProperty("_DisplacementScale")) mat.SetFloat("_DisplacementScale", 0.75f);
-                        if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.0008f);
+                        if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.00045f);
                     }
                     else
                     {
                         if (mat.HasProperty("_HeightMapInfluence")) mat.SetFloat("_HeightMapInfluence", 0f);
                         if (mat.HasProperty("_DisplacementStrength")) mat.SetFloat("_DisplacementStrength", settings.createTransparentMaterial ? 0.035f : 0.018f);
                         if (mat.HasProperty("_DisplacementScale")) mat.SetFloat("_DisplacementScale", 0.75f);
-                        if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.0008f);
+                        if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.00045f);
                     }
                     SetupMacroVariation(mat, 0.42f, 0.10f, 0.36f, 0.18f);
                     SetupDarkSceneResponse(mat);
@@ -1481,7 +1481,7 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_ReflStrength")) mat.SetFloat("_ReflStrength", 1f);
             if (mat.HasProperty("_SpecIntensity")) mat.SetFloat("_SpecIntensity", 1.35f);
             if (mat.HasProperty("_SpecPower")) mat.SetFloat("_SpecPower", 220f);
-            SetupSiliqCaustics(mat, null, 0.30f, 1.8f, 0.00016f, new Color(0.78f, 1f, 1f, 1f));
+            SetupSiliqCaustics(mat, null, 0.30f, 1.8f, 0.00008f, new Color(0.78f, 1f, 1f, 1f));
             if (mat.HasProperty("_SrcBlend")) mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
             if (mat.HasProperty("_DstBlend")) mat.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
             if (mat.HasProperty("_ZWrite")) mat.SetFloat("_ZWrite", 0f);
@@ -1519,9 +1519,9 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_Smoothness")) mat.SetFloat("_Smoothness", 0.98f);
             if (mat.HasProperty("_DisplacementStrength")) mat.SetFloat("_DisplacementStrength", 0.025f);
             if (mat.HasProperty("_DisplacementScale")) mat.SetFloat("_DisplacementScale", 0.42f);
-            if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.0008f);
+            if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.00035f);
             if (mat.HasProperty("_HeightMapInfluence")) mat.SetFloat("_HeightMapInfluence", hasHeightMap ? 0.25f : 0f);
-            SetupSiliqCaustics(mat, null, 0.58f, 1.7f, 0.00016f, new Color(0.82f, 0.98f, 1f, 1f));
+            SetupSiliqCaustics(mat, null, 0.58f, 1.7f, 0.00008f, new Color(0.82f, 0.98f, 1f, 1f));
             SetupMacroVariation(mat, 0.30f, 0.07f, 0.18f, 0.10f);
         }
 
@@ -1554,9 +1554,9 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_Smoothness")) mat.SetFloat("_Smoothness", 0.99f);
             if (mat.HasProperty("_DisplacementStrength")) mat.SetFloat("_DisplacementStrength", 0.012f);
             if (mat.HasProperty("_DisplacementScale")) mat.SetFloat("_DisplacementScale", 0.85f);
-            if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.0008f);
+            if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.00035f);
             if (mat.HasProperty("_HeightMapInfluence")) mat.SetFloat("_HeightMapInfluence", 0f);
-            SetupSiliqCaustics(mat, null, 0.64f, 2.1f, 0.00016f, new Color(0.76f, 1f, 0.98f, 1f));
+            SetupSiliqCaustics(mat, null, 0.64f, 2.1f, 0.00008f, new Color(0.76f, 1f, 0.98f, 1f));
             SetupMacroVariation(mat, 0.22f, 0.075f, 0.18f, 0.10f);
         }
 

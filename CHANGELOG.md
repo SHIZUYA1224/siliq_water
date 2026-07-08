@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.66] - 2026-07-09
+
+### 改善: 床用 caustics overlay の品質向上
+- `Siliq/Caustics Overlay Mobile` に `_Focus` / `_SoftScatter` / `_PrismStrength` を追加し、床の水底光を単純な加算模様ではなく、焦点線・柔らかい散光・薄いプリズム色で表現できるようにした
+- Crystal Lagoon / Hero の床用 caustics overlay material に新しい初期値を追加し、完成 Prefab の水底光がより透明水らしく見えるようにした
+- テストを更新し、床用 caustics overlay が白い単調な光だけに戻らないよう固定
+- 水面の初期速度、Ready material の shader scroll、完成 Prefab の `WaterSurfaceAnimator` 速度をさらに下げ、置いた直後に水が滑って見えないようにした
+
 ## [2.3.65] - 2026-07-09
 
 ### 修正: 完成 Prefab の屈折感を明示保存

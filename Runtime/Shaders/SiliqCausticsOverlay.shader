@@ -8,6 +8,9 @@ Shader "Siliq/Caustics Overlay Mobile"
         _Tint ("Light Tint", Color) = (0.72, 1, 0.92, 1)
         _Intensity ("Intensity", Range(0, 2)) = 0.55
         _Tiling ("Tiling", Range(0.1, 12)) = 1.4
+        _Focus ("Focus", Range(0.5, 4)) = 1.6
+        _SoftScatter ("Soft Scatter", Range(0, 1)) = 0.32
+        _PrismStrength ("Prism Tint", Range(0, 1)) = 0.10
         _Scroll1 ("Layer 1 Scroll", Vector) = (0.0011, 0.0004, 0, 0)
         _Scroll2 ("Layer 2 Scroll", Vector) = (-0.00035, 0.0007, 0, 0)
         _FloorFade ("Floor Fade", Range(0, 1)) = 0.82
@@ -36,6 +39,9 @@ Shader "Siliq/Caustics Overlay Mobile"
             fixed4 _Tint;
             half _Intensity;
             half _Tiling;
+            half _Focus;
+            half _SoftScatter;
+            half _PrismStrength;
             float4 _Scroll1;
             float4 _Scroll2;
             half _FloorFade;
@@ -73,10 +79,17 @@ Shader "Siliq/Caustics Overlay Mobile"
 
                 half c1 = tex2D(_CausticsMap, uv1).r;
                 half c2 = tex2D(_CausticsMap, uv2).r;
-                half light = saturate((c1 * 0.78h + c2 * 0.42h - 0.16h) * _Intensity);
+                half prismR = tex2D(_CausticsMap, uv1 + float2(0.004, -0.002)).r;
+                half prismB = tex2D(_CausticsMap, uv2 + float2(-0.003, 0.005)).r;
+                half raw = saturate(c1 * 0.78h + c2 * 0.42h);
+                half focused = pow(raw, max(_Focus, 0.5h));
+                half scatter = smoothstep(0.10h, 0.82h, raw) * _SoftScatter;
+                half light = saturate((focused * 1.18h + scatter - 0.12h) * _Intensity);
                 light *= _FloorFade;
+                half3 prism = half3(prismR, raw, prismB) * _Tint.rgb;
+                half3 tint = lerp(_Tint.rgb, prism, saturate(_PrismStrength));
 
-                return fixed4(_Tint.rgb * light, light);
+                return fixed4(tint * light, light);
             }
             ENDCG
         }
