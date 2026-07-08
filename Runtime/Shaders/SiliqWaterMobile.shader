@@ -28,7 +28,7 @@ Shader "Siliq/Water Mobile (Quest)"
         [NoScaleOffset] _HeightMap ("水面ハイトマップ", 2D) = "gray" {}
         _DisplacementStrength ("実際の高さ", Range(0, 0.5)) = 0
         _DisplacementScale ("高さの波長", Range(0.05, 4)) = 0.75
-        _DisplacementSpeed ("高さの速度", Range(0, 2)) = 0.08
+        _DisplacementSpeed ("高さの速度", Range(0, 1)) = 0.035
         _HeightMapInfluence ("ハイトマップの影響", Range(0, 1)) = 0
         _NormalStrength ("ノーマル強度", Range(0, 2)) = 1
         _Tiling1 ("レイヤー1 タイリング", Float) = 1
@@ -42,7 +42,7 @@ Shader "Siliq/Water Mobile (Quest)"
         [NoScaleOffset] _CausticsMap ("水底の光マップ", 2D) = "black" {}
         _CausticsStrength ("水底の光の強さ", Range(0, 1)) = 0
         _CausticsScale ("水底の光の細かさ", Range(0.2, 8)) = 1.8
-        _CausticsSpeed ("水底の光の速度", Range(0, 1)) = 0.02
+        _CausticsSpeed ("水底の光の速度", Range(0, 0.25)) = 0.008
         _CausticsTint ("水底の光の色", Color) = (0.75, 1, 1, 1)
         _SpecPower ("ハイライトの鋭さ", Range(8, 512)) = 160
         _SpecIntensity ("ハイライトの強さ", Range(0, 2)) = 0.8

@@ -233,9 +233,9 @@ namespace Siliq.Water.Tests
                 go = GameObject.CreatePrimitive(PrimitiveType.Plane);
                 var animator = go.AddComponent<WaterSurfaceAnimator>();
 
-                Assert.LessOrEqual(animator.speed, 0.10f,
+                Assert.LessOrEqual(animator.speed, 0.04f,
                     "初期 speed は見た瞬間に流れすぎない低速値にする");
-                Assert.LessOrEqual(animator.displacementSpeed, 0.10f,
+                Assert.LessOrEqual(animator.displacementSpeed, 0.04f,
                     "初期 height animation も速すぎない値にする");
             }
             finally
@@ -273,10 +273,10 @@ namespace Siliq.Water.Tests
 
                 Assert.AreEqual(2f, st.x, 1e-5f, "tiling が _BumpMap_ST.x に反映されていない");
                 Assert.AreEqual(2f, st.y, 1e-5f, "tiling が _BumpMap_ST.y に反映されていない");
-                Assert.Greater(st.z, 0.2f, "speed / direction による X offset が反映されていない");
+                Assert.Greater(st.z, 0.1f, "speed / direction による X offset が反映されていない");
                 Assert.AreEqual(2f, mainSt.x, 1e-5f, "Standard の normal UV 用 _MainTex_ST.x に tiling が反映されていない");
                 Assert.AreEqual(2f, mainSt.y, 1e-5f, "Standard の normal UV 用 _MainTex_ST.y に tiling が反映されていない");
-                Assert.Greater(mainSt.z, 0.2f, "Standard の normal UV 用 _MainTex_ST に offset が反映されていない");
+                Assert.Greater(mainSt.z, 0.1f, "Standard の normal UV 用 _MainTex_ST に offset が反映されていない");
                 Assert.AreEqual(2f, block.GetFloat("_BumpScale"), 1e-5f, "strength が _BumpScale に反映されていない");
                 Color c = block.GetColor("_Color");
                 Assert.AreEqual(0.12f, c.r, 1e-5f, "shallowColor が Standard の _Color.r に反映されていない");
@@ -479,12 +479,14 @@ namespace Siliq.Water.Tests
                     $"{name} は水底の光が完全に死んだ初期値ではいけない");
                 Assert.Greater(mat.GetVector("_Scroll1").sqrMagnitude, 0.0001f,
                     $"{name} は WaterSurfaceAnimator なしでも shader 側で波が動く scroll を持つ必要がある");
-                Assert.LessOrEqual(mat.GetVector("_Scroll1").magnitude, 0.08f,
+                Assert.LessOrEqual(mat.GetVector("_Scroll1").magnitude, 0.045f,
                     $"{name} の shader scroll が速すぎる");
-                Assert.LessOrEqual(mat.GetVector("_Scroll2").magnitude, 0.08f,
+                Assert.LessOrEqual(mat.GetVector("_Scroll2").magnitude, 0.045f,
                     $"{name} の shader scroll 2 が速すぎる");
-                Assert.LessOrEqual(mat.GetFloat("_DisplacementSpeed"), 0.12f,
+                Assert.LessOrEqual(mat.GetFloat("_DisplacementSpeed"), 0.05f,
                     $"{name} の高さアニメーションが速すぎる");
+                Assert.LessOrEqual(mat.GetFloat("_CausticsSpeed"), 0.01f,
+                    $"{name} の水底光アニメーションが速すぎる");
                 Assert.AreEqual((float)BlendMode.SrcAlpha, mat.GetFloat("_SrcBlend"), 1e-5f,
                     $"{name} は透明水としてすぐ使える blend 設定が必要");
                 Assert.AreEqual((float)BlendMode.OneMinusSrcAlpha, mat.GetFloat("_DstBlend"), 1e-5f);
@@ -498,9 +500,9 @@ namespace Siliq.Water.Tests
             Assert.AreEqual("Siliq/Water Mobile (Quest)", metal.shader.name);
             Assert.IsNotNull(metal.GetTexture("_NormalMap"));
             Assert.Greater(metal.GetVector("_Scroll1").sqrMagnitude, 0.0001f);
-            Assert.LessOrEqual(metal.GetVector("_Scroll1").magnitude, 0.08f);
-            Assert.LessOrEqual(metal.GetVector("_Scroll2").magnitude, 0.08f);
-            Assert.LessOrEqual(metal.GetFloat("_DisplacementSpeed"), 0.12f);
+            Assert.LessOrEqual(metal.GetVector("_Scroll1").magnitude, 0.045f);
+            Assert.LessOrEqual(metal.GetVector("_Scroll2").magnitude, 0.045f);
+            Assert.LessOrEqual(metal.GetFloat("_DisplacementSpeed"), 0.05f);
             Assert.AreEqual((float)BlendMode.One, metal.GetFloat("_SrcBlend"), 1e-5f);
             Assert.AreEqual((float)BlendMode.Zero, metal.GetFloat("_DstBlend"), 1e-5f);
             Assert.AreEqual(1f, metal.GetFloat("_ZWrite"), 1e-5f);

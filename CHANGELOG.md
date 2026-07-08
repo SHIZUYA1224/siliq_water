@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.38] - 2026-07-08
+
+### 修正: 水面アニメーション速度をさらに低速化
+- `WaterSurfaceAnimator` の初期 Speed / 高さ速度 / 水底光速度を、静かなプールや透明水で速く見えない値へ再調整
+- Quick Apply と同梱 Ready Materials の shader scroll / height / caustics 速度を全体的に下げ、アタッチするだけでも落ち着いた動きになるようにした
+- Ready material の速度上限テストを厳しくし、速すぎる水面へ戻らないよう固定
+
 ## [2.3.37] - 2026-07-08
 
 ### 追加: Crystal Lagoon プレビュー画像
