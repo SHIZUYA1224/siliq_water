@@ -1209,6 +1209,8 @@ namespace Siliq.Water.Tests
             Assert.AreEqual("選択中の水面を診断して自動修復", WaterBeginnerGuideWindow.RepairSelectionActionLabel);
             Assert.AreEqual("PrebakedPack/SampleScene/SC_CrystalLagoon_Showcase.unity",
                 WaterBeginnerGuideWindow.CrystalLagoonShowcaseScenePath);
+            Assert.AreEqual("PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab",
+                WaterBeginnerGuideWindow.CrystalLagoonCompletePrefabPath);
         }
 
         [Test]
@@ -1274,6 +1276,60 @@ namespace Siliq.Water.Tests
             StringAssert.Contains(gridGuid, scene, "showcase scene は分割済み grid mesh を参照する");
             StringAssert.Contains("Pale pool floor for transparency check", scene, "showcase scene には透明度確認用の明るい床が必要");
             StringAssert.Contains("Crystal Lagoon Preview Camera", scene, "showcase scene には確認用 camera が必要");
+        }
+
+        [Test]
+        public void CrystalLagoonCompletePrefab_IsBundledForBeginnerDragAndDrop()
+        {
+            const string prefabGuid = "97c15c18ecf804f7695b02375df4ffb4";
+            const string gridGuid = "c372220d922244035b21bdd3e4ff000a";
+            const string waterMaterialGuid = "f2c657c8bc4a4c7080e6a1327818890d";
+            const string overlayMaterialGuid = "f2c657c8bc4a4c7080e6a1327818897c";
+            const string floorMaterialGuid = "42443abe313b246949f1b9f8504234ce";
+
+            string prefabPath = AssetDatabase.GUIDToAssetPath(prefabGuid);
+            string floorMaterialPath = AssetDatabase.GUIDToAssetPath(floorMaterialGuid);
+            Assert.AreEqual("Packages/com.siliq.water-normalmap/PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab", prefabPath);
+            Assert.AreEqual("Packages/com.siliq.water-normalmap/PrebakedPack/ReadyMaterials/M_Siliq_PalePoolFloor.mat", floorMaterialPath);
+
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            Assert.IsNotNull(prefab, "Crystal Lagoon 完成 Prefab が読み込めない");
+            Assert.AreEqual("PF_Siliq_CrystalLagoon_Complete", prefab.name);
+
+            var water = prefab.transform.Find("Crystal Lagoon Water - transparent beauty preset");
+            var floor = prefab.transform.Find("Pale Pool Floor - transparency and caustics receiver");
+            var overlay = prefab.transform.Find("Crystal Lagoon Floor Caustics Overlay");
+            var light = prefab.transform.Find("Crystal Lagoon Soft Preview Light");
+            Assert.IsNotNull(water, "完成 Prefab に Crystal Lagoon 水面がない");
+            Assert.IsNotNull(floor, "完成 Prefab に透明度確認用の明るい床がない");
+            Assert.IsNotNull(overlay, "完成 Prefab に床用 caustics overlay がない");
+            Assert.IsNotNull(light, "完成 Prefab に確認用ライトがない");
+
+            var waterFilter = water.GetComponent<MeshFilter>();
+            var waterRenderer = water.GetComponent<MeshRenderer>();
+            var floorRenderer = floor.GetComponent<MeshRenderer>();
+            var overlayRenderer = overlay.GetComponent<MeshRenderer>();
+            var animator = water.GetComponent<WaterSurfaceAnimator>();
+            Assert.IsNotNull(waterFilter, "完成 Prefab の水面に MeshFilter がない");
+            Assert.IsNotNull(waterRenderer, "完成 Prefab の水面に MeshRenderer がない");
+            Assert.IsNotNull(floorRenderer, "完成 Prefab の床に MeshRenderer がない");
+            Assert.IsNotNull(overlayRenderer, "完成 Prefab の caustics overlay に MeshRenderer がない");
+            Assert.IsNotNull(animator, "完成 Prefab の水面に初心者調整用 WaterSurfaceAnimator がない");
+
+            Assert.AreEqual(gridGuid, AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(waterFilter.sharedMesh)),
+                "完成 Prefab は分割済み Crystal Lagoon grid mesh を使う必要がある");
+            Assert.AreEqual(waterMaterialGuid, AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(waterRenderer.sharedMaterial)),
+                "完成 Prefab の水面は Crystal Lagoon ready material を直接参照する必要がある");
+            Assert.AreEqual(floorMaterialGuid, AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(floorRenderer.sharedMaterial)),
+                "完成 Prefab の床は明るい確認用 material を直接参照する必要がある");
+            Assert.AreEqual(overlayMaterialGuid, AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(overlayRenderer.sharedMaterial)),
+                "完成 Prefab の overlay は Crystal Lagoon 床用 caustics material を直接参照する必要がある");
+
+            Assert.IsNull(floor.GetComponent<Collider>(), "完成 Prefab の床は置いた瞬間に不要な物理 collider を増やさない");
+            Assert.IsNull(overlay.GetComponent<Collider>(), "完成 Prefab の caustics overlay は不要な collider を持たない");
+            Assert.LessOrEqual(animator.speed, 0.0035f, "完成 Prefab は静かな Crystal Lagoon 速度から始める");
+            Assert.LessOrEqual(animator.displacementStrength, 0.006f, "完成 Prefab は板状の高さ模様を避ける");
+            Assert.GreaterOrEqual(animator.causticsStrength, 0.70f, "完成 Prefab は水底光を強めに確認できる必要がある");
         }
 
         [Test]

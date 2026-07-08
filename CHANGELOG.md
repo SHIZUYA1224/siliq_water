@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.47] - 2026-07-09
+
+### 追加: Crystal Lagoon 完成 Prefab
+- `PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab` を追加し、水面、明るい床、床用 caustics overlay、確認用ライトを一体で配置できるようにした
+- `M_Siliq_PalePoolFloor` を追加し、透明感と水底光を確認しやすい明るい床を Prefab に同梱
+- はじめてガイド、README、用途別ガイド、テストで完成 Prefab 導線を固定
+
 ## [2.3.46] - 2026-07-09
 
 ### 修正: 水面速度を低速基準へ再調整

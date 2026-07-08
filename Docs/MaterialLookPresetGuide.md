@@ -1,6 +1,8 @@
 # 用途別マテリアルプリセットガイド
 
-Siliq Water は、ノーマルマップ単体ではなく「用途別の見た目プリセット」として使うことを前提にする。まずアタッチだけで使う場合は `PrebakedPack/ReadyMaterials/` の `M_Siliq_*_Ready` を Renderer にドラッグする。これらは normal、色、透明度、反射、scroll、水底の光が設定済みで、`WaterSurfaceAnimator` なしでも shader 側で波が動く。
+Siliq Water は、ノーマルマップ単体ではなく「用途別の見た目プリセット」として使うことを前提にする。まず完成形を確認する場合は `PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab` を Hierarchy にドラッグする。水面、明るいプール床、床用 caustics overlay、確認用ライトが一体で入っている。
+
+アタッチだけで使う場合は `PrebakedPack/ReadyMaterials/` の `M_Siliq_*_Ready` を Renderer にドラッグする。これらは normal、色、透明度、反射、scroll、水底の光が設定済みで、`WaterSurfaceAnimator` なしでも shader 側で波が動く。
 
 水面オブジェクトを選択して作成・再適用したい場合は、Hierarchy 右クリックから以下を適用する。
 
@@ -8,7 +10,7 @@ Siliq Water は、ノーマルマップ単体ではなく「用途別の見た�
 
 水面マップスタジオでは `目的から始める` のボタンから同じ用途を選べる。ここでは生成レシピ、解像度、スーパーサンプリング、出力マップ、透明マテリアル作成までまとめて推奨値に変わる。
 
-Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイド` を開く。そこからクリスタルラグーン水面作成、既存水面の診断修復、README / 用途別ガイド / PrebakedPack の確認に進める。すぐ作る場合は `Tools > Siliq Water > かんたん作成 > クリスタルラグーン水面を作成` を使う。分割済みメッシュ、マテリアル、Animator、最低限のライト/カメラが一括で作られる。既存の水面がピンク、動かない、高さが出ない場合は `選択中の水面を診断して自動修復` を実行する。
+Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイド` を開く。そこから完成 Prefab の選択、クリスタルラグーン水面作成、既存水面の診断修復、README / 用途別ガイド / PrebakedPack の確認に進める。すぐ作る場合は `Tools > Siliq Water > かんたん作成 > クリスタルラグーン水面を作成` を使う。分割済みメッシュ、マテリアル、Animator、最低限のライト/カメラが一括で作られる。既存の水面がピンク、動かない、高さが出ない場合は `選択中の水面を診断して自動修復` を実行する。
 
 ## プリセット
 
@@ -29,6 +31,7 @@ Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイ�
 - 適したノーマルマップを割り当てる
 - フラッグシップ透明水では専用 2048px normal map と height map を割り当てる
 - クリスタルラグーンでは専用 2048px normal map、height map、`Water_Caustics_CrystalLagoon_01.png` を割り当てる
+- 完成形をすぐ確認できるよう、`PF_Siliq_CrystalLagoon_Complete.prefab` には水面、`M_Siliq_PalePoolFloor` の床、`M_Siliq_CrystalLagoon_CausticsOverlay` の床用光を同梱する
 - 床に直接光を出したい場合は、床の少し上に薄い Plane を置いて `M_Siliq_CrystalLagoon_CausticsOverlay` を貼る
 - 透明な海・プール・フラッグシップ水では `Water_Caustics_Crystal_01.png` を水底の光として割り当てる
 - 色、透明度、反射、透過光、きらめきを設定する

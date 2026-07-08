@@ -13,6 +13,7 @@ namespace Siliq.Water.Editor
         internal const string CreateFlagshipActionLabel = "フラッグシップ水面を作成";
         internal const string RepairSelectionActionLabel = "選択中の水面を診断して自動修復";
         internal const string CrystalLagoonShowcaseScenePath = "PrebakedPack/SampleScene/SC_CrystalLagoon_Showcase.unity";
+        internal const string CrystalLagoonCompletePrefabPath = "PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab";
 
         Vector2 scroll;
 
@@ -76,7 +77,7 @@ namespace Siliq.Water.Editor
         {
             EditorGUILayout.LabelField("水が安っぽく見える時の確認", EditorStyles.boldLabel);
             Bullet("すぐ使う場合は PrebakedPack/ReadyMaterials の M_Siliq_*_Ready をドラッグします。material だけで波が動きます。");
-            Bullet("美しさを最優先する場合は Crystal Lagoon を選びます。透過光、水底の光、控えめな高さが最初から入っています。");
+            Bullet("美しさを最優先する場合は Crystal Lagoon を選びます。完成 Prefab には水面、明るい床、水底光 overlay が最初から入っています。");
             Bullet("normal だけでは透明感は出ません。ReadyMaterials か用途別マテリアルで色、透明度、反射、ハイライトも設定します。");
             Bullet("高さはメッシュの頂点変位です。1 枚 Quad では見えないため、分割メッシュを使います。");
             Bullet("ピンク material は shader 不一致です。診断修復で現在の Render Pipeline に合う material へ差し替えます。");
@@ -114,15 +115,22 @@ namespace Siliq.Water.Editor
                 {
                     PingPackageAsset(CrystalLagoonShowcaseScenePath);
                 }
+                if (GUILayout.Button("Crystal Lagoon Prefab を選択"))
+                {
+                    PingPackageAsset(CrystalLagoonCompletePrefabPath);
+                }
+            }
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
                 if (GUILayout.Button("PrebakedPack を選択"))
                 {
                     PingPackageAsset("PrebakedPack");
                 }
-            }
-
-            if (GUILayout.Button("ReadyMaterials を選択"))
-            {
-                PingPackageAsset("PrebakedPack/ReadyMaterials");
+                if (GUILayout.Button("ReadyMaterials を選択"))
+                {
+                    PingPackageAsset("PrebakedPack/ReadyMaterials");
+                }
             }
         }
 
