@@ -93,8 +93,8 @@ Material:
     - _DeepColor: {r: 0.02, g: 0.22, b: 0.52, a: 1}
     - _GlimmerColor: {r: 1, g: 1, b: 0.96, a: 1}
     - _HorizonColor: {r: 0.92, g: 0.99, b: 1, a: 1}
-    - _Scroll1: {r: 0.000482, g: 0.000157, b: 0, a: 0}
-    - _Scroll2: {r: -0.000126, g: 0.000347, b: 0, a: 0}
+    - _Scroll1: {r: 0.000241, g: 0.000079, b: 0, a: 0}
+    - _Scroll2: {r: -0.000063, g: 0.000174, b: 0, a: 0}
     - _ShallowColor: {r: 0.48, g: 0.92, b: 1, a: 1}
     - _TransmissionColor: {r: 0.56, g: 0.98, b: 1, a: 1}
   m_BuildTextureStacks: []

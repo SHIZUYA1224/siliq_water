@@ -1,7 +1,9 @@
 {
     "name": "Siliq.Water.Runtime",
     "rootNamespace": "Siliq.Water",
-    "references": [],
+    "references": [
+        "UnityEngine.PhysicsModule"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

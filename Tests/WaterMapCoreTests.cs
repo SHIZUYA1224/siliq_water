@@ -275,12 +275,12 @@ namespace Siliq.Water.Tests
 
                 Assert.AreEqual(2f, st.x, 1e-5f, "tiling が _BumpMap_ST.x に反映されていない");
                 Assert.AreEqual(2f, st.y, 1e-5f, "tiling が _BumpMap_ST.y に反映されていない");
-                Assert.Greater(st.z, 0.001f, "speed / direction による X offset が反映されていない");
-                Assert.LessOrEqual(st.z, 0.002f, "Speed 0.3 でも水面として速すぎない内部減速が必要");
+                Assert.Greater(st.z, 0.00045f, "speed / direction による X offset が反映されていない");
+                Assert.LessOrEqual(st.z, 0.00075f, "Speed 0.3 でも水面として速すぎない内部減速が必要");
                 Assert.AreEqual(2f, mainSt.x, 1e-5f, "Standard の normal UV 用 _MainTex_ST.x に tiling が反映されていない");
                 Assert.AreEqual(2f, mainSt.y, 1e-5f, "Standard の normal UV 用 _MainTex_ST.y に tiling が反映されていない");
-                Assert.Greater(mainSt.z, 0.001f, "Standard の normal UV 用 _MainTex_ST に offset が反映されていない");
-                Assert.LessOrEqual(mainSt.z, 0.002f, "Standard の normal UV も Speed 0.3 で速すぎてはいけない");
+                Assert.Greater(mainSt.z, 0.00045f, "Standard の normal UV 用 _MainTex_ST に offset が反映されていない");
+                Assert.LessOrEqual(mainSt.z, 0.00075f, "Standard の normal UV も Speed 0.3 で速すぎてはいけない");
                 Assert.AreEqual(2f, block.GetFloat("_BumpScale"), 1e-5f, "strength が _BumpScale に反映されていない");
                 Color c = block.GetColor("_Color");
                 Assert.AreEqual(0.12f, c.r, 1e-5f, "shallowColor が Standard の _Color.r に反映されていない");
@@ -501,9 +501,9 @@ namespace Siliq.Water.Tests
                     $"{name} は水底光をぼやけた単色模様に戻さない");
                 Assert.Greater(mat.GetVector("_Scroll1").sqrMagnitude, 0.00000005f,
                     $"{name} は WaterSurfaceAnimator なしでも shader 側で波が動く scroll を持つ必要がある");
-                Assert.LessOrEqual(mat.GetVector("_Scroll1").magnitude, 0.001f,
+                Assert.LessOrEqual(mat.GetVector("_Scroll1").magnitude, 0.00055f,
                     $"{name} の shader scroll が速すぎる");
-                Assert.LessOrEqual(mat.GetVector("_Scroll2").magnitude, 0.00075f,
+                Assert.LessOrEqual(mat.GetVector("_Scroll2").magnitude, 0.00040f,
                     $"{name} の shader scroll 2 が速すぎる");
                 Assert.LessOrEqual(mat.GetFloat("_DisplacementSpeed"), 0.0013f,
                     $"{name} の高さアニメーションが速すぎる");
@@ -521,9 +521,9 @@ namespace Siliq.Water.Tests
             var metal = LoadReadyMaterial("M_Siliq_LiquidMetal_Ready");
             Assert.AreEqual("Siliq/Water Mobile (Quest)", metal.shader.name);
             Assert.IsNotNull(metal.GetTexture("_NormalMap"));
-            Assert.Greater(metal.GetVector("_Scroll1").sqrMagnitude, 0.0000002f);
-            Assert.LessOrEqual(metal.GetVector("_Scroll1").magnitude, 0.001f);
-            Assert.LessOrEqual(metal.GetVector("_Scroll2").magnitude, 0.00075f);
+            Assert.Greater(metal.GetVector("_Scroll1").sqrMagnitude, 0.0000001f);
+            Assert.LessOrEqual(metal.GetVector("_Scroll1").magnitude, 0.00055f);
+            Assert.LessOrEqual(metal.GetVector("_Scroll2").magnitude, 0.00040f);
             Assert.LessOrEqual(metal.GetFloat("_DisplacementSpeed"), 0.0013f);
             Assert.AreEqual((float)BlendMode.One, metal.GetFloat("_SrcBlend"), 1e-5f);
             Assert.AreEqual((float)BlendMode.Zero, metal.GetFloat("_DstBlend"), 1e-5f);
@@ -598,7 +598,7 @@ namespace Siliq.Water.Tests
                 "Hero は凹凸を抑え、変な模様ではなく透明感を優先する");
             Assert.LessOrEqual(hero.GetFloat("_DisplacementStrength"), 0.006f,
                 "Hero は高さで板状の模様を出さない");
-            Assert.LessOrEqual(hero.GetVector("_Scroll1").magnitude, 0.001f,
+            Assert.LessOrEqual(hero.GetVector("_Scroll1").magnitude, 0.00020f,
                 "Hero の shader scroll が速すぎてはいけない");
             Assert.LessOrEqual(hero.GetFloat("_DisplacementSpeed"), 0.0013f,
                 "Hero の高さアニメーションが速すぎてはいけない");
@@ -1748,7 +1748,7 @@ namespace Siliq.Water.Tests
 
             Assert.IsNull(floor.GetComponent<Collider>(), "完成 Prefab の床は置いた瞬間に不要な物理 collider を増やさない");
             Assert.IsNull(overlay.GetComponent<Collider>(), "完成 Prefab の caustics overlay は不要な collider を持たない");
-            Assert.LessOrEqual(animator.speed, 0.001f, "完成 Prefab は静かな Crystal Lagoon 速度から始める");
+            Assert.LessOrEqual(animator.speed, 0.00025f, "完成 Prefab は静かな Crystal Lagoon 速度から始める");
             Assert.LessOrEqual(animator.displacementStrength, 0.006f, "完成 Prefab は板状の高さ模様を避ける");
             Assert.GreaterOrEqual(animator.clarity, 0.90f, "完成 Prefab は透明な抜け感を高くしておく");
             Assert.GreaterOrEqual(animator.reflectionPatternStrength, 0.42f, "完成 Prefab は反射パターンを強めに確認できる必要がある");
@@ -1810,7 +1810,7 @@ namespace Siliq.Water.Tests
 
             Assert.IsNull(floor.GetComponent<Collider>(), "Hero 完成 Prefab の床は置いた瞬間に不要な物理 collider を増やさない");
             Assert.IsNull(overlay.GetComponent<Collider>(), "Hero 完成 Prefab の caustics overlay は不要な collider を持たない");
-            Assert.LessOrEqual(animator.speed, 0.001f, "Hero 完成 Prefab は静かな速度から始める");
+            Assert.LessOrEqual(animator.speed, 0.00020f, "Hero 完成 Prefab は静かな速度から始める");
             Assert.LessOrEqual(animator.displacementStrength, 0.004f, "Hero 完成 Prefab は板状の高さ模様を避ける");
             Assert.LessOrEqual(animator.opacity, 0.36f, "Hero 完成 Prefab は透明感を最優先にする");
             Assert.GreaterOrEqual(animator.clarity, 0.97f, "Hero 完成 Prefab は透明な抜け感を最大寄りにしておく");

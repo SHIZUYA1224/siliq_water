@@ -295,7 +295,7 @@ MonoBehaviour:
   animateInEditMode: 1
   editModePreviewFps: 10
   directionDegrees: 20
-  speed: 0.00045
+  speed: 0.00016
   strength: 0.36
   tiling: 0.82
   displacementStrength: 0.004

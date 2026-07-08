@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.61] - 2026-07-09
+
+### 修正: 水面の流れをさらに低速化
+- `WaterSurfaceAnimator` の内部速度倍率をさらに下げ、Speed を 0.3 まで上げても水面が滑って見えにくい基準へ変更
+- ReadyMaterials / 完成 Prefab / Quick Apply の水面 scroll を全体的に半分前後まで落とし、ドラッグ&ドロップ直後から静かな透明水に見えるようにした
+- テストの速度上限を締め、Hero / Crystal Lagoon が速い shader scroll や prefab speed に戻らないよう固定
+- Unity 6 の空プロジェクトでも `WaterRippleSource` がコンパイルできるよう Physics module dependency と runtime asmdef 参照を追加
+
 ## [2.3.60] - 2026-07-09
 
 ### 追加: Hero 水面のワンクリック作成

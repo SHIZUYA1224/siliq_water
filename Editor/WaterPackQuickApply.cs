@@ -82,11 +82,11 @@ namespace Siliq.Water.Editor
         }
 
         // 各水の雰囲気に合わせた動き。初期値はゆっくり動く水に見える速度に抑える。
-        static readonly MotionPreset CalmMotion = new MotionPreset(35f, 0.0009f, 1.35f, 1.35f);
+        static readonly MotionPreset CalmMotion = new MotionPreset(35f, 0.00045f, 1.35f, 1.35f);
         static readonly MotionPreset RippleMotion = new MotionPreset(0f, 0f, 0.55f, 1.15f);
-        static readonly MotionPreset StreamMotion = new MotionPreset(0f, 0.0020f, 1.45f, 1.8f);
-        static readonly MotionPreset PoolMotion = new MotionPreset(50f, 0.00055f, 0.55f, 1.08f);
-        static readonly MotionPreset CyberMotion = new MotionPreset(18f, 0.0009f, 0.78f, 1.24f);
+        static readonly MotionPreset StreamMotion = new MotionPreset(0f, 0.0010f, 1.45f, 1.8f);
+        static readonly MotionPreset PoolMotion = new MotionPreset(50f, 0.00028f, 0.55f, 1.08f);
+        static readonly MotionPreset CyberMotion = new MotionPreset(18f, 0.00045f, 0.78f, 1.24f);
 
         static readonly LookPreset ClearSeaLook = new LookPreset
         {
@@ -94,7 +94,7 @@ namespace Siliq.Water.Editor
             displayName = "美しい海",
             sourceGuid = CalmGuid,
             sourceLabel = "Calm",
-            motion = new MotionPreset(22f, 0.0009f, 0.92f, 1.45f),
+            motion = new MotionPreset(22f, 0.00045f, 0.92f, 1.45f),
             transparent = true,
             opacity = 0.46f,
             shallow = new Color(0.30f, 0.88f, 1f, 1f),
@@ -145,7 +145,7 @@ namespace Siliq.Water.Editor
             displayName = "透明プール",
             sourceGuid = PoolGuid,
             sourceLabel = "Pool",
-            motion = new MotionPreset(50f, 0.00055f, 0.38f, 1.0f),
+            motion = new MotionPreset(50f, 0.00028f, 0.38f, 1.0f),
             transparent = true,
             opacity = 0.34f,
             shallow = new Color(0.74f, 0.99f, 1f, 1f),
@@ -196,7 +196,7 @@ namespace Siliq.Water.Editor
             displayName = "室内ブループール",
             sourceGuid = CalmGuid,
             sourceLabel = "Calm",
-            motion = new MotionPreset(18f, 0.00050f, 0.46f, 0.82f),
+            motion = new MotionPreset(18f, 0.00025f, 0.46f, 0.82f),
             transparent = true,
             opacity = 0.38f,
             shallow = new Color(0.48f, 0.92f, 1f, 1f),
@@ -248,7 +248,7 @@ namespace Siliq.Water.Editor
             sourceGuid = FlagshipCrystalGuid,
             sourceLabel = "FlagshipCrystal",
             heightGuid = FlagshipCrystalHeightGuid,
-            motion = new MotionPreset(26f, 0.00065f, 0.58f, 1.18f),
+            motion = new MotionPreset(26f, 0.00032f, 0.58f, 1.18f),
             transparent = true,
             opacity = 0.52f,
             shallow = new Color(0.24f, 0.92f, 1f, 1f),
@@ -301,7 +301,7 @@ namespace Siliq.Water.Editor
             sourceLabel = "FlagshipCrystal",
             normalGuid = CrystalLagoonNormalGuid,
             heightGuid = CrystalLagoonHeightGuid,
-            motion = new MotionPreset(20f, 0.00040f, 0.42f, 0.92f),
+            motion = new MotionPreset(20f, 0.00022f, 0.42f, 0.92f),
             transparent = true,
             opacity = 0.40f,
             shallow = new Color(0.56f, 1f, 0.98f, 1f),
@@ -354,7 +354,7 @@ namespace Siliq.Water.Editor
             sourceLabel = "FlagshipCrystal",
             normalGuid = CrystalLagoonHeroNormalGuid,
             heightGuid = CrystalLagoonHeroHeightGuid,
-            motion = new MotionPreset(20f, 0.00035f, 0.36f, 0.82f),
+            motion = new MotionPreset(20f, 0.00016f, 0.36f, 0.82f),
             transparent = true,
             opacity = 0.34f,
             shallow = new Color(0.68f, 1f, 0.99f, 1f),
@@ -405,7 +405,7 @@ namespace Siliq.Water.Editor
             displayName = "血の海",
             sourceGuid = StreamGuid,
             sourceLabel = "Stream",
-            motion = new MotionPreset(6f, 0.00070f, 0.82f, 1.18f),
+            motion = new MotionPreset(6f, 0.00035f, 0.82f, 1.18f),
             transparent = true,
             opacity = 0.68f,
             shallow = new Color(0.48f, 0.02f, 0.025f, 1f),
@@ -456,7 +456,7 @@ namespace Siliq.Water.Editor
             displayName = "液体金属",
             sourceGuid = CyberGuid,
             sourceLabel = "Cyber",
-            motion = new MotionPreset(18f, 0.00080f, 0.72f, 1.38f),
+            motion = new MotionPreset(18f, 0.00040f, 0.72f, 1.38f),
             transparent = false,
             opacity = 1f,
             shallow = new Color(0.86f, 0.88f, 0.90f, 1f),
