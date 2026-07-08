@@ -499,11 +499,11 @@ namespace Siliq.Water.Tests
         {
             var settings = WaterMapPresets.Create(11);
             Assert.That(settings.layers.Length, Is.GreaterThanOrEqualTo(5), "フラッグシップ透明水は単調な一枚ノイズにしない");
-            Assert.LessOrEqual(settings.strength, 0.85f, "フラッグシップ透明水は高品質でも法線を荒く盛りすぎない");
+            Assert.LessOrEqual(settings.strength, 0.65f, "フラッグシップ透明水は高品質でも法線を荒く盛りすぎない");
             Assert.LessOrEqual(settings.baseRoughness, 0.03f, "フラッグシップ透明水は鏡面反射が主役なのでラフネスを低く保つ");
             Assert.GreaterOrEqual(settings.causticsIntensity, 1.0f, "フラッグシップ透明水には淡いコースティクスの存在感が必要");
 
-            bool foundBroadMirrorWave = false;
+            bool foundBroadSmoothWave = false;
             bool foundFineRipples = false;
             bool foundFineLightBreakup = false;
             foreach (var layer in settings.layers)
@@ -512,18 +512,30 @@ namespace Siliq.Water.Tests
                     "フラッグシップ normal / height にセル境界を入れると氷やタイル状に見える");
                 Assert.AreNotEqual(WaveLayerType.VoronoiCells, layer.type,
                     "フラッグシップ normal / height にセル面を入れると水面ではなく板状に見える");
+                Assert.LessOrEqual(layer.amplitude, 0.32f,
+                    "フラッグシップ透明水では単一レイヤーを強くしすぎず、複数の弱い波で作る");
 
-                if (layer.type == WaveLayerType.DirectionalWaves &&
-                    layer.scale <= 4 &&
-                    layer.amplitude >= 0.65f &&
-                    layer.waveCount >= 8)
+                if (layer.type == WaveLayerType.DirectionalWaves && layer.scale <= 8)
                 {
-                    foundBroadMirrorWave = true;
+                    Assert.LessOrEqual(layer.amplitude, 0.20f,
+                        "低周波の強い DirectionalWaves は大きな多角形面や氷割れに見える");
+                    Assert.LessOrEqual(layer.sharpness, 0.80f,
+                        "低周波 DirectionalWaves を尖らせると水ではなく板模様になる");
+                }
+
+                if (layer.type == WaveLayerType.PerlinWaves &&
+                    layer.scale >= 4 &&
+                    layer.scale <= 6 &&
+                    layer.amplitude >= 0.12f &&
+                    layer.amplitude <= 0.22f &&
+                    layer.sharpness <= 0.75f)
+                {
+                    foundBroadSmoothWave = true;
                 }
 
                 if ((layer.type == WaveLayerType.RidgedWaves || layer.type == WaveLayerType.DirectionalWaves) &&
-                    layer.scale >= 20 &&
-                    layer.amplitude <= 0.22f)
+                    layer.scale >= 30 &&
+                    layer.amplitude <= 0.18f)
                 {
                     foundFineRipples = true;
                 }
@@ -537,7 +549,7 @@ namespace Siliq.Water.Tests
                 }
             }
 
-            Assert.IsTrue(foundBroadMirrorWave, "フラッグシップ透明水には広い鏡面うねりが必要");
+            Assert.IsTrue(foundBroadSmoothWave, "フラッグシップ透明水の広い透明ムラは控えめな Perlin 系で作る");
             Assert.IsTrue(foundFineRipples, "フラッグシップ透明水には反射を細かく割る細波が必要");
             Assert.IsTrue(foundFineLightBreakup, "フラッグシップ透明水にはセル境界ではない薄い光のゆらぎが必要");
         }
@@ -576,8 +588,14 @@ namespace Siliq.Water.Tests
             Assert.AreEqual(TextureImporterType.NormalMap, normalImporter.textureType, "normal map が NormalMap import になっていない");
             Assert.AreEqual(normalPath, AssetDatabase.GetAssetPath(material.GetTexture("_BumpMap")),
                 "フラッグシップ material が専用 normal map を参照していない");
-            Assert.AreEqual(heightPath, AssetDatabase.GetAssetPath(material.GetTexture("_ParallaxMap")),
-                "フラッグシップ material が専用 height map を参照していない");
+            Assert.IsNull(material.GetTexture("_ParallaxMap"),
+                "ドラッグ&ドロップ用 Standard material では height map を Parallax に接続しない");
+            Assert.IsFalse(material.IsKeywordEnabled("_PARALLAXMAP"),
+                "ドラッグ&ドロップ用 Standard material では Parallax を切り、変な板模様を出さない");
+            Assert.LessOrEqual(material.GetFloat("_Parallax"), 0.001f,
+                "ドラッグ&ドロップ用 Standard material では height map を視差として強制使用しない");
+            Assert.LessOrEqual(material.GetFloat("_BumpScale"), 0.70f,
+                "ドラッグ&ドロップ用 Standard material でも normal を強く盛りすぎない");
         }
 
         [Test]
@@ -600,7 +618,9 @@ namespace Siliq.Water.Tests
 
                 var renderer = go.GetComponent<Renderer>();
                 var mat = renderer != null ? renderer.sharedMaterial : null;
+                var animator = go.GetComponent<WaterSurfaceAnimator>();
                 Assert.IsNotNull(mat, "Quick Apply で material が設定されていない");
+                Assert.IsNotNull(animator, "Quick Apply で WaterSurfaceAnimator が追加されていない");
 
                 string normalProperty = mat.HasProperty("_NormalMap") ? "_NormalMap" : "_BumpMap";
                 string heightProperty = mat.HasProperty("_HeightMap") ? "_HeightMap" : "_ParallaxMap";
@@ -611,14 +631,68 @@ namespace Siliq.Water.Tests
 
                 if (mat.HasProperty("_HeightMapInfluence"))
                 {
-                    Assert.Greater(mat.GetFloat("_HeightMapInfluence"), 0.25f,
-                        "フラッグシップ透明水は height map を実高さへ使う必要がある");
+                    Assert.LessOrEqual(mat.GetFloat("_HeightMapInfluence"), 0.05f,
+                        "フラッグシップ透明水は初期状態で height map を強く使うと多角形模様に見える");
                 }
+                if (mat.HasProperty("_DisplacementStrength"))
+                {
+                    Assert.LessOrEqual(mat.GetFloat("_DisplacementStrength"), 0.02f,
+                        "フラッグシップ透明水の初期高さは控えめにして、粗いメッシュで破綻させない");
+                }
+                if (mat.HasProperty("_NormalStrength"))
+                {
+                    Assert.LessOrEqual(mat.GetFloat("_NormalStrength"), 0.65f,
+                        "フラッグシップ透明水の normal を盛りすぎると変な模様に見える");
+                }
+                Assert.LessOrEqual(animator.displacementStrength, 0.02f,
+                    "Animator 側も低い高さで開始し、粗いメッシュで多角形化させない");
+                Assert.LessOrEqual(animator.heightMapInfluence, 0.05f,
+                    "Animator 側も height map を初期状態で強く使わない");
+                Assert.LessOrEqual(animator.strength, 0.65f,
+                    "Animator 側で normal strength を上書きして変な模様へ戻さない");
             }
             finally
             {
                 Selection.activeGameObject = null;
                 if (go != null) Object.DestroyImmediate(go);
+            }
+        }
+
+        [Test]
+        public void BeginnerSetup_RepairsOldFlagshipHeightSettings()
+        {
+            GameObject go = null;
+            Material mat = null;
+            try
+            {
+                Shader shader = Shader.Find("Siliq/Water Mobile (Quest)");
+                Assert.IsNotNull(shader, "Siliq/Water Mobile (Quest) シェーダーが見つからない");
+
+                go = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                mat = new Material(shader) { name = "M_Water_Look_FlagshipCrystal_Old" };
+                if (mat.HasProperty("_HeightMapInfluence")) mat.SetFloat("_HeightMapInfluence", 0.35f);
+                if (mat.HasProperty("_DisplacementStrength")) mat.SetFloat("_DisplacementStrength", 0.045f);
+                go.GetComponent<Renderer>().sharedMaterial = mat;
+
+                var report = new System.Collections.Generic.List<string>();
+                bool changed = WaterBeginnerSetup.RepairWaterObject(go, report);
+                var repaired = go.GetComponent<Renderer>().sharedMaterial;
+
+                Assert.IsTrue(changed, "古い強い flagship height 設定を診断修復できていない");
+                Assert.IsNotNull(repaired, "修復後 material がない");
+                if (repaired.HasProperty("_HeightMapInfluence"))
+                {
+                    Assert.LessOrEqual(repaired.GetFloat("_HeightMapInfluence"), 0.05f);
+                }
+                if (repaired.HasProperty("_DisplacementStrength"))
+                {
+                    Assert.LessOrEqual(repaired.GetFloat("_DisplacementStrength"), 0.02f);
+                }
+            }
+            finally
+            {
+                if (go != null) Object.DestroyImmediate(go);
+                if (mat != null) Object.DestroyImmediate(mat);
             }
         }
 

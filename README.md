@@ -391,6 +391,16 @@ Built-in / VRChat では `Siliq/Water Mobile (Quest)` または `Standard` を�
 既に作成済みのピンク material は、最新 package に更新してから同じ Quick Apply または水面マップスタジオで再適用してください。
 `Assets/SiliqWater/GeneratedMaterials/` の既存 material も安全な shader へ上書きされます。
 
+### フラッグシップ水面が氷割れ・多角形模様に見える
+
+古い `M_Water_Look_FlagshipCrystal` では height map の影響が強く、粗い Plane で大きな多角形や氷の割れ目のように見える場合があります。
+最新 package に更新後、対象の水面を選択して次を実行してください。
+
+`Tools > Siliq Water > かんたん作成 > 選択中の水面を診断して自動修復`
+
+`2.3.30` 以降は、フラッグシップ透明水の初期値では height map を強く使わず、弱い手続きうねりと細波 normal、反射で水面を作ります。
+実高さを上げる場合は、分割済み水面メッシュを使い、`ハイトマップの影響` を少しずつ上げてください。
+
 ## 構成
 
 ```

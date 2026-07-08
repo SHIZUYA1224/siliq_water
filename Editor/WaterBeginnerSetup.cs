@@ -159,7 +159,7 @@ namespace Siliq.Water.Editor
                 if (animator.opacity < 0.35f) animator.opacity = 0.52f;
                 if (animator.reflectionStrength < 0.8f) animator.reflectionStrength = 1f;
                 if (animator.edgeReflection < 0.65f) animator.edgeReflection = 0.88f;
-                if (animator.displacementStrength <= 0f) animator.displacementStrength = 0.045f;
+                if (animator.displacementStrength <= 0f) animator.displacementStrength = 0.012f;
                 animator.ApplyImmediate(0f);
                 EditorUtility.SetDirty(animator);
             }
@@ -171,12 +171,27 @@ namespace Siliq.Water.Editor
         {
             if (mat == null || mat.shader == null) return true;
             if (!WaterShaderUtility.IsUsableShaderForCurrentPipeline(mat.shader)) return true;
-            if (mat.shader.name.StartsWith("Siliq/Water", System.StringComparison.Ordinal)) return false;
+            if (mat.shader.name.StartsWith("Siliq/Water", System.StringComparison.Ordinal))
+            {
+                return IsUnsafeFlagshipMaterial(mat);
+            }
 
             bool hasNormalTexture = false;
             if (mat.HasProperty("_NormalMap") && mat.GetTexture("_NormalMap") != null) hasNormalTexture = true;
             if (mat.HasProperty("_BumpMap") && mat.GetTexture("_BumpMap") != null) hasNormalTexture = true;
-            return !hasNormalTexture;
+            if (!hasNormalTexture) return true;
+            return IsUnsafeFlagshipMaterial(mat);
+        }
+
+        static bool IsUnsafeFlagshipMaterial(Material mat)
+        {
+            if (mat == null) return false;
+            if (mat.name.IndexOf("Flagship", System.StringComparison.OrdinalIgnoreCase) < 0) return false;
+
+            if (mat.HasProperty("_HeightMapInfluence") && mat.GetFloat("_HeightMapInfluence") > 0.05f) return true;
+            if (mat.HasProperty("_DisplacementStrength") && mat.GetFloat("_DisplacementStrength") > 0.02f) return true;
+            if (mat.HasProperty("_Parallax") && mat.GetFloat("_Parallax") > 0.001f) return true;
+            return mat.IsKeywordEnabled("_PARALLAXMAP");
         }
 
         internal static Mesh GetOrCreateWaterGridMesh(int segments, float size)

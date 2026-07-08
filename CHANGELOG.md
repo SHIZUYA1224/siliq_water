@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.3.30] - 2026-07-08
+
+### 修正: フラッグシップ水面が氷割れ・多角形模様に見える問題を抑制
+- フラッグシップ透明水の生成レシピから、低周波の強い Directional wave 干渉を外し、弱い反射筋と控えめな Perlin ムラ中心に変更
+- Quick Apply / Studio のフラッグシップ初期値を、強い height map 変位ではなく、弱い手続きうねり + 細波 normal + 反射中心の見た目へ変更
+- 同梱 `M_Water_FlagshipCrystal` の Standard Parallax を無効化し、ドラッグ&ドロップだけで変な板模様が出ないようにした
+- 診断修復で古いフラッグシップ material の強すぎる height 設定を検出し、現在の安全な初期値へ再適用できるようにした
+- 多角形模様へ戻らないよう、低周波 Directional wave、強い height influence、Parallax keyword をテストで禁止
+
 ## [2.3.29] - 2026-07-08
 
 ### 追加: 初心者向けのはじめてガイド

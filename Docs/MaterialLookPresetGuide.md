@@ -36,7 +36,8 @@ Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイ�
 - 綺麗な海: `Normal Strength` を 0.8-1.1、`Opacity` を 0.5-0.7
 - プール: `Normal Strength` を 0.25-0.5、`Opacity` を 0.38-0.55
 - 室内ブループール: `Normal Strength` を 0.35-0.6、`Opacity` を 0.35-0.5、`Reflection` は高め
-- フラッグシップ透明水: `Normal Strength` を 0.7-0.9、`Opacity` を 0.48-0.62、`Reflection` と `Height` は高め
+- フラッグシップ透明水: `Normal Strength` を 0.55-0.65、`Opacity` を 0.48-0.62、`Reflection` は高め、`Height` は 0.02 以下から始める
+- 氷割れや多角形模様に見える場合: フラッグシップ透明水の `Height Map Influence` は 0 付近、`Height` は 0.02 以下から始める
 - 血の海: `Opacity` を 0.6 以上、`Reflection` は控えめ
 - 液体金属: `Opacity` は 1、`Refl Strength` と `Smoothness` は高め
 

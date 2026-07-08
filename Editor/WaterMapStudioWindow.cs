@@ -1529,9 +1529,9 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_TransmissionColor")) mat.SetColor("_TransmissionColor", new Color(0.34f, 1f, 0.95f, 1f));
             if (mat.HasProperty("_GlimmerColor")) mat.SetColor("_GlimmerColor", new Color(1f, 1f, 0.94f, 1f));
             if (mat.HasProperty("_Opacity")) mat.SetFloat("_Opacity", Mathf.Clamp01(opacity));
-            if (mat.HasProperty("_NormalStrength")) mat.SetFloat("_NormalStrength", 0.78f);
-            if (mat.HasProperty("_Tiling1")) mat.SetFloat("_Tiling1", 1.05f);
-            if (mat.HasProperty("_Tiling2")) mat.SetFloat("_Tiling2", 2.85f);
+            if (mat.HasProperty("_NormalStrength")) mat.SetFloat("_NormalStrength", 0.58f);
+            if (mat.HasProperty("_Tiling1")) mat.SetFloat("_Tiling1", 1.80f);
+            if (mat.HasProperty("_Tiling2")) mat.SetFloat("_Tiling2", 4.60f);
             if (mat.HasProperty("_AlphaFresnel")) mat.SetFloat("_AlphaFresnel", 0.72f);
             if (mat.HasProperty("_AlphaPower")) mat.SetFloat("_AlphaPower", 1.85f);
             if (mat.HasProperty("_EdgeReflection")) mat.SetFloat("_EdgeReflection", 0.88f);
@@ -1545,11 +1545,11 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_SpecIntensity")) mat.SetFloat("_SpecIntensity", 1.75f);
             if (mat.HasProperty("_SpecPower")) mat.SetFloat("_SpecPower", 340f);
             if (mat.HasProperty("_Smoothness")) mat.SetFloat("_Smoothness", 0.99f);
-            if (mat.HasProperty("_DisplacementStrength")) mat.SetFloat("_DisplacementStrength", 0.045f);
-            if (mat.HasProperty("_DisplacementScale")) mat.SetFloat("_DisplacementScale", 0.58f);
-            if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.22f);
-            if (mat.HasProperty("_HeightMapInfluence")) mat.SetFloat("_HeightMapInfluence", hasHeightMap ? 0.35f : 0f);
-            SetupMacroVariation(mat, 0.34f, 0.065f, 0.28f, 0.14f);
+            if (mat.HasProperty("_DisplacementStrength")) mat.SetFloat("_DisplacementStrength", 0.012f);
+            if (mat.HasProperty("_DisplacementScale")) mat.SetFloat("_DisplacementScale", 0.85f);
+            if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.18f);
+            if (mat.HasProperty("_HeightMapInfluence")) mat.SetFloat("_HeightMapInfluence", 0f);
+            SetupMacroVariation(mat, 0.22f, 0.075f, 0.18f, 0.10f);
         }
 
         static void SetupMacroVariation(Material mat, float variation, float scale, float directionBreakup, float colorVariation)

@@ -332,52 +332,53 @@ namespace Siliq.Water
             return s;
         }
 
-        /// <summary>製品デモの主役にする透明水。セル境界を使わず、広い鏡面、細波、実高さ用の中周波を重ねる。</summary>
+        /// <summary>製品デモの主役にする透明水。セル境界や大きな塊を使わず、細い反射筋と穏やかなうねりを重ねる。</summary>
         static WaterMapSettings FlagshipCrystalWater()
         {
-            var s = Base(0.72f);
+            var s = Base(0.46f);
             s.baseRoughness = 0.018f;
-            s.slopeRoughness = 0.48f;
-            s.foamThreshold = 0.86f;
-            s.foamSlopeBoost = 0.24f;
-            s.flowSwirl = 0.34f;
-            s.flowStrength = 0.42f;
-            s.dudvStrength = 0.75f;
-            s.causticsIntensity = 1.35f;
-            s.causticsSharpness = 2.35f;
+            s.slopeRoughness = 0.32f;
+            s.foamThreshold = 0.92f;
+            s.foamSlopeBoost = 0.12f;
+            s.flowSwirl = 0.22f;
+            s.flowStrength = 0.30f;
+            s.dudvStrength = 0.66f;
+            s.causticsIntensity = 1.05f;
+            s.causticsSharpness = 1.70f;
             s.layers = new[]
             {
                 new WaveLayer
                 {
-                    name = "大きな鏡面うねり", type = WaveLayerType.DirectionalWaves, blend = WaveBlendMode.Add,
-                    amplitude = 0.72f, scale = 3, sharpness = 1.05f, directionDeg = 24f, spreadDeg = 38f,
-                    waveCount = 9, speed = 1, seed = 41,
+                    name = "長い反射の流れ", type = WaveLayerType.DirectionalWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.26f, scale = 12, sharpness = 0.58f, directionDeg = 18f, spreadDeg = 24f,
+                    waveCount = 14, speed = 1, seed = 41, maskAmount = 0.16f, maskScale = 3,
                 },
                 new WaveLayer
                 {
-                    name = "反射を割る斜めうねり", type = WaveLayerType.DirectionalWaves, blend = WaveBlendMode.Add,
-                    amplitude = 0.34f, scale = 7, sharpness = 0.95f, directionDeg = 96f, spreadDeg = 55f,
-                    waveCount = 14, speed = 1, seed = 42, maskAmount = 0.22f, maskScale = 3,
+                    name = "滑らかな透明ムラ", type = WaveLayerType.PerlinWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.18f, scale = 5, octaves = 4, persistence = 0.42f, sharpness = 0.70f,
+                    speed = 1, seed = 42, warpAmount = 0.12f, warpScale = 3, maskAmount = 0.12f, maskScale = 2,
                 },
                 new WaveLayer
                 {
-                    name = "透明水の細波", type = WaveLayerType.RidgedWaves, blend = WaveBlendMode.Add,
-                    amplitude = 0.18f, scale = 26, octaves = 3, persistence = 0.38f, sharpness = 0.90f,
-                    directionDeg = 38f, stretch = 2, speed = 2, seed = 43, warpAmount = 0.16f, warpScale = 5,
-                    maskAmount = 0.26f, maskScale = 5,
+                    name = "透明水の細いリップル", type = WaveLayerType.DirectionalWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.14f, scale = 34, sharpness = 0.56f, directionDeg = 42f, spreadDeg = 48f,
+                    waveCount = 22, speed = 2, seed = 43, warpAmount = 0.10f, warpScale = 5,
+                    maskAmount = 0.24f, maskScale = 5,
                 },
                 new WaveLayer
                 {
-                    name = "低周波の透明ムラ", type = WaveLayerType.PerlinWaves, blend = WaveBlendMode.Add,
-                    amplitude = 0.22f, scale = 4, octaves = 5, persistence = 0.50f, sharpness = 0.95f,
-                    speed = 1, seed = 44, warpAmount = 0.30f, warpScale = 3, maskAmount = 0.35f, maskScale = 2,
+                    name = "交差する薄い反射筋", type = WaveLayerType.DirectionalWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.10f, scale = 48, sharpness = 0.52f, directionDeg = -18f, spreadDeg = 64f,
+                    waveCount = 24, speed = 1, seed = 44, warpAmount = 0.08f, warpScale = 6,
+                    maskAmount = 0.28f, maskScale = 4,
                 },
                 new WaveLayer
                 {
-                    name = "薄い光のゆらぎ", type = WaveLayerType.DirectionalWaves, blend = WaveBlendMode.Add,
-                    amplitude = 0.09f, scale = 38, sharpness = 0.72f, directionDeg = -14f, spreadDeg = 82f,
-                    waveCount = 26, speed = 1, seed = 45, warpAmount = 0.12f, warpScale = 6,
-                    maskAmount = 0.40f, maskScale = 4,
+                    name = "微細な光のゆらぎ", type = WaveLayerType.RidgedWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.06f, scale = 58, octaves = 3, persistence = 0.30f, sharpness = 0.64f,
+                    directionDeg = 34f, stretch = 2, speed = 2, seed = 45, warpAmount = 0.08f, warpScale = 8,
+                    maskAmount = 0.34f, maskScale = 5,
                 },
             };
             return s;
