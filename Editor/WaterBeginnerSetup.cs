@@ -15,20 +15,47 @@ namespace Siliq.Water.Editor
         const string GeneratedRoot = "Assets/SiliqWater";
         const string GeneratedMeshFolder = GeneratedRoot + "/GeneratedMeshes";
         const string FlagshipMenuPath = "GameObject/Siliq Water/用途別マテリアルを適用/フラッグシップ透明水 (Flagship Crystal)";
+        const string CrystalLagoonMenuPath = "GameObject/Siliq Water/用途別マテリアルを適用/クリスタルラグーン (Crystal Lagoon)";
         const int PremiumGridSegments = 96;
         const float PremiumGridSize = 20f;
+
+        [MenuItem(RootMenu + "クリスタルラグーン水面を作成", false, 1)]
+        [MenuItem(GameObjectRootMenu + "クリスタルラグーン水面を作成", false, 1)]
+        public static void CreateCrystalLagoonWater()
+        {
+            CreatePremiumWater(
+                "Siliq Water - Crystal Lagoon",
+                "Siliq クリスタルラグーン水面を作成",
+                CrystalLagoonMenuPath,
+                "クリスタルラグーン水面を作成しました。\n\n" +
+                "透き通った美しさを優先した水面です。最初はこのまま Play / Scene View で確認してください。\n" +
+                "水底の光が強すぎる場合は WaterSurfaceAnimator の「水底の光」を下げてください。\n" +
+                "高さが見えない場合は、この水面メッシュのまま使ってください。1枚 Quad では実高さが出ません。");
+        }
 
         [MenuItem(RootMenu + "フラッグシップ水面を作成", false, 1)]
         [MenuItem(GameObjectRootMenu + "フラッグシップ水面を作成", false, 1)]
         public static void CreateFlagshipWater()
         {
+            CreatePremiumWater(
+                "Siliq Water - Flagship Crystal",
+                "Siliq フラッグシップ水面を作成",
+                FlagshipMenuPath,
+                "フラッグシップ水面を作成しました。\n\n" +
+                "最初はこのまま Play / Scene View で確認してください。\n" +
+                "高さが見えない場合は、この水面メッシュのまま使ってください。1枚 Quad では実高さが出ません。\n" +
+                "VRChat Quest / iOS では、透明や反射を重くしすぎず、必要なら Studio で Normal PNG だけを書き出してください。");
+        }
+
+        static void CreatePremiumWater(string objectName, string undoName, string menuPath, string dialogBody)
+        {
             var parent = Selection.activeTransform;
-            var go = new GameObject("Siliq Water - Flagship Crystal");
-            Undo.RegisterCreatedObjectUndo(go, "Siliq フラッグシップ水面を作成");
+            var go = new GameObject(objectName);
+            Undo.RegisterCreatedObjectUndo(go, undoName);
 
             if (parent != null)
             {
-                Undo.SetTransformParent(go.transform, parent, "Siliq フラッグシップ水面を作成");
+                Undo.SetTransformParent(go.transform, parent, undoName);
                 go.transform.localPosition = Vector3.zero;
             }
             else
@@ -43,7 +70,7 @@ namespace Siliq.Water.Editor
             renderer.receiveShadows = false;
 
             Selection.activeGameObject = go;
-            bool applied = EditorApplication.ExecuteMenuItem(FlagshipMenuPath);
+            bool applied = EditorApplication.ExecuteMenuItem(menuPath);
             if (!applied)
             {
                 ApplyMinimalFallback(go);
@@ -58,10 +85,7 @@ namespace Siliq.Water.Editor
 
             EditorUtility.DisplayDialog(
                 "Siliq Water",
-                "フラッグシップ水面を作成しました。\n\n" +
-                "最初はこのまま Play / Scene View で確認してください。\n" +
-                "高さが見えない場合は、この水面メッシュのまま使ってください。1枚 Quad では実高さが出ません。\n" +
-                "VRChat Quest / iOS では、透明や反射を重くしすぎず、必要なら Studio で Normal PNG だけを書き出してください。",
+                dialogBody,
                 "OK");
         }
 
@@ -132,12 +156,12 @@ namespace Siliq.Water.Editor
             if (NeedsWaterMaterialRepair(renderer.sharedMaterial))
             {
                 Selection.activeGameObject = go;
-                bool applied = EditorApplication.ExecuteMenuItem(FlagshipMenuPath);
+                bool applied = EditorApplication.ExecuteMenuItem(CrystalLagoonMenuPath);
                 if (!applied)
                 {
                     ApplyMinimalFallback(go);
                 }
-                report?.Add($"・{go.name}: 安全なフラッグシップ水マテリアルを適用");
+                report?.Add($"・{go.name}: 安全なクリスタルラグーン水マテリアルを適用");
                 changed = true;
             }
 

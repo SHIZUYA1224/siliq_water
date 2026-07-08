@@ -850,6 +850,11 @@ namespace Siliq.Water.Tests
                 {
                     Assert.LessOrEqual(repaired.GetFloat("_DisplacementStrength"), 0.02f);
                 }
+                if (repaired.HasProperty("_TransmissionStrength"))
+                {
+                    Assert.GreaterOrEqual(repaired.GetFloat("_TransmissionStrength"), 0.90f,
+                        "診断修復は美しさ優先の Crystal Lagoon へ寄せる");
+                }
             }
             finally
             {
@@ -921,6 +926,11 @@ namespace Siliq.Water.Tests
                 Assert.AreNotEqual("Hidden/InternalErrorShader", mat.shader.name, "ピンク shader が適用されている");
                 Assert.IsTrue(mat.shader.name.StartsWith("Siliq/Water") || mat.HasProperty("_BumpMap"),
                     "水向けのマテリアルへ差し替わっていない");
+                if (mat.HasProperty("_TransmissionStrength"))
+                {
+                    Assert.GreaterOrEqual(mat.GetFloat("_TransmissionStrength"), 0.90f,
+                        "初心者向け修復は Crystal Lagoon の透明感を優先する");
+                }
                 Assert.IsNotNull(go.GetComponent<WaterSurfaceAnimator>(), "Animator が追加されていない");
             }
             finally
@@ -949,8 +959,37 @@ namespace Siliq.Water.Tests
             }
 
             Assert.IsTrue(hasMenu, "Tools > Siliq Water > はじめてガイド menu が登録されていない");
+            Assert.AreEqual("クリスタルラグーン水面を作成", WaterBeginnerGuideWindow.CreateCrystalLagoonActionLabel);
             Assert.AreEqual("フラッグシップ水面を作成", WaterBeginnerGuideWindow.CreateFlagshipActionLabel);
             Assert.AreEqual("選択中の水面を診断して自動修復", WaterBeginnerGuideWindow.RepairSelectionActionLabel);
+        }
+
+        [Test]
+        public void BeginnerSetup_ProvidesCrystalLagoonCreateMenu()
+        {
+            var method = typeof(WaterBeginnerSetup).GetMethod(
+                "CreateCrystalLagoonWater",
+                BindingFlags.Public | BindingFlags.Static);
+            Assert.IsNotNull(method, "Crystal Lagoon のかんたん作成 entry point が見つからない");
+
+            bool hasToolsMenu = false;
+            bool hasGameObjectMenu = false;
+            foreach (var attribute in method.GetCustomAttributes(typeof(MenuItem), false))
+            {
+                var menuItem = attribute as MenuItem;
+                if (menuItem == null) continue;
+                if (menuItem.menuItem == "Tools/Siliq Water/かんたん作成/クリスタルラグーン水面を作成")
+                {
+                    hasToolsMenu = true;
+                }
+                if (menuItem.menuItem == "GameObject/Siliq Water/かんたん作成/クリスタルラグーン水面を作成")
+                {
+                    hasGameObjectMenu = true;
+                }
+            }
+
+            Assert.IsTrue(hasToolsMenu, "Tools の Crystal Lagoon かんたん作成 menu が登録されていない");
+            Assert.IsTrue(hasGameObjectMenu, "GameObject の Crystal Lagoon かんたん作成 menu が登録されていない");
         }
 
         [Test]

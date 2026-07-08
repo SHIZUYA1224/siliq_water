@@ -9,6 +9,7 @@ namespace Siliq.Water.Editor
     public sealed class WaterBeginnerGuideWindow : EditorWindow
     {
         internal const string MenuPath = "Tools/Siliq Water/はじめてガイド";
+        internal const string CreateCrystalLagoonActionLabel = "クリスタルラグーン水面を作成";
         internal const string CreateFlagshipActionLabel = "フラッグシップ水面を作成";
         internal const string RepairSelectionActionLabel = "選択中の水面を診断して自動修復";
 
@@ -46,7 +47,12 @@ namespace Siliq.Water.Editor
         static void DrawQuickActions()
         {
             EditorGUILayout.LabelField("まずやること", EditorStyles.boldLabel);
-            if (GUILayout.Button(CreateFlagshipActionLabel, GUILayout.Height(34)))
+            if (GUILayout.Button(CreateCrystalLagoonActionLabel, GUILayout.Height(34)))
+            {
+                WaterBeginnerSetup.CreateCrystalLagoonWater();
+            }
+
+            if (GUILayout.Button(CreateFlagshipActionLabel, GUILayout.Height(30)))
             {
                 WaterBeginnerSetup.CreateFlagshipWater();
             }
@@ -69,6 +75,7 @@ namespace Siliq.Water.Editor
         {
             EditorGUILayout.LabelField("水が安っぽく見える時の確認", EditorStyles.boldLabel);
             Bullet("すぐ使う場合は PrebakedPack/ReadyMaterials の M_Siliq_*_Ready をドラッグします。material だけで波が動きます。");
+            Bullet("美しさを最優先する場合は Crystal Lagoon を選びます。透過光、水底の光、控えめな高さが最初から入っています。");
             Bullet("normal だけでは透明感は出ません。ReadyMaterials か用途別マテリアルで色、透明度、反射、ハイライトも設定します。");
             Bullet("高さはメッシュの頂点変位です。1 枚 Quad では見えないため、分割メッシュを使います。");
             Bullet("ピンク material は shader 不一致です。診断修復で現在の Render Pipeline に合う material へ差し替えます。");
