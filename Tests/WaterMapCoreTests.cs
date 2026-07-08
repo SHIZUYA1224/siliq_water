@@ -376,6 +376,56 @@ namespace Siliq.Water.Tests
         }
 
         [Test]
+        public void WaterRippleShader_UsesSmoothHighPrecisionRippleAnimation()
+        {
+            string[] shaderPaths =
+            {
+                "Packages/com.siliq.water-normalmap/Runtime/Shaders/SiliqWaterMobile.shader",
+                "Packages/com.siliq.water-normalmap/Samples~/URP/SiliqWaterURP.shader",
+            };
+
+            foreach (string path in shaderPaths)
+            {
+                Assert.IsTrue(File.Exists(path), $"{path} が見つからない");
+                string text = File.ReadAllText(path);
+
+                StringAssert.Contains("#define SILIQ_MAX_RIPPLES 16", text,
+                    $"{path}: 波紋スロットが少ないと寿命中の波紋を上書きしてピクつく");
+                StringAssert.Contains("smoothstep(0.0, fadeIn, age)", text,
+                    $"{path}: 波紋の出現は急な線形フェードではなく smoothstep にする");
+                Assert.IsFalse(text.Contains("age / 0.08"),
+                    $"{path}: 0.08 秒フェードは短すぎて波紋が点滅して見える");
+                Assert.IsFalse(text.Contains("half SiliqMacroNoise"),
+                    $"{path}: 時間変化する macro noise は half だとモバイルで量子化しやすい");
+                Assert.IsFalse(text.Contains("half3 SiliqComputeRipple"),
+                    $"{path}: 波紋計算は half だとモバイルでピクつきやすい");
+            }
+        }
+
+        [Test]
+        public void WaterRippleDefaults_AreSubtleEnoughToAvoidPopping()
+        {
+            GameObject go = null;
+            try
+            {
+                go = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                var emitter = go.AddComponent<WaterRippleEmitter>();
+                Assert.LessOrEqual(emitter.ripplesPerSecond, 1.0f,
+                    "自動波紋は発生頻度が高すぎると雨粒の点滅に見える");
+                Assert.LessOrEqual(emitter.rippleAmplitude, 0.55f,
+                    "波紋 amplitude の初期値が強いとピクピクしたノイズに見える");
+                Assert.GreaterOrEqual(emitter.rippleWidth, 0.40f,
+                    "リング幅が細すぎると aliasing と点滅が出やすい");
+                Assert.GreaterOrEqual(emitter.rippleLifetime, 3.5f,
+                    "波紋寿命が短いと出現/消滅が目立つ");
+            }
+            finally
+            {
+                if (go != null) Object.DestroyImmediate(go);
+            }
+        }
+
+        [Test]
         public void SiliqMobileShader_ExposesMacroVariationControls()
         {
             Material mat = null;

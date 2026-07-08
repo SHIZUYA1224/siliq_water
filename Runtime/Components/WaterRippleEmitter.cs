@@ -30,7 +30,7 @@ namespace Siliq.Water
 
         [Header("発生")]
         [Tooltip("1秒あたりに発生する波紋数。")]
-        [Range(0f, 20f)] public float ripplesPerSecond = 1.8f;
+        [Range(0f, 20f)] public float ripplesPerSecond = 0.9f;
 
         [Tooltip("1回の発生タイミングで同時に出す波紋数。雨面を濃くしたい場合に増やす。")]
         [Range(1, 6)] public int burstCount = 1;
@@ -46,16 +46,16 @@ namespace Siliq.Water
 
         [Header("波紋")]
         [Tooltip("リングが外側へ広がる速さ。")]
-        [Range(0.1f, 10f)] public float rippleSpeed = 2.8f;
+        [Range(0.1f, 10f)] public float rippleSpeed = 1.85f;
 
         [Tooltip("リング幅。小さいほど細く鋭い輪になる。")]
-        [Range(0.03f, 2f)] public float rippleWidth = 0.28f;
+        [Range(0.03f, 2f)] public float rippleWidth = 0.46f;
 
         [Tooltip("リングが消えるまでの秒数。")]
-        [Range(0.3f, 10f)] public float rippleLifetime = 2.6f;
+        [Range(0.3f, 10f)] public float rippleLifetime = 4.2f;
 
         [Tooltip("法線に乗せる波紋の強さ。")]
-        [Range(0f, 3f)] public float rippleAmplitude = 1.15f;
+        [Range(0f, 3f)] public float rippleAmplitude = 0.45f;
 
         [Tooltip("Renderer の MaterialPropertyBlock とマテリアル keyword へ波紋設定を自動反映する。")]
         public bool applyShaderSettings = true;

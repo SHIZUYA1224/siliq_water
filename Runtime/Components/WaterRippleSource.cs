@@ -20,7 +20,7 @@ namespace Siliq.Water
     [AddComponentMenu("Siliq Water/Water Ripple Source (Trigger)")]
     public class WaterRippleSource : MonoBehaviour
     {
-        const int MaxRipples = 8;
+        const int MaxRipples = 16;
         static readonly int RipplePointsId = Shader.PropertyToID("_SiliqRipplePoints");
         static readonly int RippleChannelId = Shader.PropertyToID("_RippleChannel");
         static readonly Vector4[] Points = new Vector4[MaxRipples];
@@ -36,7 +36,7 @@ namespace Siliq.Water
         public float ignoreAboveMargin = 0.5f;
 
         [Tooltip("同じコライダーが連続で波紋を発生させる最短間隔 (秒)。水に浸かったままだと波紋が出っぱなしになるのを防ぐ。")]
-        public float minIntervalPerCollider = 0.4f;
+        public float minIntervalPerCollider = 0.65f;
 
         [Tooltip("トリガーに反応するタグ。空にするとタグを問わず全てのコライダーが対象。")]
         public string requiredTag = "";

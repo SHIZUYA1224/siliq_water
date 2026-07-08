@@ -39,10 +39,10 @@ Shader "Siliq/Water URP"
         _FoamColor ("フォームの色", Color) = (1, 1, 1, 1)
 
         [Toggle(_USE_RIPPLES)] _UseRipples ("触れた時の波紋を有効化", Float) = 0
-        _RippleSpeed ("波紋の広がる速さ", Range(0.1, 10)) = 2.5
-        _RippleWidth ("波紋の幅", Range(0.05, 2)) = 0.35
-        _RippleLifetime ("波紋の持続時間 (秒)", Range(0.5, 10)) = 3
-        _RippleAmplitude ("波紋の強さ", Range(0, 3)) = 1
+        _RippleSpeed ("波紋の広がる速さ", Range(0.1, 10)) = 1.85
+        _RippleWidth ("波紋の幅", Range(0.05, 2)) = 0.46
+        _RippleLifetime ("波紋の持続時間 (秒)", Range(0.5, 10)) = 4.2
+        _RippleAmplitude ("波紋の強さ", Range(0, 3)) = 0.45
         _RippleChannel ("波紋チャンネル", Float) = 0
     }
 
@@ -108,25 +108,26 @@ Shader "Siliq/Water URP"
                 half _ShoreFoamWidth;
                 float _FoamTiling;
                 half4 _FoamColor;
-                half _RippleSpeed;
-                half _RippleWidth;
-                half _RippleLifetime;
-                half _RippleAmplitude;
-                half _RippleChannel;
+                float _RippleSpeed;
+                float _RippleWidth;
+                float _RippleLifetime;
+                float _RippleAmplitude;
+                float _RippleChannel;
             CBUFFER_END
 
-            half SiliqMacroNoise(float2 p)
+            float SiliqMacroNoise(float2 p)
             {
-                half a = sin(dot(p, float2(1.27, 2.31)) + _Time.y * 0.07);
-                half b = sin(dot(p, float2(-2.14, 1.43)) - _Time.y * 0.05);
-                half c = sin(dot(p, float2(0.63, -1.19)) + _Time.y * 0.03);
-                return a * 0.5h + b * 0.32h + c * 0.18h;
+                float time = _Time.y;
+                float a = sin(dot(p, float2(1.27, 2.31)) + time * 0.07);
+                float b = sin(dot(p, float2(-2.14, 1.43)) - time * 0.05);
+                float c = sin(dot(p, float2(0.63, -1.19)) + time * 0.03);
+                return a * 0.5 + b * 0.32 + c * 0.18;
             }
 
-            float2 SiliqRotate2D(float2 v, half angle)
+            float2 SiliqRotate2D(float2 v, float angle)
             {
-                half s = sin(angle);
-                half c = cos(angle);
+                float s = sin(angle);
+                float c = cos(angle);
                 return float2(v.x * c - v.y * s, v.x * s + v.y * c);
             }
 
@@ -134,13 +135,13 @@ Shader "Siliq/Water URP"
             // アバターが触れた/水に入った場所からスクリプト (WaterRippleSource / Udon版) が
             // 都度書き込むグローバル配列。xy=ワールドXZ座標, z=発生時刻, w=波紋チャンネル。
             // 複数の水面マテリアルで共有されるため UnityPerMaterial の外で定義する (SRP Batcher 互換)。
-            #define SILIQ_MAX_RIPPLES 8
+            #define SILIQ_MAX_RIPPLES 16
             float4 _SiliqRipplePoints[SILIQ_MAX_RIPPLES];
 
-            half3 SiliqComputeRipple(float2 worldXZ)
+            float3 SiliqComputeRipple(float2 worldXZ)
             {
-                half2 total = 0;
-                half light = 0;
+                float2 total = 0;
+                float light = 0;
                 UNITY_UNROLL
                 for (int i = 0; i < SILIQ_MAX_RIPPLES; i++)
                 {
@@ -156,8 +157,11 @@ Shader "Siliq/Water URP"
                     float width = max(_RippleWidth, 1e-3);
                     float ringPhase = (d - radius) / width;
                     float envelope = exp(-ringPhase * ringPhase);
-                    float fade = saturate(age / 0.08) * saturate(1.0 - age / _RippleLifetime);
-                    half2 dir = d > 1e-4 ? (worldXZ - center) / d : half2(0, 0);
+                    float fadeIn = min(0.35, _RippleLifetime * 0.18);
+                    float fadeOut = min(0.75, _RippleLifetime * 0.30);
+                    float fade = smoothstep(0.0, fadeIn, age) *
+                                 (1.0 - smoothstep(max(0.0, _RippleLifetime - fadeOut), _RippleLifetime, age));
+                    float2 dir = d > 1e-4 ? (worldXZ - center) / d : float2(0, 0);
                     float phase = ringPhase * TWO_PI;
                     float wave = sin(phase);
                     float crest = (0.5 + 0.5 * cos(phase)) * envelope * fade;

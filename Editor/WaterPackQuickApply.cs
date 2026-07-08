@@ -1002,10 +1002,10 @@ namespace Siliq.Water.Editor
             if (mat == null) return;
 
             if (mat.HasProperty("_UseRipples")) mat.SetFloat("_UseRipples", 1f);
-            if (mat.HasProperty("_RippleSpeed")) mat.SetFloat("_RippleSpeed", 2.8f);
-            if (mat.HasProperty("_RippleWidth")) mat.SetFloat("_RippleWidth", 0.28f);
-            if (mat.HasProperty("_RippleLifetime")) mat.SetFloat("_RippleLifetime", 2.6f);
-            if (mat.HasProperty("_RippleAmplitude")) mat.SetFloat("_RippleAmplitude", 1.15f);
+            if (mat.HasProperty("_RippleSpeed")) mat.SetFloat("_RippleSpeed", 1.85f);
+            if (mat.HasProperty("_RippleWidth")) mat.SetFloat("_RippleWidth", 0.46f);
+            if (mat.HasProperty("_RippleLifetime")) mat.SetFloat("_RippleLifetime", 4.2f);
+            if (mat.HasProperty("_RippleAmplitude")) mat.SetFloat("_RippleAmplitude", 0.45f);
             if (mat.HasProperty("_RippleChannel")) mat.SetFloat("_RippleChannel", 0f);
             if (mat.HasProperty("_Scroll1")) mat.SetVector("_Scroll1", Vector4.zero);
             if (mat.HasProperty("_Scroll2")) mat.SetVector("_Scroll2", Vector4.zero);
@@ -1185,12 +1185,12 @@ namespace Siliq.Water.Editor
             emitter.targetRenderer = renderer;
             emitter.waterSurfaceY = renderer.bounds.center.y;
             emitter.rippleChannel = 0;
-            emitter.ripplesPerSecond = 1.8f;
+            emitter.ripplesPerSecond = 0.9f;
             emitter.burstCount = 1;
-            emitter.rippleSpeed = 2.8f;
-            emitter.rippleWidth = 0.28f;
-            emitter.rippleLifetime = 2.6f;
-            emitter.rippleAmplitude = 1.15f;
+            emitter.rippleSpeed = 1.85f;
+            emitter.rippleWidth = 0.46f;
+            emitter.rippleLifetime = 4.2f;
+            emitter.rippleAmplitude = 0.45f;
             emitter.applyShaderSettings = true;
             emitter.ApplyImmediate();
             EditorUtility.SetDirty(emitter);

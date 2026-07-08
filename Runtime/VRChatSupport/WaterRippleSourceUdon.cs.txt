@@ -37,7 +37,7 @@ namespace Siliq.Water.VRChat
 {
     public class WaterRippleSourceUdon : UdonSharpBehaviour
     {
-        const int MaxRipples = 8;
+        const int MaxRipples = 16;
         const int MaxTrackedPlayers = 82; // VRChat の1インスタンス最大人数を目安にした簡易テーブルサイズ
 
         [Tooltip("この Y 座標以下にプレイヤーが来たら波紋を発生させる。水面のワールド Y に合わせること。")]
@@ -50,7 +50,7 @@ namespace Siliq.Water.VRChat
         public float ignoreAboveMargin = 0.3f;
 
         [Tooltip("同じプレイヤーが連続で波紋を発生させる最短間隔 (秒)")]
-        public float minIntervalPerPlayer = 0.4f;
+        public float minIntervalPerPlayer = 0.65f;
 
         [Tooltip("何秒ごとに全プレイヤーの位置をチェックするか (負荷とレスポンスのバランス)")]
         public float checkInterval = 0.15f;
