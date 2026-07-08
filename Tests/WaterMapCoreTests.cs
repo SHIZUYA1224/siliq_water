@@ -1286,11 +1286,21 @@ namespace Siliq.Water.Tests
             const string waterMaterialGuid = "f2c657c8bc4a4c7080e6a1327818890d";
             const string overlayMaterialGuid = "f2c657c8bc4a4c7080e6a1327818897c";
             const string floorMaterialGuid = "42443abe313b246949f1b9f8504234ce";
+            const string floorShaderGuid = "a171aabb01c34e01a1b2c3d4e5f60607";
 
             string prefabPath = AssetDatabase.GUIDToAssetPath(prefabGuid);
             string floorMaterialPath = AssetDatabase.GUIDToAssetPath(floorMaterialGuid);
+            string floorShaderPath = AssetDatabase.GUIDToAssetPath(floorShaderGuid);
             Assert.AreEqual("Packages/com.siliq.water-normalmap/PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab", prefabPath);
             Assert.AreEqual("Packages/com.siliq.water-normalmap/PrebakedPack/ReadyMaterials/M_Siliq_PalePoolFloor.mat", floorMaterialPath);
+            Assert.AreEqual("Packages/com.siliq.water-normalmap/Runtime/Shaders/SiliqPalePoolFloor.shader", floorShaderPath);
+
+            string floorShaderText = File.ReadAllText(floorShaderPath);
+            StringAssert.Contains("Shader \"Siliq/Pale Pool Floor Mobile\"", floorShaderText);
+            StringAssert.Contains("_TileScale", floorShaderText,
+                "完成 Prefab の床は単色板ではなく薄いタイル感を持つ必要がある");
+            Assert.IsFalse(floorShaderText.Contains("com.unity.render-pipelines.universal"),
+                "床 shader は URP package 未導入でも壊れない Built-in 互換にする");
 
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
             Assert.IsNotNull(prefab, "Crystal Lagoon 完成 Prefab が読み込めない");
@@ -1324,6 +1334,14 @@ namespace Siliq.Water.Tests
                 "完成 Prefab の床は明るい確認用 material を直接参照する必要がある");
             Assert.AreEqual(overlayMaterialGuid, AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(overlayRenderer.sharedMaterial)),
                 "完成 Prefab の overlay は Crystal Lagoon 床用 caustics material を直接参照する必要がある");
+            Assert.AreEqual("Siliq/Pale Pool Floor Mobile", floorRenderer.sharedMaterial.shader.name,
+                "完成 Prefab の床は水底光が映える専用 shader を使う必要がある");
+            Assert.GreaterOrEqual(floorRenderer.sharedMaterial.GetFloat("_TileScale"), 4f,
+                "完成 Prefab の床は近距離でも単色板に見えないタイル密度が必要");
+            Assert.LessOrEqual(floorRenderer.sharedMaterial.GetFloat("_TileScale"), 12f,
+                "完成 Prefab の床タイルが細かすぎるとノイズに見える");
+            Assert.GreaterOrEqual(floorRenderer.sharedMaterial.GetFloat("_CausticsReceive"), 0.10f,
+                "完成 Prefab の床は水底光を受ける明るさを持つ必要がある");
 
             Assert.IsNull(floor.GetComponent<Collider>(), "完成 Prefab の床は置いた瞬間に不要な物理 collider を増やさない");
             Assert.IsNull(overlay.GetComponent<Collider>(), "完成 Prefab の caustics overlay は不要な collider を持たない");

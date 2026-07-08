@@ -1,6 +1,6 @@
 # 用途別マテリアルプリセットガイド
 
-Siliq Water は、ノーマルマップ単体ではなく「用途別の見た目プリセット」として使うことを前提にする。まず完成形を確認する場合は `PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab` を Hierarchy にドラッグする。水面、明るいプール床、床用 caustics overlay、確認用ライトが一体で入っている。
+Siliq Water は、ノーマルマップ単体ではなく「用途別の見た目プリセット」として使うことを前提にする。まず完成形を確認する場合は `PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab` を Hierarchy にドラッグする。水面、薄いタイル感のある明るいプール床、床用 caustics overlay、確認用ライトが一体で入っている。
 
 アタッチだけで使う場合は `PrebakedPack/ReadyMaterials/` の `M_Siliq_*_Ready` を Renderer にドラッグする。これらは normal、色、透明度、反射、scroll、水底の光が設定済みで、`WaterSurfaceAnimator` なしでも shader 側で波が動く。
 
@@ -31,7 +31,7 @@ Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイ�
 - 適したノーマルマップを割り当てる
 - フラッグシップ透明水では専用 2048px normal map と height map を割り当てる
 - クリスタルラグーンでは専用 2048px normal map、height map、`Water_Caustics_CrystalLagoon_01.png` を割り当てる
-- 完成形をすぐ確認できるよう、`PF_Siliq_CrystalLagoon_Complete.prefab` には水面、`M_Siliq_PalePoolFloor` の床、`M_Siliq_CrystalLagoon_CausticsOverlay` の床用光を同梱する
+- 完成形をすぐ確認できるよう、`PF_Siliq_CrystalLagoon_Complete.prefab` には水面、`Siliq/Pale Pool Floor Mobile` の薄いタイル床、`M_Siliq_CrystalLagoon_CausticsOverlay` の床用光を同梱する
 - 床に直接光を出したい場合は、床の少し上に薄い Plane を置いて `M_Siliq_CrystalLagoon_CausticsOverlay` を貼る
 - 透明な海・プール・フラッグシップ水では `Water_Caustics_Crystal_01.png` を水底の光として割り当てる
 - 色、透明度、反射、透過光、きらめきを設定する

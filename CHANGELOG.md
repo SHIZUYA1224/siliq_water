@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.48] - 2026-07-09
+
+### 改善: Crystal Lagoon 完成 Prefab の床表現
+- `Siliq/Pale Pool Floor Mobile` を追加し、Crystal Lagoon の床を単色 Standard material から薄いタイル感と水底光の受け皿を持つ軽量 shader へ変更
+- `M_Siliq_PalePoolFloor` が専用床 shader を使うよう更新し、完成 Prefab の透明感確認がただの板に見えにくい状態へ改善
+- README / 用途別ガイド / テストで、完成 Prefab の床表現を固定
+
 ## [2.3.47] - 2026-07-09
 
 ### 追加: Crystal Lagoon 完成 Prefab
