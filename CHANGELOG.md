@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.3.65] - 2026-07-09
+
+### 修正: 完成 Prefab の屈折感を明示保存
+- Crystal Lagoon / Hero 完成 Prefab の `WaterSurfaceAnimator` に `refractionStrength` を保存し、Prefab を置いた直後から水底光と床が水越しに揺らいで見えるようにした
+- 完成 Prefab のテストに屈折強度の確認を追加し、ReadyMaterial だけ更新されて Prefab 側が平板に戻る事故を防止
+
 ## [2.3.64] - 2026-07-09
 
 ### 改善: 透明水越しの軽量な屈折感

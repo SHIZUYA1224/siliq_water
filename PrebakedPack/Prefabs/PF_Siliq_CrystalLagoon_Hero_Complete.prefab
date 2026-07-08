@@ -310,6 +310,7 @@ MonoBehaviour:
   opacity: 0.34
   clarity: 0.98
   edgeReflection: 0.96
+  refractionStrength: 0.42
   reflectionStrength: 1
   reflectionPatternStrength: 0.58
   reflectionPatternScale: 0.82

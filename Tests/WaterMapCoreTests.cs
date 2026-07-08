@@ -1842,6 +1842,7 @@ namespace Siliq.Water.Tests
             Assert.LessOrEqual(animator.speed, 0.00025f, "完成 Prefab は静かな Crystal Lagoon 速度から始める");
             Assert.LessOrEqual(animator.displacementStrength, 0.006f, "完成 Prefab は板状の高さ模様を避ける");
             Assert.GreaterOrEqual(animator.clarity, 0.90f, "完成 Prefab は透明な抜け感を高くしておく");
+            Assert.GreaterOrEqual(animator.refractionStrength, 0.30f, "完成 Prefab は水越しの揺らぎを確認できる必要がある");
             Assert.GreaterOrEqual(animator.reflectionPatternStrength, 0.42f, "完成 Prefab は反射パターンを強めに確認できる必要がある");
             Assert.GreaterOrEqual(animator.causticsStrength, 0.70f, "完成 Prefab は水底光を強めに確認できる必要がある");
             Assert.GreaterOrEqual(animator.causticsFocus, 2.0f, "完成 Prefab は水底光を細い焦点線として確認できる必要がある");
@@ -1906,6 +1907,7 @@ namespace Siliq.Water.Tests
             Assert.LessOrEqual(animator.displacementStrength, 0.004f, "Hero 完成 Prefab は板状の高さ模様を避ける");
             Assert.LessOrEqual(animator.opacity, 0.36f, "Hero 完成 Prefab は透明感を最優先にする");
             Assert.GreaterOrEqual(animator.clarity, 0.97f, "Hero 完成 Prefab は透明な抜け感を最大寄りにしておく");
+            Assert.GreaterOrEqual(animator.refractionStrength, 0.40f, "Hero 完成 Prefab は水越しの揺らぎを強めに確認できる必要がある");
             Assert.GreaterOrEqual(animator.reflectionPatternStrength, 0.55f, "Hero 完成 Prefab は反射帯を確認できる必要がある");
             Assert.GreaterOrEqual(animator.transmissionStrength, 0.97f, "Hero 完成 Prefab は透過光を強めにする");
             Assert.GreaterOrEqual(animator.causticsStrength, 0.80f, "Hero 完成 Prefab は水底光を強めに確認できる必要がある");
