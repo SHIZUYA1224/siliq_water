@@ -20,7 +20,7 @@ namespace Siliq.Water
     public class WaterSurfaceAnimator : MonoBehaviour
     {
         const float MaxSurfaceSpeed = 0.3f;
-        const float SurfaceSpeedToUvPerSecond = 0.08f;
+        const float SurfaceSpeedToUvPerSecond = 0.025f;
         const int DefaultEditModePreviewFps = 10;
 
         [Tooltip("スクロールさせるテクスチャのプロパティ名。Standard/URP Lit/VRChat Mobile は _BumpMap、Siliq 独自シェーダーは _NormalMap。")]
@@ -39,7 +39,7 @@ namespace Siliq.Water
         [Tooltip("波が流れる向き (度)。0=右、90=上、180=左、270=下。")]
         [Range(0f, 360f)] public float directionDegrees = 30f;
 
-        [Tooltip("流れる速さ。0で静止、0.003が静かな水、0.006が標準、0.015以上は速め。内部で水面向けに強く減速されます。")]
+        [Tooltip("流れる速さ。0で静止、0.03以下が静かな水、0.3でも穏やかに見えるよう内部で強く減速されます。")]
         [Range(0f, MaxSurfaceSpeed)] public float speed = 0.006f;
 
         [Header("見た目")]

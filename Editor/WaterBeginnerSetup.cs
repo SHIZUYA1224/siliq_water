@@ -184,8 +184,8 @@ namespace Siliq.Water.Editor
                 if (animator.reflectionStrength < 0.8f) animator.reflectionStrength = 1f;
                 if (animator.edgeReflection < 0.65f) animator.edgeReflection = 0.88f;
                 if (animator.displacementStrength <= 0f) animator.displacementStrength = 0.012f;
-                if (animator.displacementSpeed > 0.005f) animator.displacementSpeed = 0.005f;
-                if (animator.causticsSpeed > 0.001f) animator.causticsSpeed = 0.001f;
+                if (animator.displacementSpeed > 0.003f) animator.displacementSpeed = 0.003f;
+                if (animator.causticsSpeed > 0.0006f) animator.causticsSpeed = 0.0006f;
                 animator.ApplyImmediate(0f);
                 EditorUtility.SetDirty(animator);
             }

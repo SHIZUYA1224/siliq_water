@@ -46,13 +46,13 @@ Material:
     - _AlphaPower: 2
     - _BottomLightStrength: 1.35
     - _CausticsScale: 2.4
-    - _CausticsSpeed: 0.001
+    - _CausticsSpeed: 0.0005
     - _CausticsStrength: 0.46
     - _Clarity: 0.76
     - _DarkDetailDamping: 0.7
     - _DarkReflectionDamping: 0.72
     - _DisplacementScale: 1.1
-    - _DisplacementSpeed: 0.004
+    - _DisplacementSpeed: 0.002
     - _DisplacementStrength: 0.018
     - _DstBlend: 10
     - _EdgeReflection: 0.6
@@ -91,8 +91,8 @@ Material:
     - _DeepColor: {r: 0.08, g: 0.42, b: 0.62, a: 1}
     - _GlimmerColor: {r: 0.98, g: 1, b: 1, a: 1}
     - _HorizonColor: {r: 0.92, g: 1, b: 1, a: 1}
-    - _Scroll1: {r: 0.001542, g: 0.001839, b: 0, a: 0}
-    - _Scroll2: {r: -0.001381, g: 0.001079, b: 0, a: 0}
+    - _Scroll1: {r: 0.000771, g: 0.000920, b: 0, a: 0}
+    - _Scroll2: {r: -0.000691, g: 0.000540, b: 0, a: 0}
     - _ShallowColor: {r: 0.74, g: 0.99, b: 1, a: 1}
     - _TransmissionColor: {r: 0.62, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
