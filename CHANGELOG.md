@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.52] - 2026-07-09
+
+### 改善: 水面の帯状反射
+- `Siliq/Water Mobile (Quest)` に `_ReflectionPatternStrength` / `_ReflectionPatternScale` を追加し、空や窓が水面へ映るような軽量反射パターンを足せるようにした
+- `WaterSurfaceAnimator` / Inspector / Quick Apply / ReadyMaterials / Crystal Lagoon 完成 Prefab が反射パターンを扱うよう更新
+- Crystal Lagoon / Flagship Crystal / Indoor Blue Pool の初期反射を強め、透明水でも反射が薄すぎない状態へ調整
+
 ## [2.3.51] - 2026-07-09
 
 ### 改善: 透明な抜け感と水底光の透過

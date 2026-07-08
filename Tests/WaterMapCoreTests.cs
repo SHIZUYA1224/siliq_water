@@ -324,6 +324,8 @@ namespace Siliq.Water.Tests
                 animator.clarity = 0.67f;
                 animator.edgeReflection = 0.73f;
                 animator.reflectionStrength = 0.64f;
+                animator.reflectionPatternStrength = 0.29f;
+                animator.reflectionPatternScale = 1.23f;
                 animator.transmissionStrength = 0.58f;
                 animator.sparkle = 0.31f;
                 animator.highlightStrength = 1.42f;
@@ -350,6 +352,8 @@ namespace Siliq.Water.Tests
                 Assert.AreEqual(0.67f, block.GetFloat("_Clarity"), 1e-5f);
                 Assert.AreEqual(0.73f, block.GetFloat("_EdgeReflection"), 1e-5f);
                 Assert.AreEqual(0.64f, block.GetFloat("_ReflStrength"), 1e-5f);
+                Assert.AreEqual(0.29f, block.GetFloat("_ReflectionPatternStrength"), 1e-5f);
+                Assert.AreEqual(1.23f, block.GetFloat("_ReflectionPatternScale"), 1e-5f);
                 Assert.AreEqual(0.58f, block.GetFloat("_TransmissionStrength"), 1e-5f);
                 Assert.AreEqual(0.31f, block.GetFloat("_GlimmerIntensity"), 1e-5f);
                 Assert.AreEqual(0.62f, block.GetFloat("_GlintIntensity"), 1e-5f);
@@ -522,6 +526,8 @@ namespace Siliq.Water.Tests
             Assert.LessOrEqual(flagship.GetFloat("_DisplacementStrength"), 0.02f);
             Assert.GreaterOrEqual(flagship.GetFloat("_Clarity"), 0.80f,
                 "美しさ特化の Flagship ready material は透明な抜け感を高めに持つ必要がある");
+            Assert.GreaterOrEqual(flagship.GetFloat("_ReflectionPatternStrength"), 0.30f,
+                "美しさ特化の Flagship ready material は空や窓が映る反射パターンを持つ必要がある");
             Assert.GreaterOrEqual(flagship.GetFloat("_CausticsStrength"), 0.60f,
                 "美しさ特化の Flagship ready material は水底光をはっきり持つ必要がある");
             Assert.GreaterOrEqual(flagship.GetFloat("_BottomLightStrength"), 1.40f,
@@ -536,6 +542,8 @@ namespace Siliq.Water.Tests
                 "Crystal Lagoon は透き通った見た目を最優先にする");
             Assert.GreaterOrEqual(lagoon.GetFloat("_Clarity"), 0.90f,
                 "Crystal Lagoon は濁りを抑えた透明な抜け感を最優先にする");
+            Assert.GreaterOrEqual(lagoon.GetFloat("_ReflectionPatternStrength"), 0.42f,
+                "Crystal Lagoon は透明水でも反射が薄すぎない初期値にする");
             Assert.GreaterOrEqual(lagoon.GetFloat("_CausticsStrength"), 0.70f,
                 "Crystal Lagoon は水底光を強めに持つ必要がある");
             Assert.GreaterOrEqual(lagoon.GetFloat("_BottomLightStrength"), 1.65f,
@@ -751,6 +759,8 @@ namespace Siliq.Water.Tests
                 Assert.IsTrue(mat.HasProperty("_DarkReflectionDamping"));
                 Assert.IsTrue(mat.HasProperty("_DarkDetailDamping"));
                 Assert.IsTrue(mat.HasProperty("_Clarity"));
+                Assert.IsTrue(mat.HasProperty("_ReflectionPatternStrength"));
+                Assert.IsTrue(mat.HasProperty("_ReflectionPatternScale"));
                 Assert.IsTrue(mat.HasProperty("_HeightMap"));
                 Assert.IsTrue(mat.HasProperty("_DisplacementStrength"));
                 Assert.IsTrue(mat.HasProperty("_DisplacementScale"));
@@ -1108,6 +1118,8 @@ namespace Siliq.Water.Tests
                     "Crystal Lagoon Quick Apply は透き通った見た目を優先する");
                 Assert.GreaterOrEqual(mat.GetFloat("_Clarity"), 0.90f,
                     "Crystal Lagoon Quick Apply は透明な抜け感を最優先する");
+                Assert.GreaterOrEqual(mat.GetFloat("_ReflectionPatternStrength"), 0.42f,
+                    "Crystal Lagoon Quick Apply は反射パターンを持つ必要がある");
                 Assert.GreaterOrEqual(mat.GetFloat("_CausticsStrength"), 0.70f,
                     "Crystal Lagoon Quick Apply は水底光を強めに持つ必要がある");
                 Assert.GreaterOrEqual(mat.GetFloat("_BottomLightStrength"), 1.65f,
@@ -1424,6 +1436,7 @@ namespace Siliq.Water.Tests
             Assert.LessOrEqual(animator.speed, 0.0018f, "完成 Prefab は静かな Crystal Lagoon 速度から始める");
             Assert.LessOrEqual(animator.displacementStrength, 0.006f, "完成 Prefab は板状の高さ模様を避ける");
             Assert.GreaterOrEqual(animator.clarity, 0.90f, "完成 Prefab は透明な抜け感を高くしておく");
+            Assert.GreaterOrEqual(animator.reflectionPatternStrength, 0.42f, "完成 Prefab は反射パターンを強めに確認できる必要がある");
             Assert.GreaterOrEqual(animator.causticsStrength, 0.70f, "完成 Prefab は水底光を強めに確認できる必要がある");
             Assert.GreaterOrEqual(animator.bottomLightStrength, 1.65f, "完成 Prefab は水底光が水越しに見える必要がある");
         }

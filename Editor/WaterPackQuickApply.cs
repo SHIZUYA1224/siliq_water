@@ -60,6 +60,8 @@ namespace Siliq.Water.Editor
             public float specIntensity;
             public float fresnelPower;
             public float reflStrength;
+            public float reflectionPatternStrength;
+            public float reflectionPatternScale;
             public float displacementStrength;
             public float displacementScale;
             public float displacementSpeed;
@@ -114,6 +116,8 @@ namespace Siliq.Water.Editor
             specIntensity = 1.35f,
             fresnelPower = 2.45f,
             reflStrength = 1f,
+            reflectionPatternStrength = 0.18f,
+            reflectionPatternScale = 1.05f,
             displacementStrength = 0.055f,
             displacementScale = 0.55f,
             displacementSpeed = 0.006f,
@@ -161,6 +165,8 @@ namespace Siliq.Water.Editor
             specIntensity = 1.05f,
             fresnelPower = 2.65f,
             reflStrength = 0.92f,
+            reflectionPatternStrength = 0.28f,
+            reflectionPatternScale = 0.85f,
             displacementStrength = 0.018f,
             displacementScale = 1.10f,
             displacementSpeed = 0.004f,
@@ -208,6 +214,8 @@ namespace Siliq.Water.Editor
             specIntensity = 1.50f,
             fresnelPower = 2.05f,
             reflStrength = 1f,
+            reflectionPatternStrength = 0.42f,
+            reflectionPatternScale = 0.78f,
             displacementStrength = 0.025f,
             displacementScale = 0.42f,
             displacementSpeed = 0.004f,
@@ -256,6 +264,8 @@ namespace Siliq.Water.Editor
             specIntensity = 1.75f,
             fresnelPower = 1.90f,
             reflStrength = 1f,
+            reflectionPatternStrength = 0.34f,
+            reflectionPatternScale = 1.15f,
             displacementStrength = 0.012f,
             displacementScale = 0.85f,
             displacementSpeed = 0.004f,
@@ -305,6 +315,8 @@ namespace Siliq.Water.Editor
             specIntensity = 1.85f,
             fresnelPower = 1.75f,
             reflStrength = 1f,
+            reflectionPatternStrength = 0.46f,
+            reflectionPatternScale = 0.92f,
             displacementStrength = 0.006f,
             displacementScale = 0.95f,
             displacementSpeed = 0.003f,
@@ -352,6 +364,8 @@ namespace Siliq.Water.Editor
             specIntensity = 0.52f,
             fresnelPower = 4.2f,
             reflStrength = 0.35f,
+            reflectionPatternStrength = 0.04f,
+            reflectionPatternScale = 1.2f,
             displacementStrength = 0.035f,
             displacementScale = 0.65f,
             displacementSpeed = 0.005f,
@@ -399,6 +413,8 @@ namespace Siliq.Water.Editor
             specIntensity = 1.65f,
             fresnelPower = 1.6f,
             reflStrength = 1f,
+            reflectionPatternStrength = 0.22f,
+            reflectionPatternScale = 1.4f,
             displacementStrength = 0.025f,
             displacementScale = 0.85f,
             displacementSpeed = 0.005f,
@@ -1037,6 +1053,7 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_Clarity")) mat.SetFloat("_Clarity", 0f);
             if (mat.HasProperty("_AlphaFresnel")) mat.SetFloat("_AlphaFresnel", 0f);
             if (mat.HasProperty("_EdgeReflection")) mat.SetFloat("_EdgeReflection", 0f);
+            if (mat.HasProperty("_ReflectionPatternStrength")) mat.SetFloat("_ReflectionPatternStrength", 0f);
             if (mat.HasProperty("_SrcBlend")) mat.SetFloat("_SrcBlend", (float)BlendMode.One);
             if (mat.HasProperty("_DstBlend")) mat.SetFloat("_DstBlend", (float)BlendMode.Zero);
             if (mat.HasProperty("_ZWrite")) mat.SetFloat("_ZWrite", 1f);
@@ -1062,6 +1079,8 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_GlintPower")) mat.SetFloat("_GlintPower", 220f);
             if (mat.HasProperty("_FresnelPower")) mat.SetFloat("_FresnelPower", 2.35f);
             if (mat.HasProperty("_ReflStrength")) mat.SetFloat("_ReflStrength", 1f);
+            if (mat.HasProperty("_ReflectionPatternStrength")) mat.SetFloat("_ReflectionPatternStrength", 0.24f);
+            if (mat.HasProperty("_ReflectionPatternScale")) mat.SetFloat("_ReflectionPatternScale", 1.0f);
             if (mat.HasProperty("_SpecIntensity")) mat.SetFloat("_SpecIntensity", 1.35f);
             if (mat.HasProperty("_SpecPower")) mat.SetFloat("_SpecPower", 220f);
             if (mat.HasProperty("_DisplacementStrength")) mat.SetFloat("_DisplacementStrength", 0.04f);
@@ -1273,6 +1292,8 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_SpecIntensity")) mat.SetFloat("_SpecIntensity", preset.specIntensity);
             if (mat.HasProperty("_FresnelPower")) mat.SetFloat("_FresnelPower", preset.fresnelPower);
             if (mat.HasProperty("_ReflStrength")) mat.SetFloat("_ReflStrength", preset.reflStrength);
+            if (mat.HasProperty("_ReflectionPatternStrength")) mat.SetFloat("_ReflectionPatternStrength", preset.reflectionPatternStrength);
+            if (mat.HasProperty("_ReflectionPatternScale")) mat.SetFloat("_ReflectionPatternScale", preset.reflectionPatternScale);
             if (mat.HasProperty("_DisplacementStrength")) mat.SetFloat("_DisplacementStrength", preset.displacementStrength);
             if (mat.HasProperty("_DisplacementScale")) mat.SetFloat("_DisplacementScale", preset.displacementScale);
             if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", preset.displacementSpeed);

@@ -311,6 +311,8 @@ MonoBehaviour:
   clarity: 0.92
   edgeReflection: 0.92
   reflectionStrength: 1
+  reflectionPatternStrength: 0.46
+  reflectionPatternScale: 0.92
   transmissionStrength: 0.92
   sparkle: 0.38
   highlightStrength: 1.85

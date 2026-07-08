@@ -52,6 +52,8 @@ Shader "Siliq/Water Mobile (Quest)"
         [Toggle(USE_REFLECTION_CUBE)] _UseCube ("キューブマップ反射を使う", Float) = 0
         [NoScaleOffset] _ReflCube ("反射キューブマップ", Cube) = "" {}
         _ReflStrength ("反射の強さ", Range(0, 1)) = 0.6
+        _ReflectionPatternStrength ("反射パターンの強さ", Range(0, 1)) = 0
+        _ReflectionPatternScale ("反射パターンの大きさ", Range(0.1, 8)) = 1.2
 
         [Toggle(_USE_RIPPLES)] _UseRipples ("触れた時の波紋を有効化", Float) = 0
         _RippleSpeed ("波紋の広がる速さ", Range(0.1, 10)) = 1.85
@@ -130,6 +132,8 @@ Shader "Siliq/Water Mobile (Quest)"
             half _SpecIntensity;
             half _FresnelPower;
             half _ReflStrength;
+            half _ReflectionPatternStrength;
+            half _ReflectionPatternScale;
             #ifdef USE_REFLECTION_CUBE
             samplerCUBE _ReflCube;
             #endif
@@ -312,6 +316,7 @@ Shader "Siliq/Water Mobile (Quest)"
                 half detailVisibility = lerp(1.0h - _DarkDetailDamping, 1.0h, surfaceLight);
                 half colorLift = (macro01 - 0.5h) * _MacroColorVariation;
                 half colorMix = saturate(0.12h + directLum * 0.68h + ambientLum * 0.32h + colorLift);
+                half viewFacing = saturate(dot(worldN, viewDir));
                 half3 baseCol = lerp(_DeepColor.rgb, _ShallowColor.rgb, colorMix) * baseVisibility;
                 half clarity = saturate(_Clarity);
                 half3 clearWaterCol = lerp(_ShallowColor.rgb, _TransmissionColor.rgb, 0.68h) * baseVisibility;
@@ -325,9 +330,13 @@ Shader "Siliq/Water Mobile (Quest)"
                 half reflectionAmount = lerp(0.08h, 1.45h, _ReflStrength);
                 reflCol *= reflectionVisibility * reflectionAmount;
 
-                half viewFacing = saturate(dot(worldN, viewDir));
                 half fresnel = saturate(pow(1.0h - viewFacing, _FresnelPower) * lerp(0.72h, 1.18h, _ReflStrength));
                 half alphaFresnel = pow(1.0h - viewFacing, _AlphaPower);
+                float2 reflectionP = SiliqRotate2D(i.worldPos.xz + worldN.xz * 0.35, -0.38) * max((float)_ReflectionPatternScale, 0.1);
+                half reflectionBand = pow(saturate(sin(reflectionP.x * 3.14159) * 0.5h + 0.5h), 18.0h);
+                half reflectionBreakup = saturate(0.55h + 0.45h * sin(reflectionP.y * 2.3h + macroA * 2.2h));
+                half reflectionPattern = reflectionBand * reflectionBreakup * _ReflectionPatternStrength;
+                reflectionPattern *= reflectionVisibility * detailVisibility * saturate(0.25h + fresnel + _EdgeReflection * 0.35h);
                 half spec = pow(saturate(dot(worldN, halfDir)), _SpecPower) * _SpecIntensity;
                 spec *= lerp(0.72h, 1.28h, macro01) * detailVisibility * mainLightLum;
                 half glint = pow(saturate(dot(reflect(-lightDir, worldN), viewDir)), _GlintPower) * _GlintIntensity;
@@ -349,6 +358,7 @@ Shader "Siliq/Water Mobile (Quest)"
 
                 half4 col;
                 col.rgb = lerp(baseCol + transmission, reflCol, fresnel) + (spec + glint) * _LightColor0.rgb;
+                col.rgb += _HorizonColor.rgb * reflectionPattern;
                 col.rgb += _CausticsTint.rgb * caustics;
                 col.rgb += _GlimmerColor.rgb * (glimmer + rippleLight * 0.35h * detailVisibility);
                 col.rgb = lerp(col.rgb, reflCol + (spec + glint) * _LightColor0.rgb, alphaFresnel * _EdgeReflection);

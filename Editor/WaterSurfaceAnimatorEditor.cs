@@ -29,6 +29,8 @@ namespace Siliq.Water.Editor
         SerializedProperty clarity;
         SerializedProperty edgeReflection;
         SerializedProperty reflectionStrength;
+        SerializedProperty reflectionPatternStrength;
+        SerializedProperty reflectionPatternScale;
         SerializedProperty transmissionStrength;
         SerializedProperty sparkle;
         SerializedProperty highlightStrength;
@@ -61,6 +63,8 @@ namespace Siliq.Water.Editor
             clarity = serializedObject.FindProperty("clarity");
             edgeReflection = serializedObject.FindProperty("edgeReflection");
             reflectionStrength = serializedObject.FindProperty("reflectionStrength");
+            reflectionPatternStrength = serializedObject.FindProperty("reflectionPatternStrength");
+            reflectionPatternScale = serializedObject.FindProperty("reflectionPatternScale");
             transmissionStrength = serializedObject.FindProperty("transmissionStrength");
             sparkle = serializedObject.FindProperty("sparkle");
             highlightStrength = serializedObject.FindProperty("highlightStrength");
@@ -157,6 +161,8 @@ namespace Siliq.Water.Editor
             EditorGUILayout.PropertyField(clarity, new GUIContent("透明な抜け感"));
             EditorGUILayout.PropertyField(edgeReflection, new GUIContent("輪郭反射"));
             EditorGUILayout.PropertyField(reflectionStrength, new GUIContent("反射量"));
+            EditorGUILayout.PropertyField(reflectionPatternStrength, new GUIContent("反射パターン"));
+            EditorGUILayout.PropertyField(reflectionPatternScale, new GUIContent("反射パターンの大きさ"));
             EditorGUILayout.PropertyField(transmissionStrength, new GUIContent("透過光量"));
             EditorGUILayout.PropertyField(sparkle, new GUIContent("きらめき"));
             EditorGUILayout.PropertyField(highlightStrength, new GUIContent("ハイライト"));

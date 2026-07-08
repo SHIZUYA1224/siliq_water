@@ -91,6 +91,12 @@ namespace Siliq.Water
         [Tooltip("全体の反射の強さ。Siliq 水シェーダーで有効。")]
         [Range(0f, 1f)] public float reflectionStrength = 0.85f;
 
+        [Tooltip("窓や空の帯が水面に映るような反射パターンの強さ。Siliq 水シェーダーで有効。")]
+        [Range(0f, 1f)] public float reflectionPatternStrength = 0.18f;
+
+        [Tooltip("反射パターンの大きさ。小さいほど広い帯、大きいほど細かい帯になります。Siliq 水シェーダーで有効。")]
+        [Range(0.1f, 8f)] public float reflectionPatternScale = 1.2f;
+
         [Tooltip("透過光の強さ。透明感と水の厚みを足します。Siliq 水シェーダーで有効。")]
         [Range(0f, 1f)] public float transmissionStrength = 0.62f;
 
@@ -147,6 +153,8 @@ namespace Siliq.Water
         int glimmerColorPropertyId;
         int edgeReflectionPropertyId;
         int reflStrengthPropertyId;
+        int reflectionPatternStrengthPropertyId;
+        int reflectionPatternScalePropertyId;
         int transmissionStrengthPropertyId;
         int glimmerIntensityPropertyId;
         int glintIntensityPropertyId;
@@ -235,6 +243,8 @@ namespace Siliq.Water
             glimmerColorPropertyId = Shader.PropertyToID("_GlimmerColor");
             edgeReflectionPropertyId = Shader.PropertyToID("_EdgeReflection");
             reflStrengthPropertyId = Shader.PropertyToID("_ReflStrength");
+            reflectionPatternStrengthPropertyId = Shader.PropertyToID("_ReflectionPatternStrength");
+            reflectionPatternScalePropertyId = Shader.PropertyToID("_ReflectionPatternScale");
             transmissionStrengthPropertyId = Shader.PropertyToID("_TransmissionStrength");
             glimmerIntensityPropertyId = Shader.PropertyToID("_GlimmerIntensity");
             glintIntensityPropertyId = Shader.PropertyToID("_GlintIntensity");
@@ -378,6 +388,14 @@ namespace Siliq.Water
             if (targetMaterial.HasProperty(reflStrengthPropertyId))
             {
                 reflectionStrength = Mathf.Clamp01(targetMaterial.GetFloat(reflStrengthPropertyId));
+            }
+            if (targetMaterial.HasProperty(reflectionPatternStrengthPropertyId))
+            {
+                reflectionPatternStrength = Mathf.Clamp01(targetMaterial.GetFloat(reflectionPatternStrengthPropertyId));
+            }
+            if (targetMaterial.HasProperty(reflectionPatternScalePropertyId))
+            {
+                reflectionPatternScale = Mathf.Clamp(targetMaterial.GetFloat(reflectionPatternScalePropertyId), 0.1f, 8f);
             }
             if (targetMaterial.HasProperty(clarityPropertyId))
             {
@@ -683,6 +701,14 @@ namespace Siliq.Water
             if (targetMaterial.HasProperty(reflStrengthPropertyId))
             {
                 propertyBlock.SetFloat(reflStrengthPropertyId, Mathf.Clamp01(reflectionStrength));
+            }
+            if (targetMaterial.HasProperty(reflectionPatternStrengthPropertyId))
+            {
+                propertyBlock.SetFloat(reflectionPatternStrengthPropertyId, Mathf.Clamp01(reflectionPatternStrength));
+            }
+            if (targetMaterial.HasProperty(reflectionPatternScalePropertyId))
+            {
+                propertyBlock.SetFloat(reflectionPatternScalePropertyId, Mathf.Clamp(reflectionPatternScale, 0.1f, 8f));
             }
             if (targetMaterial.HasProperty(transmissionStrengthPropertyId))
             {

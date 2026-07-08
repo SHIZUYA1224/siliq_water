@@ -35,7 +35,7 @@ Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイ�
 - 床に直接光を出したい場合は、床の少し上に薄い Plane を置いて `M_Siliq_CrystalLagoon_CausticsOverlay` を貼る
 - 透明な海・プール・フラッグシップ水では `Water_Caustics_Crystal_01.png` を水底の光として割り当てる
 - 色、透明度、反射、透過光、きらめきを設定する
-- `Clarity` と `Bottom Light Strength` を用途ごとに設定し、Crystal Lagoon では水色の濁りを抑え、水底光が水越しに見える状態から始める
+- `Clarity`、`Reflection Pattern`、`Bottom Light Strength` を用途ごとに設定し、Crystal Lagoon では水色の濁りを抑え、空や窓の帯状反射と水底光が水越しに見える状態から始める
 - `WaterSurfaceAnimator` を追加または更新し、動きを付ける
 - Built-in / iOS 系では `Siliq/Water Mobile (Quest)` を使う
 - URP プロジェクトでは、`URP Shader` Sample が Import 済みなら `Siliq/Water URP` を優先して使う
@@ -47,7 +47,7 @@ Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイ�
 - プール: `Normal Strength` を 0.25-0.5、`Opacity` を 0.38-0.55
 - 室内ブループール: `Normal Strength` を 0.35-0.6、`Opacity` を 0.35-0.5、`Reflection` は高め
 - フラッグシップ透明水: `Normal Strength` を 0.55-0.65、`Opacity` を 0.48-0.62、`Reflection` は高め、`Height` は 0.02 以下から始める
-- クリスタルラグーン: `Normal Strength` は 0.4 前後、`Clarity` は 0.9 以上、`Transmission` と `Caustics` は高め、`Bottom Light Strength` は 1.65 以上、`Height` は 0.01 以下に抑える
+- クリスタルラグーン: `Normal Strength` は 0.4 前後、`Clarity` は 0.9 以上、`Reflection Pattern` は 0.42 以上、`Transmission` と `Caustics` は高め、`Bottom Light Strength` は 1.65 以上、`Height` は 0.01 以下に抑える
 - 水底の光: プールや浅い海では `Caustics Strength` を 0.3-0.65、暗い場所や深い水では 0.15 以下から始める
 - 床用 caustics overlay: `Intensity` は 0.4-0.7、`Tiling` は 1-2 から始める。床が発光しすぎる場合は `Floor Fade` を下げる。
 - 氷割れや多角形模様に見える場合: フラッグシップ透明水の `Height Map Influence` は 0 付近、`Height` は 0.02 以下から始める
