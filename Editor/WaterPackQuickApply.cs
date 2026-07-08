@@ -262,6 +262,52 @@ namespace Siliq.Water.Editor
             causticsTint = new Color(0.76f, 1f, 0.98f, 1f),
         };
 
+        static readonly LookPreset CrystalLagoonLook = new LookPreset
+        {
+            assetName = "CrystalLagoon",
+            displayName = "クリスタルラグーン",
+            sourceGuid = FlagshipCrystalGuid,
+            sourceLabel = "FlagshipCrystal",
+            heightGuid = FlagshipCrystalHeightGuid,
+            motion = new MotionPreset(20f, 0.030f, 0.42f, 0.92f),
+            transparent = true,
+            opacity = 0.40f,
+            shallow = new Color(0.56f, 1f, 0.98f, 1f),
+            deep = new Color(0.004f, 0.13f, 0.30f, 1f),
+            horizon = new Color(0.96f, 1f, 1f, 1f),
+            transmission = new Color(0.62f, 1f, 0.96f, 1f),
+            glimmer = new Color(1f, 1f, 0.96f, 1f),
+            normalStrength = 0.42f,
+            tiling1 = 1.15f,
+            tiling2 = 3.40f,
+            alphaFresnel = 0.82f,
+            alphaPower = 1.70f,
+            edgeReflection = 0.92f,
+            transmissionStrength = 0.92f,
+            glimmerIntensity = 0.38f,
+            glimmerSharpness = 20f,
+            glintIntensity = 1.05f,
+            glintPower = 360f,
+            specPower = 380f,
+            specIntensity = 1.85f,
+            fresnelPower = 1.75f,
+            reflStrength = 1f,
+            displacementStrength = 0.006f,
+            displacementScale = 0.95f,
+            displacementSpeed = 0.045f,
+            heightMapInfluence = 0f,
+            smoothness = 0.995f,
+            macroVariation = 0.18f,
+            macroScale = 0.055f,
+            macroDirectionBreakup = 0.14f,
+            macroColorVariation = 0.08f,
+            causticsGuid = CrystalCausticsGuid,
+            causticsStrength = 0.72f,
+            causticsScale = 2.25f,
+            causticsSpeed = 0.010f,
+            causticsTint = new Color(0.84f, 1f, 0.96f, 1f),
+        };
+
         static readonly LookPreset BloodSeaLook = new LookPreset
         {
             assetName = "BloodSea",
@@ -426,10 +472,13 @@ namespace Siliq.Water.Editor
         [MenuItem(LookMenuRoot + "フラッグシップ透明水 (Flagship Crystal)", false, 43)]
         static void ApplyFlagshipCrystalLook() => ApplyLook(FlagshipCrystalLook);
 
-        [MenuItem(LookMenuRoot + "血の海 (Blood Sea)", false, 44)]
+        [MenuItem(LookMenuRoot + "クリスタルラグーン (Crystal Lagoon)", false, 44)]
+        static void ApplyCrystalLagoonLook() => ApplyLook(CrystalLagoonLook);
+
+        [MenuItem(LookMenuRoot + "血の海 (Blood Sea)", false, 45)]
         static void ApplyBloodSeaLook() => ApplyLook(BloodSeaLook);
 
-        [MenuItem(LookMenuRoot + "液体金属 (Liquid Metal)", false, 45)]
+        [MenuItem(LookMenuRoot + "液体金属 (Liquid Metal)", false, 46)]
         static void ApplyLiquidMetalLook() => ApplyLook(LiquidMetalLook);
 
         [MenuItem(MenuRoot + "静かな水面 (Calm)", true)]
@@ -451,6 +500,7 @@ namespace Siliq.Water.Editor
         [MenuItem(LookMenuRoot + "透明プール (Clear Pool)", true)]
         [MenuItem(LookMenuRoot + "室内ブループール (Indoor Blue Pool)", true)]
         [MenuItem(LookMenuRoot + "フラッグシップ透明水 (Flagship Crystal)", true)]
+        [MenuItem(LookMenuRoot + "クリスタルラグーン (Crystal Lagoon)", true)]
         [MenuItem(LookMenuRoot + "血の海 (Blood Sea)", true)]
         [MenuItem(LookMenuRoot + "液体金属 (Liquid Metal)", true)]
         static bool ValidateSelection()

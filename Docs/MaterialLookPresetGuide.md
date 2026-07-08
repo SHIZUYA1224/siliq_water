@@ -18,6 +18,7 @@ Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイ�
 | 透明プール (Clear Pool) | プール、浅い水、建築ビジュアル | 高い透明度、弱い凹凸、控えめな光網 |
 | 室内ブループール (Indoor Blue Pool) | 明るい室内プール、窓反射、アニメ調の青い水面 | 青い透過、広い白ハイライト、強めの反射、控えめな高さ |
 | フラッグシップ透明水 (Flagship Crystal) | 製品デモ、メインビジュアル、最上位の透明水 | 厚めの透明感、強い鏡面反射、多層細波、実高さ |
+| クリスタルラグーン (Crystal Lagoon) | 透き通った美しさを最優先した浅い水、プール、リゾート水面 | 淡い青緑、強い透過光、控えめな凹凸、強めの水底光 |
 | 血の海 (Blood Sea) | ホラー、異世界、赤い液体 | 深い赤、重い粘度感、弱い反射 |
 | 液体金属 (Liquid Metal) | 水銀、金属液、SF 表現 | 高反射、高スムースネス、不透明で鏡面寄り |
 
@@ -40,6 +41,7 @@ Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイ�
 - プール: `Normal Strength` を 0.25-0.5、`Opacity` を 0.38-0.55
 - 室内ブループール: `Normal Strength` を 0.35-0.6、`Opacity` を 0.35-0.5、`Reflection` は高め
 - フラッグシップ透明水: `Normal Strength` を 0.55-0.65、`Opacity` を 0.48-0.62、`Reflection` は高め、`Height` は 0.02 以下から始める
+- クリスタルラグーン: `Normal Strength` は 0.4 前後、`Transmission` と `Caustics` は高め、`Height` は 0.01 以下に抑える
 - 水底の光: プールや浅い海では `Caustics Strength` を 0.3-0.65、暗い場所や深い水では 0.15 以下から始める
 - 氷割れや多角形模様に見える場合: フラッグシップ透明水の `Height Map Influence` は 0 付近、`Height` は 0.02 以下から始める
 - 血の海: `Opacity` を 0.6 以上、`Reflection` は控えめ

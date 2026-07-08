@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.35] - 2026-07-08
+
+### 追加: 美しさ特化の Crystal Lagoon 水面
+- `PrebakedPack/ReadyMaterials/M_Siliq_CrystalLagoon_Ready.mat` を追加し、透き通った浅い水・プール・リゾート水面向けの完成済み material を同梱
+- 用途別 Quick Apply に `クリスタルラグーン (Crystal Lagoon)` を追加し、専用 normal / height / caustics を使いつつ、凹凸と実高さを控えめにした透明感優先の初期値にした
+- Crystal Lagoon が強い透過光、控えめな高さ、強めの水底光を維持するようテストを追加
+
 ## [2.3.34] - 2026-07-08
 
 ### 追加: 透明水向けの水底コースティクス表現

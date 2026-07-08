@@ -101,6 +101,7 @@ README / 用途別ガイド / PrebakedPack の確認に進めます。
 | `M_Siliq_ClearPool_Ready` | 透明プール |
 | `M_Siliq_IndoorBluePool_Ready` | 明るい室内プール |
 | `M_Siliq_FlagshipCrystal_Ready` | 製品デモ向けのフラッグシップ透明水 |
+| `M_Siliq_CrystalLagoon_Ready` | 透き通った美しさ特化の水面 |
 | `M_Siliq_BloodSea_Ready` | 血の海・赤い液体 |
 | `M_Siliq_LiquidMetal_Ready` | 液体金属 |
 
@@ -215,7 +216,7 @@ Quest / モバイルでは不透明のまま使うことを推奨します。PC 
 ノーマルマップ単体は凹凸だけを表すため、透明感はマテリアルの Blend / Alpha / `_Opacity`
 と Fresnel 連動の `_AlphaFresnel` / `_EdgeReflection` で作ります。
 一枚の Plane を明るい Scene View 背景に置くだけだと、水の厚みや底面色が無いため薄く見えやすいです。
-薄すぎる場合は水面マップスタジオの **不透明度** を 0.5 以上に上げるか、用途別の `美しい海` / `透明プール` / `室内ブループール` / `フラッグシップ透明水` を使ってください。
+薄すぎる場合は水面マップスタジオの **不透明度** を 0.5 以上に上げるか、用途別の `美しい海` / `透明プール` / `室内ブループール` / `フラッグシップ透明水` / `クリスタルラグーン` を使ってください。
 製品デモやメインビジュアル用に最高品質を優先する場合は、`目的から始める > フラッグシップ透明水` を使うと、4096px、48 フレーム、Height / Flow / DUDV / Caustics 付きの重めの設定になります。
 iOS 透明版はさらに `_TransmissionStrength` / `_GlimmerIntensity` / `_GlintIntensity` で
 透過光、細い光の揺らぎ、強いハイライトを足し、透明なだけの板に見えにくい設定にしています。
@@ -446,7 +447,7 @@ Tests/
   WaterMapCoreTests.cs      Unity Test Runner (EditMode) 用の自動テスト
 PrebakedPack/
   Textures/                 基本 normal 5 種 (1024px) + flagship normal/height (2048px)
-  ReadyMaterials/           アタッチするだけで動く Siliq 水マテリアル 6 種
+  ReadyMaterials/           アタッチするだけで動く Siliq 水マテリアル 7 種
   Materials/                設定済み Standard マテリアル 6 種
   SampleScene/              SC_WaterNormalMap_Preview.unity (基本 5 種比較シーン)
   Preview/                  Plane に貼った状態のプレビュー画像

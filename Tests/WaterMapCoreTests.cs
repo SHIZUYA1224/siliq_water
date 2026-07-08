@@ -462,6 +462,7 @@ namespace Siliq.Water.Tests
                 "M_Siliq_ClearPool_Ready",
                 "M_Siliq_IndoorBluePool_Ready",
                 "M_Siliq_FlagshipCrystal_Ready",
+                "M_Siliq_CrystalLagoon_Ready",
                 "M_Siliq_BloodSea_Ready",
             };
 
@@ -511,6 +512,16 @@ namespace Siliq.Water.Tests
             Assert.LessOrEqual(flagship.GetFloat("_DisplacementStrength"), 0.02f);
             Assert.GreaterOrEqual(flagship.GetFloat("_CausticsStrength"), 0.60f,
                 "美しさ特化の Flagship ready material は水底光をはっきり持つ必要がある");
+
+            var lagoon = LoadReadyMaterial("M_Siliq_CrystalLagoon_Ready");
+            Assert.LessOrEqual(lagoon.GetFloat("_NormalStrength"), 0.45f,
+                "Crystal Lagoon は透明感優先なので凹凸を強くしすぎない");
+            Assert.LessOrEqual(lagoon.GetFloat("_DisplacementStrength"), 0.01f,
+                "Crystal Lagoon は板模様を避けるため実高さを控えめにする");
+            Assert.GreaterOrEqual(lagoon.GetFloat("_TransmissionStrength"), 0.90f,
+                "Crystal Lagoon は透き通った見た目を最優先にする");
+            Assert.GreaterOrEqual(lagoon.GetFloat("_CausticsStrength"), 0.70f,
+                "Crystal Lagoon は水底光を強めに持つ必要がある");
         }
 
         static Material LoadReadyMaterial(string name)
