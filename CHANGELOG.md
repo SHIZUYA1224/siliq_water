@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.49] - 2026-07-09
+
+### 修正: 水面速度をさらに静かな基準へ調整
+- `WaterSurfaceAnimator` の実効速度倍率を下げ、`Speed 0.3` でも水面が速く流れすぎないようにした
+- 初期 Speed / 高さ速度 / 水底光速度を半分前後まで落とし、静かなプールや透明水の初期状態を落ち着かせた
+- Quick Apply、ReadyMaterials、Crystal Lagoon 完成 Prefab、README、テストを同じ低速基準へ更新
+
 ## [2.3.48] - 2026-07-09
 
 ### 改善: Crystal Lagoon 完成 Prefab の床表現
