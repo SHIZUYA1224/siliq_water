@@ -275,12 +275,12 @@ namespace Siliq.Water.Tests
 
                 Assert.AreEqual(2f, st.x, 1e-5f, "tiling が _BumpMap_ST.x に反映されていない");
                 Assert.AreEqual(2f, st.y, 1e-5f, "tiling が _BumpMap_ST.y に反映されていない");
-                Assert.Greater(st.z, 0.00005f, "speed / direction による X offset が反映されていない");
-                Assert.LessOrEqual(st.z, 0.00010f, "Speed 0.3 でも水面として速すぎない内部減速が必要");
+                Assert.Greater(st.z, 0.00002f, "speed / direction による X offset が反映されていない");
+                Assert.LessOrEqual(st.z, 0.00004f, "Speed 0.3 でも水面として速すぎない内部減速が必要");
                 Assert.AreEqual(2f, mainSt.x, 1e-5f, "Standard の normal UV 用 _MainTex_ST.x に tiling が反映されていない");
                 Assert.AreEqual(2f, mainSt.y, 1e-5f, "Standard の normal UV 用 _MainTex_ST.y に tiling が反映されていない");
-                Assert.Greater(mainSt.z, 0.00005f, "Standard の normal UV 用 _MainTex_ST に offset が反映されていない");
-                Assert.LessOrEqual(mainSt.z, 0.00010f, "Standard の normal UV も Speed 0.3 で速すぎてはいけない");
+                Assert.Greater(mainSt.z, 0.00002f, "Standard の normal UV 用 _MainTex_ST に offset が反映されていない");
+                Assert.LessOrEqual(mainSt.z, 0.00004f, "Standard の normal UV も Speed 0.3 で速すぎてはいけない");
                 Assert.AreEqual(2f, block.GetFloat("_BumpScale"), 1e-5f, "strength が _BumpScale に反映されていない");
                 Color c = block.GetColor("_Color");
                 Assert.AreEqual(0.12f, c.r, 1e-5f, "shallowColor が Standard の _Color.r に反映されていない");
@@ -538,7 +538,7 @@ namespace Siliq.Water.Tests
                     $"{name} は細い線だけでなく柔らかい水底光の広がりを持つ必要がある");
                 Assert.GreaterOrEqual(mat.GetFloat("_RefractionStrength"), 0.08f,
                     $"{name} は水底や反射が平板に見えない程度の軽量屈折を持つ必要がある");
-                Assert.Greater(mat.GetVector("_Scroll1").sqrMagnitude, 0.000000005f,
+                Assert.Greater(mat.GetVector("_Scroll1").sqrMagnitude, 0.0000000001f,
                     $"{name} は WaterSurfaceAnimator なしでも shader 側で波が動く scroll を持つ必要がある");
                 Assert.LessOrEqual(mat.GetVector("_Scroll1").magnitude, 0.00022f,
                     $"{name} の shader scroll が速すぎる");
@@ -560,7 +560,7 @@ namespace Siliq.Water.Tests
             var metal = LoadReadyMaterial("M_Siliq_LiquidMetal_Ready");
             Assert.AreEqual("Siliq/Water Mobile (Quest)", metal.shader.name);
             Assert.IsNotNull(metal.GetTexture("_NormalMap"));
-            Assert.Greater(metal.GetVector("_Scroll1").sqrMagnitude, 0.00000001f);
+            Assert.Greater(metal.GetVector("_Scroll1").sqrMagnitude, 0.0000000001f);
             Assert.LessOrEqual(metal.GetVector("_Scroll1").magnitude, 0.00022f);
             Assert.LessOrEqual(metal.GetVector("_Scroll2").magnitude, 0.00016f);
             Assert.LessOrEqual(metal.GetFloat("_DisplacementSpeed"), 0.00045f);
@@ -869,10 +869,10 @@ namespace Siliq.Water.Tests
 
                 float average = sum / (float)pixels.Length;
                 Assert.GreaterOrEqual(min, 8, "Crystal Lagoon 水底光に黒つぶれを戻してはならない");
-                Assert.GreaterOrEqual(max, 90, "Crystal Lagoon 水底光は床に見えるだけの明るい筋が必要");
+                Assert.GreaterOrEqual(max, 110, "Crystal Lagoon 水底光は床に見えるだけの明るい筋が必要");
                 Assert.LessOrEqual(max, 220, "Crystal Lagoon 水底光は白飛びした線にしない");
                 Assert.GreaterOrEqual(average, 32f, "Crystal Lagoon 水底光が暗すぎる");
-                Assert.LessOrEqual(average, 72f, "Crystal Lagoon 水底光が全面発光のように強すぎる");
+                Assert.LessOrEqual(average, 48f, "Crystal Lagoon 水底光が全面発光のように強すぎる");
             }
             finally
             {
@@ -911,7 +911,7 @@ namespace Siliq.Water.Tests
                 Assert.GreaterOrEqual(min, 8, "Hero 水底光に黒つぶれを戻してはならない");
                 Assert.GreaterOrEqual(max, 180, "Hero 水底光には床に映える明るい焦点線が必要");
                 Assert.LessOrEqual(max, 230, "Hero 水底光は texture 側で白飛びさせない");
-                Assert.GreaterOrEqual(average, 45f, "Hero 水底光が暗すぎる");
+                Assert.GreaterOrEqual(average, 40f, "Hero 水底光が暗すぎる");
                 Assert.LessOrEqual(average, 80f, "Hero 水底光が全面発光のように強すぎる");
                 Assert.Greater(brightPixels, pixels.Length * 0.01f,
                     "Hero 水底光には商品品質で見える明るい光筋が必要");

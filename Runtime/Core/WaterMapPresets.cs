@@ -41,6 +41,91 @@ namespace Siliq.Water
             }
         }
 
+        public static WaterMapSettings CrystalLagoonCaustics()
+        {
+            var s = Base(0.34f);
+            s.resolution = 2048;
+            s.supersample = 2;
+            s.causticsIntensity = 1.14f;
+            s.causticsSharpness = 1.62f;
+            s.layers = new[]
+            {
+                new WaveLayer
+                {
+                    name = "大きく揺らぐ透明水レンズ", type = WaveLayerType.DirectionalWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.34f, scale = 5, sharpness = 0.50f, directionDeg = 22f, spreadDeg = 42f,
+                    waveCount = 7, speed = 1, seed = 710, warpAmount = 0.08f, warpScale = 3,
+                    maskAmount = 0.12f, maskScale = 2,
+                },
+                new WaveLayer
+                {
+                    name = "細い焦点線 A", type = WaveLayerType.DirectionalWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.13f, scale = 16, sharpness = 0.56f, directionDeg = 44f, spreadDeg = 58f,
+                    waveCount = 12, speed = 1, seed = 711, warpAmount = 0.12f, warpScale = 5,
+                    maskAmount = 0.22f, maskScale = 4,
+                },
+                new WaveLayer
+                {
+                    name = "細い焦点線 B", type = WaveLayerType.DirectionalWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.075f, scale = 24, sharpness = 0.54f, directionDeg = -28f, spreadDeg = 68f,
+                    waveCount = 14, speed = 1, seed = 712, warpAmount = 0.09f, warpScale = 6,
+                    maskAmount = 0.26f, maskScale = 5,
+                },
+                new WaveLayer
+                {
+                    name = "柔らかい光膜", type = WaveLayerType.PerlinWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.08f, scale = 5, octaves = 3, persistence = 0.36f, sharpness = 0.62f,
+                    speed = 1, seed = 713, warpAmount = 0.10f, warpScale = 4,
+                },
+            };
+            return s;
+        }
+
+        public static WaterMapSettings CrystalLagoonHeroCaustics()
+        {
+            var s = CrystalLagoonCaustics();
+            s.causticsIntensity = 1.32f;
+            s.causticsSharpness = 1.48f;
+            s.layers = new[]
+            {
+                new WaveLayer
+                {
+                    name = "Hero 広い透明水レンズ", type = WaveLayerType.DirectionalWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.36f, scale = 5, sharpness = 0.50f, directionDeg = 18f, spreadDeg = 46f,
+                    waveCount = 8, speed = 1, seed = 810, warpAmount = 0.09f, warpScale = 3,
+                    maskAmount = 0.12f, maskScale = 2,
+                },
+                new WaveLayer
+                {
+                    name = "Hero 高輝度焦点線 A", type = WaveLayerType.DirectionalWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.15f, scale = 18, sharpness = 0.54f, directionDeg = 38f, spreadDeg = 64f,
+                    waveCount = 15, speed = 1, seed = 811, warpAmount = 0.13f, warpScale = 5,
+                    maskAmount = 0.22f, maskScale = 4,
+                },
+                new WaveLayer
+                {
+                    name = "Hero 高輝度焦点線 B", type = WaveLayerType.DirectionalWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.085f, scale = 26, sharpness = 0.54f, directionDeg = -24f, spreadDeg = 72f,
+                    waveCount = 17, speed = 1, seed = 812, warpAmount = 0.10f, warpScale = 7,
+                    maskAmount = 0.26f, maskScale = 5,
+                },
+                new WaveLayer
+                {
+                    name = "Hero 柔らかい水底光膜", type = WaveLayerType.PerlinWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.09f, scale = 5, octaves = 3, persistence = 0.34f, sharpness = 0.60f,
+                    speed = 1, seed = 813, warpAmount = 0.11f, warpScale = 4,
+                },
+                new WaveLayer
+                {
+                    name = "Hero 微細なきらめき", type = WaveLayerType.RidgedWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.020f, scale = 34, octaves = 2, persistence = 0.25f, sharpness = 0.48f,
+                    speed = 1, seed = 814, warpAmount = 0.08f, warpScale = 6,
+                    maskAmount = 0.28f, maskScale = 5,
+                },
+            };
+            return s;
+        }
+
         static WaterMapSettings Base(float strength)
         {
             return new WaterMapSettings

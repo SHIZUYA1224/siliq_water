@@ -611,12 +611,15 @@ namespace Siliq.Water
         }
 
         /// <summary>
-        /// コースティクス近似: 光が収束する場所 (負のラプラシアン = 凸レンズ状) を明るく。
-        /// 決定論的なマッピングなのでアニメーションでもちらつかない。
+        /// コースティクス近似: 光が収束する場所 (負のラプラシアン = 凸レンズ状) を細い焦点線にし、
+        /// その周囲に低周波の散光を重ねる。決定論的なマッピングなのでアニメーションでもちらつかない。
         /// </summary>
         public static Color[] HeightsToCausticsColors(float[] heights, int size, WaterMapSettings s)
         {
             var pixels = new Color[size * size];
+            var rawFocus = new float[size * size];
+            var softFocus = new float[size * size];
+            var wideScatter = new float[size * size];
             // -lap * size^2 は解像度に依存しない曲率。0.5e-4 は代表プリセットの
             // 曲率レンジ (数千〜数万) を [0,1] 付近へ写す較正値。
             float k = 0.5e-4f * s.causticsIntensity * size * (float)size;
@@ -627,9 +630,42 @@ namespace Siliq.Water
                 for (int x = 0; x < size; x++)
                 {
                     float focus = -LaplacianAt(heights, size, x, y) * k;
-                    float c01 = Mathf.Clamp01(0.5f + focus);
-                    float c = Mathf.Pow(c01, s.causticsSharpness);
-                    pixels[row + x] = new Color(c, c, c, 1f);
+                    float converged = Mathf.Clamp01(0.5f + focus);
+                    rawFocus[row + x] = Mathf.Pow(converged, Mathf.Max(0.5f, s.causticsSharpness));
+                }
+            });
+
+            Array.Copy(rawFocus, softFocus, rawFocus.Length);
+            Array.Copy(rawFocus, wideScatter, rawFocus.Length);
+            BoxBlurWrapped(softFocus, size);
+            BoxBlurWrapped(wideScatter, size);
+            BoxBlurWrapped(wideScatter, size);
+            BoxBlurWrapped(wideScatter, size);
+
+            Parallel.For(0, size, y =>
+            {
+                int row = y * size;
+                float v = y / (float)size;
+                for (int x = 0; x < size; x++)
+                {
+                    int i = row + x;
+                    float u = x / (float)size;
+
+                    float tight = Mathf.Pow(Mathf.Clamp01((rawFocus[i] - 0.76f) / 0.20f), 1.35f);
+                    float glow = Mathf.SmoothStep(0.56f, 0.90f, softFocus[i]);
+                    float veil = Mathf.SmoothStep(0.50f, 0.86f, wideScatter[i]);
+                    float macro = Mathf.Clamp01(0.5f + 0.5f * PerlinTileable(u * 3f, v * 3f, 3, 3, s.globalSeed + 9917));
+                    float micro = Mathf.Clamp01(0.5f + 0.5f * PerlinTileable(u * 11f + 7.13f, v * 11f + 3.71f, 11, 11, s.globalSeed + 9929));
+
+                    float light = 0.04f;
+                    light += tight * 0.58f;
+                    light += glow * 0.11f;
+                    light += veil * 0.030f;
+                    light *= Mathf.Lerp(0.82f, 1.14f, macro);
+                    light += micro * 0.010f;
+                    light = Mathf.Clamp(light, 0.035f, 0.92f);
+
+                    pixels[i] = new Color(light, light, light, 1f);
                 }
             });
             return pixels;

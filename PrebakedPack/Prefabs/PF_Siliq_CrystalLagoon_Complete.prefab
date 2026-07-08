@@ -295,12 +295,12 @@ MonoBehaviour:
   animateInEditMode: 1
   editModePreviewFps: 10
   directionDegrees: 20
-  speed: 0.00012
+  speed: 0.00006
   strength: 0.42
   tiling: 0.92
   displacementStrength: 0.006
   displacementScale: 0.95
-  displacementSpeed: 0.00030
+  displacementSpeed: 0.00018
   heightMapInfluence: 0
   shallowColor: {r: 0.56, g: 1, b: 0.98, a: 1}
   deepColor: {r: 0.004, g: 0.13, b: 0.3, a: 1}
@@ -319,7 +319,7 @@ MonoBehaviour:
   highlightStrength: 1.85
   causticsStrength: 0.72
   causticsScale: 2.25
-  causticsSpeed: 0.00006
+  causticsSpeed: 0.000035
   causticsFocus: 2
   causticsPrismStrength: 0.18
   causticsScatterStrength: 0.58

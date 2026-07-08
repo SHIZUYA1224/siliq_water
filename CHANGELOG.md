@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.67] - 2026-07-09
+
+### 改善: 水面速度と Crystal Lagoon 水底光の再調整
+- `WaterSurfaceAnimator` の Speed レンジを 0.6 まで広げ、0.3 を中間操作値として使いながら内部 UV 速度はさらに低速化した
+- Ready material / Crystal Lagoon 完成 Prefab / Hero 完成 Prefab の shader scroll、height animation、caustics animation を下げ、貼った直後に水面が速く滑らないようにした
+- Crystal Lagoon / Hero 専用 caustics 生成 preset を再調整し、細かいスクラッチ状の全面模様ではなく、暗い床に焦点線と柔らかい水底光が乗る 2048px texture へ焼き直した
+- `Tools > Siliq Water > 開発 > Crystal Lagoon 水底光を再生成` を追加し、専用 caustics texture を同じアルゴリズムで再生成できるようにした
+
 ## [2.3.66] - 2026-07-09
 
 ### 改善: 床用 caustics overlay の品質向上
