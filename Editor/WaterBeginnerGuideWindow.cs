@@ -10,6 +10,7 @@ namespace Siliq.Water.Editor
     {
         internal const string MenuPath = "Tools/Siliq Water/はじめてガイド";
         internal const string PlaceCrystalLagoonHeroCompleteActionLabel = "最高品質 Hero 完成セットを配置";
+        internal const string PlaceSunlitPoolCompleteActionLabel = "透明プール完成セットを配置";
         internal const string CreateCrystalLagoonHeroActionLabel = "最高品質 Hero 水面を作成";
         internal const string CreateCrystalLagoonActionLabel = "クリスタルラグーン水面を作成";
         internal const string CreateFlagshipActionLabel = "フラッグシップ水面を作成";
@@ -17,6 +18,7 @@ namespace Siliq.Water.Editor
         internal const string CrystalLagoonShowcaseScenePath = "PrebakedPack/SampleScene/SC_CrystalLagoon_Showcase.unity";
         internal const string CrystalLagoonCompletePrefabPath = "PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab";
         internal const string CrystalLagoonHeroCompletePrefabPath = "PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Hero_Complete.prefab";
+        internal const string SunlitPoolCompletePrefabPath = "PrebakedPack/Prefabs/PF_Siliq_SunlitPool_Complete.prefab";
         internal const string CrystalLagoonCompletePreviewPath = "PrebakedPack/Preview/preview_crystal_lagoon_complete.png";
         internal const string CrystalLagoonHeroCompletePreviewPath = "PrebakedPack/Preview/preview_crystal_lagoon_hero_complete.png";
         internal const string CrystalLagoonHeroMaterialPath = "PrebakedPack/ReadyMaterials/M_Siliq_CrystalLagoon_Hero_Ready.mat";
@@ -60,6 +62,11 @@ namespace Siliq.Water.Editor
                 WaterBeginnerSetup.PlaceCrystalLagoonHeroCompletePrefab();
             }
 
+            if (GUILayout.Button(PlaceSunlitPoolCompleteActionLabel, GUILayout.Height(34)))
+            {
+                WaterBeginnerSetup.PlaceSunlitPoolCompletePrefab();
+            }
+
             if (GUILayout.Button(CreateCrystalLagoonHeroActionLabel, GUILayout.Height(34)))
             {
                 WaterBeginnerSetup.CreateCrystalLagoonHeroWater();
@@ -93,7 +100,7 @@ namespace Siliq.Water.Editor
         {
             EditorGUILayout.LabelField("水が安っぽく見える時の確認", EditorStyles.boldLabel);
             Bullet("すぐ使う場合は PrebakedPack/ReadyMaterials の M_Siliq_*_Ready をドラッグします。material だけで波が動きます。");
-            Bullet("美しさを最優先する場合は Hero 完成セットを配置します。水面、明るい床、水底光 overlay が最初から入っています。");
+            Bullet("美しさを最優先する場合は Hero 完成セット、プール用途なら透明プール完成セットを配置します。水面、明るい床、水底光 overlay が最初から入っています。");
             Bullet("normal だけでは透明感は出ません。ReadyMaterials か用途別マテリアルで色、透明度、反射、ハイライトも設定します。");
             Bullet("高さはメッシュの頂点変位です。1 枚 Quad では見えないため、分割メッシュを使います。");
             Bullet("ピンク material は shader 不一致です。診断修復で現在の Render Pipeline に合う material へ差し替えます。");
@@ -150,6 +157,10 @@ namespace Siliq.Water.Editor
                 if (GUILayout.Button("Hero Prefab を選択"))
                 {
                     PingPackageAsset(CrystalLagoonHeroCompletePrefabPath);
+                }
+                if (GUILayout.Button("透明プール Prefab を選択"))
+                {
+                    PingPackageAsset(SunlitPoolCompletePrefabPath);
                 }
             }
 

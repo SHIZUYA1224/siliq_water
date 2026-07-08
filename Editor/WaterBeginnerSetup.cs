@@ -18,6 +18,7 @@ namespace Siliq.Water.Editor
         const string CrystalLagoonMenuPath = "GameObject/Siliq Water/用途別マテリアルを適用/クリスタルラグーン (Crystal Lagoon)";
         const string CrystalLagoonHeroMenuPath = "GameObject/Siliq Water/用途別マテリアルを適用/クリスタルラグーン Hero (Crystal Lagoon Hero)";
         internal const string CrystalLagoonHeroCompletePrefabPackagePath = "Packages/com.siliq.water-normalmap/PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Hero_Complete.prefab";
+        internal const string SunlitPoolCompletePrefabPackagePath = "Packages/com.siliq.water-normalmap/PrebakedPack/Prefabs/PF_Siliq_SunlitPool_Complete.prefab";
         const int PremiumGridSegments = 96;
         const float PremiumGridSize = 20f;
 
@@ -25,12 +26,36 @@ namespace Siliq.Water.Editor
         [MenuItem(GameObjectRootMenu + "最高品質 Hero 完成セットを配置", false, 0)]
         public static void PlaceCrystalLagoonHeroCompletePrefab()
         {
-            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(CrystalLagoonHeroCompletePrefabPackagePath);
+            PlaceCompletePrefab(
+                CrystalLagoonHeroCompletePrefabPackagePath,
+                "Hero 完成 Prefab",
+                "Siliq 最高品質 Hero 完成セットを配置",
+                "最高品質 Hero 完成セットを配置しました。\n\n" +
+                "水面、明るい床、Hero 専用 caustics overlay、確認用ライトが一体です。\n" +
+                "まずはこの状態で透明感、水底光、斜め反射を確認してください。");
+        }
+
+        [MenuItem(RootMenu + "透明プール完成セットを配置", false, 1)]
+        [MenuItem(GameObjectRootMenu + "透明プール完成セットを配置", false, 1)]
+        public static void PlaceSunlitPoolCompletePrefab()
+        {
+            PlaceCompletePrefab(
+                SunlitPoolCompletePrefabPackagePath,
+                "透明プール完成 Prefab",
+                "Siliq 透明プール完成セットを配置",
+                "透明プール完成セットを配置しました。\n\n" +
+                "透明プール水面、明るい床、SunlitPool 専用 caustics overlay、確認用ライトが一体です。\n" +
+                "室内プールや浅いプールで、水底の広い床光と柔らかい光リボンを確認できます。");
+        }
+
+        static void PlaceCompletePrefab(string packagePath, string missingLabel, string undoName, string dialogBody)
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(packagePath);
             if (prefab == null)
             {
                 EditorUtility.DisplayDialog(
                     "Siliq Water",
-                    "Hero 完成 Prefab が見つかりません。Package が正しく読み込まれているか確認してください。",
+                    $"{missingLabel} が見つかりません。Package が正しく読み込まれているか確認してください。",
                     "OK");
                 return;
             }
@@ -43,7 +68,7 @@ namespace Siliq.Water.Editor
                 if (parent != null) instance.transform.SetParent(parent, false);
             }
 
-            Undo.RegisterCreatedObjectUndo(instance, "Siliq 最高品質 Hero 完成セットを配置");
+            Undo.RegisterCreatedObjectUndo(instance, undoName);
             instance.transform.localPosition = Vector3.zero;
             instance.transform.localRotation = Quaternion.identity;
             Selection.activeGameObject = instance;
@@ -54,16 +79,11 @@ namespace Siliq.Water.Editor
                 SceneView.lastActiveSceneView.FrameSelected();
             }
 
-            EditorUtility.DisplayDialog(
-                "Siliq Water",
-                "最高品質 Hero 完成セットを配置しました。\n\n" +
-                "水面、明るい床、Hero 専用 caustics overlay、確認用ライトが一体です。\n" +
-                "まずはこの状態で透明感、水底光、斜め反射を確認してください。",
-                "OK");
+            EditorUtility.DisplayDialog("Siliq Water", dialogBody, "OK");
         }
 
-        [MenuItem(RootMenu + "最高品質 Hero 水面を作成", false, 1)]
-        [MenuItem(GameObjectRootMenu + "最高品質 Hero 水面を作成", false, 1)]
+        [MenuItem(RootMenu + "最高品質 Hero 水面を作成", false, 2)]
+        [MenuItem(GameObjectRootMenu + "最高品質 Hero 水面を作成", false, 2)]
         public static void CreateCrystalLagoonHeroWater()
         {
             CreatePremiumWater(
@@ -76,8 +96,8 @@ namespace Siliq.Water.Editor
                 "水底の光が強すぎる場合は WaterSurfaceAnimator の「水底の光」を下げてください。");
         }
 
-        [MenuItem(RootMenu + "クリスタルラグーン水面を作成", false, 2)]
-        [MenuItem(GameObjectRootMenu + "クリスタルラグーン水面を作成", false, 2)]
+        [MenuItem(RootMenu + "クリスタルラグーン水面を作成", false, 3)]
+        [MenuItem(GameObjectRootMenu + "クリスタルラグーン水面を作成", false, 3)]
         public static void CreateCrystalLagoonWater()
         {
             CreatePremiumWater(
@@ -90,8 +110,8 @@ namespace Siliq.Water.Editor
                 "高さが見えない場合は、この水面メッシュのまま使ってください。1枚 Quad では実高さが出ません。");
         }
 
-        [MenuItem(RootMenu + "フラッグシップ水面を作成", false, 3)]
-        [MenuItem(GameObjectRootMenu + "フラッグシップ水面を作成", false, 3)]
+        [MenuItem(RootMenu + "フラッグシップ水面を作成", false, 4)]
+        [MenuItem(GameObjectRootMenu + "フラッグシップ水面を作成", false, 4)]
         public static void CreateFlagshipWater()
         {
             CreatePremiumWater(

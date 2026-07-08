@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.77] - 2026-07-09
+
+### 追加: 透明プール完成セットと SunlitPool 床光 overlay
+- `M_Siliq_SunlitPool_CausticsOverlay` を追加し、透明プール / 室内ブループール用の `Water_Caustics_SunlitPool_01.png` を床にも直接重ねられるようにした
+- `PF_Siliq_SunlitPool_Complete.prefab` を追加し、ClearPool 水面、明るい床、SunlitPool caustics overlay、確認用ライトを一体で配置できるようにした
+- `Tools > Siliq Water > かんたん作成 > 透明プール完成セットを配置` と はじめてガイドのボタンを追加
+- テストとドキュメントを更新し、透明プール系でも水底光込みの完成形から始められることを固定
+
 ## [2.3.76] - 2026-07-09
 
 ### 改善: 透明水越しの水底 visibility を追加

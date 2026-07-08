@@ -1119,8 +1119,10 @@ namespace Siliq.Water.Tests
             const string shaderPath = "Packages/com.siliq.water-normalmap/Runtime/Shaders/SiliqCausticsOverlay.shader";
             const string materialPath = "Packages/com.siliq.water-normalmap/PrebakedPack/ReadyMaterials/M_Siliq_CrystalLagoon_CausticsOverlay.mat";
             const string heroMaterialPath = "Packages/com.siliq.water-normalmap/PrebakedPack/ReadyMaterials/M_Siliq_CrystalLagoon_Hero_CausticsOverlay.mat";
+            const string sunlitPoolMaterialPath = "Packages/com.siliq.water-normalmap/PrebakedPack/ReadyMaterials/M_Siliq_SunlitPool_CausticsOverlay.mat";
             const string causticsPath = "Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Caustics_CrystalLagoon_01.png";
             const string heroCausticsPath = "Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Caustics_CrystalLagoon_Hero_01.png";
+            const string sunlitPoolCausticsPath = "Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Caustics_SunlitPool_01.png";
 
             Assert.IsTrue(File.Exists(shaderPath), "床用 caustics overlay shader が同梱されていない");
             string shaderText = File.ReadAllText(shaderPath);
@@ -1141,14 +1143,19 @@ namespace Siliq.Water.Tests
 
             var material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
             var heroMaterial = AssetDatabase.LoadAssetAtPath<Material>(heroMaterialPath);
+            var sunlitPoolMaterial = AssetDatabase.LoadAssetAtPath<Material>(sunlitPoolMaterialPath);
             Assert.IsNotNull(material, "Crystal Lagoon 床用 caustics overlay material が同梱されていない");
             Assert.IsNotNull(heroMaterial, "Hero 床用 caustics overlay material が同梱されていない");
+            Assert.IsNotNull(sunlitPoolMaterial, "透明プール床用 SunlitPool caustics overlay material が同梱されていない");
             Assert.AreEqual("Siliq/Caustics Overlay Mobile", material.shader.name);
             Assert.AreEqual("Siliq/Caustics Overlay Mobile", heroMaterial.shader.name);
+            Assert.AreEqual("Siliq/Caustics Overlay Mobile", sunlitPoolMaterial.shader.name);
             Assert.AreEqual(causticsPath, AssetDatabase.GetAssetPath(material.GetTexture("_CausticsMap")),
                 "床用 caustics overlay が Crystal Lagoon 専用 caustics を参照していない");
             Assert.AreEqual(heroCausticsPath, AssetDatabase.GetAssetPath(heroMaterial.GetTexture("_CausticsMap")),
                 "Hero 床用 caustics overlay が Hero 専用 caustics を参照していない");
+            Assert.AreEqual(sunlitPoolCausticsPath, AssetDatabase.GetAssetPath(sunlitPoolMaterial.GetTexture("_CausticsMap")),
+                "透明プール床用 overlay が SunlitPool 専用 caustics を参照していない");
             Assert.GreaterOrEqual(material.GetFloat("_Intensity"), 0.4f,
                 "床用 caustics overlay が弱すぎると水底光として見えない");
             Assert.LessOrEqual(material.GetFloat("_Intensity"), 0.75f,
@@ -1171,10 +1178,20 @@ namespace Siliq.Water.Tests
                 "Hero 床用 caustics overlay は透明水越しの柔らかい散光を強めに持つ必要がある");
             Assert.GreaterOrEqual(heroMaterial.GetFloat("_PrismStrength"), 0.14f,
                 "Hero 床用 caustics overlay は薄いプリズム色を強めに持つ必要がある");
+            Assert.GreaterOrEqual(sunlitPoolMaterial.GetFloat("_Intensity"), 0.45f,
+                "透明プール床用 overlay は広い床光として見える強さが必要");
+            Assert.LessOrEqual(sunlitPoolMaterial.GetFloat("_Intensity"), 0.65f,
+                "透明プール床用 overlay が強すぎると床が発光しすぎる");
+            Assert.GreaterOrEqual(sunlitPoolMaterial.GetFloat("_SoftScatter"), 0.50f,
+                "透明プール床用 overlay は細い線より柔らかい床光を優先する");
+            Assert.LessOrEqual(sunlitPoolMaterial.GetFloat("_Focus"), 1.65f,
+                "透明プール床用 overlay は Hero のように締めすぎず自然な床光にする");
             Assert.AreEqual((int)RenderQueue.Transparent, material.renderQueue,
                 "床用 caustics overlay は透明キューで床の上に重ねる");
             Assert.AreEqual((int)RenderQueue.Transparent, heroMaterial.renderQueue,
                 "Hero 床用 caustics overlay は透明キューで床の上に重ねる");
+            Assert.AreEqual((int)RenderQueue.Transparent, sunlitPoolMaterial.renderQueue,
+                "透明プール床用 overlay は透明キューで床の上に重ねる");
         }
 
         [Test]
@@ -1866,6 +1883,7 @@ namespace Siliq.Water.Tests
 
             Assert.IsTrue(hasMenu, "Tools > Siliq Water > はじめてガイド menu が登録されていない");
             Assert.AreEqual("最高品質 Hero 完成セットを配置", WaterBeginnerGuideWindow.PlaceCrystalLagoonHeroCompleteActionLabel);
+            Assert.AreEqual("透明プール完成セットを配置", WaterBeginnerGuideWindow.PlaceSunlitPoolCompleteActionLabel);
             Assert.AreEqual("最高品質 Hero 水面を作成", WaterBeginnerGuideWindow.CreateCrystalLagoonHeroActionLabel);
             Assert.AreEqual("クリスタルラグーン水面を作成", WaterBeginnerGuideWindow.CreateCrystalLagoonActionLabel);
             Assert.AreEqual("フラッグシップ水面を作成", WaterBeginnerGuideWindow.CreateFlagshipActionLabel);
@@ -1876,6 +1894,8 @@ namespace Siliq.Water.Tests
                 WaterBeginnerGuideWindow.CrystalLagoonCompletePrefabPath);
             Assert.AreEqual("PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Hero_Complete.prefab",
                 WaterBeginnerGuideWindow.CrystalLagoonHeroCompletePrefabPath);
+            Assert.AreEqual("PrebakedPack/Prefabs/PF_Siliq_SunlitPool_Complete.prefab",
+                WaterBeginnerGuideWindow.SunlitPoolCompletePrefabPath);
             Assert.AreEqual("PrebakedPack/Preview/preview_crystal_lagoon_complete.png",
                 WaterBeginnerGuideWindow.CrystalLagoonCompletePreviewPath);
             Assert.AreEqual("PrebakedPack/Preview/preview_crystal_lagoon_hero_complete.png",
@@ -1915,6 +1935,39 @@ namespace Siliq.Water.Tests
                 WaterBeginnerSetup.CrystalLagoonHeroCompletePrefabPackagePath);
             Assert.IsNotNull(AssetDatabase.LoadAssetAtPath<GameObject>(WaterBeginnerSetup.CrystalLagoonHeroCompletePrefabPackagePath),
                 "Hero 完成セット配置 menu が参照する Prefab が読み込めない");
+        }
+
+        [Test]
+        public void BeginnerSetup_ProvidesSunlitPoolCompletePrefabPlacementMenu()
+        {
+            var method = typeof(WaterBeginnerSetup).GetMethod(
+                "PlaceSunlitPoolCompletePrefab",
+                BindingFlags.Public | BindingFlags.Static);
+            Assert.IsNotNull(method, "透明プール完成セットの配置 entry point が見つからない");
+
+            bool hasToolsMenu = false;
+            bool hasGameObjectMenu = false;
+            foreach (var attribute in method.GetCustomAttributes(typeof(MenuItem), false))
+            {
+                var menuItem = attribute as MenuItem;
+                if (menuItem == null) continue;
+                if (menuItem.menuItem == "Tools/Siliq Water/かんたん作成/透明プール完成セットを配置")
+                {
+                    hasToolsMenu = true;
+                }
+                if (menuItem.menuItem == "GameObject/Siliq Water/かんたん作成/透明プール完成セットを配置")
+                {
+                    hasGameObjectMenu = true;
+                }
+            }
+
+            Assert.IsTrue(hasToolsMenu, "Tools の透明プール完成セット配置 menu が登録されていない");
+            Assert.IsTrue(hasGameObjectMenu, "GameObject の透明プール完成セット配置 menu が登録されていない");
+            Assert.AreEqual(
+                "Packages/com.siliq.water-normalmap/PrebakedPack/Prefabs/PF_Siliq_SunlitPool_Complete.prefab",
+                WaterBeginnerSetup.SunlitPoolCompletePrefabPackagePath);
+            Assert.IsNotNull(AssetDatabase.LoadAssetAtPath<GameObject>(WaterBeginnerSetup.SunlitPoolCompletePrefabPackagePath),
+                "透明プール完成セット配置 menu が参照する Prefab が読み込めない");
         }
 
         [Test]
@@ -2155,6 +2208,70 @@ namespace Siliq.Water.Tests
             Assert.GreaterOrEqual(animator.bottomLightStrength, 1.85f, "Hero 完成 Prefab は水底光が水越しに強く見える必要がある");
             Assert.GreaterOrEqual(animator.bottomGlowStrength, 1.0f, "Hero 完成 Prefab は水底の柔らかい明るさを確認できる必要がある");
             Assert.GreaterOrEqual(animator.depthTintStrength, 0.32f, "Hero 完成 Prefab は奥行きの青みを確認できる必要がある");
+        }
+
+        [Test]
+        public void SunlitPoolCompletePrefab_IsBundledForPoolDragAndDrop()
+        {
+            const string prefabGuid = "a171aabb01c34e01a1b2c3d4e5f60710";
+            const string gridGuid = "c372220d922244035b21bdd3e4ff000a";
+            const string clearPoolMaterialGuid = "0d11aad9d06714851b748d978793f0ad";
+            const string sunlitOverlayMaterialGuid = "f2c657c8bc4a4c7080e6a1327818899d";
+            const string floorMaterialGuid = "42443abe313b246949f1b9f8504234ce";
+
+            string prefabPath = AssetDatabase.GUIDToAssetPath(prefabGuid);
+            Assert.AreEqual("Packages/com.siliq.water-normalmap/PrebakedPack/Prefabs/PF_Siliq_SunlitPool_Complete.prefab", prefabPath);
+
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            Assert.IsNotNull(prefab, "透明プール完成 Prefab が読み込めない");
+            Assert.AreEqual("PF_Siliq_SunlitPool_Complete", prefab.name);
+
+            var water = prefab.transform.Find("Sunlit Pool Water - clear transparent pool");
+            var floor = prefab.transform.Find("Pale Pool Floor - transparency and caustics receiver");
+            var overlay = prefab.transform.Find("Sunlit Pool Floor Caustics Overlay");
+            var light = prefab.transform.Find("Sunlit Pool Soft Preview Light");
+            Assert.IsNotNull(water, "透明プール完成 Prefab に水面がない");
+            Assert.IsNotNull(floor, "透明プール完成 Prefab に明るい床がない");
+            Assert.IsNotNull(overlay, "透明プール完成 Prefab に SunlitPool caustics overlay がない");
+            Assert.IsNotNull(light, "透明プール完成 Prefab に確認用ライトがない");
+
+            var waterFilter = water.GetComponent<MeshFilter>();
+            var waterRenderer = water.GetComponent<MeshRenderer>();
+            var floorRenderer = floor.GetComponent<MeshRenderer>();
+            var overlayRenderer = overlay.GetComponent<MeshRenderer>();
+            var animator = water.GetComponent<WaterSurfaceAnimator>();
+            Assert.IsNotNull(waterFilter, "透明プール完成 Prefab の水面に MeshFilter がない");
+            Assert.IsNotNull(waterRenderer, "透明プール完成 Prefab の水面に MeshRenderer がない");
+            Assert.IsNotNull(floorRenderer, "透明プール完成 Prefab の床に MeshRenderer がない");
+            Assert.IsNotNull(overlayRenderer, "透明プール完成 Prefab の caustics overlay に MeshRenderer がない");
+            Assert.IsNotNull(animator, "透明プール完成 Prefab の水面に WaterSurfaceAnimator がない");
+
+            Assert.AreEqual(gridGuid, AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(waterFilter.sharedMesh)),
+                "透明プール完成 Prefab は分割済み grid mesh を使う必要がある");
+            Assert.AreEqual(clearPoolMaterialGuid, AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(waterRenderer.sharedMaterial)),
+                "透明プール完成 Prefab の水面は ClearPool ready material を直接参照する必要がある");
+            Assert.AreEqual(sunlitOverlayMaterialGuid, AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(overlayRenderer.sharedMaterial)),
+                "透明プール完成 Prefab の overlay は SunlitPool caustics overlay material を直接参照する必要がある");
+            Assert.AreEqual(floorMaterialGuid, AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(floorRenderer.sharedMaterial)),
+                "透明プール完成 Prefab の床は明るい確認用 material を直接参照する必要がある");
+
+            Assert.AreEqual("Siliq/Water Mobile (Quest)", waterRenderer.sharedMaterial.shader.name);
+            Assert.AreEqual("Siliq/Caustics Overlay Mobile", overlayRenderer.sharedMaterial.shader.name);
+            Assert.GreaterOrEqual(overlayRenderer.sharedMaterial.GetFloat("_Intensity"), 0.45f,
+                "透明プール完成 Prefab は床側に見える SunlitPool 水底光を持つ必要がある");
+            Assert.GreaterOrEqual(overlayRenderer.sharedMaterial.GetFloat("_SoftScatter"), 0.50f,
+                "透明プール完成 Prefab は細い線だけでなく柔らかい床光を持つ必要がある");
+
+            Assert.IsNull(floor.GetComponent<Collider>(), "透明プール完成 Prefab の床は不要な物理 collider を増やさない");
+            Assert.IsNull(overlay.GetComponent<Collider>(), "透明プール完成 Prefab の caustics overlay は不要な collider を持たない");
+            Assert.LessOrEqual(animator.speed, 0.000025f, "透明プール完成 Prefab は静かな速度から始める");
+            Assert.LessOrEqual(animator.displacementStrength, 0.018f, "透明プール完成 Prefab は高さを強くしすぎない");
+            Assert.LessOrEqual(animator.opacity, 0.36f, "透明プール完成 Prefab は透明感を優先する");
+            Assert.GreaterOrEqual(animator.clarity, 0.74f, "透明プール完成 Prefab は水底が見える抜け感を持つ必要がある");
+            Assert.GreaterOrEqual(animator.refractionStrength, 0.30f, "透明プール完成 Prefab は床と水底光を水越しに揺らす必要がある");
+            Assert.GreaterOrEqual(animator.causticsStrength, 0.45f, "透明プール完成 Prefab は水底光を弱くしすぎない");
+            Assert.GreaterOrEqual(animator.bottomVisibility, 1.30f, "透明プール完成 Prefab は水底が見える初期値にする");
+            Assert.GreaterOrEqual(animator.bottomGlowStrength, 0.68f, "透明プール完成 Prefab は水底の柔らかい明るさを持つ必要がある");
         }
 
         [Test]
