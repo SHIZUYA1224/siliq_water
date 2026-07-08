@@ -491,6 +491,46 @@ namespace Siliq.Water.Tests
             Assert.IsTrue(foundSubtleCaustics, "室内ブループールには淡い室内光のムラが必要");
         }
 
+        [Test]
+        public void FlagshipCrystalPreset_UsesLayeredPremiumWaterRecipe()
+        {
+            var settings = WaterMapPresets.Create(11);
+            Assert.That(settings.layers.Length, Is.GreaterThanOrEqualTo(5), "フラッグシップ透明水は単調な一枚ノイズにしない");
+            Assert.LessOrEqual(settings.strength, 0.85f, "フラッグシップ透明水は高品質でも法線を荒く盛りすぎない");
+            Assert.LessOrEqual(settings.baseRoughness, 0.03f, "フラッグシップ透明水は鏡面反射が主役なのでラフネスを低く保つ");
+            Assert.GreaterOrEqual(settings.causticsIntensity, 1.0f, "フラッグシップ透明水には淡いコースティクスの存在感が必要");
+
+            bool foundBroadMirrorWave = false;
+            bool foundFineRipples = false;
+            bool foundSubtleCaustics = false;
+            foreach (var layer in settings.layers)
+            {
+                if (layer.type == WaveLayerType.DirectionalWaves &&
+                    layer.scale <= 4 &&
+                    layer.amplitude >= 0.65f &&
+                    layer.waveCount >= 8)
+                {
+                    foundBroadMirrorWave = true;
+                }
+
+                if ((layer.type == WaveLayerType.RidgedWaves || layer.type == WaveLayerType.DirectionalWaves) &&
+                    layer.scale >= 20 &&
+                    layer.amplitude <= 0.22f)
+                {
+                    foundFineRipples = true;
+                }
+
+                if (layer.type != WaveLayerType.VoronoiCaustics) continue;
+                foundSubtleCaustics = true;
+                Assert.LessOrEqual(layer.amplitude, 0.10f, "フラッグシップ透明水のコースティクスを太い白模様にしてはならない");
+                Assert.GreaterOrEqual(layer.scale, 20, "フラッグシップ透明水のコースティクスは細かく上品にする");
+            }
+
+            Assert.IsTrue(foundBroadMirrorWave, "フラッグシップ透明水には広い鏡面うねりが必要");
+            Assert.IsTrue(foundFineRipples, "フラッグシップ透明水には反射を細かく割る細波が必要");
+            Assert.IsTrue(foundSubtleCaustics, "フラッグシップ透明水には控えめなコースティクスが必要");
+        }
+
         // ---------------------------------------------------------------
         // ヘルパー
         // ---------------------------------------------------------------

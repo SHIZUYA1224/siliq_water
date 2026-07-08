@@ -18,6 +18,7 @@ namespace Siliq.Water
             "プール (光の網目)",
             "サイバー (細いデータ流)",
             "室内ブループール (窓反射)",
+            "フラッグシップ透明水 (多層反射)",
         };
 
         public static WaterMapSettings Create(int index)
@@ -35,6 +36,7 @@ namespace Siliq.Water
                 case 8: return Pool();
                 case 9: return Cyber();
                 case 10: return IndoorBluePool();
+                case 11: return FlagshipCrystalWater();
                 default: return CalmLake();
             }
         }
@@ -325,6 +327,56 @@ namespace Siliq.Water
                     name = "淡い室内光のムラ", type = WaveLayerType.VoronoiCaustics, blend = WaveBlendMode.Add,
                     amplitude = 0.06f, scale = 16, sharpness = 1.80f, jitter = 0.96f, speed = 1,
                     seed = 31, warpAmount = 0.22f, warpScale = 4, maskAmount = 0.50f, maskScale = 3,
+                },
+            };
+            return s;
+        }
+
+        /// <summary>製品デモの主役にする透明水。広い鏡面、細波、淡いコースティクス、実高さ用の中周波を重ねる。</summary>
+        static WaterMapSettings FlagshipCrystalWater()
+        {
+            var s = Base(0.72f);
+            s.baseRoughness = 0.018f;
+            s.slopeRoughness = 0.48f;
+            s.foamThreshold = 0.86f;
+            s.foamSlopeBoost = 0.24f;
+            s.flowSwirl = 0.34f;
+            s.flowStrength = 0.42f;
+            s.dudvStrength = 0.75f;
+            s.causticsIntensity = 1.35f;
+            s.causticsSharpness = 2.35f;
+            s.layers = new[]
+            {
+                new WaveLayer
+                {
+                    name = "大きな鏡面うねり", type = WaveLayerType.DirectionalWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.72f, scale = 3, sharpness = 1.05f, directionDeg = 24f, spreadDeg = 38f,
+                    waveCount = 9, speed = 1, seed = 41,
+                },
+                new WaveLayer
+                {
+                    name = "反射を割る斜めうねり", type = WaveLayerType.DirectionalWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.34f, scale = 7, sharpness = 0.95f, directionDeg = 96f, spreadDeg = 55f,
+                    waveCount = 14, speed = 1, seed = 42, maskAmount = 0.22f, maskScale = 3,
+                },
+                new WaveLayer
+                {
+                    name = "透明水の細波", type = WaveLayerType.RidgedWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.18f, scale = 26, octaves = 3, persistence = 0.38f, sharpness = 0.90f,
+                    directionDeg = 38f, stretch = 2, speed = 2, seed = 43, warpAmount = 0.16f, warpScale = 5,
+                    maskAmount = 0.26f, maskScale = 5,
+                },
+                new WaveLayer
+                {
+                    name = "低周波の透明ムラ", type = WaveLayerType.PerlinWaves, blend = WaveBlendMode.Add,
+                    amplitude = 0.22f, scale = 4, octaves = 5, persistence = 0.50f, sharpness = 0.95f,
+                    speed = 1, seed = 44, warpAmount = 0.30f, warpScale = 3, maskAmount = 0.35f, maskScale = 2,
+                },
+                new WaveLayer
+                {
+                    name = "上品なコースティクス", type = WaveLayerType.VoronoiCaustics, blend = WaveBlendMode.Add,
+                    amplitude = 0.08f, scale = 24, sharpness = 2.10f, jitter = 0.98f, speed = 1,
+                    seed = 45, warpAmount = 0.28f, warpScale = 4, maskAmount = 0.45f, maskScale = 3,
                 },
             };
             return s;
