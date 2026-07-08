@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.55] - 2026-07-09
+
+### 追加: Hero 専用水底光 texture
+- `Water_Caustics_CrystalLagoon_Hero_01.png` を追加し、Hero material の水底光を通常 Crystal Lagoon より焦点線が多い専用 texture に分離
+- `M_Siliq_CrystalLagoon_Hero_Ready` が Hero caustics を参照するよう更新
+- README / 用途別ガイド / テストで、Hero caustics が通常版や共通 caustics の流用ではないことを固定
+
 ## [2.3.54] - 2026-07-09
 
 ### 追加: Crystal Lagoon Hero ready material
