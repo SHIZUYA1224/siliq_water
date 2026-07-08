@@ -179,7 +179,8 @@ PC の発熱を避けるため、編集モードの連続プレビューは**選
 Package Manager の `URP Shader` Sample を Import すると `Siliq/Water URP` も使えます。
 これらは最初から UV スクロールが組み込まれているため `WaterSurfaceAnimator` は不要です。
 
-見た目は `PrebakedPack/Preview/` のプレビュー画像 (Plane に貼って光を当てた状態) で事前確認できます。
+見た目は `PrebakedPack/Preview/` のプレビュー画像で事前確認できます。
+美しさ特化の入口は `preview_crystal_lagoon.png` です。透明感、水底の光、淡い青緑の方向性を先に確認できます。
 
 ### 手動でインポート設定する場合
 
@@ -450,7 +451,7 @@ PrebakedPack/
   ReadyMaterials/           アタッチするだけで動く Siliq 水マテリアル 7 種
   Materials/                設定済み Standard マテリアル 6 種
   SampleScene/              SC_WaterNormalMap_Preview.unity (基本 5 種比較シーン)
-  Preview/                  Plane に貼った状態のプレビュー画像
+  Preview/                  Plane に貼った状態のプレビュー画像、Crystal Lagoon の美しさ確認用画像
 ```
 
 ## テスト

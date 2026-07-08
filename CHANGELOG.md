@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.37] - 2026-07-08
+
+### 追加: Crystal Lagoon プレビュー画像
+- `PrebakedPack/Preview/preview_crystal_lagoon.png` を追加し、美しさ特化の水面を適用前に確認できるようにした
+- README のプレビュー説明を Crystal Lagoon 優先に更新
+- Crystal Lagoon の preview asset が package に含まれることをテストで固定
+
 ## [2.3.36] - 2026-07-08
 
 ### 改善: 初心者向け作成導線を Crystal Lagoon 優先へ変更

@@ -533,6 +533,20 @@ namespace Siliq.Water.Tests
         }
 
         [Test]
+        public void CrystalLagoonPreview_IsBundledForBeautyFirstSelection()
+        {
+            const string path = "Packages/com.siliq.water-normalmap/PrebakedPack/Preview/preview_crystal_lagoon.png";
+            var preview = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+            Assert.IsNotNull(preview, "Crystal Lagoon の美しさ確認用 preview が同梱されていない");
+            Assert.GreaterOrEqual(preview.width, 1024, "Crystal Lagoon preview は水底光が見える解像度が必要");
+            Assert.GreaterOrEqual(preview.height, 512, "Crystal Lagoon preview は水面の透明感が見える解像度が必要");
+
+            var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            Assert.IsNotNull(importer, "Crystal Lagoon preview の import 設定が読めない");
+            Assert.IsTrue(importer.sRGBTexture, "Preview 画像は見た目確認用なので sRGB で読み込む");
+        }
+
+        [Test]
         public void SiliqMobileShader_ExposesMacroVariationControls()
         {
             Material mat = null;
