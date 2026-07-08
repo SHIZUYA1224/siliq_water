@@ -20,7 +20,7 @@ namespace Siliq.Water
     public class WaterSurfaceAnimator : MonoBehaviour
     {
         const float MaxSurfaceSpeed = 0.6f;
-        const float SurfaceSpeedToUvPerSecond = 0.000055f;
+        const float SurfaceSpeedToUvPerSecond = 0.000022f;
         const int DefaultEditModePreviewFps = 10;
 
         [Tooltip("スクロールさせるテクスチャのプロパティ名。Standard/URP Lit/VRChat Mobile は _BumpMap、Siliq 独自シェーダーは _NormalMap。")]
@@ -39,7 +39,7 @@ namespace Siliq.Water
         [Tooltip("波が流れる向き (度)。0=右、90=上、180=左、270=下。")]
         [Range(0f, 360f)] public float directionDegrees = 30f;
 
-        [Tooltip("流れる速さ。0で静止、0.3が静かな水面の中間。内部でかなり減速し、透明水が速く滑って見えないようにしています。")]
+        [Tooltip("流れる速さ。0で静止、0.3が静かな水面の中間。内部で強く減速し、透明水が速く滑って見えないようにしています。")]
         [Range(0f, MaxSurfaceSpeed)] public float speed = 0.00025f;
 
         [Header("見た目")]
@@ -57,7 +57,7 @@ namespace Siliq.Water
         [Range(0.05f, 4f)] public float displacementScale = 0.75f;
 
         [Tooltip("高さ変位の動く速さ。")]
-        [Range(0f, 1f)] public float displacementSpeed = 0.00018f;
+        [Range(0f, 1f)] public float displacementSpeed = 0.00008f;
 
         [Tooltip("書き出したハイトマップを高さに使う割合。0 なら手続き的なうねりのみ、1 ならハイトマップ中心。")]
         [Range(0f, 1f)] public float heightMapInfluence = 0f;
@@ -117,7 +117,7 @@ namespace Siliq.Water
         [Range(0.2f, 8f)] public float causticsScale = 2.0f;
 
         [Tooltip("水底の光模様がゆっくり流れる速さ。")]
-        [Range(0f, 0.25f)] public float causticsSpeed = 0.00004f;
+        [Range(0f, 0.25f)] public float causticsSpeed = 0.000012f;
 
         [Tooltip("水底光の線の締まり。高いほど細い焦点線になり、低いほど柔らかく広がります。")]
         [Range(0.5f, 4f)] public float causticsFocus = 1.4f;
