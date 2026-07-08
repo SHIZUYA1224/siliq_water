@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.41] - 2026-07-09
+
+### 追加: Crystal Lagoon showcase scene
+- `PrebakedPack/SampleScene/SC_CrystalLagoon_Showcase.unity` を追加し、専用 Crystal Lagoon ready material を開いて確認できるようにした
+- 透明感と水底光を確認しやすい分割済み水面メッシュ、明るい床、ライト、カメラを同梱
+- はじめてガイドと README のサンプル導線を Crystal Lagoon showcase 優先へ更新
+
 ## [2.3.40] - 2026-07-09
 
 ### 改善: 水底光を自然な Crystal Lagoon 向けに再作成

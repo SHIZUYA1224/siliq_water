@@ -12,6 +12,7 @@ namespace Siliq.Water.Editor
         internal const string CreateCrystalLagoonActionLabel = "クリスタルラグーン水面を作成";
         internal const string CreateFlagshipActionLabel = "フラッグシップ水面を作成";
         internal const string RepairSelectionActionLabel = "選択中の水面を診断して自動修復";
+        internal const string CrystalLagoonShowcaseScenePath = "PrebakedPack/SampleScene/SC_CrystalLagoon_Showcase.unity";
 
         Vector2 scroll;
 
@@ -109,9 +110,9 @@ namespace Siliq.Water.Editor
 
             using (new EditorGUILayout.HorizontalScope())
             {
-                if (GUILayout.Button("サンプルシーンを選択"))
+                if (GUILayout.Button("Crystal Lagoon シーンを選択"))
                 {
-                    PingPackageAsset("PrebakedPack/SampleScene/SC_WaterNormalMap_Preview.unity");
+                    PingPackageAsset(CrystalLagoonShowcaseScenePath);
                 }
                 if (GUILayout.Button("PrebakedPack を選択"))
                 {

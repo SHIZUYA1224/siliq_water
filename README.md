@@ -128,8 +128,9 @@ Renderer にドラッグ&ドロップするだけで水として動きます。`
    同梱の `Siliq/Water Mobile (Quest)` を alpha blend 設定にしたマテリアルを生成します。
    正面は透け、斜め視線では Fresnel で反射と不透明感が増え、透過光・細い光・きらめきで水らしさが出るように調整済みです。
    暗い部屋では反射ときらめきを自動で抑えるため、黒背景で水面だけ銀色に浮きにくくなります。
-3. **サンプルシーンで見比べる**: `PrebakedPack/SampleScene/SC_WaterNormalMap_Preview.unity` を開くと
-   基本 5 種の水面が Plane に貼られた状態で比較できます (このシーンは静止状態です)
+3. **Crystal Lagoon を確認する**: `PrebakedPack/SampleScene/SC_CrystalLagoon_Showcase.unity` を開くと
+   分割済み水面、Crystal Lagoon ready material、明るい床、ライト、カメラが入った状態で透明感と水底光を確認できます。
+   基本 5 種を見比べる場合は `SC_WaterNormalMap_Preview.unity` を使います。
 
 ### 水面を動かす (WaterSurfaceAnimator)
 
@@ -451,7 +452,7 @@ PrebakedPack/
   Textures/                 基本 normal 5 種 (1024px) + flagship normal/height (2048px)
   ReadyMaterials/           アタッチするだけで動く Siliq 水マテリアル 7 種
   Materials/                設定済み Standard マテリアル 6 種
-  SampleScene/              SC_WaterNormalMap_Preview.unity (基本 5 種比較シーン)
+  SampleScene/              SC_CrystalLagoon_Showcase.unity + 基本 5 種比較シーン
   Preview/                  Plane に貼った状態のプレビュー画像、Crystal Lagoon の美しさ確認用画像
 ```
 
