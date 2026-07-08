@@ -67,6 +67,11 @@ namespace Siliq.Water.Editor
             public float macroScale;
             public float macroDirectionBreakup;
             public float macroColorVariation;
+            public string causticsGuid;
+            public float causticsStrength;
+            public float causticsScale;
+            public float causticsSpeed;
+            public Color causticsTint;
         }
 
         // 各水の雰囲気に合わせた動き。初期値はゆっくり動く水に見える速度に抑える。
@@ -114,6 +119,11 @@ namespace Siliq.Water.Editor
             macroScale = 0.10f,
             macroDirectionBreakup = 0.40f,
             macroColorVariation = 0.18f,
+            causticsGuid = CrystalCausticsGuid,
+            causticsStrength = 0.28f,
+            causticsScale = 1.9f,
+            causticsSpeed = 0.018f,
+            causticsTint = new Color(0.68f, 1f, 1f, 1f),
         };
 
         static readonly LookPreset ClearPoolLook = new LookPreset
@@ -154,6 +164,11 @@ namespace Siliq.Water.Editor
             macroScale = 0.08f,
             macroDirectionBreakup = 0.22f,
             macroColorVariation = 0.10f,
+            causticsGuid = CrystalCausticsGuid,
+            causticsStrength = 0.46f,
+            causticsScale = 2.4f,
+            causticsSpeed = 0.014f,
+            causticsTint = new Color(0.84f, 1f, 1f, 1f),
         };
 
         static readonly LookPreset IndoorBluePoolLook = new LookPreset
@@ -194,6 +209,11 @@ namespace Siliq.Water.Editor
             macroScale = 0.07f,
             macroDirectionBreakup = 0.18f,
             macroColorVariation = 0.10f,
+            causticsGuid = CrystalCausticsGuid,
+            causticsStrength = 0.58f,
+            causticsScale = 1.7f,
+            causticsSpeed = 0.010f,
+            causticsTint = new Color(0.82f, 0.98f, 1f, 1f),
         };
 
         static readonly LookPreset FlagshipCrystalLook = new LookPreset
@@ -235,6 +255,11 @@ namespace Siliq.Water.Editor
             macroScale = 0.075f,
             macroDirectionBreakup = 0.18f,
             macroColorVariation = 0.10f,
+            causticsGuid = CrystalCausticsGuid,
+            causticsStrength = 0.64f,
+            causticsScale = 2.1f,
+            causticsSpeed = 0.012f,
+            causticsTint = new Color(0.76f, 1f, 0.98f, 1f),
         };
 
         static readonly LookPreset BloodSeaLook = new LookPreset
@@ -275,6 +300,11 @@ namespace Siliq.Water.Editor
             macroScale = 0.09f,
             macroDirectionBreakup = 0.42f,
             macroColorVariation = 0.28f,
+            causticsGuid = CrystalCausticsGuid,
+            causticsStrength = 0.06f,
+            causticsScale = 1.4f,
+            causticsSpeed = 0.008f,
+            causticsTint = new Color(1f, 0.22f, 0.16f, 1f),
         };
 
         static readonly LookPreset LiquidMetalLook = new LookPreset
@@ -315,6 +345,10 @@ namespace Siliq.Water.Editor
             macroScale = 0.12f,
             macroDirectionBreakup = 0.24f,
             macroColorVariation = 0.08f,
+            causticsStrength = 0f,
+            causticsScale = 1.8f,
+            causticsSpeed = 0f,
+            causticsTint = Color.white,
         };
 
         // PrebakedPack/Materials/*.mat.meta の固定 GUID
@@ -325,6 +359,7 @@ namespace Siliq.Water.Editor
         const string CyberGuid = "a171aabb01c34e01a1b2c3d4e5f60205";
         const string FlagshipCrystalGuid = "a171aabb01c34e01a1b2c3d4e5f60206";
         const string FlagshipCrystalHeightGuid = "a171aabb01c34e01a1b2c3d4e5f60306";
+        const string CrystalCausticsGuid = "00e6b1e9a23c24df69fe9558209de596";
 
         const string MenuRoot = "GameObject/Siliq Water/水マテリアルを適用/";
         const string TransparentMenuRoot = "GameObject/Siliq Water/透明な水マテリアルを適用 (PC)/";
@@ -960,6 +995,15 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_DisplacementScale")) mat.SetFloat("_DisplacementScale", 0.70f);
             if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.08f);
             if (mat.HasProperty("_HeightMapInfluence")) mat.SetFloat("_HeightMapInfluence", 0f);
+            if (mat.HasProperty("_CausticsMap"))
+            {
+                Texture caustics = LoadTexture(CrystalCausticsGuid, "Water_Caustics_Crystal_01");
+                if (caustics != null) mat.SetTexture("_CausticsMap", caustics);
+            }
+            if (mat.HasProperty("_CausticsStrength")) mat.SetFloat("_CausticsStrength", 0.30f);
+            if (mat.HasProperty("_CausticsScale")) mat.SetFloat("_CausticsScale", 1.8f);
+            if (mat.HasProperty("_CausticsSpeed")) mat.SetFloat("_CausticsSpeed", 0.016f);
+            if (mat.HasProperty("_CausticsTint")) mat.SetColor("_CausticsTint", new Color(0.78f, 1f, 1f, 1f));
             if (mat.HasProperty("_SrcBlend")) mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
             if (mat.HasProperty("_DstBlend")) mat.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
             if (mat.HasProperty("_ZWrite")) mat.SetFloat("_ZWrite", 0f);
@@ -1076,6 +1120,17 @@ namespace Siliq.Water.Editor
             }
         }
 
+        static void ApplySiliqCaustics(Material mat, LookPreset preset)
+        {
+            if (mat == null || !mat.HasProperty("_CausticsMap") || string.IsNullOrEmpty(preset.causticsGuid)) return;
+
+            Texture caustics = LoadTexture(preset.causticsGuid, "Water_Caustics_Crystal_01");
+            if (caustics != null)
+            {
+                mat.SetTexture("_CausticsMap", caustics);
+            }
+        }
+
         static void ApplySiliqWaterPalette(Material mat, Material source)
         {
             if (mat == null) return;
@@ -1101,6 +1156,7 @@ namespace Siliq.Water.Editor
 
             ApplySiliqNormal(mat, source);
             ApplySiliqHeight(mat, source, preset.heightGuid, preset.sourceLabel, preset.heightMapInfluence);
+            ApplySiliqCaustics(mat, preset);
             SetupSiliqBlend(mat, preset.transparent, preset.opacity);
 
             if (mat.HasProperty("_ShallowColor")) mat.SetColor("_ShallowColor", preset.shallow);
@@ -1130,6 +1186,10 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", preset.displacementSpeed);
             if (mat.HasProperty("_HeightMapInfluence")) mat.SetFloat("_HeightMapInfluence", preset.heightMapInfluence);
             if (mat.HasProperty("_Smoothness")) mat.SetFloat("_Smoothness", preset.smoothness);
+            if (mat.HasProperty("_CausticsStrength")) mat.SetFloat("_CausticsStrength", preset.causticsStrength);
+            if (mat.HasProperty("_CausticsScale")) mat.SetFloat("_CausticsScale", preset.causticsScale);
+            if (mat.HasProperty("_CausticsSpeed")) mat.SetFloat("_CausticsSpeed", preset.causticsSpeed);
+            if (mat.HasProperty("_CausticsTint")) mat.SetColor("_CausticsTint", preset.causticsTint);
 
             if (mat.HasProperty("_Scroll1"))
             {

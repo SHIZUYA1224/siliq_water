@@ -92,6 +92,7 @@ README / 用途別ガイド / PrebakedPack の確認に進めます。
 
 基本 5 種は **1024×1024 PNG / シームレス / インポート設定済み (NormalMap・Repeat・Android/iOS は ASTC 6x6)**。
 フラッグシップ透明水は専用 **2048×2048 normal map + 2048×2048 height map** を同梱し、用途別 Quick Apply では両方を Siliq 水シェーダーへ割り当てます。
+さらに `Water_Caustics_Crystal_01.png` を同梱し、透明な海・プール・フラッグシップ水では水底に揺れる光模様として使います。
 `PrebakedPack/ReadyMaterials/` には `Siliq/Water Mobile (Quest)` 設定済みの完成マテリアルが入っています。
 
 | Ready material | 用途 |
@@ -103,7 +104,7 @@ README / 用途別ガイド / PrebakedPack の確認に進めます。
 | `M_Siliq_BloodSea_Ready` | 血の海・赤い液体 |
 | `M_Siliq_LiquidMetal_Ready` | 液体金属 |
 
-これらは normal map、色、透明度、反射、scroll、実高さの初期値まで設定済みなので、
+これらは normal map、色、透明度、反射、scroll、実高さ、水底の光の初期値まで設定済みなので、
 Renderer にドラッグ&ドロップするだけで水として動きます。`WaterSurfaceAnimator` は必須ではありません。
 既存の `PrebakedPack/Materials/M_Water_*` は Standard シェーダーの互換・確認用です。
 
@@ -155,13 +156,15 @@ Renderer にドラッグ&ドロップするだけで水として動きます。`
 | **不透明度** | 1 に近いほど濃く、低いほど透ける |
 | **輪郭反射 / 反射量** | 斜め視線の反射と全体の映り込み |
 | **透過光量 / ハイライト / きらめき** | 透明感、強い光、細い揺らぎの量 |
+| **水底の光** | Caustics map の強さ、細かさ、速度、色。透明プールや浅い海の床に揺れる光を作る |
 
 **Play ボタンを押さなくても、値を変えるとシーンビュー上でその場に反映**されます。
 Standard / URP Lit / VRChat Mobile 系では `_BumpMap` の UV、`_BumpScale`、色 alpha を、
 同梱の Siliq 水シェーダーでは `_Scroll1` / `_Scroll2` / `_NormalStrength` / `_Tiling*` /
-`_DisplacementStrength` / `_DisplacementScale` / `_DisplacementSpeed` を
+`_DisplacementStrength` / `_DisplacementScale` / `_DisplacementSpeed` /
+`_CausticsStrength` / `_CausticsScale` / `_CausticsSpeed` を
 `_ShallowColor` / `_DeepColor` / `_HorizonColor` / `_TransmissionColor` /
-`_Opacity` / `_EdgeReflection` / `_ReflStrength` などと一緒に
+`_Opacity` / `_EdgeReflection` / `_ReflStrength` / `_CausticsTint` などと一緒に
 `MaterialPropertyBlock` 経由で動かすため、共有マテリアルを汚さずに調整できます。
 実際の高さは頂点変位なので、1 枚ポリゴンの Quad では見えにくいです。Unity 標準の Plane や細分化された水面メッシュを使ってください。
 PC の発熱を避けるため、編集モードの連続プレビューは**選択中の水面だけ**最大 10fps で更新されます。
@@ -289,6 +292,7 @@ Built-in / VRChat / Quest / iOS 向けの通常導入ではコンパイル対象
 - ノーマルマップ 1 枚を 2 回スクロールサンプリング
 - `_DisplacementStrength` による実頂点変位。ハイトマップがある場合は `_HeightMapInfluence` で混ぜられます
 - 深い色 ⇔ 浅い色 + フレネル + 透過光 + 細い光の揺らぎ + スペキュラ + 任意のキューブマップ反射
+- `_CausticsMap` / `_CausticsStrength` / `_CausticsScale` / `_CausticsSpeed` / `_CausticsTint` による水底の光模様
 - `_ReflStrength` はキューブマップ未使用時も反射量として効くため、反射が足りない時に直接上げられます
 - `_MinLighting` / `_DarkReflectionDamping` / `_DarkDetailDamping` により、暗い部屋では反射ときらめきを減衰
 - `_MacroVariation` / `_MacroScale` / `_MacroDirectionBreakup` /

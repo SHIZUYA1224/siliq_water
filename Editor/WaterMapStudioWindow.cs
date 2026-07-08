@@ -1284,6 +1284,7 @@ namespace Siliq.Water.Editor
             var height = Find(WaterMapType.Height);
             var foam = Find(WaterMapType.Foam);
             var flow = Find(WaterMapType.Flow);
+            var caustics = Find(WaterMapType.Caustics);
             bool indoorBluePool = presetIndex == IndoorBluePoolPresetIndex;
             bool flagshipCrystal = presetIndex == FlagshipCrystalPresetIndex;
             Color generatedBaseColor = new Color(0.1f, 0.35f, 0.45f, settings.createTransparentMaterial ? settings.materialOpacity : 1f);
@@ -1343,6 +1344,7 @@ namespace Siliq.Water.Editor
                     {
                         mat.SetTexture("_NormalMap", normal);
                     }
+                    SetupSiliqCaustics(mat, caustics, 0.34f, 1.8f, 0.016f, new Color(0.78f, 1f, 1f, 1f));
                     if (height != null && mat.HasProperty("_HeightMap"))
                     {
                         mat.SetTexture("_HeightMap", height);
@@ -1478,6 +1480,7 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_ReflStrength")) mat.SetFloat("_ReflStrength", 1f);
             if (mat.HasProperty("_SpecIntensity")) mat.SetFloat("_SpecIntensity", 1.35f);
             if (mat.HasProperty("_SpecPower")) mat.SetFloat("_SpecPower", 220f);
+            SetupSiliqCaustics(mat, null, 0.30f, 1.8f, 0.016f, new Color(0.78f, 1f, 1f, 1f));
             if (mat.HasProperty("_SrcBlend")) mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
             if (mat.HasProperty("_DstBlend")) mat.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
             if (mat.HasProperty("_ZWrite")) mat.SetFloat("_ZWrite", 0f);
@@ -1516,6 +1519,7 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_DisplacementScale")) mat.SetFloat("_DisplacementScale", 0.42f);
             if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.07f);
             if (mat.HasProperty("_HeightMapInfluence")) mat.SetFloat("_HeightMapInfluence", hasHeightMap ? 0.25f : 0f);
+            SetupSiliqCaustics(mat, null, 0.58f, 1.7f, 0.010f, new Color(0.82f, 0.98f, 1f, 1f));
             SetupMacroVariation(mat, 0.30f, 0.07f, 0.18f, 0.10f);
         }
 
@@ -1549,7 +1553,31 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_DisplacementScale")) mat.SetFloat("_DisplacementScale", 0.85f);
             if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.06f);
             if (mat.HasProperty("_HeightMapInfluence")) mat.SetFloat("_HeightMapInfluence", 0f);
+            SetupSiliqCaustics(mat, null, 0.64f, 2.1f, 0.012f, new Color(0.76f, 1f, 0.98f, 1f));
             SetupMacroVariation(mat, 0.22f, 0.075f, 0.18f, 0.10f);
+        }
+
+        static void SetupSiliqCaustics(Material mat, Texture2D caustics, float strength, float scale, float speed, Color tint)
+        {
+            if (mat == null) return;
+
+            if (mat.HasProperty("_CausticsMap"))
+            {
+                Texture texture = caustics;
+                if (texture == null)
+                {
+                    texture = mat.GetTexture("_CausticsMap");
+                }
+                if (texture == null)
+                {
+                    texture = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Caustics_Crystal_01.png");
+                }
+                if (texture != null) mat.SetTexture("_CausticsMap", texture);
+            }
+            if (mat.HasProperty("_CausticsStrength")) mat.SetFloat("_CausticsStrength", strength);
+            if (mat.HasProperty("_CausticsScale")) mat.SetFloat("_CausticsScale", scale);
+            if (mat.HasProperty("_CausticsSpeed")) mat.SetFloat("_CausticsSpeed", speed);
+            if (mat.HasProperty("_CausticsTint")) mat.SetColor("_CausticsTint", tint);
         }
 
         static void SetupMacroVariation(Material mat, float variation, float scale, float directionBreakup, float colorVariation)

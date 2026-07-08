@@ -96,6 +96,19 @@ namespace Siliq.Water
         [Tooltip("強いハイライトの量。反射が弱く見える時はここを上げます。Siliq 水シェーダーで有効。")]
         [Range(0f, 2f)] public float highlightStrength = 1.15f;
 
+        [Header("水底の光")]
+        [Tooltip("水底に揺れるコースティクス光の強さ。Siliq 水シェーダーで有効。")]
+        [Range(0f, 1f)] public float causticsStrength = 0.35f;
+
+        [Tooltip("水底の光模様の細かさ。大きいほど細かい光網になります。")]
+        [Range(0.2f, 8f)] public float causticsScale = 2.0f;
+
+        [Tooltip("水底の光模様がゆっくり流れる速さ。")]
+        [Range(0f, 1f)] public float causticsSpeed = 0.02f;
+
+        [Tooltip("水底の光の色。透明なプールや海では淡い水色から白が自然です。")]
+        public Color causticsTint = new Color(0.78f, 1f, 1f, 1f);
+
         Renderer targetRenderer;
         Material targetMaterial;
         MaterialPropertyBlock propertyBlock;
@@ -130,6 +143,10 @@ namespace Siliq.Water
         int glimmerIntensityPropertyId;
         int glintIntensityPropertyId;
         int specIntensityPropertyId;
+        int causticsStrengthPropertyId;
+        int causticsScalePropertyId;
+        int causticsSpeedPropertyId;
+        int causticsTintPropertyId;
         string cachedPropertyName;
         Vector2 baseTextureScale = Vector2.one;
         Vector2 baseTextureOffset = Vector2.zero;
@@ -212,6 +229,10 @@ namespace Siliq.Water
             glimmerIntensityPropertyId = Shader.PropertyToID("_GlimmerIntensity");
             glintIntensityPropertyId = Shader.PropertyToID("_GlintIntensity");
             specIntensityPropertyId = Shader.PropertyToID("_SpecIntensity");
+            causticsStrengthPropertyId = Shader.PropertyToID("_CausticsStrength");
+            causticsScalePropertyId = Shader.PropertyToID("_CausticsScale");
+            causticsSpeedPropertyId = Shader.PropertyToID("_CausticsSpeed");
+            causticsTintPropertyId = Shader.PropertyToID("_CausticsTint");
         }
 
         void Update()
@@ -278,6 +299,9 @@ namespace Siliq.Water
             transmissionStrength = Mathf.Clamp01(transmissionStrength);
             sparkle = Mathf.Clamp01(sparkle);
             highlightStrength = Mathf.Clamp(highlightStrength, 0f, 2f);
+            causticsStrength = Mathf.Clamp01(causticsStrength);
+            causticsScale = Mathf.Clamp(causticsScale, 0.2f, 8f);
+            causticsSpeed = Mathf.Clamp01(causticsSpeed);
             if (propertyBlock == null) propertyBlock = new MaterialPropertyBlock();
             RebindRendererAndMaterial();
             ApplyProperties(0f);
@@ -371,6 +395,22 @@ namespace Siliq.Water
             if (targetMaterial.HasProperty(specIntensityPropertyId))
             {
                 highlightStrength = Mathf.Clamp(targetMaterial.GetFloat(specIntensityPropertyId), 0f, 2f);
+            }
+            if (targetMaterial.HasProperty(causticsStrengthPropertyId))
+            {
+                causticsStrength = Mathf.Clamp01(targetMaterial.GetFloat(causticsStrengthPropertyId));
+            }
+            if (targetMaterial.HasProperty(causticsScalePropertyId))
+            {
+                causticsScale = Mathf.Clamp(targetMaterial.GetFloat(causticsScalePropertyId), 0.2f, 8f);
+            }
+            if (targetMaterial.HasProperty(causticsSpeedPropertyId))
+            {
+                causticsSpeed = Mathf.Clamp01(targetMaterial.GetFloat(causticsSpeedPropertyId));
+            }
+            if (targetMaterial.HasProperty(causticsTintPropertyId))
+            {
+                causticsTint = targetMaterial.GetColor(causticsTintPropertyId);
             }
         }
 
@@ -631,6 +671,22 @@ namespace Siliq.Water
             if (targetMaterial.HasProperty(specIntensityPropertyId))
             {
                 propertyBlock.SetFloat(specIntensityPropertyId, Mathf.Clamp(highlightStrength, 0f, 2f));
+            }
+            if (targetMaterial.HasProperty(causticsStrengthPropertyId))
+            {
+                propertyBlock.SetFloat(causticsStrengthPropertyId, Mathf.Clamp01(causticsStrength));
+            }
+            if (targetMaterial.HasProperty(causticsScalePropertyId))
+            {
+                propertyBlock.SetFloat(causticsScalePropertyId, Mathf.Clamp(causticsScale, 0.2f, 8f));
+            }
+            if (targetMaterial.HasProperty(causticsSpeedPropertyId))
+            {
+                propertyBlock.SetFloat(causticsSpeedPropertyId, Mathf.Clamp01(causticsSpeed));
+            }
+            if (targetMaterial.HasProperty(causticsTintPropertyId))
+            {
+                propertyBlock.SetColor(causticsTintPropertyId, causticsTint);
             }
         }
     }

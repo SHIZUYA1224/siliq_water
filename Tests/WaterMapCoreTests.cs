@@ -326,6 +326,10 @@ namespace Siliq.Water.Tests
                 animator.displacementScale = 0.66f;
                 animator.displacementSpeed = 0.44f;
                 animator.heightMapInfluence = 0.25f;
+                animator.causticsStrength = 0.42f;
+                animator.causticsScale = 2.3f;
+                animator.causticsSpeed = 0.05f;
+                animator.causticsTint = new Color(0.8f, 1f, 0.95f, 1f);
                 animator.ApplyImmediate(0f);
 
                 var block = new MaterialPropertyBlock();
@@ -347,6 +351,10 @@ namespace Siliq.Water.Tests
                 Assert.AreEqual(0.66f, block.GetFloat("_DisplacementScale"), 1e-5f);
                 Assert.AreEqual(0.44f, block.GetFloat("_DisplacementSpeed"), 1e-5f);
                 Assert.AreEqual(0.25f, block.GetFloat("_HeightMapInfluence"), 1e-5f);
+                Assert.AreEqual(0.42f, block.GetFloat("_CausticsStrength"), 1e-5f);
+                Assert.AreEqual(2.3f, block.GetFloat("_CausticsScale"), 1e-5f);
+                Assert.AreEqual(0.05f, block.GetFloat("_CausticsSpeed"), 1e-5f);
+                AssertColor(animator.causticsTint, block.GetColor("_CausticsTint"), "_CausticsTint");
                 Assert.AreEqual(1f, mat.GetFloat("_Opacity"), 1e-5f, "共有マテリアルの _Opacity を直接変更してはならない");
             }
             finally
@@ -464,6 +472,10 @@ namespace Siliq.Water.Tests
                     $"{name} は最初から使える Siliq 水マテリアルである必要がある");
                 Assert.IsNotNull(mat.GetTexture("_NormalMap"),
                     $"{name} はドラッグ&ドロップだけで凹凸が出るよう normal map を持つ必要がある");
+                Assert.IsNotNull(mat.GetTexture("_CausticsMap"),
+                    $"{name} は水底の光表現用 caustics map を持つ必要がある");
+                Assert.Greater(mat.GetFloat("_CausticsStrength"), 0.04f,
+                    $"{name} は水底の光が完全に死んだ初期値ではいけない");
                 Assert.Greater(mat.GetVector("_Scroll1").sqrMagnitude, 0.0001f,
                     $"{name} は WaterSurfaceAnimator なしでも shader 側で波が動く scroll を持つ必要がある");
                 Assert.LessOrEqual(mat.GetVector("_Scroll1").magnitude, 0.08f,
@@ -497,6 +509,8 @@ namespace Siliq.Water.Tests
             Assert.IsNotNull(flagship.GetTexture("_HeightMap"),
                 "Flagship ready material は専用 height map を持つが、初期 influence は 0 にする");
             Assert.LessOrEqual(flagship.GetFloat("_DisplacementStrength"), 0.02f);
+            Assert.GreaterOrEqual(flagship.GetFloat("_CausticsStrength"), 0.60f,
+                "美しさ特化の Flagship ready material は水底光をはっきり持つ必要がある");
         }
 
         static Material LoadReadyMaterial(string name)
@@ -529,6 +543,11 @@ namespace Siliq.Water.Tests
                 Assert.IsTrue(mat.HasProperty("_DisplacementScale"));
                 Assert.IsTrue(mat.HasProperty("_DisplacementSpeed"));
                 Assert.IsTrue(mat.HasProperty("_HeightMapInfluence"));
+                Assert.IsTrue(mat.HasProperty("_CausticsMap"));
+                Assert.IsTrue(mat.HasProperty("_CausticsStrength"));
+                Assert.IsTrue(mat.HasProperty("_CausticsScale"));
+                Assert.IsTrue(mat.HasProperty("_CausticsSpeed"));
+                Assert.IsTrue(mat.HasProperty("_CausticsTint"));
             }
             finally
             {

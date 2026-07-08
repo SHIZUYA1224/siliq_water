@@ -39,6 +39,11 @@ Shader "Siliq/Water Mobile (Quest)"
         _MacroScale ("大きなムラのスケール", Range(0.01, 1)) = 0.12
         _MacroDirectionBreakup ("方向の崩し", Range(0, 1)) = 0.28
         _MacroColorVariation ("色と光のムラ", Range(0, 1)) = 0.16
+        [NoScaleOffset] _CausticsMap ("水底の光マップ", 2D) = "black" {}
+        _CausticsStrength ("水底の光の強さ", Range(0, 1)) = 0
+        _CausticsScale ("水底の光の細かさ", Range(0.2, 8)) = 1.8
+        _CausticsSpeed ("水底の光の速度", Range(0, 1)) = 0.02
+        _CausticsTint ("水底の光の色", Color) = (0.75, 1, 1, 1)
         _SpecPower ("ハイライトの鋭さ", Range(8, 512)) = 160
         _SpecIntensity ("ハイライトの強さ", Range(0, 2)) = 0.8
         _FresnelPower ("フレネルの鋭さ", Range(0.5, 8)) = 4
@@ -82,6 +87,7 @@ Shader "Siliq/Water Mobile (Quest)"
 
             sampler2D _NormalMap;
             sampler2D _HeightMap;
+            sampler2D _CausticsMap;
             half4 _ShallowColor;
             half4 _DeepColor;
             half4 _HorizonColor;
@@ -112,6 +118,10 @@ Shader "Siliq/Water Mobile (Quest)"
             half _MacroScale;
             half _MacroDirectionBreakup;
             half _MacroColorVariation;
+            half _CausticsStrength;
+            half _CausticsScale;
+            half _CausticsSpeed;
+            half4 _CausticsTint;
             half _SpecPower;
             half _SpecIntensity;
             half _FresnelPower;
@@ -319,10 +329,18 @@ Shader "Siliq/Water Mobile (Quest)"
                 half interference = saturate(1.0h - abs(n1.x * 0.72h + n1.y * 0.31h - n2.x * 0.46h + n2.y * 0.58h));
                 half glimmer = pow(interference, _GlimmerSharpness) * _GlimmerIntensity * saturate(0.35h + surfaceLight);
                 glimmer *= lerp(0.65h, 1.35h, macro01) * detailVisibility;
+                float causticsScale = max((float)_CausticsScale, 0.001);
+                float2 causticsUvA = i.worldPos.xz * causticsScale * 0.12 + worldN.xz * 0.10 + _Time.y * _CausticsSpeed * float2(0.33, 0.21);
+                float2 causticsUvB = SiliqRotate2D(i.worldPos.xz, 1.17) * causticsScale * 0.09 - worldN.xz * 0.08 - _Time.y * _CausticsSpeed * float2(0.19, 0.29);
+                half causticsA = tex2D(_CausticsMap, causticsUvA).r;
+                half causticsB = tex2D(_CausticsMap, causticsUvB).r;
+                half caustics = saturate((causticsA * 0.68h + causticsB * 0.45h - 0.22h) * _CausticsStrength);
+                caustics *= viewFacing * detailVisibility * saturate(0.45h + _TransmissionStrength);
                 half3 transmission = _TransmissionColor.rgb * _TransmissionStrength * viewFacing * saturate(0.2h + surfaceLight) * baseVisibility;
 
                 half4 col;
                 col.rgb = lerp(baseCol + transmission, reflCol, fresnel) + (spec + glint) * _LightColor0.rgb;
+                col.rgb += _CausticsTint.rgb * caustics;
                 col.rgb += _GlimmerColor.rgb * (glimmer + rippleLight * 0.35h * detailVisibility);
                 col.rgb = lerp(col.rgb, reflCol + (spec + glint) * _LightColor0.rgb, alphaFresnel * _EdgeReflection);
                 col.a = saturate(_Opacity + alphaFresnel * _AlphaFresnel + glimmer * 0.08h + rippleLight * 0.05h);

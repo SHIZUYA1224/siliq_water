@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.3.34] - 2026-07-08
+
+### 追加: 透明水向けの水底コースティクス表現
+- `Siliq/Water Mobile (Quest)` に `_CausticsMap` / `_CausticsStrength` / `_CausticsScale` / `_CausticsSpeed` / `_CausticsTint` を追加し、透明水に水底の揺れる光を重ねられるようにした
+- `PrebakedPack/Textures/Water_Caustics_Crystal_01.png` を追加し、ReadyMaterials と用途別 Quick Apply の透明水へ割り当て
+- `M_Siliq_ClearSea_Ready` / `M_Siliq_ClearPool_Ready` / `M_Siliq_IndoorBluePool_Ready` / `M_Siliq_FlagshipCrystal_Ready` の水底光を用途別に調整
+- `WaterSurfaceAnimator` の Inspector に水底の光の強さ・細かさ・速度・色を追加し、初心者でも選択中の水面から直接調整できるようにした
+- 水底光プロパティと ready material の同梱設定が戻らないようテストを追加
+
 ## [2.3.33] - 2026-07-08
 
 ### 修正: 水面アニメーションの初期速度を低速化

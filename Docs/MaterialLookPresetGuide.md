@@ -1,6 +1,6 @@
 # 用途別マテリアルプリセットガイド
 
-Siliq Water は、ノーマルマップ単体ではなく「用途別の見た目プリセット」として使うことを前提にする。まずアタッチだけで使う場合は `PrebakedPack/ReadyMaterials/` の `M_Siliq_*_Ready` を Renderer にドラッグする。これらは normal、色、透明度、反射、scroll が設定済みで、`WaterSurfaceAnimator` なしでも shader 側で波が動く。
+Siliq Water は、ノーマルマップ単体ではなく「用途別の見た目プリセット」として使うことを前提にする。まずアタッチだけで使う場合は `PrebakedPack/ReadyMaterials/` の `M_Siliq_*_Ready` を Renderer にドラッグする。これらは normal、色、透明度、反射、scroll、水底の光が設定済みで、`WaterSurfaceAnimator` なしでも shader 側で波が動く。
 
 水面オブジェクトを選択して作成・再適用したい場合は、Hierarchy 右クリックから以下を適用する。
 
@@ -27,6 +27,7 @@ Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイ�
 
 - 適したノーマルマップを割り当てる
 - フラッグシップ透明水では専用 2048px normal map と height map を割り当てる
+- 透明な海・プール・フラッグシップ水では `Water_Caustics_Crystal_01.png` を水底の光として割り当てる
 - 色、透明度、反射、透過光、きらめきを設定する
 - `WaterSurfaceAnimator` を追加または更新し、動きを付ける
 - Built-in / iOS 系では `Siliq/Water Mobile (Quest)` を使う
@@ -39,6 +40,7 @@ Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイ�
 - プール: `Normal Strength` を 0.25-0.5、`Opacity` を 0.38-0.55
 - 室内ブループール: `Normal Strength` を 0.35-0.6、`Opacity` を 0.35-0.5、`Reflection` は高め
 - フラッグシップ透明水: `Normal Strength` を 0.55-0.65、`Opacity` を 0.48-0.62、`Reflection` は高め、`Height` は 0.02 以下から始める
+- 水底の光: プールや浅い海では `Caustics Strength` を 0.3-0.65、暗い場所や深い水では 0.15 以下から始める
 - 氷割れや多角形模様に見える場合: フラッグシップ透明水の `Height Map Influence` は 0 付近、`Height` は 0.02 以下から始める
 - 血の海: `Opacity` を 0.6 以上、`Reflection` は控えめ
 - 液体金属: `Opacity` は 1、`Refl Strength` と `Smoothness` は高め
@@ -46,7 +48,7 @@ Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイ�
 ## 注意
 
 - 透明感は normal map だけでは作れない。必ず用途別プリセットか透明マテリアルを使う。
-- 高品質に見せるには normal map、色、透明度、反射、ハイライト、実高さ、ライト、分割メッシュの全部が必要。
+- 高品質に見せるには normal map、色、透明度、反射、ハイライト、実高さ、水底の光、ライト、分割メッシュの全部が必要。
 - フラッグシップ透明水は Calm の流用ではなく、`Water_Normal_FlagshipCrystal_01.png` と `Water_Height_FlagshipCrystal_01.png` を前提にする。
 - 血や金属液体は「水」ではなく特殊液体なので、色だけでなく反射と凹凸の強さを変える。
 - 液体金属は透過させず、不透明で反射を強くした方が破綻しにくい。

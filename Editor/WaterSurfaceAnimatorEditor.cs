@@ -31,6 +31,10 @@ namespace Siliq.Water.Editor
         SerializedProperty transmissionStrength;
         SerializedProperty sparkle;
         SerializedProperty highlightStrength;
+        SerializedProperty causticsStrength;
+        SerializedProperty causticsScale;
+        SerializedProperty causticsSpeed;
+        SerializedProperty causticsTint;
 
         void OnEnable()
         {
@@ -57,6 +61,10 @@ namespace Siliq.Water.Editor
             transmissionStrength = serializedObject.FindProperty("transmissionStrength");
             sparkle = serializedObject.FindProperty("sparkle");
             highlightStrength = serializedObject.FindProperty("highlightStrength");
+            causticsStrength = serializedObject.FindProperty("causticsStrength");
+            causticsScale = serializedObject.FindProperty("causticsScale");
+            causticsSpeed = serializedObject.FindProperty("causticsSpeed");
+            causticsTint = serializedObject.FindProperty("causticsTint");
         }
 
         public override void OnInspectorGUI()
@@ -69,6 +77,7 @@ namespace Siliq.Water.Editor
             DrawHeightSection();
             DrawColorSection();
             DrawOpticalSection();
+            DrawCausticsSection();
             bool changed = EditorGUI.EndChangeCheck();
 
             serializedObject.ApplyModifiedProperties();
@@ -146,6 +155,16 @@ namespace Siliq.Water.Editor
             EditorGUILayout.PropertyField(transmissionStrength, new GUIContent("透過光量"));
             EditorGUILayout.PropertyField(sparkle, new GUIContent("きらめき"));
             EditorGUILayout.PropertyField(highlightStrength, new GUIContent("ハイライト"));
+            EditorGUILayout.Space(4f);
+        }
+
+        void DrawCausticsSection()
+        {
+            EditorGUILayout.LabelField("水底の光", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(causticsStrength, new GUIContent("光の強さ"));
+            EditorGUILayout.PropertyField(causticsScale, new GUIContent("光の細かさ"));
+            EditorGUILayout.PropertyField(causticsSpeed, new GUIContent("光の速度"));
+            EditorGUILayout.PropertyField(causticsTint, new GUIContent("光の色"));
             EditorGUILayout.Space(4f);
         }
 

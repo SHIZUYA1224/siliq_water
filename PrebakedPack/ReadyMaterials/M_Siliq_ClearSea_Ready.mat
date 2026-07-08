@@ -24,6 +24,10 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _CausticsMap:
+        m_Texture: {fileID: 2800000, guid: 00e6b1e9a23c24df69fe9558209de596, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _HeightMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -40,6 +44,9 @@ Material:
     m_Floats:
     - _AlphaFresnel: 0.74
     - _AlphaPower: 2.2
+    - _CausticsScale: 1.9
+    - _CausticsSpeed: 0.018
+    - _CausticsStrength: 0.28
     - _DarkDetailDamping: 0.7
     - _DarkReflectionDamping: 0.72
     - _DisplacementScale: 0.55
@@ -76,6 +83,7 @@ Material:
     - _UseRipples: 0
     - _ZWrite: 0
     m_Colors:
+    - _CausticsTint: {r: 0.68, g: 1, b: 1, a: 1}
     - _DeepColor: {r: 0.004, g: 0.1, b: 0.28, a: 1}
     - _GlimmerColor: {r: 0.97, g: 1, b: 1, a: 1}
     - _HorizonColor: {r: 0.86, g: 0.98, b: 1, a: 1}
