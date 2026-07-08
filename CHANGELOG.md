@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.70] - 2026-07-09
+
+### 改善: Crystal Lagoon 水底光 texture を光筋として再作成
+- `Water_Caustics_CrystalLagoon_01.png` を暗い網目模様から、加算 overlay で床に見える淡い曲線 caustics へ焼き直した
+- `Water_Caustics_CrystalLagoon_Hero_01.png` は柔らかい中間光を残しつつ、150 以上の明るい焦点線を増やして Hero material の水底光が弱く見えないようにした
+- テストに柔らかい光筋の面積、明るい焦点線、方向分散を追加し、黒い網目・一方向の線・弱すぎる水底光へ戻らないよう固定
+
 ## [2.3.69] - 2026-07-09
 
 ### 改善: 水面速度をさらに低速化

@@ -886,12 +886,16 @@ namespace Siliq.Water.Tests
                 var pixels = readable.GetPixels32();
                 int min = 255;
                 int max = 0;
+                int softLightPixels = 0;
+                int brightLinePixels = 0;
                 long sum = 0;
                 foreach (var pixel in pixels)
                 {
                     int v = pixel.r;
                     if (v < min) min = v;
                     if (v > max) max = v;
+                    if (v >= 70) softLightPixels++;
+                    if (v >= 110) brightLinePixels++;
                     sum += v;
                 }
 
@@ -901,6 +905,45 @@ namespace Siliq.Water.Tests
                 Assert.LessOrEqual(max, 220, "Crystal Lagoon 水底光は白飛びした線にしない");
                 Assert.GreaterOrEqual(average, 32f, "Crystal Lagoon 水底光が暗すぎる");
                 Assert.LessOrEqual(average, 48f, "Crystal Lagoon 水底光が全面発光のように強すぎる");
+                Assert.Greater(softLightPixels, pixels.Length * 0.02f,
+                    "Crystal Lagoon 水底光には床に見える柔らかい光筋の面積が必要");
+                Assert.Greater(brightLinePixels, pixels.Length * 0.001f,
+                    "Crystal Lagoon 水底光には弱すぎない焦点線が必要");
+
+                int[] orientationBins = new int[18];
+                int orientationSamples = 0;
+                const int stride = 8;
+                for (int y = stride; y < readable.height - stride; y += stride)
+                {
+                    for (int x = stride; x < readable.width - stride; x += stride)
+                    {
+                        int index = y * readable.width + x;
+                        int center = pixels[index].r;
+                        if (center < 70) continue;
+
+                        int gx = pixels[index + stride].r - pixels[index - stride].r;
+                        int gy = pixels[index + stride * readable.width].r - pixels[index - stride * readable.width].r;
+                        float magnitude = Mathf.Sqrt(gx * gx + gy * gy);
+                        if (magnitude < 8f) continue;
+
+                        float angle = Mathf.Atan2(gy, gx);
+                        if (angle < 0f) angle += Mathf.PI;
+                        int bin = Mathf.Clamp(Mathf.FloorToInt(angle / Mathf.PI * orientationBins.Length), 0, orientationBins.Length - 1);
+                        orientationBins[bin]++;
+                        orientationSamples++;
+                    }
+                }
+
+                int dominantBin = 0;
+                for (int i = 0; i < orientationBins.Length; i++)
+                {
+                    dominantBin = Mathf.Max(dominantBin, orientationBins[i]);
+                }
+
+                Assert.Greater(orientationSamples, 1000,
+                    "Crystal Lagoon 水底光は方向性を評価できるだけの曲線ディテールが必要");
+                Assert.Less(dominantBin / (float)orientationSamples, 0.14f,
+                    "Crystal Lagoon 水底光が一方向の線や格子に戻っている");
             }
             finally
             {
