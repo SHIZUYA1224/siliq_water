@@ -37,7 +37,8 @@ Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイ�
 - `M_Siliq_CrystalLagoon_Hero_Ready` は `Water_Normal_CrystalLagoon_Hero_01.png`、`Water_Height_CrystalLagoon_Hero_01.png`、`Water_Caustics_CrystalLagoon_Hero_01.png` を使い、通常 Crystal Lagoon texture の流用に戻さない。`Clarity`、`Reflection Pattern`、`Transmission`、`Bottom Light Strength`、`Caustics Focus`、`Caustics Prism`、`Caustics Scatter` を強めた最高品質確認用として同梱する
 - 完成形をすぐ確認できるよう、`PF_Siliq_CrystalLagoon_Complete.prefab` には水面、`Siliq/Pale Pool Floor Mobile` の薄いタイル床、`M_Siliq_CrystalLagoon_CausticsOverlay` の床用光を同梱する。`PF_Siliq_CrystalLagoon_Hero_Complete.prefab` では Hero water material と `M_Siliq_CrystalLagoon_Hero_CausticsOverlay` を使う
 - 床に直接光を出したい場合は、床の少し上に薄い Plane を置いて `M_Siliq_CrystalLagoon_CausticsOverlay` を貼る
-- 透明な海・プール・フラッグシップ水では `Water_Caustics_Crystal_01.png` を水底の光として割り当てる
+- 透明プール / 室内ブループールでは `Water_Caustics_SunlitPool_01.png` を水底の光として割り当て、広い床光と柔らかい光リボンから始める
+- 透明な海・フラッグシップ水では `Water_Caustics_Crystal_01.png` を水底の光として割り当てる
 - 色、透明度、反射、透過光、きらめきを設定する
 - `Clarity`、`Reflection Pattern`、`Bottom Light Strength` を用途ごとに設定し、Crystal Lagoon では水色の濁りを抑え、空や窓の帯状反射と水底光が水越しに見える状態から始める
 - `WaterSurfaceAnimator` を追加または更新し、動きを付ける

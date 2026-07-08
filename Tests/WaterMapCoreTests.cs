@@ -688,6 +688,14 @@ namespace Siliq.Water.Tests
             Assert.AreEqual((float)BlendMode.OneMinusSrcAlpha, hero.GetFloat("_DstBlend"), 1e-5f);
             Assert.AreEqual(0f, hero.GetFloat("_ZWrite"), 1e-5f);
             Assert.AreEqual((int)RenderQueue.Transparent, hero.renderQueue);
+
+            const string sunlitPoolCausticsPath = "Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Caustics_SunlitPool_01.png";
+            var clearPool = LoadReadyMaterial("M_Siliq_ClearPool_Ready");
+            var indoorPool = LoadReadyMaterial("M_Siliq_IndoorBluePool_Ready");
+            Assert.AreEqual(sunlitPoolCausticsPath, AssetDatabase.GetAssetPath(clearPool.GetTexture("_CausticsMap")),
+                "透明プール ready material は線が強すぎる共通 caustics ではなく SunlitPool 専用水底光を使う");
+            Assert.AreEqual(sunlitPoolCausticsPath, AssetDatabase.GetAssetPath(indoorPool.GetTexture("_CausticsMap")),
+                "室内ブループール ready material は広い床光を持つ SunlitPool 専用水底光を使う");
         }
 
         static Material LoadReadyMaterial(string name)
@@ -944,6 +952,58 @@ namespace Siliq.Water.Tests
                     "Crystal Lagoon 水底光は方向性を評価できるだけの曲線ディテールが必要");
                 Assert.Less(dominantBin / (float)orientationSamples, 0.14f,
                     "Crystal Lagoon 水底光が一方向の線や格子に戻っている");
+            }
+            finally
+            {
+                Object.DestroyImmediate(readable);
+            }
+        }
+
+        [Test]
+        public void SunlitPoolCausticsTexture_HasBroadSoftFloorLight()
+        {
+            const string path = "Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Caustics_SunlitPool_01.png";
+            var caustics = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+            Assert.IsNotNull(caustics, "透明プール / 室内プール用の SunlitPool 水底光 texture が同梱されていない");
+            Assert.GreaterOrEqual(caustics.width, 2048, "SunlitPool 水底光は美しさ優先で 2048px 以上にする");
+            Assert.GreaterOrEqual(caustics.height, 2048, "SunlitPool 水底光は美しさ優先で 2048px 以上にする");
+
+            var readable = new Texture2D(2, 2, TextureFormat.RGB24, false);
+            try
+            {
+                Assert.IsTrue(readable.LoadImage(File.ReadAllBytes(path)), "SunlitPool 水底光 texture を PNG として読めない");
+                var pixels = readable.GetPixels32();
+                int min = 255;
+                int max = 0;
+                int softFloorLightPixels = 0;
+                int brightRibbonPixels = 0;
+                int blownOutPixels = 0;
+                long sum = 0;
+
+                foreach (var pixel in pixels)
+                {
+                    int v = pixel.r;
+                    if (v < min) min = v;
+                    if (v > max) max = v;
+                    if (v >= 60 && v <= 145) softFloorLightPixels++;
+                    if (v >= 150) brightRibbonPixels++;
+                    if (v >= 235) blownOutPixels++;
+                    sum += v;
+                }
+
+                float average = sum / (float)pixels.Length;
+                Assert.GreaterOrEqual(min, 8, "SunlitPool 水底光に黒つぶれを戻してはならない");
+                Assert.GreaterOrEqual(max, 170, "SunlitPool 水底光には床に見える焦点リボンが必要");
+                Assert.LessOrEqual(max, 230, "SunlitPool 水底光は texture 側で白飛びさせない");
+                Assert.GreaterOrEqual(average, 42f, "SunlitPool 水底光は柔らかい面光として見える明るさが必要");
+                Assert.LessOrEqual(average, 78f, "SunlitPool 水底光が全面発光のように強すぎる");
+                Assert.Greater(softFloorLightPixels, pixels.Length * 0.12f,
+                    "SunlitPool 水底光には細い線だけでなく広い柔らかい床光が必要");
+                Assert.Greater(brightRibbonPixels, pixels.Length * 0.004f,
+                    "SunlitPool 水底光には弱すぎない光リボンが必要");
+                Assert.Less(brightRibbonPixels, pixels.Length * 0.12f,
+                    "SunlitPool 水底光の明るい線が多すぎると変な模様に見える");
+                Assert.AreEqual(0, blownOutPixels, "SunlitPool 水底光に飽和した白飛び線を戻してはならない");
             }
             finally
             {
@@ -1631,7 +1691,9 @@ namespace Siliq.Water.Tests
                 "Hero が通常 Lagoon texture の流用ではないことをガイドで説明する");
             StringAssert.Contains("Caustics Scatter", guide,
                 "ガイドには Hero の柔らかい水底光パラメータを明記する");
-            StringAssert.Contains("透明な海・プール・フラッグシップ水では `Water_Caustics_Crystal_01.png`", guide,
+            StringAssert.Contains("透明プール / 室内ブループールでは `Water_Caustics_SunlitPool_01.png`", guide,
+                "透明プール用の広い床光 texture を説明する");
+            StringAssert.Contains("透明な海・フラッグシップ水では `Water_Caustics_Crystal_01.png`", guide,
                 "共通水底光と Crystal Lagoon 専用水底光の対象を分けて説明する");
         }
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.74] - 2026-07-09
+
+### 追加: 透明プール向け SunlitPool 水底光 texture
+- `Water_Caustics_SunlitPool_01.png` を追加し、透明プール / 室内ブループールで細い線だけではなく広い床光と柔らかい光リボンが見えるようにした
+- `M_Siliq_ClearPool_Ready` / `M_Siliq_IndoorBluePool_Ready` と用途別 Quick Apply を SunlitPool 専用 caustics へ切り替え
+- テストとガイドを更新し、SunlitPool texture の明るさ、面光、白飛び防止、ReadyMaterial 参照を固定
+
 ## [2.3.73] - 2026-07-09
 
 ### 修正: 水面速度をさらに静かな基準へ調整

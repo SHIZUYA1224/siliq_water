@@ -134,7 +134,7 @@ namespace Siliq.Water.Editor
             macroScale = 0.10f,
             macroDirectionBreakup = 0.40f,
             macroColorVariation = 0.18f,
-            causticsGuid = CrystalCausticsGuid,
+            causticsGuid = SunlitPoolCausticsGuid,
             causticsStrength = 0.28f,
             causticsScale = 1.9f,
             causticsSpeed = 0.000007f,
@@ -189,7 +189,7 @@ namespace Siliq.Water.Editor
             macroScale = 0.08f,
             macroDirectionBreakup = 0.22f,
             macroColorVariation = 0.10f,
-            causticsGuid = CrystalCausticsGuid,
+            causticsGuid = SunlitPoolCausticsGuid,
             causticsStrength = 0.46f,
             causticsScale = 2.4f,
             causticsSpeed = 0.000007f,
@@ -550,6 +550,7 @@ namespace Siliq.Water.Editor
         const string CrystalLagoonHeroNormalGuid = "a171aabb01c34e01a1b2c3d4e5f60108";
         const string CrystalLagoonHeroHeightGuid = "a171aabb01c34e01a1b2c3d4e5f60308";
         const string CrystalLagoonHeroCausticsGuid = "a171aabb01c34e01a1b2c3d4e5f60408";
+        const string SunlitPoolCausticsGuid = "a171aabb01c34e01a1b2c3d4e5f60409";
         const string CrystalCausticsGuid = "00e6b1e9a23c24df69fe9558209de596";
 
         const string MenuRoot = "GameObject/Siliq Water/水マテリアルを適用/";
