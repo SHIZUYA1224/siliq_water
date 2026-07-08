@@ -321,6 +321,7 @@ MonoBehaviour:
   causticsSpeed: 0.00016
   causticsFocus: 2.4
   causticsPrismStrength: 0.24
+  causticsScatterStrength: 0.74
   bottomLightStrength: 1.9
   causticsTint: {r: 0.88, g: 1, b: 0.97, a: 1}
 --- !u!1 &8641218449220747125

@@ -22,6 +22,16 @@ Shader "Siliq/Water URP"
         _MacroDirectionBreakup ("方向の崩し", Range(0, 1)) = 0.28
         _MacroColorVariation ("色と光のムラ", Range(0, 1)) = 0.16
 
+        [NoScaleOffset] _CausticsMap ("水底の光マップ", 2D) = "black" {}
+        _CausticsStrength ("水底の光の強さ", Range(0, 1)) = 0
+        _CausticsScale ("水底の光の細かさ", Range(0.2, 8)) = 1.8
+        _CausticsSpeed ("水底の光の速度", Range(0, 0.25)) = 0.00025
+        _CausticsFocus ("水底光の焦点", Range(0.5, 4)) = 1.4
+        _CausticsPrismStrength ("水底光の色分散", Range(0, 1)) = 0.12
+        _CausticsScatterStrength ("水底光の柔らかい広がり", Range(0, 1)) = 0.25
+        _BottomLightStrength ("水底光の透け", Range(0, 2)) = 1
+        _CausticsTint ("水底の光の色", Color) = (0.75, 1, 1, 1)
+
         _Smoothness ("スムースネス", Range(0, 1)) = 0.92
         _FresnelPower ("フレネルの鋭さ", Range(0.5, 8)) = 4
         _ReflStrength ("反射の強さ (リフレクションプローブ)", Range(0, 1)) = 0.8
@@ -83,6 +93,7 @@ Shader "Siliq/Water URP"
             TEXTURE2D(_NormalMap);      SAMPLER(sampler_NormalMap);
             TEXTURE2D(_FlowMap);        SAMPLER(sampler_FlowMap);
             TEXTURE2D(_FoamMap);        SAMPLER(sampler_FoamMap);
+            TEXTURE2D(_CausticsMap);    SAMPLER(sampler_CausticsMap);
 
             CBUFFER_START(UnityPerMaterial)
                 half4 _ShallowColor;
@@ -97,6 +108,14 @@ Shader "Siliq/Water URP"
                 half _MacroScale;
                 half _MacroDirectionBreakup;
                 half _MacroColorVariation;
+                half _CausticsStrength;
+                half _CausticsScale;
+                half _CausticsSpeed;
+                half _CausticsFocus;
+                half _CausticsPrismStrength;
+                half _CausticsScatterStrength;
+                half _BottomLightStrength;
+                half4 _CausticsTint;
                 half _Smoothness;
                 half _FresnelPower;
                 half _ReflStrength;
@@ -314,6 +333,24 @@ Shader "Siliq/Water URP"
                 spec *= lerp(0.72h, 1.28h, macroMask);
 
                 half3 color = lerp(baseCol, reflection, fresnel) + spec;
+                float causticsScale = max((float)_CausticsScale, 0.001);
+                float2 causticsUvA = input.positionWS.xz * causticsScale * 0.12 + normalWS.xz * 0.10 + _Time.y * _CausticsSpeed * float2(0.33, 0.21);
+                float2 causticsUvB = SiliqRotate2D(input.positionWS.xz, 1.17) * causticsScale * 0.09 - normalWS.xz * 0.08 - _Time.y * _CausticsSpeed * float2(0.19, 0.29);
+                half causticsA = SAMPLE_TEXTURE2D(_CausticsMap, sampler_CausticsMap, causticsUvA).r;
+                half causticsB = SAMPLE_TEXTURE2D(_CausticsMap, sampler_CausticsMap, causticsUvB).r;
+                half causticsPrismR = SAMPLE_TEXTURE2D(_CausticsMap, sampler_CausticsMap, causticsUvA + normalWS.xz * 0.013 + float2(0.004, -0.002)).r;
+                half causticsPrismB = SAMPLE_TEXTURE2D(_CausticsMap, sampler_CausticsMap, causticsUvB - normalWS.xz * 0.011 + float2(-0.003, 0.005)).r;
+                half bottomLight = saturate(_BottomLightStrength * 0.5h);
+                half causticsRaw = saturate(causticsA * 0.62h + causticsB * 0.50h);
+                half causticsFocus = pow(causticsRaw, max(_CausticsFocus, 0.5h));
+                half causticsLine = saturate((causticsFocus - 0.10h) * _CausticsStrength * lerp(0.82h, 1.55h, bottomLight));
+                half causticsScatter = smoothstep(0.10h, 0.82h, causticsRaw) * _CausticsStrength * _CausticsScatterStrength;
+                causticsScatter *= lerp(0.45h, 1.35h, bottomLight) * saturate(0.35h + shoreFade * 0.4h + (1.0h - fresnel) * 0.35h);
+                half3 causticsColor = _CausticsTint.rgb;
+                half3 prismColor = half3(causticsPrismR, causticsRaw, causticsPrismB) * _CausticsTint.rgb;
+                causticsColor = lerp(causticsColor, prismColor, saturate(_CausticsPrismStrength) * saturate(0.35h + bottomLight * 0.35h));
+                color += causticsColor * causticsLine * saturate(0.35h + shoreFade * 0.65h);
+                color += lerp(_ShallowColor.rgb, causticsColor, 0.48h) * causticsScatter;
                 color += lerp(_ShallowColor.rgb, half3(1.0h, 1.0h, 1.0h), 0.72h) * rippleLight * 0.35h;
                 half alpha = _Opacity;
 

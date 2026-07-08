@@ -49,6 +49,7 @@ Material:
     - _CausticsSpeed: 0
     - _CausticsFocus: 1.0
     - _CausticsPrismStrength: 0
+    - _CausticsScatterStrength: 0
     - _CausticsStrength: 0
     - _Clarity: 0
     - _DarkDetailDamping: 0.7

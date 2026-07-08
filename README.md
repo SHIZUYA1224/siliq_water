@@ -173,14 +173,14 @@ Renderer にドラッグ&ドロップするだけで水として動きます。`
 | **輪郭反射 / 反射量** | 斜め視線の反射と全体の映り込み |
 | **反射パターン** | 空や窓の帯が水面に映る量と大きさ |
 | **透過光量 / ハイライト / きらめき** | 透明感、強い光、細い揺らぎの量 |
-| **水底の光** | Caustics map の強さ、細かさ、速度、焦点、色分散、色。透明プールや浅い海の床に揺れる光を作る |
+| **水底の光** | Caustics map の強さ、細かさ、速度、焦点、色分散、柔らかい広がり、色。透明プールや浅い海の床に揺れる光を作る |
 | **水底光の透け** | 水底光が水面越しに見える量。Crystal Lagoon では高め |
 
 **Play ボタンを押さなくても、値を変えるとシーンビュー上でその場に反映**されます。
 Standard / URP Lit / VRChat Mobile 系では `_BumpMap` の UV、`_BumpScale`、色 alpha を、
 同梱の Siliq 水シェーダーでは `_Scroll1` / `_Scroll2` / `_NormalStrength` / `_Tiling*` /
 `_DisplacementStrength` / `_DisplacementScale` / `_DisplacementSpeed` /
-`_CausticsStrength` / `_CausticsScale` / `_CausticsSpeed` / `_CausticsFocus` / `_CausticsPrismStrength` / `_BottomLightStrength` を
+`_CausticsStrength` / `_CausticsScale` / `_CausticsSpeed` / `_CausticsFocus` / `_CausticsPrismStrength` / `_CausticsScatterStrength` / `_BottomLightStrength` を
 `_ShallowColor` / `_DeepColor` / `_HorizonColor` / `_TransmissionColor` /
 `_Opacity` / `_Clarity` / `_EdgeReflection` / `_ReflStrength` / `_ReflectionPatternStrength` / `_ReflectionPatternScale` / `_CausticsTint` などと一緒に
 `MaterialPropertyBlock` 経由で動かすため、共有マテリアルを汚さずに調整できます。
@@ -313,7 +313,7 @@ Built-in / VRChat / Quest / iOS 向けの通常導入ではコンパイル対象
 - `_DisplacementStrength` による実頂点変位。ハイトマップがある場合は `_HeightMapInfluence` で混ぜられます
 - 深い色 ⇔ 浅い色 + フレネル + 透過光 + 細い光の揺らぎ + スペキュラ + 任意のキューブマップ反射
 - `_ReflectionPatternStrength` / `_ReflectionPatternScale` による空や窓の帯状反射
-- `_CausticsMap` / `_CausticsStrength` / `_CausticsScale` / `_CausticsSpeed` / `_BottomLightStrength` / `_CausticsTint` による水底の光模様
+- `_CausticsMap` / `_CausticsStrength` / `_CausticsScale` / `_CausticsSpeed` / `_CausticsFocus` / `_CausticsPrismStrength` / `_CausticsScatterStrength` / `_BottomLightStrength` / `_CausticsTint` による水底の光模様
 - `_ReflStrength` はキューブマップ未使用時も反射量として効くため、反射が足りない時に直接上げられます
 - `_MinLighting` / `_DarkReflectionDamping` / `_DarkDetailDamping` により、暗い部屋では反射ときらめきを減衰
 - `_MacroVariation` / `_MacroScale` / `_MacroDirectionBreakup` /

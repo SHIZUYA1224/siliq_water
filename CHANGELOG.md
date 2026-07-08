@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.62] - 2026-07-09
+
+### 改善: 透明水越しの柔らかい水底光
+- `Siliq/Water Mobile (Quest)` と URP サンプル shader に `_CausticsScatterStrength` を追加し、細い caustics 焦点線だけでなく、透明水を通した柔らかい光膜を重ねられるようにした
+- `WaterSurfaceAnimator` / Inspector / Quick Apply / ReadyMaterials / 完成 Prefab に水底光の柔らかい広がりを反映
+- Crystal Lagoon / Hero の初期値とテストを更新し、Hero が強い焦点線と柔らかい底光の両方を持つことを固定
+
 ## [2.3.61] - 2026-07-09
 
 ### 修正: 水面の流れをさらに低速化

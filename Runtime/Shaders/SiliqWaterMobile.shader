@@ -46,6 +46,7 @@ Shader "Siliq/Water Mobile (Quest)"
         _CausticsSpeed ("水底の光の速度", Range(0, 0.25)) = 0.00025
         _CausticsFocus ("水底光の焦点", Range(0.5, 4)) = 1.4
         _CausticsPrismStrength ("水底光の色分散", Range(0, 1)) = 0.12
+        _CausticsScatterStrength ("水底光の柔らかい広がり", Range(0, 1)) = 0.25
         _BottomLightStrength ("水底光の透け", Range(0, 2)) = 1
         _CausticsTint ("水底の光の色", Color) = (0.75, 1, 1, 1)
         _SpecPower ("ハイライトの鋭さ", Range(8, 512)) = 160
@@ -130,6 +131,7 @@ Shader "Siliq/Water Mobile (Quest)"
             half _CausticsSpeed;
             half _CausticsFocus;
             half _CausticsPrismStrength;
+            half _CausticsScatterStrength;
             half _BottomLightStrength;
             half4 _CausticsTint;
             half _SpecPower;
@@ -361,6 +363,9 @@ Shader "Siliq/Water Mobile (Quest)"
                 half causticsFocus = pow(saturate(causticsRaw), max(_CausticsFocus, 0.5h));
                 half caustics = saturate((causticsFocus - 0.10h) * _CausticsStrength * lerp(0.82h, 1.55h, bottomLight));
                 caustics *= viewFacing * detailVisibility * saturate(0.32h + _TransmissionStrength + bottomLight * 0.28h);
+                half causticsScatter = smoothstep(0.10h, 0.82h, causticsRaw);
+                causticsScatter *= _CausticsStrength * _CausticsScatterStrength * lerp(0.45h, 1.35h, bottomLight);
+                causticsScatter *= viewFacing * baseVisibility * saturate(0.28h + clarity * 0.52h + _TransmissionStrength * 0.35h);
                 half3 causticsColor = _CausticsTint.rgb;
                 half3 prismColor = half3(causticsPrismR, causticsRaw, causticsPrismB) * _CausticsTint.rgb;
                 causticsColor = lerp(causticsColor, prismColor, saturate(_CausticsPrismStrength) * saturate(0.25h + clarity + bottomLight * 0.35h));
@@ -371,6 +376,7 @@ Shader "Siliq/Water Mobile (Quest)"
                 col.rgb = lerp(baseCol + transmission, reflCol, fresnel) + (spec + glint) * _LightColor0.rgb;
                 col.rgb += _HorizonColor.rgb * reflectionPattern;
                 col.rgb += causticsColor * caustics;
+                col.rgb += lerp(_TransmissionColor.rgb, causticsColor, 0.42h) * causticsScatter;
                 col.rgb += _GlimmerColor.rgb * (glimmer + rippleLight * 0.35h * detailVisibility);
                 col.rgb = lerp(col.rgb, reflCol + (spec + glint) * _LightColor0.rgb, alphaFresnel * _EdgeReflection);
                 col.a = saturate(_Opacity - clarity * viewFacing * 0.12h + alphaFresnel * _AlphaFresnel + glimmer * 0.08h + rippleLight * 0.05h);

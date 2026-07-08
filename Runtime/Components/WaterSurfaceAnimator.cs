@@ -122,6 +122,9 @@ namespace Siliq.Water
         [Tooltip("水底光のごく薄い色分散。透明プールや浅い海で、白い模様だけに見えるのを防ぎます。")]
         [Range(0f, 1f)] public float causticsPrismStrength = 0.12f;
 
+        [Tooltip("水底光の柔らかい広がり。細い焦点線だけでなく、透明水越しの光膜を作ります。")]
+        [Range(0f, 1f)] public float causticsScatterStrength = 0.25f;
+
         [Tooltip("水底光が水を通して見える量。透明な浅いプールやラグーンでは高めにします。Siliq 水シェーダーで有効。")]
         [Range(0f, 2f)] public float bottomLightStrength = 1f;
 
@@ -170,6 +173,7 @@ namespace Siliq.Water
         int causticsSpeedPropertyId;
         int causticsFocusPropertyId;
         int causticsPrismStrengthPropertyId;
+        int causticsScatterStrengthPropertyId;
         int bottomLightStrengthPropertyId;
         int causticsTintPropertyId;
         string cachedPropertyName;
@@ -262,6 +266,7 @@ namespace Siliq.Water
             causticsSpeedPropertyId = Shader.PropertyToID("_CausticsSpeed");
             causticsFocusPropertyId = Shader.PropertyToID("_CausticsFocus");
             causticsPrismStrengthPropertyId = Shader.PropertyToID("_CausticsPrismStrength");
+            causticsScatterStrengthPropertyId = Shader.PropertyToID("_CausticsScatterStrength");
             bottomLightStrengthPropertyId = Shader.PropertyToID("_BottomLightStrength");
             causticsTintPropertyId = Shader.PropertyToID("_CausticsTint");
         }
@@ -333,6 +338,7 @@ namespace Siliq.Water
             causticsStrength = Mathf.Clamp01(causticsStrength);
             causticsScale = Mathf.Clamp(causticsScale, 0.2f, 8f);
             causticsSpeed = Mathf.Clamp01(causticsSpeed);
+            causticsScatterStrength = Mathf.Clamp01(causticsScatterStrength);
             if (propertyBlock == null) propertyBlock = new MaterialPropertyBlock();
             RebindRendererAndMaterial();
             ApplyProperties(0f);
@@ -458,6 +464,10 @@ namespace Siliq.Water
             if (targetMaterial.HasProperty(causticsPrismStrengthPropertyId))
             {
                 causticsPrismStrength = Mathf.Clamp01(targetMaterial.GetFloat(causticsPrismStrengthPropertyId));
+            }
+            if (targetMaterial.HasProperty(causticsScatterStrengthPropertyId))
+            {
+                causticsScatterStrength = Mathf.Clamp01(targetMaterial.GetFloat(causticsScatterStrengthPropertyId));
             }
             if (targetMaterial.HasProperty(bottomLightStrengthPropertyId))
             {
@@ -763,6 +773,10 @@ namespace Siliq.Water
             if (targetMaterial.HasProperty(causticsPrismStrengthPropertyId))
             {
                 propertyBlock.SetFloat(causticsPrismStrengthPropertyId, Mathf.Clamp01(causticsPrismStrength));
+            }
+            if (targetMaterial.HasProperty(causticsScatterStrengthPropertyId))
+            {
+                propertyBlock.SetFloat(causticsScatterStrengthPropertyId, Mathf.Clamp01(causticsScatterStrength));
             }
             if (targetMaterial.HasProperty(bottomLightStrengthPropertyId))
             {
