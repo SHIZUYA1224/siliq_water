@@ -1134,6 +1134,20 @@ namespace Siliq.Water.Tests
         }
 
         [Test]
+        public void SiliqMobileShader_KeepsBottomLightReadableInDarkScenes()
+        {
+            const string shaderPath = "Packages/com.siliq.water-normalmap/Runtime/Shaders/SiliqWaterMobile.shader";
+            string shaderText = File.ReadAllText(shaderPath);
+
+            StringAssert.Contains("half causticsVisibility = lerp(baseVisibility, detailVisibility",
+                shaderText, "水底光は暗所で detailVisibility だけに引っ張らず、最低明るさを残す専用 visibility を使う");
+            StringAssert.Contains("caustics *= viewFacing * causticsVisibility",
+                shaderText, "焦点線 caustics は暗所でも完全に死なない visibility を使う");
+            StringAssert.Contains("causticsScatter *= viewFacing * causticsVisibility",
+                shaderText, "柔らかい水底光膜も暗所で消えすぎない visibility を使う");
+        }
+
+        [Test]
         public void ShaderUtility_UniversalPipelineWithoutUrpPackage_DoesNotChooseBuiltInShaders()
         {
             var originalPipeline = GraphicsSettings.renderPipelineAsset;

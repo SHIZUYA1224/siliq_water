@@ -326,6 +326,7 @@ Shader "Siliq/Water Mobile (Quest)"
                 half baseVisibility = saturate(_MinLighting + surfaceLight * (1.0h - _MinLighting));
                 half reflectionVisibility = lerp(1.0h - _DarkReflectionDamping, 1.0h, ambientLum);
                 half detailVisibility = lerp(1.0h - _DarkDetailDamping, 1.0h, surfaceLight);
+                half causticsVisibility = lerp(baseVisibility, detailVisibility, 0.42h);
                 half colorLift = (macro01 - 0.5h) * _MacroColorVariation;
                 half colorMix = saturate(0.12h + directLum * 0.68h + ambientLum * 0.32h + colorLift);
                 half viewFacing = saturate(dot(worldN, viewDir));
@@ -376,10 +377,10 @@ Shader "Siliq/Water Mobile (Quest)"
                 half causticsRaw = saturate(causticsA * 0.62h + causticsB * 0.50h);
                 half causticsFocus = pow(saturate(causticsRaw), max(_CausticsFocus, 0.5h));
                 half caustics = saturate((causticsFocus - 0.10h) * _CausticsStrength * lerp(0.82h, 1.55h, bottomLight));
-                caustics *= viewFacing * detailVisibility * saturate(0.32h + _TransmissionStrength + bottomLight * 0.28h);
+                caustics *= viewFacing * causticsVisibility * saturate(0.32h + _TransmissionStrength + bottomLight * 0.28h);
                 half causticsScatter = smoothstep(0.10h, 0.82h, causticsRaw);
                 causticsScatter *= _CausticsStrength * _CausticsScatterStrength * lerp(0.45h, 1.35h, bottomLight);
-                causticsScatter *= viewFacing * baseVisibility * saturate(0.28h + clarity * 0.52h + _TransmissionStrength * 0.35h);
+                causticsScatter *= viewFacing * causticsVisibility * saturate(0.28h + clarity * 0.52h + _TransmissionStrength * 0.35h);
                 half3 causticsColor = _CausticsTint.rgb;
                 half3 prismColor = half3(causticsPrismR, causticsRaw, causticsPrismB) * _CausticsTint.rgb;
                 causticsColor = lerp(causticsColor, prismColor, saturate(_CausticsPrismStrength) * saturate(0.25h + clarity + bottomLight * 0.35h));
