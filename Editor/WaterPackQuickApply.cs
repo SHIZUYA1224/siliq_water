@@ -34,6 +34,7 @@ namespace Siliq.Water.Editor
             public string displayName;
             public string sourceGuid;
             public string sourceLabel;
+            public string normalGuid;
             public string heightGuid;
             public MotionPreset motion;
             public bool transparent;
@@ -268,7 +269,8 @@ namespace Siliq.Water.Editor
             displayName = "クリスタルラグーン",
             sourceGuid = FlagshipCrystalGuid,
             sourceLabel = "FlagshipCrystal",
-            heightGuid = FlagshipCrystalHeightGuid,
+            normalGuid = CrystalLagoonNormalGuid,
+            heightGuid = CrystalLagoonHeightGuid,
             motion = new MotionPreset(20f, 0.012f, 0.42f, 0.92f),
             transparent = true,
             opacity = 0.40f,
@@ -405,6 +407,8 @@ namespace Siliq.Water.Editor
         const string CyberGuid = "a171aabb01c34e01a1b2c3d4e5f60205";
         const string FlagshipCrystalGuid = "a171aabb01c34e01a1b2c3d4e5f60206";
         const string FlagshipCrystalHeightGuid = "a171aabb01c34e01a1b2c3d4e5f60306";
+        const string CrystalLagoonNormalGuid = "a171aabb01c34e01a1b2c3d4e5f60107";
+        const string CrystalLagoonHeightGuid = "a171aabb01c34e01a1b2c3d4e5f60307";
         const string CrystalCausticsGuid = "00e6b1e9a23c24df69fe9558209de596";
 
         const string MenuRoot = "GameObject/Siliq Water/水マテリアルを適用/";
@@ -1132,9 +1136,21 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_DarkDetailDamping")) mat.SetFloat("_DarkDetailDamping", 0.70f);
         }
 
-        static void ApplySiliqNormal(Material mat, Material source)
+        static void ApplySiliqNormal(Material mat, Material source, LookPreset preset)
         {
-            if (mat == null || source == null) return;
+            if (mat == null) return;
+
+            if (!string.IsNullOrEmpty(preset.normalGuid) && mat.HasProperty("_NormalMap"))
+            {
+                Texture normal = LoadTexture(preset.normalGuid, $"Water_Normal_{preset.assetName}_01");
+                if (normal != null)
+                {
+                    mat.SetTexture("_NormalMap", normal);
+                    return;
+                }
+            }
+
+            if (source == null) return;
 
             if (source.HasProperty("_BumpMap") && mat.HasProperty("_NormalMap"))
             {
@@ -1144,6 +1160,11 @@ namespace Siliq.Water.Editor
             {
                 mat.SetFloat("_NormalStrength", Mathf.Max(1f, source.GetFloat("_BumpScale")));
             }
+        }
+
+        static void ApplySiliqNormal(Material mat, Material source)
+        {
+            ApplySiliqNormal(mat, source, default);
         }
 
         static void ApplySiliqHeight(Material mat, Material source, string heightGuid, string sourceLabel, float influence)
@@ -1204,7 +1225,7 @@ namespace Siliq.Water.Editor
         {
             if (mat == null) return;
 
-            ApplySiliqNormal(mat, source);
+            ApplySiliqNormal(mat, source, preset);
             ApplySiliqHeight(mat, source, preset.heightGuid, preset.sourceLabel, preset.heightMapInfluence);
             ApplySiliqCaustics(mat, preset);
             SetupSiliqBlend(mat, preset.transparent, preset.opacity);

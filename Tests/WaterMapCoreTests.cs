@@ -837,6 +837,83 @@ namespace Siliq.Water.Tests
         }
 
         [Test]
+        public void CrystalLagoonPrebakedAssets_AreDedicatedHighResolutionAssets()
+        {
+            const string normalGuid = "a171aabb01c34e01a1b2c3d4e5f60107";
+            const string heightGuid = "a171aabb01c34e01a1b2c3d4e5f60307";
+            const string flagshipNormalGuid = "a171aabb01c34e01a1b2c3d4e5f60106";
+            const string flagshipHeightGuid = "a171aabb01c34e01a1b2c3d4e5f60306";
+
+            string normalPath = AssetDatabase.GUIDToAssetPath(normalGuid);
+            string heightPath = AssetDatabase.GUIDToAssetPath(heightGuid);
+            string flagshipNormalPath = AssetDatabase.GUIDToAssetPath(flagshipNormalGuid);
+            string flagshipHeightPath = AssetDatabase.GUIDToAssetPath(flagshipHeightGuid);
+
+            Assert.IsNotEmpty(normalPath, "Crystal Lagoon 専用 normal map が package に含まれていない");
+            Assert.IsNotEmpty(heightPath, "Crystal Lagoon 専用 height map が package に含まれていない");
+            Assert.AreNotEqual(flagshipNormalPath, normalPath, "Crystal Lagoon normal が Flagship normal の流用に戻っている");
+            Assert.AreNotEqual(flagshipHeightPath, heightPath, "Crystal Lagoon height が Flagship height の流用に戻っている");
+
+            var normal = AssetDatabase.LoadAssetAtPath<Texture2D>(normalPath);
+            var height = AssetDatabase.LoadAssetAtPath<Texture2D>(heightPath);
+            Assert.IsNotNull(normal, "Crystal Lagoon normal map を読み込めない");
+            Assert.IsNotNull(height, "Crystal Lagoon height map を読み込めない");
+            Assert.GreaterOrEqual(normal.width, 2048, "美しさ特化 normal map は 2048px 以上にする");
+            Assert.GreaterOrEqual(normal.height, 2048, "美しさ特化 normal map は 2048px 以上にする");
+            Assert.GreaterOrEqual(height.width, 2048, "美しさ特化 height map は 2048px 以上にする");
+            Assert.GreaterOrEqual(height.height, 2048, "美しさ特化 height map は 2048px 以上にする");
+
+            var normalImporter = AssetImporter.GetAtPath(normalPath) as TextureImporter;
+            Assert.IsNotNull(normalImporter, "Crystal Lagoon normal importer が TextureImporter ではない");
+            Assert.AreEqual(TextureImporterType.NormalMap, normalImporter.textureType,
+                "Crystal Lagoon normal map が NormalMap import になっていない");
+
+            var ready = LoadReadyMaterial("M_Siliq_CrystalLagoon_Ready");
+            Assert.AreEqual(normalPath, AssetDatabase.GetAssetPath(ready.GetTexture("_NormalMap")),
+                "Crystal Lagoon ready material が専用 normal map を参照していない");
+            Assert.AreEqual(heightPath, AssetDatabase.GetAssetPath(ready.GetTexture("_HeightMap")),
+                "Crystal Lagoon ready material が専用 height map を参照していない");
+        }
+
+        [Test]
+        public void CrystalLagoonQuickApply_UsesDedicatedBeautyTextures()
+        {
+            const string normalGuid = "a171aabb01c34e01a1b2c3d4e5f60107";
+            const string heightGuid = "a171aabb01c34e01a1b2c3d4e5f60307";
+            string normalPath = AssetDatabase.GUIDToAssetPath(normalGuid);
+            string heightPath = AssetDatabase.GUIDToAssetPath(heightGuid);
+
+            GameObject go = null;
+            try
+            {
+                go = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                Selection.activeGameObject = go;
+
+                bool executed = EditorApplication.ExecuteMenuItem(
+                    "GameObject/Siliq Water/用途別マテリアルを適用/クリスタルラグーン (Crystal Lagoon)");
+                Assert.IsTrue(executed, "Crystal Lagoon の Quick Apply menu を実行できない");
+
+                var renderer = go.GetComponent<Renderer>();
+                var mat = renderer != null ? renderer.sharedMaterial : null;
+                Assert.IsNotNull(mat, "Crystal Lagoon Quick Apply で material が設定されていない");
+
+                Assert.AreEqual(normalPath, AssetDatabase.GetAssetPath(mat.GetTexture("_NormalMap")),
+                    "Crystal Lagoon Quick Apply が専用 normal map を割り当てていない");
+                Assert.AreEqual(heightPath, AssetDatabase.GetAssetPath(mat.GetTexture("_HeightMap")),
+                    "Crystal Lagoon Quick Apply が専用 height map を割り当てていない");
+                Assert.GreaterOrEqual(mat.GetFloat("_TransmissionStrength"), 0.90f,
+                    "Crystal Lagoon Quick Apply は透き通った見た目を優先する");
+                Assert.GreaterOrEqual(mat.GetFloat("_CausticsStrength"), 0.70f,
+                    "Crystal Lagoon Quick Apply は水底光を強めに持つ必要がある");
+            }
+            finally
+            {
+                Selection.activeGameObject = null;
+                if (go != null) Object.DestroyImmediate(go);
+            }
+        }
+
+        [Test]
         public void BeginnerSetup_RepairsOldFlagshipHeightSettings()
         {
             GameObject go = null;

@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.39] - 2026-07-09
+
+### 追加: Crystal Lagoon 専用 normal / height
+- `Water_Normal_CrystalLagoon_01.png` と `Water_Height_CrystalLagoon_01.png` を追加し、Crystal Lagoon が Flagship の texture 流用に戻らないようにした
+- 専用 texture はセル状・板状ではなく、広い透明ムラと細い反射筋中心のシームレス素材として同梱
+- Ready Material と Quick Apply の Crystal Lagoon を専用 normal / height 参照へ更新
+
 ## [2.3.38] - 2026-07-08
 
 ### 修正: 水面アニメーション速度をさらに低速化
