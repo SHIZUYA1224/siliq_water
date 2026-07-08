@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.42] - 2026-07-09
+
+### 修正: 水面速度をさらに低速化
+- `WaterSurfaceAnimator` の Speed を水面用に内部減速し、Speed 0.3 でも以前ほど速く流れないようにした
+- 用途別 Quick Apply と同梱 ReadyMaterials の shader scroll / 高さ速度 / 水底光速度をさらに下げ、プールや透明水が落ち着いて見える初期値へ調整
+- Ready material の速度上限テストを厳しくし、速すぎる既定値へ戻らないようにした
+
 ## [2.3.41] - 2026-07-09
 
 ### 追加: Crystal Lagoon showcase scene

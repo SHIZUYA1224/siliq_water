@@ -15,8 +15,8 @@ Shader "Siliq/Water URP"
         _NormalStrength ("ノーマル強度", Range(0, 2)) = 1
         _Tiling1 ("レイヤー1 タイリング", Float) = 1
         _Tiling2 ("レイヤー2 タイリング", Float) = 2.7
-        _Scroll1 ("レイヤー1 スクロール (XY)", Vector) = (0.02, 0.013, 0, 0)
-        _Scroll2 ("レイヤー2 スクロール (XY)", Vector) = (-0.017, 0.021, 0, 0)
+        _Scroll1 ("レイヤー1 スクロール (XY)", Vector) = (0.01, 0.004, 0, 0)
+        _Scroll2 ("レイヤー2 スクロール (XY)", Vector) = (-0.003, 0.007, 0, 0)
         _MacroVariation ("大きなムラ", Range(0, 1)) = 0.35
         _MacroScale ("大きなムラのスケール", Range(0.01, 1)) = 0.12
         _MacroDirectionBreakup ("方向の崩し", Range(0, 1)) = 0.28
@@ -28,7 +28,7 @@ Shader "Siliq/Water URP"
 
         [Toggle(_USE_FLOWMAP)] _UseFlowMap ("フローマップを使う", Float) = 0
         [NoScaleOffset] _FlowMap ("フローマップ (RG)", 2D) = "grey" {}
-        _FlowSpeed ("フロー速度", Range(0, 2)) = 0.5
+        _FlowSpeed ("フロー速度", Range(0, 2)) = 0.18
         _FlowIntensity ("フロー強度", Range(0, 1)) = 0.3
 
         [Toggle(_SHORE_EFFECTS)] _UseShore ("岸辺エフェクトを使う (深度テクスチャ必須)", Float) = 0
