@@ -44,6 +44,7 @@ namespace Siliq.Water.Editor
         SerializedProperty causticsFocus;
         SerializedProperty causticsPrismStrength;
         SerializedProperty causticsScatterStrength;
+        SerializedProperty bottomVisibility;
         SerializedProperty bottomLightStrength;
         SerializedProperty bottomGlowStrength;
         SerializedProperty depthTintStrength;
@@ -87,6 +88,7 @@ namespace Siliq.Water.Editor
             causticsFocus = serializedObject.FindProperty("causticsFocus");
             causticsPrismStrength = serializedObject.FindProperty("causticsPrismStrength");
             causticsScatterStrength = serializedObject.FindProperty("causticsScatterStrength");
+            bottomVisibility = serializedObject.FindProperty("bottomVisibility");
             bottomLightStrength = serializedObject.FindProperty("bottomLightStrength");
             bottomGlowStrength = serializedObject.FindProperty("bottomGlowStrength");
             depthTintStrength = serializedObject.FindProperty("depthTintStrength");
@@ -207,6 +209,7 @@ namespace Siliq.Water.Editor
             EditorGUILayout.PropertyField(causticsFocus, new GUIContent("光の焦点"));
             EditorGUILayout.PropertyField(causticsPrismStrength, new GUIContent("光の色分散"));
             EditorGUILayout.PropertyField(causticsScatterStrength, new GUIContent("光の柔らかい広がり"));
+            EditorGUILayout.PropertyField(bottomVisibility, new GUIContent("水底の見え方"));
             EditorGUILayout.PropertyField(bottomLightStrength, new GUIContent("水底光の透け"));
             EditorGUILayout.PropertyField(bottomGlowStrength, new GUIContent("水底の柔らかい明るさ"));
             EditorGUILayout.PropertyField(depthTintStrength, new GUIContent("奥行きの青み"));

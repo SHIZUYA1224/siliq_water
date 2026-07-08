@@ -79,6 +79,7 @@ namespace Siliq.Water.Editor
             public float causticsFocus;
             public float causticsPrismStrength;
             public float causticsScatterStrength;
+            public float bottomVisibility;
             public float bottomLightStrength;
             public float bottomGlowStrength;
             public float depthTintStrength;
@@ -141,6 +142,7 @@ namespace Siliq.Water.Editor
             causticsFocus = 1.35f,
             causticsPrismStrength = 0.08f,
             causticsScatterStrength = 0.28f,
+            bottomVisibility = 1.05f,
             bottomLightStrength = 1.15f,
             bottomGlowStrength = 0.55f,
             depthTintStrength = 0.38f,
@@ -196,6 +198,7 @@ namespace Siliq.Water.Editor
             causticsFocus = 1.55f,
             causticsPrismStrength = 0.12f,
             causticsScatterStrength = 0.36f,
+            bottomVisibility = 1.35f,
             bottomLightStrength = 1.35f,
             bottomGlowStrength = 0.70f,
             depthTintStrength = 0.24f,
@@ -251,6 +254,7 @@ namespace Siliq.Water.Editor
             causticsFocus = 1.45f,
             causticsPrismStrength = 0.14f,
             causticsScatterStrength = 0.42f,
+            bottomVisibility = 1.30f,
             bottomLightStrength = 1.35f,
             bottomGlowStrength = 0.72f,
             depthTintStrength = 0.26f,
@@ -307,6 +311,7 @@ namespace Siliq.Water.Editor
             causticsFocus = 1.75f,
             causticsPrismStrength = 0.16f,
             causticsScatterStrength = 0.48f,
+            bottomVisibility = 1.20f,
             bottomLightStrength = 1.45f,
             bottomGlowStrength = 0.76f,
             depthTintStrength = 0.32f,
@@ -364,6 +369,7 @@ namespace Siliq.Water.Editor
             causticsFocus = 2.0f,
             causticsPrismStrength = 0.18f,
             causticsScatterStrength = 0.58f,
+            bottomVisibility = 1.55f,
             bottomLightStrength = 1.70f,
             bottomGlowStrength = 0.82f,
             depthTintStrength = 0.30f,
@@ -421,6 +427,7 @@ namespace Siliq.Water.Editor
             causticsFocus = 2.4f,
             causticsPrismStrength = 0.24f,
             causticsScatterStrength = 0.74f,
+            bottomVisibility = 1.75f,
             bottomLightStrength = 1.90f,
             bottomGlowStrength = 1.05f,
             depthTintStrength = 0.34f,
@@ -476,6 +483,7 @@ namespace Siliq.Water.Editor
             causticsFocus = 1.1f,
             causticsPrismStrength = 0.02f,
             causticsScatterStrength = 0.04f,
+            bottomVisibility = 0.15f,
             bottomLightStrength = 0.35f,
             bottomGlowStrength = 0.10f,
             depthTintStrength = 0.55f,
@@ -530,6 +538,7 @@ namespace Siliq.Water.Editor
             causticsFocus = 1.0f,
             causticsPrismStrength = 0f,
             causticsScatterStrength = 0f,
+            bottomVisibility = 0f,
             bottomLightStrength = 0f,
             bottomGlowStrength = 0f,
             depthTintStrength = 0.12f,
@@ -1168,6 +1177,7 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_EdgeReflection")) mat.SetFloat("_EdgeReflection", 0f);
             if (mat.HasProperty("_RefractionStrength")) mat.SetFloat("_RefractionStrength", 0f);
             if (mat.HasProperty("_ReflectionPatternStrength")) mat.SetFloat("_ReflectionPatternStrength", 0f);
+            if (mat.HasProperty("_BottomVisibility")) mat.SetFloat("_BottomVisibility", 0f);
             if (mat.HasProperty("_BottomGlowStrength")) mat.SetFloat("_BottomGlowStrength", 0f);
             if (mat.HasProperty("_DepthTintStrength")) mat.SetFloat("_DepthTintStrength", 0f);
             if (mat.HasProperty("_SrcBlend")) mat.SetFloat("_SrcBlend", (float)BlendMode.One);
@@ -1217,6 +1227,7 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_CausticsFocus")) mat.SetFloat("_CausticsFocus", 1.35f);
             if (mat.HasProperty("_CausticsPrismStrength")) mat.SetFloat("_CausticsPrismStrength", 0.08f);
             if (mat.HasProperty("_CausticsScatterStrength")) mat.SetFloat("_CausticsScatterStrength", 0.30f);
+            if (mat.HasProperty("_BottomVisibility")) mat.SetFloat("_BottomVisibility", 1.15f);
             if (mat.HasProperty("_BottomLightStrength")) mat.SetFloat("_BottomLightStrength", 1.20f);
             if (mat.HasProperty("_BottomGlowStrength")) mat.SetFloat("_BottomGlowStrength", 0.55f);
             if (mat.HasProperty("_DepthTintStrength")) mat.SetFloat("_DepthTintStrength", 0.28f);
@@ -1430,6 +1441,7 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_CausticsFocus")) mat.SetFloat("_CausticsFocus", Mathf.Max(0.5f, preset.causticsFocus));
             if (mat.HasProperty("_CausticsPrismStrength")) mat.SetFloat("_CausticsPrismStrength", Mathf.Clamp01(preset.causticsPrismStrength));
             if (mat.HasProperty("_CausticsScatterStrength")) mat.SetFloat("_CausticsScatterStrength", Mathf.Clamp01(preset.causticsScatterStrength));
+            if (mat.HasProperty("_BottomVisibility")) mat.SetFloat("_BottomVisibility", Mathf.Clamp(preset.bottomVisibility, 0f, 2f));
             if (mat.HasProperty("_BottomLightStrength")) mat.SetFloat("_BottomLightStrength", preset.bottomLightStrength);
             if (mat.HasProperty("_BottomGlowStrength")) mat.SetFloat("_BottomGlowStrength", preset.bottomGlowStrength);
             if (mat.HasProperty("_DepthTintStrength")) mat.SetFloat("_DepthTintStrength", preset.depthTintStrength);

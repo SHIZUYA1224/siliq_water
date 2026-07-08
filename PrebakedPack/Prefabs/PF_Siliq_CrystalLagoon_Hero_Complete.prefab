@@ -323,6 +323,7 @@ MonoBehaviour:
   causticsFocus: 2.4
   causticsPrismStrength: 0.24
   causticsScatterStrength: 0.74
+  bottomVisibility: 1.75
   bottomLightStrength: 1.9
   bottomGlowStrength: 1.05
   depthTintStrength: 0.34

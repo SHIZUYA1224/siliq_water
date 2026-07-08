@@ -30,6 +30,7 @@ Shader "Siliq/Water URP"
         _CausticsFocus ("水底光の焦点", Range(0.5, 4)) = 1.4
         _CausticsPrismStrength ("水底光の色分散", Range(0, 1)) = 0.12
         _CausticsScatterStrength ("水底光の柔らかい広がり", Range(0, 1)) = 0.25
+        _BottomVisibility ("水底の見え方", Range(0, 2)) = 1
         _BottomLightStrength ("水底光の透け", Range(0, 2)) = 1
         _CausticsTint ("水底の光の色", Color) = (0.75, 1, 1, 1)
 
@@ -116,6 +117,7 @@ Shader "Siliq/Water URP"
                 half _CausticsFocus;
                 half _CausticsPrismStrength;
                 half _CausticsScatterStrength;
+                half _BottomVisibility;
                 half _BottomLightStrength;
                 half4 _CausticsTint;
                 half _Smoothness;
@@ -331,6 +333,7 @@ Shader "Siliq/Water URP"
                 reflection *= lerp(0.78h, 1.22h, macroMask);
 
                 half fresnel = pow(1.0h - saturate(dot(normalWS, viewDir)), _FresnelPower);
+                half bottomVisibility = min(_BottomVisibility, 2.0h) * saturate(0.34h + shoreFade * 0.28h + (1.0h - fresnel) * 0.38h);
 
                 // スペキュラハイライト
                 half3 halfDir = normalize(mainLight.direction + viewDir);
@@ -338,6 +341,8 @@ Shader "Siliq/Water URP"
                 half3 spec = pow(saturate(dot(normalWS, halfDir)), specPow) * mainLight.color;
                 spec *= lerp(0.72h, 1.28h, macroMask);
 
+                half3 visibleBottomCol = lerp(_ShallowColor.rgb, half3(0.82h, 1.0h, 1.0h), 0.42h);
+                baseCol = lerp(baseCol, visibleBottomCol, saturate(bottomVisibility * 0.24h));
                 half3 color = lerp(baseCol, reflection, fresnel) + spec;
                 float causticsScale = max((float)_CausticsScale, 0.001);
                 float2 causticsUvA = input.positionWS.xz * causticsScale * 0.12 + normalWS.xz * (0.10 + refraction * 0.24) + _Time.y * _CausticsSpeed * float2(0.33, 0.21);
@@ -346,16 +351,17 @@ Shader "Siliq/Water URP"
                 half causticsB = SAMPLE_TEXTURE2D(_CausticsMap, sampler_CausticsMap, causticsUvB).r;
                 half causticsPrismR = SAMPLE_TEXTURE2D(_CausticsMap, sampler_CausticsMap, causticsUvA + normalWS.xz * 0.013 + float2(0.004, -0.002)).r;
                 half causticsPrismB = SAMPLE_TEXTURE2D(_CausticsMap, sampler_CausticsMap, causticsUvB - normalWS.xz * 0.011 + float2(-0.003, 0.005)).r;
-                half bottomLight = saturate(_BottomLightStrength * 0.5h);
+                half bottomLight = saturate(_BottomLightStrength * 0.5h) * saturate(0.68h + bottomVisibility * 0.32h);
                 half causticsRaw = saturate(causticsA * 0.62h + causticsB * 0.50h);
                 half causticsFocus = pow(causticsRaw, max(_CausticsFocus, 0.5h));
                 half causticsLine = saturate((causticsFocus - 0.10h) * _CausticsStrength * lerp(0.82h, 1.55h, bottomLight));
                 half causticsScatter = smoothstep(0.10h, 0.82h, causticsRaw) * _CausticsStrength * _CausticsScatterStrength;
-                causticsScatter *= lerp(0.45h, 1.35h, bottomLight) * saturate(0.35h + shoreFade * 0.4h + (1.0h - fresnel) * 0.35h);
+                causticsScatter *= lerp(0.45h, 1.35h, bottomLight) * saturate(0.35h + shoreFade * 0.4h + (1.0h - fresnel) * 0.35h + bottomVisibility * 0.26h);
                 half3 causticsColor = _CausticsTint.rgb;
                 half3 prismColor = half3(causticsPrismR, causticsRaw, causticsPrismB) * _CausticsTint.rgb;
                 causticsColor = lerp(causticsColor, prismColor, saturate(_CausticsPrismStrength) * saturate(0.35h + bottomLight * 0.35h));
-                color += causticsColor * causticsLine * saturate(0.35h + shoreFade * 0.65h);
+                color += visibleBottomCol * bottomVisibility * saturate(_BottomLightStrength * 0.10h);
+                color += causticsColor * causticsLine * saturate(0.35h + shoreFade * 0.65h + bottomVisibility * 0.18h);
                 color += lerp(_ShallowColor.rgb, causticsColor, 0.48h) * causticsScatter;
                 color += lerp(_ShallowColor.rgb, half3(1.0h, 1.0h, 1.0h), 0.72h) * rippleLight * 0.35h;
                 half alpha = _Opacity;

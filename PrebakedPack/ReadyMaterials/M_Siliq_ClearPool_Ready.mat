@@ -46,6 +46,7 @@ Material:
     - _AlphaPower: 2
     - _BottomGlowStrength: 0.70
     - _BottomLightStrength: 1.35
+    - _BottomVisibility: 1.35
     - _CausticsScale: 2.4
     - _CausticsSpeed: 0.000007
     - _CausticsFocus: 1.55

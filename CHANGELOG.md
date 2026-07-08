@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.76] - 2026-07-09
+
+### 改善: 透明水越しの水底 visibility を追加
+- `Siliq/Water Mobile (Quest)` と URP サンプル shader に `_BottomVisibility` を追加し、透明度とは別に水底や床が水越しに見える量を調整できるようにした
+- `WaterSurfaceAnimator` / 専用 Inspector / Quick Apply / ReadyMaterials / Crystal Lagoon 完成 Prefab に水底の見え方を反映
+- Hero / Crystal Lagoon / 透明プール系の初期値を、水面模様だけではなく水底光と明るい床が透き通って見える方向へ寄せた
+- テストを更新し、PropertyBlock 反映、ReadyMaterial の同梱値、Hero / Crystal Lagoon Quick Apply が水底 visibility を持つことを固定
+
 ## [2.3.75] - 2026-07-09
 
 ### 改善: 暗所の透明水調整を Inspector に追加

@@ -138,6 +138,9 @@ namespace Siliq.Water
         [Tooltip("水底光の柔らかい広がり。細い焦点線だけでなく、透明水越しの光膜を作ります。")]
         [Range(0f, 1f)] public float causticsScatterStrength = 0.25f;
 
+        [Tooltip("水底やプール床が水越しに見える量。高いほど透明な抜け感と床光が強く残ります。Siliq 水シェーダーで有効。")]
+        [Range(0f, 2f)] public float bottomVisibility = 1f;
+
         [Tooltip("水底光が水を通して見える量。透明な浅いプールやラグーンでは高めにします。Siliq 水シェーダーで有効。")]
         [Range(0f, 2f)] public float bottomLightStrength = 1f;
 
@@ -197,6 +200,7 @@ namespace Siliq.Water
         int causticsFocusPropertyId;
         int causticsPrismStrengthPropertyId;
         int causticsScatterStrengthPropertyId;
+        int bottomVisibilityPropertyId;
         int bottomLightStrengthPropertyId;
         int bottomGlowStrengthPropertyId;
         int depthTintStrengthPropertyId;
@@ -296,6 +300,7 @@ namespace Siliq.Water
             causticsFocusPropertyId = Shader.PropertyToID("_CausticsFocus");
             causticsPrismStrengthPropertyId = Shader.PropertyToID("_CausticsPrismStrength");
             causticsScatterStrengthPropertyId = Shader.PropertyToID("_CausticsScatterStrength");
+            bottomVisibilityPropertyId = Shader.PropertyToID("_BottomVisibility");
             bottomLightStrengthPropertyId = Shader.PropertyToID("_BottomLightStrength");
             bottomGlowStrengthPropertyId = Shader.PropertyToID("_BottomGlowStrength");
             depthTintStrengthPropertyId = Shader.PropertyToID("_DepthTintStrength");
@@ -376,6 +381,7 @@ namespace Siliq.Water
             causticsFocus = Mathf.Clamp(causticsFocus, 0.5f, 4f);
             causticsPrismStrength = Mathf.Clamp01(causticsPrismStrength);
             causticsScatterStrength = Mathf.Clamp01(causticsScatterStrength);
+            bottomVisibility = Mathf.Clamp(bottomVisibility, 0f, 2f);
             bottomLightStrength = Mathf.Clamp(bottomLightStrength, 0f, 2f);
             bottomGlowStrength = Mathf.Clamp(bottomGlowStrength, 0f, 2f);
             depthTintStrength = Mathf.Clamp01(depthTintStrength);
@@ -524,6 +530,10 @@ namespace Siliq.Water
             if (targetMaterial.HasProperty(causticsScatterStrengthPropertyId))
             {
                 causticsScatterStrength = Mathf.Clamp01(targetMaterial.GetFloat(causticsScatterStrengthPropertyId));
+            }
+            if (targetMaterial.HasProperty(bottomVisibilityPropertyId))
+            {
+                bottomVisibility = Mathf.Clamp(targetMaterial.GetFloat(bottomVisibilityPropertyId), 0f, 2f);
             }
             if (targetMaterial.HasProperty(bottomLightStrengthPropertyId))
             {
@@ -857,6 +867,10 @@ namespace Siliq.Water
             if (targetMaterial.HasProperty(causticsScatterStrengthPropertyId))
             {
                 propertyBlock.SetFloat(causticsScatterStrengthPropertyId, Mathf.Clamp01(causticsScatterStrength));
+            }
+            if (targetMaterial.HasProperty(bottomVisibilityPropertyId))
+            {
+                propertyBlock.SetFloat(bottomVisibilityPropertyId, Mathf.Clamp(bottomVisibility, 0f, 2f));
             }
             if (targetMaterial.HasProperty(bottomLightStrengthPropertyId))
             {

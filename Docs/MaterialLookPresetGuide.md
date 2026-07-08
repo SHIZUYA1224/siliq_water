@@ -3,7 +3,7 @@
 Siliq Water は、ノーマルマップ単体ではなく「用途別の見た目プリセット」として使うことを前提にする。まず完成形を確認する場合は `PrebakedPack/Preview/preview_crystal_lagoon_complete.png`、美しさ最優先なら `PrebakedPack/Preview/preview_crystal_lagoon_hero_complete.png` で方向性を見てから、Hero は `PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Hero_Complete.prefab`、通常確認は `PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab` を Hierarchy にドラッグする。水面、薄いタイル感のある明るいプール床、床用 caustics overlay、確認用ライトが一体で入っている。
 
 アタッチだけで使う場合は `PrebakedPack/ReadyMaterials/` の `M_Siliq_*_Ready` を Renderer にドラッグする。これらは normal、色、透明度、反射、scroll、水底の光が設定済みで、`WaterSurfaceAnimator` なしでも shader 側で波が動く。美しさを最優先して確認する場合は `M_Siliq_CrystalLagoon_Hero_Ready` から始める。
-Hero / Crystal Lagoon / 透明プールは、置いた瞬間に水面が滑って見えないよう shader scroll と Animator speed をかなり低速にしている。`Speed` は 0.3 を静かな水面の中間操作値として扱い、もっと静止に近づけたい場合は `Speed` を 0.01 以下、または material の `_Scroll1` / `_Scroll2` を 0 にする。水底光まで速く見える場合は `_CausticsSpeed`、高さの動きが速い場合は `_DisplacementSpeed` を下げる。Hero の水底光は直線格子ではなく、有機的に曲がる caustics の光筋として調整する。透明水の平板さが気になる場合は `_RefractionStrength` を 0.25-0.45、`_BottomGlowStrength` を 0.7-1.1、`_DepthTintStrength` を 0.25-0.4 の範囲で使い、水底光、底の柔らかい明るさ、反射を薄く歪ませる。暗い部屋で水面だけ浮く場合は WaterSurfaceAnimator の暗所項目で `_DarkReflectionDamping` / `_DarkDetailDamping` を上げ、底光が沈む場合は `_MinLighting` を少し上げる。
+Hero / Crystal Lagoon / 透明プールは、置いた瞬間に水面が滑って見えないよう shader scroll と Animator speed をかなり低速にしている。`Speed` は 0.3 を静かな水面の中間操作値として扱い、もっと静止に近づけたい場合は `Speed` を 0.01 以下、または material の `_Scroll1` / `_Scroll2` を 0 にする。水底光まで速く見える場合は `_CausticsSpeed`、高さの動きが速い場合は `_DisplacementSpeed` を下げる。Hero の水底光は直線格子ではなく、有機的に曲がる caustics の光筋として調整する。透明水の平板さが気になる場合は `_RefractionStrength` を 0.25-0.45、`_BottomVisibility` を 1.2-1.8、`_BottomGlowStrength` を 0.7-1.1、`_DepthTintStrength` を 0.25-0.4 の範囲で使い、水底、底の柔らかい明るさ、反射を薄く歪ませる。暗い部屋で水面だけ浮く場合は WaterSurfaceAnimator の暗所項目で `_DarkReflectionDamping` / `_DarkDetailDamping` を上げ、底光が沈む場合は `_MinLighting` を少し上げる。
 床に直接重ねる caustics overlay では `_Focus` で焦点線、`_SoftScatter` で柔らかい光膜、`_PrismStrength` で薄い色分散を調整する。Hero は通常版より少し高い値から始める。
 
 水面オブジェクトを選択して作成・再適用したい場合は、Hierarchy 右クリックから以下を適用する。
@@ -34,13 +34,13 @@ Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイ�
 - 適したノーマルマップを割り当てる
 - フラッグシップ透明水では専用 2048px normal map と height map を割り当てる
 - クリスタルラグーンでは専用 2048px normal map、height map、`Water_Caustics_CrystalLagoon_01.png` を割り当てる
-- `M_Siliq_CrystalLagoon_Hero_Ready` は `Water_Normal_CrystalLagoon_Hero_01.png`、`Water_Height_CrystalLagoon_Hero_01.png`、`Water_Caustics_CrystalLagoon_Hero_01.png` を使い、通常 Crystal Lagoon texture の流用に戻さない。`Clarity`、`Reflection Pattern`、`Transmission`、`Bottom Light Strength`、`Caustics Focus`、`Caustics Prism`、`Caustics Scatter` を強めた最高品質確認用として同梱する
+- `M_Siliq_CrystalLagoon_Hero_Ready` は `Water_Normal_CrystalLagoon_Hero_01.png`、`Water_Height_CrystalLagoon_Hero_01.png`、`Water_Caustics_CrystalLagoon_Hero_01.png` を使い、通常 Crystal Lagoon texture の流用に戻さない。`Clarity`、`Reflection Pattern`、`Transmission`、`Bottom Visibility`、`Bottom Light Strength`、`Caustics Focus`、`Caustics Prism`、`Caustics Scatter` を強めた最高品質確認用として同梱する
 - 完成形をすぐ確認できるよう、`PF_Siliq_CrystalLagoon_Complete.prefab` には水面、`Siliq/Pale Pool Floor Mobile` の薄いタイル床、`M_Siliq_CrystalLagoon_CausticsOverlay` の床用光を同梱する。`PF_Siliq_CrystalLagoon_Hero_Complete.prefab` では Hero water material と `M_Siliq_CrystalLagoon_Hero_CausticsOverlay` を使う
 - 床に直接光を出したい場合は、床の少し上に薄い Plane を置いて `M_Siliq_CrystalLagoon_CausticsOverlay` を貼る
 - 透明プール / 室内ブループールでは `Water_Caustics_SunlitPool_01.png` を水底の光として割り当て、広い床光と柔らかい光リボンから始める
 - 透明な海・フラッグシップ水では `Water_Caustics_Crystal_01.png` を水底の光として割り当てる
 - 色、透明度、反射、透過光、きらめきを設定する
-- `Clarity`、`Reflection Pattern`、`Bottom Light Strength` を用途ごとに設定し、Crystal Lagoon では水色の濁りを抑え、空や窓の帯状反射と水底光が水越しに見える状態から始める
+- `Clarity`、`Reflection Pattern`、`Bottom Visibility`、`Bottom Light Strength` を用途ごとに設定し、Crystal Lagoon では水色の濁りを抑え、空や窓の帯状反射と水底光が水越しに見える状態から始める
 - `WaterSurfaceAnimator` を追加または更新し、動きを付ける
 - Built-in / iOS 系では `Siliq/Water Mobile (Quest)` を使う
 - URP プロジェクトでは、`URP Shader` Sample が Import 済みなら `Siliq/Water URP` を優先して使う
@@ -52,8 +52,8 @@ Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイ�
 - プール: `Normal Strength` を 0.25-0.5、`Opacity` を 0.38-0.55
 - 室内ブループール: `Normal Strength` を 0.35-0.6、`Opacity` を 0.35-0.5、`Reflection` は高め
 - フラッグシップ透明水: `Normal Strength` を 0.55-0.65、`Opacity` を 0.48-0.62、`Reflection` は高め、`Height` は 0.02 以下から始める
-- クリスタルラグーン: `Normal Strength` は 0.4 前後、`Clarity` は 0.9 以上、`Reflection Pattern` は 0.42 以上、`Transmission` と `Caustics` は高め、`Caustics Scatter` は 0.58 前後、`Bottom Light Strength` は 1.65 以上、`Height` は 0.01 以下に抑える
-- クリスタルラグーン Hero: `Normal Strength` は 0.36 前後、`Opacity` は 0.34 前後、`Clarity` は 0.98、`Reflection Pattern` は 0.58、`Transmission` は 0.98、`Caustics` は 0.84、`Caustics Focus` は 2.4、`Caustics Prism` は 0.24、`Caustics Scatter` は 0.74、`Bottom Light Strength` は 1.9 を基準にする
+- クリスタルラグーン: `Normal Strength` は 0.4 前後、`Clarity` は 0.9 以上、`Reflection Pattern` は 0.42 以上、`Transmission` と `Caustics` は高め、`Caustics Scatter` は 0.58 前後、`Bottom Visibility` は 1.55、`Bottom Light Strength` は 1.65 以上、`Height` は 0.01 以下に抑える
+- クリスタルラグーン Hero: `Normal Strength` は 0.36 前後、`Opacity` は 0.34 前後、`Clarity` は 0.98、`Reflection Pattern` は 0.58、`Transmission` は 0.98、`Caustics` は 0.84、`Caustics Focus` は 2.4、`Caustics Prism` は 0.24、`Caustics Scatter` は 0.74、`Bottom Visibility` は 1.75、`Bottom Light Strength` は 1.9 を基準にする
 - 水底の光: プールや浅い海では `Caustics Strength` を 0.3-0.65、暗い場所や深い水では 0.15 以下から始める
 - 床用 caustics overlay: `Intensity` は 0.4-0.7、`Tiling` は 1-2 から始める。床が発光しすぎる場合は `Floor Fade` を下げる。
 - 氷割れや多角形模様に見える場合: フラッグシップ透明水の `Height Map Influence` は 0 付近、`Height` は 0.02 以下から始める

@@ -343,6 +343,7 @@ namespace Siliq.Water.Tests
                 animator.causticsFocus = 2.1f;
                 animator.causticsPrismStrength = 0.17f;
                 animator.causticsScatterStrength = 0.63f;
+                animator.bottomVisibility = 1.44f;
                 animator.bottomLightStrength = 1.33f;
                 animator.bottomGlowStrength = 0.77f;
                 animator.depthTintStrength = 0.41f;
@@ -381,6 +382,7 @@ namespace Siliq.Water.Tests
                 Assert.AreEqual(2.1f, block.GetFloat("_CausticsFocus"), 1e-5f);
                 Assert.AreEqual(0.17f, block.GetFloat("_CausticsPrismStrength"), 1e-5f);
                 Assert.AreEqual(0.63f, block.GetFloat("_CausticsScatterStrength"), 1e-5f);
+                Assert.AreEqual(1.44f, block.GetFloat("_BottomVisibility"), 1e-5f);
                 Assert.AreEqual(1.33f, block.GetFloat("_BottomLightStrength"), 1e-5f);
                 Assert.AreEqual(0.77f, block.GetFloat("_BottomGlowStrength"), 1e-5f);
                 Assert.AreEqual(0.41f, block.GetFloat("_DepthTintStrength"), 1e-5f);
@@ -476,6 +478,10 @@ namespace Siliq.Water.Tests
 
                 StringAssert.Contains("_CausticsScatterStrength", text,
                     $"{path}: 水底光の柔らかい広がりを調整できる必要がある");
+                StringAssert.Contains("_BottomVisibility", text,
+                    $"{path}: 水底や床が水越しに見える量を調整できる必要がある");
+                StringAssert.Contains("bottomVisibility", text,
+                    $"{path}: 水底の見え方を水色・水底光・底 glow に反映する必要がある");
                 StringAssert.Contains("causticsScatter", text,
                     $"{path}: 細い焦点線だけでなく柔らかい水底光を合成する必要がある");
                 StringAssert.Contains("_CausticsPrismStrength", text,
@@ -540,6 +546,8 @@ namespace Siliq.Water.Tests
                     $"{name} は透明水越しの柔らかい水底光調整を持つ必要がある");
                 Assert.IsTrue(mat.HasProperty("_RefractionStrength"),
                     $"{name} は透明水越しの揺らぎ調整を持つ必要がある");
+                Assert.IsTrue(mat.HasProperty("_BottomVisibility"),
+                    $"{name} は水底や床が水越しに見える量の調整を持つ必要がある");
                 Assert.IsTrue(mat.HasProperty("_BottomGlowStrength"),
                     $"{name} は水底そのものを柔らかく明るくする調整を持つ必要がある");
                 Assert.IsTrue(mat.HasProperty("_DepthTintStrength"),
@@ -552,6 +560,8 @@ namespace Siliq.Water.Tests
                     $"{name} は細い線だけでなく柔らかい水底光の広がりを持つ必要がある");
                 Assert.GreaterOrEqual(mat.GetFloat("_RefractionStrength"), 0.08f,
                     $"{name} は水底や反射が平板に見えない程度の軽量屈折を持つ必要がある");
+                Assert.GreaterOrEqual(mat.GetFloat("_BottomVisibility"), 0.10f,
+                    $"{name} は透明水として水底が完全に見えない初期値ではいけない");
                 Assert.GreaterOrEqual(mat.GetFloat("_BottomGlowStrength"), 0.10f,
                     $"{name} は水底の柔らかい明るさが完全に死んだ初期値ではいけない");
                 Assert.GreaterOrEqual(mat.GetFloat("_DepthTintStrength"), 0.20f,
@@ -584,6 +594,8 @@ namespace Siliq.Water.Tests
             Assert.LessOrEqual(metal.GetFloat("_DisplacementSpeed"), 0.00008f);
             Assert.AreEqual(0f, metal.GetFloat("_BottomGlowStrength"), 1e-5f,
                 "Liquid Metal は透明水の底光を足さない");
+            Assert.AreEqual(0f, metal.GetFloat("_BottomVisibility"), 1e-5f,
+                "Liquid Metal は水底の見え方を足さず、不透明な金属液として扱う");
             Assert.GreaterOrEqual(metal.GetFloat("_DepthTintStrength"), 0.10f,
                 "Liquid Metal も shader property 欠落を避けるため奥行き調整値を持つ");
             Assert.AreEqual((float)BlendMode.One, metal.GetFloat("_SrcBlend"), 1e-5f);
@@ -603,6 +615,8 @@ namespace Siliq.Water.Tests
                 "美しさ特化の Flagship ready material は水底光をはっきり持つ必要がある");
             Assert.GreaterOrEqual(flagship.GetFloat("_BottomLightStrength"), 1.40f,
                 "美しさ特化の Flagship ready material は水底光が水越しに見える必要がある");
+            Assert.GreaterOrEqual(flagship.GetFloat("_BottomVisibility"), 1.15f,
+                "美しさ特化の Flagship ready material は水底が透明水越しに見える必要がある");
             Assert.GreaterOrEqual(flagship.GetFloat("_BottomGlowStrength"), 0.70f,
                 "美しさ特化の Flagship ready material は水底の柔らかい明るさを持つ必要がある");
             Assert.GreaterOrEqual(flagship.GetFloat("_DepthTintStrength"), 0.30f,
@@ -633,6 +647,8 @@ namespace Siliq.Water.Tests
                 "Crystal Lagoon は水底光を細い線だけでなく柔らかく広げる");
             Assert.GreaterOrEqual(lagoon.GetFloat("_BottomLightStrength"), 1.65f,
                 "Crystal Lagoon は水底光が水越しに強く見える必要がある");
+            Assert.GreaterOrEqual(lagoon.GetFloat("_BottomVisibility"), 1.50f,
+                "Crystal Lagoon は水底や床の抜けを強く持つ必要がある");
             Assert.GreaterOrEqual(lagoon.GetFloat("_BottomGlowStrength"), 0.80f,
                 "Crystal Lagoon は水底そのものが柔らかく明るく見える必要がある");
             Assert.GreaterOrEqual(lagoon.GetFloat("_DepthTintStrength"), 0.28f,
@@ -675,6 +691,8 @@ namespace Siliq.Water.Tests
                 "Hero は透明水越しに柔らかい水底光の膜を持つ必要がある");
             Assert.GreaterOrEqual(hero.GetFloat("_BottomLightStrength"), 1.85f,
                 "Hero は水底光が水越しに強く透ける必要がある");
+            Assert.GreaterOrEqual(hero.GetFloat("_BottomVisibility"), 1.70f,
+                "Hero は水底が見える透明な抜け感を最高品質確認用に強める");
             Assert.GreaterOrEqual(hero.GetFloat("_BottomGlowStrength"), 1.0f,
                 "Hero は水底の柔らかい明るさを最高品質確認用に強める");
             Assert.GreaterOrEqual(hero.GetFloat("_DepthTintStrength"), 0.32f,
@@ -1188,6 +1206,7 @@ namespace Siliq.Water.Tests
                 Assert.IsTrue(mat.HasProperty("_CausticsStrength"));
                 Assert.IsTrue(mat.HasProperty("_CausticsScale"));
                 Assert.IsTrue(mat.HasProperty("_CausticsSpeed"));
+                Assert.IsTrue(mat.HasProperty("_BottomVisibility"));
                 Assert.IsTrue(mat.HasProperty("_BottomLightStrength"));
                 Assert.IsTrue(mat.HasProperty("_BottomGlowStrength"));
                 Assert.IsTrue(mat.HasProperty("_DepthTintStrength"));
@@ -1598,6 +1617,8 @@ namespace Siliq.Water.Tests
                     "Crystal Lagoon Quick Apply は水底光の柔らかい広がりを持つ必要がある");
                 Assert.GreaterOrEqual(mat.GetFloat("_BottomLightStrength"), 1.65f,
                     "Crystal Lagoon Quick Apply は水底光が水越しに見える必要がある");
+                Assert.GreaterOrEqual(mat.GetFloat("_BottomVisibility"), 1.50f,
+                    "Crystal Lagoon Quick Apply は水底や床の抜けを強く持つ必要がある");
                 Assert.GreaterOrEqual(mat.GetFloat("_BottomGlowStrength"), 0.80f,
                     "Crystal Lagoon Quick Apply は水底そのものの柔らかい明るさを持つ必要がある");
                 Assert.GreaterOrEqual(mat.GetFloat("_DepthTintStrength"), 0.28f,
@@ -1656,6 +1677,8 @@ namespace Siliq.Water.Tests
                     "Hero Quick Apply は水底光の柔らかい広がりを強めに持つ必要がある");
                 Assert.GreaterOrEqual(mat.GetFloat("_BottomLightStrength"), 1.85f,
                     "Hero Quick Apply は水底光が水越しに見える必要がある");
+                Assert.GreaterOrEqual(mat.GetFloat("_BottomVisibility"), 1.70f,
+                    "Hero Quick Apply は水底が見える透明な抜け感を強める必要がある");
                 Assert.GreaterOrEqual(mat.GetFloat("_BottomGlowStrength"), 1.0f,
                     "Hero Quick Apply は水底そのものの柔らかい明るさを強める必要がある");
                 Assert.GreaterOrEqual(mat.GetFloat("_DepthTintStrength"), 0.32f,
@@ -2182,12 +2205,14 @@ namespace Siliq.Water.Tests
                 mat.SetFloat("_MinLighting", 0.21f);
                 mat.SetFloat("_DarkReflectionDamping", 0.64f);
                 mat.SetFloat("_DarkDetailDamping", 0.79f);
+                mat.SetFloat("_BottomVisibility", 1.48f);
                 go.GetComponent<Renderer>().sharedMaterial = mat;
 
                 var animator = go.AddComponent<WaterSurfaceAnimator>();
                 animator.minLighting = 0f;
                 animator.darkReflectionDamping = 0f;
                 animator.darkDetailDamping = 0f;
+                animator.bottomVisibility = 0f;
                 animator.SyncLookFromMaterial();
 
                 Assert.AreEqual(0.21f, animator.minLighting, 1e-5f,
@@ -2196,6 +2221,8 @@ namespace Siliq.Water.Tests
                     "マテリアルから読み込む時に暗所の反射抑制を同期する必要がある");
                 Assert.AreEqual(0.79f, animator.darkDetailDamping, 1e-5f,
                     "マテリアルから読み込む時に暗所の細部抑制を同期する必要がある");
+                Assert.AreEqual(1.48f, animator.bottomVisibility, 1e-5f,
+                    "マテリアルから読み込む時に水底の見え方を同期する必要がある");
             }
             finally
             {
