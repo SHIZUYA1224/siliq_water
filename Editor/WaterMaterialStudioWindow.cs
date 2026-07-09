@@ -14,6 +14,7 @@ namespace Siliq.Water.Editor
         static readonly string[] TargetLabels = { "PC", "Quest", "iOS" };
         static readonly WaterPackQuickApply.ReadyLook[] Looks =
         {
+            WaterPackQuickApply.ReadyLook.WaterTable,
             WaterPackQuickApply.ReadyLook.CrystalLagoonHero,
             WaterPackQuickApply.ReadyLook.CrystalLagoon,
             WaterPackQuickApply.ReadyLook.ClearSea,
@@ -142,6 +143,8 @@ namespace Siliq.Water.Editor
         {
             switch (look)
             {
+                case WaterPackQuickApply.ReadyLook.WaterTable:
+                    return "ガラス水盤・水テーブル向け。中央リング波、黒青い浅い水、強いエッジ反射を使います。";
                 case WaterPackQuickApply.ReadyLook.CrystalLagoonHero:
                     return "最初に見るべき最高品質寄りの透明水。迷ったらこれ。";
                 case WaterPackQuickApply.ReadyLook.CrystalLagoon:

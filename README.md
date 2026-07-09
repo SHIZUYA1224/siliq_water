@@ -96,12 +96,14 @@ README / 用途別ガイド / PrebakedPack の確認に進めます。
 | `Water_Normal_FlagshipCrystal_01.png` + `Water_Height_FlagshipCrystal_01.png` | 製品デモ向けの透明水・高反射・実高さ | `M_Water_FlagshipCrystal` |
 | `Water_Normal_CrystalLagoon_01.png` + `Water_Height_CrystalLagoon_01.png` | 透き通った浅い水・美しさ特化 | `M_Siliq_CrystalLagoon_Ready` |
 | `Water_Normal_CrystalLagoon_Hero_01.png` + `Water_Height_CrystalLagoon_Hero_01.png` | 最高品質確認用の透明水・柔らかい波面 | `M_Siliq_CrystalLagoon_Hero_Ready` |
+| `Water_Normal_WaterTable_01.png` + `Water_Height_WaterTable_01.png` | ガラス水盤・ウォーターテーブル用の中央リング波 | `M_Siliq_WaterTable_Ready` |
 | `Water_Caustics_CrystalLagoon_01.png` | 水底/床メッシュに重ねる Crystal Lagoon 専用 caustics | `M_Siliq_CrystalLagoon_CausticsOverlay` |
 | `Water_Caustics_CrystalLagoon_Hero_01.png` | 水底/床メッシュに重ねる Hero 専用 caustics | `M_Siliq_CrystalLagoon_Hero_CausticsOverlay` |
 | `Water_Caustics_SunlitPool_01.png` | 透明プール/室内プールの床に重ねる柔らかい caustics | `M_Siliq_SunlitPool_CausticsOverlay` |
 
 基本 5 種は **1024×1024 PNG / シームレス / インポート設定済み (NormalMap・Repeat・Android/iOS は ASTC 6x6)**。
-フラッグシップ透明水と Crystal Lagoon は専用 **2048×2048 normal map + 2048×2048 height map** を同梱し、用途別 Quick Apply では両方を Siliq 水シェーダーへ割り当てます。
+フラッグシップ透明水、Crystal Lagoon、WaterTable は専用 **2048×2048 normal map + 2048×2048 height map** を同梱し、用途別 Quick Apply では両方を Siliq 水シェーダーへ割り当てます。
+WaterTable は水面専用です。ガラス天板、LED ライン、ベース、中央ノズルは別オブジェクトで作り、水面 material に飛沫や塩のような後付け要素は混ぜません。
 Crystal Lagoon / Hero / SunlitPool の caustics は水面 material ではなく、床や水底用の別メッシュへ貼る overlay material で使います。水面に白い線や塩のような模様を混ぜないため、Ready material 側の `_CausticsStrength` / `_BottomVisibility` / `_BottomLightStrength` / `_BottomGlowStrength` は初期値 0 です。
 共通の `Water_Caustics_Crystal_01.png` も同梱していますが、水面に直接混ぜる用途ではなく、必要な時だけ別メッシュ/別material側で使う前提です。
 `PrebakedPack/ReadyMaterials/` には `Siliq/Water Mobile (Quest)` 設定済みの完成マテリアルが入っています。
@@ -113,6 +115,7 @@ Crystal Lagoon / Hero / SunlitPool の caustics は水面 material ではなく�
 | `M_Siliq_ClearSea_Ready` | 綺麗な海・透明感のある水面 |
 | `M_Siliq_ClearPool_Ready` | 透明プール |
 | `M_Siliq_IndoorBluePool_Ready` | 明るい室内プール |
+| `M_Siliq_WaterTable_Ready` | ガラス水盤・ウォーターテーブルの黒青い浅い水面 |
 | `M_Siliq_FlagshipCrystal_Ready` | 製品デモ向けのフラッグシップ透明水 |
 | `M_Siliq_CrystalLagoon_Ready` | 透き通った美しさ特化の水面 |
 | `M_Siliq_CrystalLagoon_Hero_Ready` | 専用 Hero normal / height で透明感・反射を強めた最高品質確認用の水面 |
@@ -243,14 +246,14 @@ Hero の水底光は太い格子や線の密集ではなく、柔らかい床光
 
 Quest / モバイルでは不透明のまま使うことを推奨します。PC 専用で透明にする場合は
 右クリックメニューの `透明な水マテリアルを適用 (PC)` / `透明な水マテリアルを適用 (iOS/Mobile)` を使うか、通常の水面マップスタジオで PC / Quest / iOS を選んで用途別 Material を反映してください。
-綺麗な海、透明プール、室内ブループール、フラッグシップ透明水、血の海、液体金属のような用途が決まっている場合は、
+綺麗な海、透明プール、室内ブループール、ウォーターテーブル、フラッグシップ透明水、血の海、液体金属のような用途が決まっている場合は、
 `Siliq Water > 用途別マテリアルを適用` から見た目プリセットを選ぶと、
 ノーマル、色、不透明度、反射、動きまでまとめて設定できます。
 最高品質確認は `クリスタルラグーン Hero (Crystal Lagoon Hero)` を選んでください。
 ノーマルマップ単体は凹凸だけを表すため、透明感はマテリアルの Blend / Alpha / `_Opacity`
 と Fresnel 連動の `_AlphaFresnel` / `_EdgeReflection` で作ります。
 一枚の Plane を明るい Scene View 背景に置くだけだと、水の厚みや底面色が無いため薄く見えやすいです。
-薄すぎる場合は用途別の `クリスタルラグーン Hero` / `クリスタルラグーン` / `美しい海` / `透明プール` / `室内ブループール` / `フラッグシップ透明水` を使ってください。
+薄すぎる場合は用途別の `クリスタルラグーン Hero` / `クリスタルラグーン` / `美しい海` / `透明プール` / `室内ブループール` / `ウォーターテーブル` / `フラッグシップ透明水` を使ってください。
 製品デモやメインビジュアル用に素材を作り直したい場合だけ、上級者向けの水面マップ生成スタジオで 4096px、48 フレーム、Height / Flow / DUDV / Caustics 付きの重めの設定を使います。
 iOS 透明版はさらに `_TransmissionStrength` / `_GlimmerIntensity` / `_GlintIntensity` で
 透過光、細い光の揺らぎ、強いハイライトを足し、透明なだけの板に見えにくい設定にしています。
@@ -277,7 +280,7 @@ https://github.com/shizuya1224/siliq_water.git
 
 1. メニューの **Tools > Siliq Water > 水面マップスタジオ** を開く
 2. **PC / Quest / iOS** を選ぶ
-3. **見た目**から、クリスタルラグーン Hero / クリスタルラグーン / 美しい海 / 透明プールなどを選ぶ
+3. **見た目**から、ウォーターテーブル / クリスタルラグーン Hero / クリスタルラグーン / 美しい海 / 透明プールなどを選ぶ
 4. **選択中の水面へ反映** を押す
 5. 水底光が必要なら、床や水底用の別メッシュに `M_Siliq_*_CausticsOverlay` を貼る
 
@@ -483,9 +486,9 @@ Samples~/
 Tests/
   WaterMapCoreTests.cs      Unity Test Runner (EditMode) 用の自動テスト
 PrebakedPack/
-  Textures/                 基本 normal 5 種 (1024px) + flagship normal/height (2048px)
-  ReadyMaterials/           アタッチするだけで動く Siliq 水マテリアル 8 種 + 床用 caustics overlay 2 種
-  Prefabs/                  PF_Siliq_CrystalLagoon_Complete.prefab + PF_Siliq_CrystalLagoon_Hero_Complete.prefab
+  Textures/                 基本 normal 5 種 (1024px) + 用途別 normal/height/caustics (2048px)
+  ReadyMaterials/           アタッチするだけで動く Siliq 水マテリアル 9 種 + 床用 caustics overlay 3 種
+  Prefabs/                  CrystalLagoon / Hero / SunlitPool の完成セット
   Materials/                設定済み Standard マテリアル 6 種
   SampleScene/              SC_CrystalLagoon_Showcase.unity + 基本 5 種比較シーン
   Preview/                  Plane に貼った状態のプレビュー画像、Crystal Lagoon / Hero 完成形の確認用画像

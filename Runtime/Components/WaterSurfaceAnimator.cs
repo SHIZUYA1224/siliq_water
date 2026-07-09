@@ -49,6 +49,8 @@ namespace Siliq.Water
         [Tooltip("模様の大きさ。1 が元のサイズ、大きいほど模様が細かく (タイリング数が増え) 見える。")]
         [Range(0.1f, 8f)] public float tiling = 1f;
 
+        [HideInInspector] public float secondaryTilingMultiplier = 2.7f;
+
         [Header("高さ")]
         [Tooltip("水面メッシュを実際に上下させる量。Plane のように頂点があるメッシュで有効です。")]
         [Range(0f, 0.5f)] public float displacementStrength = 0.04f;
@@ -365,6 +367,7 @@ namespace Siliq.Water
             if (texturePropertyName == null) texturePropertyName = string.Empty;
             speed = Mathf.Clamp(speed, 0f, MaxSurfaceSpeed);
             editModePreviewFps = Mathf.Clamp(editModePreviewFps, 1, 30);
+            secondaryTilingMultiplier = Mathf.Clamp(secondaryTilingMultiplier, 0.1f, 8f);
             displacementStrength = Mathf.Clamp(displacementStrength, 0f, 0.5f);
             displacementScale = Mathf.Clamp(displacementScale, 0.05f, 4f);
             displacementSpeed = Mathf.Clamp01(displacementSpeed);
@@ -470,6 +473,12 @@ namespace Siliq.Water
             if (targetMaterial.HasProperty(clarityPropertyId))
             {
                 clarity = Mathf.Clamp01(targetMaterial.GetFloat(clarityPropertyId));
+            }
+            if (targetMaterial.HasProperty(tiling1PropertyId) && targetMaterial.HasProperty(tiling2PropertyId))
+            {
+                float primaryTiling = Mathf.Max(0.1f, targetMaterial.GetFloat(tiling1PropertyId));
+                float secondaryTiling = Mathf.Max(0.1f, targetMaterial.GetFloat(tiling2PropertyId));
+                secondaryTilingMultiplier = Mathf.Clamp(secondaryTiling / primaryTiling, 0.1f, 8f);
             }
             if (targetMaterial.HasProperty(displacementStrengthPropertyId))
             {
@@ -746,7 +755,7 @@ namespace Siliq.Water
                 }
                 if (targetMaterial.HasProperty(tiling2PropertyId))
                 {
-                    propertyBlock.SetFloat(tiling2PropertyId, Mathf.Max(0.1f, tiling * 2.7f));
+                    propertyBlock.SetFloat(tiling2PropertyId, Mathf.Max(0.1f, tiling * secondaryTilingMultiplier));
                 }
             }
 

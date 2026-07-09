@@ -12,6 +12,7 @@ namespace Siliq.Water.Editor
         internal const string PlaceCrystalLagoonHeroCompleteActionLabel = "最高品質 Hero 完成セットを配置";
         internal const string PlaceSunlitPoolCompleteActionLabel = "透明プール完成セットを配置";
         internal const string CreateCrystalLagoonHeroActionLabel = "最高品質 Hero 水面を作成";
+        internal const string CreateWaterTableActionLabel = "ウォーターテーブル水面を作成";
         internal const string CreateCrystalLagoonActionLabel = "クリスタルラグーン水面を作成";
         internal const string CreateFlagshipActionLabel = "フラッグシップ水面を作成";
         internal const string RepairSelectionActionLabel = "選択中の水面を診断して自動修復";
@@ -22,6 +23,7 @@ namespace Siliq.Water.Editor
         internal const string CrystalLagoonCompletePreviewPath = "PrebakedPack/Preview/preview_crystal_lagoon_complete.png";
         internal const string CrystalLagoonHeroCompletePreviewPath = "PrebakedPack/Preview/preview_crystal_lagoon_hero_complete.png";
         internal const string CrystalLagoonHeroMaterialPath = "PrebakedPack/ReadyMaterials/M_Siliq_CrystalLagoon_Hero_Ready.mat";
+        internal const string WaterTableMaterialPath = "PrebakedPack/ReadyMaterials/M_Siliq_WaterTable_Ready.mat";
 
         Vector2 scroll;
 
@@ -72,6 +74,11 @@ namespace Siliq.Water.Editor
                 WaterBeginnerSetup.CreateCrystalLagoonHeroWater();
             }
 
+            if (GUILayout.Button(CreateWaterTableActionLabel, GUILayout.Height(34)))
+            {
+                WaterBeginnerSetup.CreateWaterTableWater();
+            }
+
             if (GUILayout.Button(CreateCrystalLagoonActionLabel, GUILayout.Height(34)))
             {
                 WaterBeginnerSetup.CreateCrystalLagoonWater();
@@ -101,6 +108,7 @@ namespace Siliq.Water.Editor
             EditorGUILayout.LabelField("水が安っぽく見える時の確認", EditorStyles.boldLabel);
             Bullet("すぐ使う場合は PrebakedPack/ReadyMaterials の M_Siliq_*_Ready をドラッグします。material だけで波が動きます。");
             Bullet("美しさを最優先する場合は Hero 完成セット、プール用途なら透明プール完成セットを配置します。水面、明るい床、水底用 caustics overlay が別メッシュで入っています。");
+            Bullet("水テーブルやガラス水盤は M_Siliq_WaterTable_Ready を水面メッシュに貼ります。ガラス板、LEDライン、ベースは別オブジェクトで作ります。");
             Bullet("水底やプール床の模様は水面ではなく、床や水底用の別メッシュに caustics overlay material を貼って作ります。");
             Bullet("normal だけでは透明感は出ません。ReadyMaterials か用途別マテリアルで色、透明度、反射、ハイライトも設定します。");
             Bullet("高さはメッシュの頂点変位です。1 枚 Quad では見えないため、分割メッシュを使います。");
@@ -139,6 +147,10 @@ namespace Siliq.Water.Editor
                 if (GUILayout.Button("最高品質 Material を選択"))
                 {
                     PingPackageAsset(CrystalLagoonHeroMaterialPath);
+                }
+                if (GUILayout.Button("WaterTable Material を選択"))
+                {
+                    PingPackageAsset(WaterTableMaterialPath);
                 }
                 if (GUILayout.Button("完成プレビューを選択"))
                 {

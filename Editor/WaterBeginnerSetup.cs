@@ -18,6 +18,7 @@ namespace Siliq.Water.Editor
         const string FlagshipMenuPath = "GameObject/Siliq Water/用途別マテリアルを適用/フラッグシップ透明水 (Flagship Crystal)";
         const string CrystalLagoonMenuPath = "GameObject/Siliq Water/用途別マテリアルを適用/クリスタルラグーン (Crystal Lagoon)";
         const string CrystalLagoonHeroMenuPath = "GameObject/Siliq Water/用途別マテリアルを適用/クリスタルラグーン Hero (Crystal Lagoon Hero)";
+        const string WaterTableMenuPath = "GameObject/Siliq Water/用途別マテリアルを適用/ウォーターテーブル (Water Table)";
         internal const string CrystalLagoonHeroCompletePrefabPackagePath = "Packages/com.siliq.water-normalmap/PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Hero_Complete.prefab";
         internal const string SunlitPoolCompletePrefabPackagePath = "Packages/com.siliq.water-normalmap/PrebakedPack/Prefabs/PF_Siliq_SunlitPool_Complete.prefab";
         const int PremiumGridSegments = 96;
@@ -97,8 +98,22 @@ namespace Siliq.Water.Editor
                 "高さが見えない場合は、この水面メッシュのまま使ってください。1枚 Quad では実高さが出ません。");
         }
 
-        [MenuItem(RootMenu + "クリスタルラグーン水面を作成", false, 3)]
-        [MenuItem(GameObjectRootMenu + "クリスタルラグーン水面を作成", false, 3)]
+        [MenuItem(RootMenu + "ウォーターテーブル水面を作成", false, 3)]
+        [MenuItem(GameObjectRootMenu + "ウォーターテーブル水面を作成", false, 3)]
+        public static void CreateWaterTableWater()
+        {
+            CreatePremiumWater(
+                "Siliq Water - Water Table",
+                "Siliq ウォーターテーブル水面を作成",
+                WaterTableMenuPath,
+                "ウォーターテーブル水面を作成しました。\n\n" +
+                "中央から広がる浅いリング波、黒青い水面、強い反射を持つテーブル向け水面です。\n" +
+                "飛沫や粒子、塩のような後付け表現は入れていません。\n" +
+                "ガラス天板やLEDラインは別オブジェクトで作り、この水面は水面メッシュだけに使ってください。");
+        }
+
+        [MenuItem(RootMenu + "クリスタルラグーン水面を作成", false, 4)]
+        [MenuItem(GameObjectRootMenu + "クリスタルラグーン水面を作成", false, 4)]
         public static void CreateCrystalLagoonWater()
         {
             CreatePremiumWater(
@@ -111,8 +126,8 @@ namespace Siliq.Water.Editor
                 "高さが見えない場合は、この水面メッシュのまま使ってください。1枚 Quad では実高さが出ません。");
         }
 
-        [MenuItem(RootMenu + "フラッグシップ水面を作成", false, 4)]
-        [MenuItem(GameObjectRootMenu + "フラッグシップ水面を作成", false, 4)]
+        [MenuItem(RootMenu + "フラッグシップ水面を作成", false, 5)]
+        [MenuItem(GameObjectRootMenu + "フラッグシップ水面を作成", false, 5)]
         public static void CreateFlagshipWater()
         {
             CreatePremiumWater(

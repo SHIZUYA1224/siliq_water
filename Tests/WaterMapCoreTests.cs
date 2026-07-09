@@ -302,6 +302,44 @@ namespace Siliq.Water.Tests
         }
 
         [Test]
+        public void WaterSurfaceAnimator_SyncsSecondaryTilingRatioFromMaterial()
+        {
+            GameObject go = null;
+            Material mat = null;
+            try
+            {
+                Shader shader = Shader.Find("Siliq/Water Mobile (Quest)");
+                Assert.IsNotNull(shader, "Siliq/Water Mobile (Quest) シェーダーが見つからない");
+
+                go = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                mat = new Material(shader);
+                mat.SetFloat("_Tiling1", 1f);
+                mat.SetFloat("_Tiling2", 1.08f);
+                var renderer = go.GetComponent<Renderer>();
+                renderer.sharedMaterial = mat;
+
+                var animator = go.AddComponent<WaterSurfaceAnimator>();
+                animator.texturePropertyName = "_NormalMap";
+                animator.SyncLookFromMaterial();
+                animator.tiling = 1f;
+                animator.ApplyImmediate(0f);
+
+                var block = new MaterialPropertyBlock();
+                renderer.GetPropertyBlock(block, 0);
+
+                Assert.AreEqual(1.08f, animator.secondaryTilingMultiplier, 1e-5f,
+                    "中央リング系の material は第2レイヤーを固定2.7倍にされると別の中心模様が増える");
+                Assert.AreEqual(1.08f, block.GetFloat("_Tiling2"), 1e-5f,
+                    "WaterSurfaceAnimator は material の _Tiling2/_Tiling1 比率を維持する必要がある");
+            }
+            finally
+            {
+                if (go != null) Object.DestroyImmediate(go);
+                if (mat != null) Object.DestroyImmediate(mat);
+            }
+        }
+
+        [Test]
         public void WaterSurfaceAnimator_AppliesSiliqTransparencyControls()
         {
             GameObject go = null;
@@ -696,6 +734,29 @@ namespace Siliq.Water.Tests
             var indoorPool = LoadReadyMaterial("M_Siliq_IndoorBluePool_Ready");
             AssertSurfaceBottomDefaultsOff(clearPool, "ClearPool ready material");
             AssertSurfaceBottomDefaultsOff(indoorPool, "IndoorBluePool ready material");
+
+            var waterTable = LoadReadyMaterial("M_Siliq_WaterTable_Ready");
+            Assert.AreEqual("Siliq/Water Mobile (Quest)", waterTable.shader.name,
+                "WaterTable ready material はドラッグ&ドロップで使える Siliq Mobile 水シェーダーにする");
+            Assert.AreEqual("Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Normal_WaterTable_01.png", AssetDatabase.GetAssetPath(waterTable.GetTexture("_NormalMap")),
+                "WaterTable ready material は専用 normal map を使う");
+            Assert.AreEqual("Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Height_WaterTable_01.png", AssetDatabase.GetAssetPath(waterTable.GetTexture("_HeightMap")),
+                "WaterTable ready material は専用 height map を使う");
+            AssertSurfaceBottomDefaultsOff(waterTable, "WaterTable ready material");
+            Assert.GreaterOrEqual(waterTable.GetFloat("_ReflectionPatternStrength"), 0.60f,
+                "WaterTable はガラス水盤らしい青い反射帯を持つ必要がある");
+            Assert.GreaterOrEqual(waterTable.GetFloat("_EdgeReflection"), 0.95f,
+                "WaterTable は斜めから見たガラス端の反射感を強める");
+            Assert.LessOrEqual(waterTable.GetFloat("_Tiling2"), 1.15f,
+                "WaterTable は中央リングを複数中心に増殖させないため第2レイヤーを大きく増やさない");
+            Assert.GreaterOrEqual(waterTable.GetFloat("_HeightMapInfluence"), 0.10f,
+                "WaterTable は専用 height map の中央リングを実高さにも少し反映する");
+            Assert.LessOrEqual(waterTable.GetFloat("_DisplacementStrength"), 0.008f,
+                "WaterTable は浅い水盤なので高さを大きくしすぎない");
+            Assert.GreaterOrEqual(waterTable.GetVector("_Scroll1").magnitude, 0.0010f,
+                "WaterTable は静止画に見えない最低限の水面 scroll を持つ");
+            Assert.LessOrEqual(waterTable.GetVector("_Scroll1").magnitude, 0.0022f,
+                "WaterTable は中央リングが速く滑らない低速 scroll にする");
         }
 
         static Material LoadReadyMaterial(string name)
@@ -876,6 +937,43 @@ namespace Siliq.Water.Tests
                     Assert.LessOrEqual(mat.GetFloat("_ReflectionPatternStrength"), 0.18f,
                         "iOS向けは反射パターンを重くしすぎない");
                 }
+            }
+            finally
+            {
+                Selection.activeGameObject = null;
+                if (go != null) Object.DestroyImmediate(go);
+            }
+        }
+
+        [Test]
+        public void SimpleMaterialStudio_AppliesWaterTableWithoutExtraFx()
+        {
+            GameObject go = null;
+            try
+            {
+                go = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                Selection.activeGameObject = go;
+
+                WaterPackQuickApply.ApplyReadyLookToSelection(
+                    WaterPackQuickApply.ReadyLook.WaterTable,
+                    WaterPackQuickApply.TargetPlatform.PC);
+
+                var renderer = go.GetComponent<Renderer>();
+                var mat = renderer != null ? renderer.sharedMaterial : null;
+                var animator = go.GetComponent<WaterSurfaceAnimator>();
+                var emitter = go.GetComponent<WaterRippleEmitter>();
+                Assert.IsNotNull(mat, "WaterTable の適用で material が設定されていない");
+                Assert.IsNotNull(animator, "WaterTable の適用で WaterSurfaceAnimator が追加されていない");
+                StringAssert.Contains("WaterTable", mat.name);
+                Assert.AreEqual("Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Normal_WaterTable_01.png", AssetDatabase.GetAssetPath(mat.GetTexture("_NormalMap")),
+                    "WaterTable は専用 normal map を使う");
+                Assert.AreEqual("Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Height_WaterTable_01.png", AssetDatabase.GetAssetPath(mat.GetTexture("_HeightMap")),
+                    "WaterTable は専用 height map を使う");
+                AssertSurfaceBottomDefaultsOff(mat, "WaterTable quick apply material");
+                Assert.IsTrue(emitter == null || !emitter.enabled,
+                    "WaterTable は飛沫や自動波紋 emitter などの追加FXを勝手に有効化しない");
+                Assert.LessOrEqual(animator.secondaryTilingMultiplier, 1.15f,
+                    "WaterTable の中央リングを Animator が別タイル中心へ増やしてはいけない");
             }
             finally
             {

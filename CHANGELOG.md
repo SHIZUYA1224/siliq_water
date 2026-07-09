@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.86] - 2026-07-09
+
+### 追加: ウォーターテーブル用の専用水面マップ
+- `Water_Normal_WaterTable_01.png` / `Water_Height_WaterTable_01.png` を追加し、ガラス水盤・LED 内蔵テーブル向けの黒青い水面と中央リング波を Ready material で使えるようにした
+- `M_Siliq_WaterTable_Ready` と用途別 Quick Apply / 水面マップスタジオ / はじめてガイドの導線を追加
+- 水テーブルは水面専用とし、ガラス、LED、ベース、中央ノズル、飛沫や粒子は material に混ぜない設計に固定
+- `WaterSurfaceAnimator` が material の `_Tiling2 / _Tiling1` 比率を引き継ぐようにし、中央リングマップを Quick Apply しても別中心の模様が増えないようにした
+
 ## [2.3.85] - 2026-07-09
 
 ### 変更: 水底表現を別メッシュ前提へ分離し、後付けFXを削除

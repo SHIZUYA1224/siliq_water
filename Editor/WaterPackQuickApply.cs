@@ -17,6 +17,7 @@ namespace Siliq.Water.Editor
             ClearSea,
             ClearPool,
             IndoorBluePool,
+            WaterTable,
             FlagshipCrystal,
             CrystalLagoon,
             CrystalLagoonHero,
@@ -87,6 +88,9 @@ namespace Siliq.Water.Editor
             public float displacementSpeed;
             public float heightMapInfluence;
             public float smoothness;
+            public float minLighting;
+            public float darkReflectionDamping;
+            public float darkDetailDamping;
             public float macroVariation;
             public float macroScale;
             public float macroDirectionBreakup;
@@ -339,6 +343,66 @@ namespace Siliq.Water.Editor
             causticsTint = new Color(0.76f, 1f, 0.98f, 1f),
         };
 
+        static readonly LookPreset WaterTableLook = new LookPreset
+        {
+            assetName = "WaterTable",
+            displayName = "ウォーターテーブル",
+            sourceGuid = WaterTableReadyGuid,
+            sourceLabel = "WaterTable",
+            normalGuid = WaterTableNormalGuid,
+            heightGuid = WaterTableHeightGuid,
+            motion = new MotionPreset(19f, 0.08f, 0.42f, 1.0f),
+            transparent = true,
+            opacity = 0.50f,
+            shallow = new Color(0.015f, 0.22f, 0.72f, 1f),
+            deep = new Color(0f, 0.015f, 0.075f, 1f),
+            horizon = new Color(0.12f, 0.55f, 1f, 1f),
+            transmission = new Color(0.04f, 0.42f, 1f, 1f),
+            glimmer = new Color(0.66f, 0.92f, 1f, 1f),
+            normalStrength = 0.42f,
+            tiling1 = 1.0f,
+            tiling2 = 1.08f,
+            alphaFresnel = 0.92f,
+            alphaPower = 1.42f,
+            clarity = 0.62f,
+            edgeReflection = 0.98f,
+            refractionStrength = 0.24f,
+            transmissionStrength = 0.55f,
+            glimmerIntensity = 0.22f,
+            glimmerSharpness = 24f,
+            glintIntensity = 1.45f,
+            glintPower = 420f,
+            specPower = 460f,
+            specIntensity = 2f,
+            fresnelPower = 1.28f,
+            reflStrength = 1f,
+            reflectionPatternStrength = 0.68f,
+            reflectionPatternScale = 0.55f,
+            displacementStrength = 0.006f,
+            displacementScale = 0.72f,
+            displacementSpeed = 0.000018f,
+            heightMapInfluence = 0.18f,
+            smoothness = 0.995f,
+            minLighting = 0.08f,
+            darkReflectionDamping = 0.36f,
+            darkDetailDamping = 0.52f,
+            macroVariation = 0.12f,
+            macroScale = 0.045f,
+            macroDirectionBreakup = 0.10f,
+            macroColorVariation = 0.08f,
+            causticsStrength = 0f,
+            causticsScale = 1.4f,
+            causticsSpeed = 0f,
+            causticsFocus = 1.6f,
+            causticsPrismStrength = 0f,
+            causticsScatterStrength = 0f,
+            bottomVisibility = 0f,
+            bottomLightStrength = 0f,
+            bottomGlowStrength = 0f,
+            depthTintStrength = 0.44f,
+            causticsTint = new Color(0.18f, 0.64f, 1f, 1f),
+        };
+
         static readonly LookPreset CrystalLagoonLook = new LookPreset
         {
             assetName = "CrystalLagoon",
@@ -581,6 +645,9 @@ namespace Siliq.Water.Editor
         const string CrystalLagoonHeroHeightGuid = "a171aabb01c34e01a1b2c3d4e5f60308";
         const string CrystalLagoonHeroCausticsGuid = "a171aabb01c34e01a1b2c3d4e5f60408";
         const string SunlitPoolCausticsGuid = "a171aabb01c34e01a1b2c3d4e5f60409";
+        const string WaterTableReadyGuid = "a171aabb01c34e01a1b2c3d4e5f60809";
+        const string WaterTableNormalGuid = "a171aabb01c34e01a1b2c3d4e5f60109";
+        const string WaterTableHeightGuid = "a171aabb01c34e01a1b2c3d4e5f60309";
         const string CrystalCausticsGuid = "00e6b1e9a23c24df69fe9558209de596";
 
         const string MenuRoot = "GameObject/Siliq Water/水マテリアルを適用/";
@@ -645,19 +712,22 @@ namespace Siliq.Water.Editor
         [MenuItem(LookMenuRoot + "室内ブループール (Indoor Blue Pool)", false, 42)]
         static void ApplyIndoorBluePoolLook() => ApplyLook(IndoorBluePoolLook);
 
-        [MenuItem(LookMenuRoot + "フラッグシップ透明水 (Flagship Crystal)", false, 43)]
+        [MenuItem(LookMenuRoot + "ウォーターテーブル (Water Table)", false, 43)]
+        static void ApplyWaterTableLook() => ApplyLook(WaterTableLook);
+
+        [MenuItem(LookMenuRoot + "フラッグシップ透明水 (Flagship Crystal)", false, 44)]
         static void ApplyFlagshipCrystalLook() => ApplyLook(FlagshipCrystalLook);
 
-        [MenuItem(LookMenuRoot + "クリスタルラグーン (Crystal Lagoon)", false, 44)]
+        [MenuItem(LookMenuRoot + "クリスタルラグーン (Crystal Lagoon)", false, 45)]
         static void ApplyCrystalLagoonLook() => ApplyLook(CrystalLagoonLook);
 
-        [MenuItem(LookMenuRoot + "クリスタルラグーン Hero (Crystal Lagoon Hero)", false, 45)]
+        [MenuItem(LookMenuRoot + "クリスタルラグーン Hero (Crystal Lagoon Hero)", false, 46)]
         static void ApplyCrystalLagoonHeroLook() => ApplyLook(CrystalLagoonHeroLook);
 
-        [MenuItem(LookMenuRoot + "血の海 (Blood Sea)", false, 46)]
+        [MenuItem(LookMenuRoot + "血の海 (Blood Sea)", false, 47)]
         static void ApplyBloodSeaLook() => ApplyLook(BloodSeaLook);
 
-        [MenuItem(LookMenuRoot + "液体金属 (Liquid Metal)", false, 47)]
+        [MenuItem(LookMenuRoot + "液体金属 (Liquid Metal)", false, 48)]
         static void ApplyLiquidMetalLook() => ApplyLook(LiquidMetalLook);
 
         [MenuItem(MenuRoot + "静かな水面 (Calm)", true)]
@@ -678,6 +748,7 @@ namespace Siliq.Water.Editor
         [MenuItem(LookMenuRoot + "美しい海 (Clear Sea)", true)]
         [MenuItem(LookMenuRoot + "透明プール (Clear Pool)", true)]
         [MenuItem(LookMenuRoot + "室内ブループール (Indoor Blue Pool)", true)]
+        [MenuItem(LookMenuRoot + "ウォーターテーブル (Water Table)", true)]
         [MenuItem(LookMenuRoot + "フラッグシップ透明水 (Flagship Crystal)", true)]
         [MenuItem(LookMenuRoot + "クリスタルラグーン (Crystal Lagoon)", true)]
         [MenuItem(LookMenuRoot + "クリスタルラグーン Hero (Crystal Lagoon Hero)", true)]
@@ -714,6 +785,7 @@ namespace Siliq.Water.Editor
                 case ReadyLook.ClearSea: return ClearSeaLook;
                 case ReadyLook.ClearPool: return ClearPoolLook;
                 case ReadyLook.IndoorBluePool: return IndoorBluePoolLook;
+                case ReadyLook.WaterTable: return WaterTableLook;
                 case ReadyLook.FlagshipCrystal: return FlagshipCrystalLook;
                 case ReadyLook.CrystalLagoon: return CrystalLagoonLook;
                 case ReadyLook.CrystalLagoonHero: return CrystalLagoonHeroLook;
@@ -1110,15 +1182,29 @@ namespace Siliq.Water.Editor
                 mat.SetTexture("_BumpMap", source.GetTexture("_BumpMap"));
                 mat.EnableKeyword("_NORMALMAP");
             }
+            else if (source != null && source.HasProperty("_NormalMap") && mat.HasProperty("_BumpMap"))
+            {
+                mat.SetTexture("_BumpMap", source.GetTexture("_NormalMap"));
+                mat.EnableKeyword("_NORMALMAP");
+            }
             if (source != null && source.HasProperty("_BumpScale") && mat.HasProperty("_BumpScale"))
             {
                 mat.SetFloat("_BumpScale", Mathf.Max(1f, source.GetFloat("_BumpScale")));
+            }
+            else if (source != null && source.HasProperty("_NormalStrength") && mat.HasProperty("_BumpScale"))
+            {
+                mat.SetFloat("_BumpScale", Mathf.Max(1f, source.GetFloat("_NormalStrength")));
             }
 
             Color color = new Color(0.08f, 0.34f, 0.45f, Mathf.Clamp01(opacity));
             if (source != null && source.HasProperty("_Color"))
             {
                 Color sourceColor = source.GetColor("_Color");
+                color = new Color(sourceColor.r, sourceColor.g, sourceColor.b, Mathf.Clamp01(opacity));
+            }
+            else if (source != null && source.HasProperty("_ShallowColor"))
+            {
+                Color sourceColor = source.GetColor("_ShallowColor");
                 color = new Color(sourceColor.r, sourceColor.g, sourceColor.b, Mathf.Clamp01(opacity));
             }
 
@@ -1387,11 +1473,19 @@ namespace Siliq.Water.Editor
 
         static void SetupDarkSceneResponse(Material mat)
         {
+            SetupDarkSceneResponse(mat, default);
+        }
+
+        static void SetupDarkSceneResponse(Material mat, LookPreset preset)
+        {
             if (mat == null) return;
 
-            if (mat.HasProperty("_MinLighting")) mat.SetFloat("_MinLighting", 0.10f);
-            if (mat.HasProperty("_DarkReflectionDamping")) mat.SetFloat("_DarkReflectionDamping", 0.72f);
-            if (mat.HasProperty("_DarkDetailDamping")) mat.SetFloat("_DarkDetailDamping", 0.70f);
+            float minLighting = preset.minLighting > 0f ? preset.minLighting : 0.10f;
+            float darkReflectionDamping = preset.darkReflectionDamping > 0f ? preset.darkReflectionDamping : 0.72f;
+            float darkDetailDamping = preset.darkDetailDamping > 0f ? preset.darkDetailDamping : 0.70f;
+            if (mat.HasProperty("_MinLighting")) mat.SetFloat("_MinLighting", minLighting);
+            if (mat.HasProperty("_DarkReflectionDamping")) mat.SetFloat("_DarkReflectionDamping", darkReflectionDamping);
+            if (mat.HasProperty("_DarkDetailDamping")) mat.SetFloat("_DarkDetailDamping", darkDetailDamping);
         }
 
         static void ApplySiliqNormal(Material mat, Material source, LookPreset preset)
@@ -1548,7 +1642,7 @@ namespace Siliq.Water.Editor
             }
 
             SetupMacroVariation(mat, preset.macroVariation, preset.macroScale, preset.macroDirectionBreakup, preset.macroColorVariation);
-            SetupDarkSceneResponse(mat);
+            SetupDarkSceneResponse(mat, preset);
 
             if (mat.HasProperty("_UseFlowMap")) mat.SetFloat("_UseFlowMap", 0f);
             if (mat.HasProperty("_UseShore")) mat.SetFloat("_UseShore", 0f);
