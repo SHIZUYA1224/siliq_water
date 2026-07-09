@@ -30,8 +30,8 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Intensity: 1.15
-    - _Alpha: 0.52
+    - _Intensity: 1.05
+    - _Alpha: 0.48
     - _Tiling: 1.35
     - _MaskPower: 1.15
     - _PulseSpeed: 0.7

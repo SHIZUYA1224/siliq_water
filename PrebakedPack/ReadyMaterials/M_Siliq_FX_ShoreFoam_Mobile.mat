@@ -31,9 +31,9 @@ Material:
     m_Ints: []
     m_Floats:
     - _Intensity: 0.96
-    - _Alpha: 0.82
+    - _Alpha: 0.72
     - _Tiling: 1
-    - _MaskPower: 1.05
+    - _MaskPower: 1.25
     - _PulseSpeed: 0.35
     - _PulseAmount: 0.05
     - _SrcBlend: 5

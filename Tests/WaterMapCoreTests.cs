@@ -848,23 +848,37 @@ namespace Siliq.Water.Tests
                 var pixels = readable.GetPixels32();
                 int darkPixels = 0;
                 int visiblePixels = 0;
+                int midPixels = 0;
                 int brightPixels = 0;
+                int hotPixels = 0;
+                int maxBrightness = 0;
                 foreach (var p in pixels)
                 {
                     int v = Mathf.Max(p.r, Mathf.Max(p.g, p.b));
                     if (v <= 4) darkPixels++;
                     if (v >= 18) visiblePixels++;
+                    if (v >= 32 && v <= 180) midPixels++;
                     if (v >= 96) brightPixels++;
+                    if (v >= 230) hotPixels++;
+                    if (v > maxBrightness) maxBrightness = v;
                 }
 
-                Assert.Greater(darkPixels, pixels.Length * 0.25f,
-                    $"{label}: 黒地マスクでないと透明/加算Planeとして使いにくい");
-                Assert.Greater(visiblePixels, pixels.Length * 0.002f,
+                Assert.Greater(darkPixels, pixels.Length * 0.45f,
+                    $"{label}: 高品質な透明/加算Plane用に十分な黒地余白が必要");
+                Assert.Greater(visiblePixels, pixels.Length * 0.01f,
                     $"{label}: エフェクトが薄すぎて見えない");
+                Assert.Less(visiblePixels, pixels.Length * 0.55f,
+                    $"{label}: 素材全体が白い板状に近い");
+                Assert.Greater(midPixels, pixels.Length * 0.01f,
+                    $"{label}: 高品質素材としてアンチエイリアスされた中間階調が必要");
                 Assert.Greater(brightPixels, pixels.Length * 0.0003f,
                     $"{label}: 明るい焦点がなく水表現として弱い");
-                Assert.Less(brightPixels, pixels.Length * 0.45f,
+                Assert.Less(brightPixels, pixels.Length * 0.35f,
                     $"{label}: 白い板状の素材に戻してはいけない");
+                Assert.GreaterOrEqual(maxBrightness, 220,
+                    $"{label}: 水の焦点ハイライトとして使える明部が必要");
+                Assert.Less(hotPixels, pixels.Length * 0.08f,
+                    $"{label}: 白飛び面積が多すぎると加算/透明で安っぽく見える");
             }
             finally
             {
