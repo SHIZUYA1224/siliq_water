@@ -1125,85 +1125,158 @@ namespace Siliq.Water.Tests
         public void CrystalCausticsTexture_UsesSoftNonPolygonalLight()
         {
             const string path = "Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Caustics_Crystal_01.png";
-            var caustics = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
-            Assert.IsNotNull(caustics, "水底光 texture が同梱されていない");
-            Assert.GreaterOrEqual(caustics.width, 1024, "水底光 texture は低解像度に戻さない");
-            Assert.GreaterOrEqual(caustics.height, 1024, "水底光 texture は低解像度に戻さない");
-
-            var readable = new Texture2D(2, 2, TextureFormat.RGB24, false);
-            try
-            {
-                Assert.IsTrue(readable.LoadImage(File.ReadAllBytes(path)), "水底光 texture を PNG として読めない");
-                var pixels = readable.GetPixels32();
-                int nearBlack = 0;
-                int nearWhite = 0;
-                int min = 255;
-                int max = 0;
-                long sum = 0;
-                foreach (var pixel in pixels)
-                {
-                    int v = pixel.r;
-                    if (v <= 2) nearBlack++;
-                    if (v >= 250) nearWhite++;
-                    if (v < min) min = v;
-                    if (v > max) max = v;
-                    sum += v;
-                }
-
-                float total = pixels.Length;
-                Assert.AreEqual(0, nearBlack, "水底光 texture に真っ黒な大面積セルを戻してはならない");
-                Assert.AreEqual(0, nearWhite, "水底光 texture に飽和した白い Voronoi 線を戻してはならない");
-                Assert.GreaterOrEqual(min, 8, "水底光は黒い多角形セルではなく、淡い光として扱う");
-                Assert.LessOrEqual(max, 220, "水底光は白飛びした線ではなく、shader 側で強度調整できる余地を残す");
-                Assert.Greater(sum / total, 24f, "水底光 texture が暗すぎる");
-            }
-            finally
-            {
-                Object.DestroyImmediate(readable);
-            }
+            AssertCausticsTextureQuality(
+                path,
+                "共通水底光",
+                1024,
+                minDarkRatio: 0.25f,
+                maxDarkRatio: 0.70f,
+                minVisibleRatio: 0.12f,
+                maxVisibleRatio: 0.55f,
+                minMidRatio: 0.05f,
+                minBrightRatio: 0.01f,
+                maxHotRatio: 0.035f,
+                maxAverageBrightness: 38f,
+                minMaxBrightness: 230,
+                maxEdgeDelta: 2f,
+                maxDominantOrientationRatio: 0.14f);
         }
 
         [Test]
         public void CrystalLagoonCausticsTexture_IsHighResolutionAndVisible()
         {
             const string path = "Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Caustics_CrystalLagoon_01.png";
+            AssertCausticsTextureQuality(
+                path,
+                "Crystal Lagoon 水底光",
+                2048,
+                minDarkRatio: 0.45f,
+                maxDarkRatio: 0.75f,
+                minVisibleRatio: 0.10f,
+                maxVisibleRatio: 0.38f,
+                minMidRatio: 0.05f,
+                minBrightRatio: 0.01f,
+                maxHotRatio: 0.035f,
+                maxAverageBrightness: 28f,
+                minMaxBrightness: 230,
+                maxEdgeDelta: 2f,
+                maxDominantOrientationRatio: 0.14f);
+        }
+
+        [Test]
+        public void SunlitPoolCausticsTexture_HasBroadSoftFloorLight()
+        {
+            const string path = "Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Caustics_SunlitPool_01.png";
+            AssertCausticsTextureQuality(
+                path,
+                "SunlitPool 水底光",
+                2048,
+                minDarkRatio: 0.12f,
+                maxDarkRatio: 0.50f,
+                minVisibleRatio: 0.35f,
+                maxVisibleRatio: 0.70f,
+                minMidRatio: 0.18f,
+                minBrightRatio: 0.02f,
+                maxHotRatio: 0.035f,
+                maxAverageBrightness: 45f,
+                minMaxBrightness: 220,
+                maxEdgeDelta: 2f,
+                maxDominantOrientationRatio: 0.14f);
+        }
+
+        [Test]
+        public void CrystalLagoonHeroCausticsTexture_IsHighResolutionSoftAndVisible()
+        {
+            const string path = "Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Caustics_CrystalLagoon_Hero_01.png";
+            AssertCausticsTextureQuality(
+                path,
+                "Hero 水底光",
+                2048,
+                minDarkRatio: 0.45f,
+                maxDarkRatio: 0.76f,
+                minVisibleRatio: 0.10f,
+                maxVisibleRatio: 0.38f,
+                minMidRatio: 0.05f,
+                minBrightRatio: 0.008f,
+                maxHotRatio: 0.035f,
+                maxAverageBrightness: 28f,
+                minMaxBrightness: 230,
+                maxEdgeDelta: 2f,
+                maxDominantOrientationRatio: 0.14f);
+        }
+
+        static void AssertCausticsTextureQuality(
+            string path,
+            string label,
+            int minResolution,
+            float minDarkRatio,
+            float maxDarkRatio,
+            float minVisibleRatio,
+            float maxVisibleRatio,
+            float minMidRatio,
+            float minBrightRatio,
+            float maxHotRatio,
+            float maxAverageBrightness,
+            int minMaxBrightness,
+            float maxEdgeDelta,
+            float maxDominantOrientationRatio)
+        {
             var caustics = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
-            Assert.IsNotNull(caustics, "Crystal Lagoon 専用の水底光 texture が同梱されていない");
-            Assert.GreaterOrEqual(caustics.width, 2048, "Crystal Lagoon の水底光は美しさ優先で 2048px 以上にする");
-            Assert.GreaterOrEqual(caustics.height, 2048, "Crystal Lagoon の水底光は美しさ優先で 2048px 以上にする");
+            Assert.IsNotNull(caustics, $"{label}: texture が同梱されていない");
+            Assert.GreaterOrEqual(caustics.width, minResolution, $"{label}: 低解像度に戻さない");
+            Assert.GreaterOrEqual(caustics.height, minResolution, $"{label}: 低解像度に戻さない");
 
             var readable = new Texture2D(2, 2, TextureFormat.RGB24, false);
             try
             {
-                Assert.IsTrue(readable.LoadImage(File.ReadAllBytes(path)), "Crystal Lagoon 水底光 texture を PNG として読めない");
+                Assert.IsTrue(readable.LoadImage(File.ReadAllBytes(path)), $"{label}: PNG として読めない");
                 var pixels = readable.GetPixels32();
-                int min = 255;
-                int max = 0;
-                int softLightPixels = 0;
-                int brightLinePixels = 0;
+                int darkPixels = 0;
+                int visiblePixels = 0;
+                int midPixels = 0;
+                int brightPixels = 0;
+                int hotPixels = 0;
+                int maxBrightness = 0;
                 long sum = 0;
+
                 foreach (var pixel in pixels)
                 {
-                    int v = pixel.r;
-                    if (v < min) min = v;
-                    if (v > max) max = v;
-                    if (v >= 70) softLightPixels++;
-                    if (v >= 110) brightLinePixels++;
+                    int v = Mathf.Max(pixel.r, Mathf.Max(pixel.g, pixel.b));
+                    if (v <= 4) darkPixels++;
+                    if (v >= 18) visiblePixels++;
+                    if (v >= 32 && v <= 180) midPixels++;
+                    if (v >= 96) brightPixels++;
+                    if (v >= 230) hotPixels++;
+                    if (v > maxBrightness) maxBrightness = v;
                     sum += v;
                 }
 
-                float average = sum / (float)pixels.Length;
-                Assert.GreaterOrEqual(min, 8, "Crystal Lagoon 水底光に黒つぶれを戻してはならない");
-                Assert.GreaterOrEqual(max, 110, "Crystal Lagoon 水底光は床に見えるだけの明るい筋が必要");
-                Assert.LessOrEqual(max, 220, "Crystal Lagoon 水底光は白飛びした線にしない");
-                Assert.GreaterOrEqual(average, 32f, "Crystal Lagoon 水底光が暗すぎる");
-                Assert.LessOrEqual(average, 48f, "Crystal Lagoon 水底光が全面発光のように強すぎる");
-                Assert.Greater(softLightPixels, pixels.Length * 0.02f,
-                    "Crystal Lagoon 水底光には床に見える柔らかい光筋の面積が必要");
-                Assert.Greater(brightLinePixels, pixels.Length * 0.001f,
-                    "Crystal Lagoon 水底光には弱すぎない焦点線が必要");
-                Assert.Less(brightLinePixels, pixels.Length * 0.04f,
-                    "Crystal Lagoon 水底光の明るい線が多すぎると不自然な線画に見える");
+                float total = pixels.Length;
+                float average = sum / total;
+                Assert.GreaterOrEqual(darkPixels / total, minDarkRatio,
+                    $"{label}: 加算/透明 overlay で板に見えない黒地余白が必要");
+                Assert.LessOrEqual(darkPixels / total, maxDarkRatio,
+                    $"{label}: 黒地が多すぎて水底光として弱い");
+                Assert.GreaterOrEqual(visiblePixels / total, minVisibleRatio,
+                    $"{label}: 見える光筋の面積が少なすぎる");
+                Assert.LessOrEqual(visiblePixels / total, maxVisibleRatio,
+                    $"{label}: 見える面積が多すぎて白い模様の板に戻っている");
+                Assert.GreaterOrEqual(midPixels / total, minMidRatio,
+                    $"{label}: アンチエイリアスされた柔らかい中間階調が必要");
+                Assert.GreaterOrEqual(brightPixels / total, minBrightRatio,
+                    $"{label}: 水底に刺さる焦点ハイライトが必要");
+                Assert.LessOrEqual(hotPixels / total, maxHotRatio,
+                    $"{label}: 白飛び面積が多すぎる");
+                Assert.GreaterOrEqual(maxBrightness, minMaxBrightness,
+                    $"{label}: 水底光のピークとして使える明部が必要");
+                Assert.LessOrEqual(average, maxAverageBrightness,
+                    $"{label}: 平均輝度が高すぎると床全体が発光して見える");
+
+                float edgeDelta = Mathf.Max(
+                    AverageEdgeDelta(pixels, readable.width, readable.height, true),
+                    AverageEdgeDelta(pixels, readable.width, readable.height, false));
+                Assert.LessOrEqual(edgeDelta, maxEdgeDelta,
+                    $"{label}: Repeat 時に境界の明るさが飛ぶと継ぎ目が見える");
 
                 int[] orientationBins = new int[18];
                 int orientationSamples = 0;
@@ -1213,13 +1286,13 @@ namespace Siliq.Water.Tests
                     for (int x = stride; x < readable.width - stride; x += stride)
                     {
                         int index = y * readable.width + x;
-                        int center = pixels[index].r;
-                        if (center < 70) continue;
+                        int center = Mathf.Max(pixels[index].r, Mathf.Max(pixels[index].g, pixels[index].b));
+                        if (center < 32) continue;
 
                         int gx = pixels[index + stride].r - pixels[index - stride].r;
                         int gy = pixels[index + stride * readable.width].r - pixels[index - stride * readable.width].r;
                         float magnitude = Mathf.Sqrt(gx * gx + gy * gy);
-                        if (magnitude < 8f) continue;
+                        if (magnitude < 6f) continue;
 
                         float angle = Mathf.Atan2(gy, gx);
                         if (angle < 0f) angle += Mathf.PI;
@@ -1236,9 +1309,9 @@ namespace Siliq.Water.Tests
                 }
 
                 Assert.Greater(orientationSamples, 1000,
-                    "Crystal Lagoon 水底光は方向性を評価できるだけの曲線ディテールが必要");
-                Assert.Less(dominantBin / (float)orientationSamples, 0.14f,
-                    "Crystal Lagoon 水底光が一方向の線や格子に戻っている");
+                    $"{label}: 方向性を評価できるだけの曲線ディテールが必要");
+                Assert.Less(dominantBin / (float)orientationSamples, maxDominantOrientationRatio,
+                    $"{label}: 一方向の線や格子に戻っている");
             }
             finally
             {
@@ -1246,138 +1319,20 @@ namespace Siliq.Water.Tests
             }
         }
 
-        [Test]
-        public void SunlitPoolCausticsTexture_HasBroadSoftFloorLight()
+        static float AverageEdgeDelta(Color32[] pixels, int width, int height, bool horizontal)
         {
-            const string path = "Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Caustics_SunlitPool_01.png";
-            var caustics = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
-            Assert.IsNotNull(caustics, "透明プール / 室内プール用の SunlitPool 水底光 texture が同梱されていない");
-            Assert.GreaterOrEqual(caustics.width, 2048, "SunlitPool 水底光は美しさ優先で 2048px 以上にする");
-            Assert.GreaterOrEqual(caustics.height, 2048, "SunlitPool 水底光は美しさ優先で 2048px 以上にする");
-
-            var readable = new Texture2D(2, 2, TextureFormat.RGB24, false);
-            try
+            long sum = 0;
+            int count = horizontal ? height : width;
+            for (int i = 0; i < count; i++)
             {
-                Assert.IsTrue(readable.LoadImage(File.ReadAllBytes(path)), "SunlitPool 水底光 texture を PNG として読めない");
-                var pixels = readable.GetPixels32();
-                int min = 255;
-                int max = 0;
-                int softFloorLightPixels = 0;
-                int brightRibbonPixels = 0;
-                int blownOutPixels = 0;
-                long sum = 0;
-
-                foreach (var pixel in pixels)
-                {
-                    int v = pixel.r;
-                    if (v < min) min = v;
-                    if (v > max) max = v;
-                    if (v >= 60 && v <= 145) softFloorLightPixels++;
-                    if (v >= 150) brightRibbonPixels++;
-                    if (v >= 235) blownOutPixels++;
-                    sum += v;
-                }
-
-                float average = sum / (float)pixels.Length;
-                Assert.GreaterOrEqual(min, 8, "SunlitPool 水底光に黒つぶれを戻してはならない");
-                Assert.GreaterOrEqual(max, 170, "SunlitPool 水底光には床に見える焦点リボンが必要");
-                Assert.LessOrEqual(max, 230, "SunlitPool 水底光は texture 側で白飛びさせない");
-                Assert.GreaterOrEqual(average, 42f, "SunlitPool 水底光は柔らかい面光として見える明るさが必要");
-                Assert.LessOrEqual(average, 78f, "SunlitPool 水底光が全面発光のように強すぎる");
-                Assert.Greater(softFloorLightPixels, pixels.Length * 0.12f,
-                    "SunlitPool 水底光には細い線だけでなく広い柔らかい床光が必要");
-                Assert.Greater(brightRibbonPixels, pixels.Length * 0.004f,
-                    "SunlitPool 水底光には弱すぎない光リボンが必要");
-                Assert.Less(brightRibbonPixels, pixels.Length * 0.06f,
-                    "SunlitPool 水底光の明るい線が多すぎると変な模様に見える");
-                Assert.AreEqual(0, blownOutPixels, "SunlitPool 水底光に飽和した白飛び線を戻してはならない");
+                Color32 a = horizontal ? pixels[i * width] : pixels[i];
+                Color32 b = horizontal ? pixels[i * width + width - 1] : pixels[(height - 1) * width + i];
+                int av = Mathf.Max(a.r, Mathf.Max(a.g, a.b));
+                int bv = Mathf.Max(b.r, Mathf.Max(b.g, b.b));
+                sum += Mathf.Abs(av - bv);
             }
-            finally
-            {
-                Object.DestroyImmediate(readable);
-            }
-        }
 
-        [Test]
-        public void CrystalLagoonHeroCausticsTexture_IsHighResolutionSoftAndVisible()
-        {
-            const string path = "Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Caustics_CrystalLagoon_Hero_01.png";
-            var caustics = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
-            Assert.IsNotNull(caustics, "Crystal Lagoon Hero 専用の水底光 texture が同梱されていない");
-            Assert.GreaterOrEqual(caustics.width, 2048, "Hero 水底光は美しさ優先で 2048px 以上にする");
-            Assert.GreaterOrEqual(caustics.height, 2048, "Hero 水底光は美しさ優先で 2048px 以上にする");
-
-            var readable = new Texture2D(2, 2, TextureFormat.RGB24, false);
-            try
-            {
-                Assert.IsTrue(readable.LoadImage(File.ReadAllBytes(path)), "Hero 水底光 texture を PNG として読めない");
-                var pixels = readable.GetPixels32();
-                int min = 255;
-                int max = 0;
-                int softFloorLightPixels = 0;
-                int brightPixels = 0;
-                long sum = 0;
-                foreach (var pixel in pixels)
-                {
-                    int v = pixel.r;
-                    if (v < min) min = v;
-                    if (v > max) max = v;
-                    if (v >= 60 && v <= 145) softFloorLightPixels++;
-                    if (v >= 150) brightPixels++;
-                    sum += v;
-                }
-
-                float average = sum / (float)pixels.Length;
-                Assert.GreaterOrEqual(min, 8, "Hero 水底光に黒つぶれを戻してはならない");
-                Assert.GreaterOrEqual(max, 180, "Hero 水底光には床に映える明るい焦点線が必要");
-                Assert.LessOrEqual(max, 230, "Hero 水底光は texture 側で白飛びさせない");
-                Assert.GreaterOrEqual(average, 40f, "Hero 水底光が暗すぎる");
-                Assert.LessOrEqual(average, 80f, "Hero 水底光が全面発光のように強すぎる");
-                Assert.Greater(softFloorLightPixels, pixels.Length * 0.16f,
-                    "Hero 水底光には線だけでなく、水底に広がる柔らかい床光が必要");
-                Assert.Greater(brightPixels, pixels.Length * 0.01f,
-                    "Hero 水底光には商品品質で見える明るい光筋が必要");
-                Assert.Less(brightPixels, pixels.Length * 0.08f,
-                    "Hero 水底光の明るい線が多すぎると不自然な線画に見える");
-
-                int[] orientationBins = new int[18];
-                int orientationSamples = 0;
-                const int stride = 8;
-                for (int y = stride; y < readable.height - stride; y += stride)
-                {
-                    for (int x = stride; x < readable.width - stride; x += stride)
-                    {
-                        int index = y * readable.width + x;
-                        int center = pixels[index].r;
-                        if (center < 70) continue;
-
-                        int gx = pixels[index + stride].r - pixels[index - stride].r;
-                        int gy = pixels[index + stride * readable.width].r - pixels[index - stride * readable.width].r;
-                        float magnitude = Mathf.Sqrt(gx * gx + gy * gy);
-                        if (magnitude < 8f) continue;
-
-                        float angle = Mathf.Atan2(gy, gx);
-                        if (angle < 0f) angle += Mathf.PI;
-                        int bin = Mathf.Clamp(Mathf.FloorToInt(angle / Mathf.PI * orientationBins.Length), 0, orientationBins.Length - 1);
-                        orientationBins[bin]++;
-                        orientationSamples++;
-                    }
-                }
-
-                int dominantBin = 0;
-                for (int i = 0; i < orientationBins.Length; i++)
-                {
-                    dominantBin = Mathf.Max(dominantBin, orientationBins[i]);
-                }
-
-                Assert.Greater(orientationSamples, 1000, "Hero 水底光は方向性を評価できるだけの曲線ディテールが必要");
-                Assert.Less(dominantBin / (float)orientationSamples, 0.16f,
-                    "Hero 水底光が一方向の長い線や格子に戻っている");
-            }
-            finally
-            {
-                Object.DestroyImmediate(readable);
-            }
+            return sum / (float)count;
         }
 
         [Test]

@@ -44,15 +44,15 @@ Material:
     m_Floats:
     - _AlphaFresnel: 0.7
     - _AlphaPower: 2
-    - _BottomGlowStrength: 0.70
+    - _BottomGlowStrength: 0.76
     - _BottomLightStrength: 1.35
     - _BottomVisibility: 1.35
     - _CausticsScale: 2.4
     - _CausticsSpeed: 0.000007
     - _CausticsFocus: 1.55
     - _CausticsPrismStrength: 0.12
-    - _CausticsScatterStrength: 0.36
-    - _CausticsStrength: 0.46
+    - _CausticsScatterStrength: 0.42
+    - _CausticsStrength: 0.54
     - _Clarity: 0.76
     - _DarkDetailDamping: 0.7
     - _DarkReflectionDamping: 0.72

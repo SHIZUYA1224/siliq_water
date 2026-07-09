@@ -109,9 +109,9 @@ README / 用途別ガイド / PrebakedPack の確認に進めます。
 基本 5 種は **1024×1024 PNG / シームレス / インポート設定済み (NormalMap・Repeat・Android/iOS は ASTC 6x6)**。
 Mobile FX 6 種は **1024×1024 PNG / 個別生成の黒地高品質マスク / sRGB Off / Repeat / Android・iOS は ASTC 6x6**。1枚のアトラスから雑に切り出した素材ではなく、水しぶき、泡、反射、粒子、岸泡、雨波紋それぞれに密度と余白を調整しています。
 フラッグシップ透明水と Crystal Lagoon は専用 **2048×2048 normal map + 2048×2048 height map** を同梱し、用途別 Quick Apply では両方を Siliq 水シェーダーへ割り当てます。
-Crystal Lagoon は水底光も専用 **2048×2048 `Water_Caustics_CrystalLagoon_01.png`** を使い、透明な浅い水の床に淡く曲がる光筋が出るようにしています。Hero material は normal / height / caustics すべてを専用 texture にし、さらに明るい焦点線と柔らかい水底光を増やした **2048×2048 `Water_Caustics_CrystalLagoon_Hero_01.png`** を使います。
-透明プール / 室内ブループールには、広い床光と柔らかい光リボンを持つ **2048×2048 `Water_Caustics_SunlitPool_01.png`** を割り当てています。
-さらに共通の `Water_Caustics_Crystal_01.png` を同梱し、透明な海・フラッグシップ水では水底に揺れる光模様として使います。これは強い多角形セルではなく、淡く重なる光の筋として調整しています。
+Crystal Lagoon は水底光も専用 **2048×2048 `Water_Caustics_CrystalLagoon_01.png`** を使い、透明な浅い水の床に黒地から細い焦点線と柔らかい散光が出るようにしています。Hero material は normal / height / caustics すべてを専用 texture にし、さらに明るい焦点線と柔らかい水底光を増やした **2048×2048 `Water_Caustics_CrystalLagoon_Hero_01.png`** を使います。
+透明プール / 室内ブループールには、黒地余白を残しつつ広い床光と柔らかい光リボンを持つ **2048×2048 `Water_Caustics_SunlitPool_01.png`** を割り当てています。
+さらに共通の `Water_Caustics_Crystal_01.png` を同梱し、透明な海・フラッグシップ水では水底に揺れる光模様として使います。これは白い板や強い多角形セルではなく、暗部の抜けを持つ細い光の筋として調整しています。
 `PrebakedPack/ReadyMaterials/` には `Siliq/Water Mobile (Quest)` 設定済みの完成マテリアルが入っています。
 `PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab` は、分割済み水面、明るいプール床、床用 caustics overlay、確認用ライトを一体化した完成セットです。さらに `PF_Siliq_CrystalLagoon_Hero_Complete.prefab` は Hero material と Hero caustics overlay を貼った最高品質確認用です。`PF_Siliq_SunlitPool_Complete.prefab` は ClearPool material と SunlitPool caustics overlay を使う、透明プール / 室内プール向けの完成セットです。Prefab を Hierarchy へ置くだけで、透明感と水底光を同時に確認できます。
 完成形の方向性は `PrebakedPack/Preview/preview_crystal_lagoon_complete.png`、最高品質寄りは `PrebakedPack/Preview/preview_crystal_lagoon_hero_complete.png` で確認できます。薄い床、透明な水面、窓の揺れる反射、水底光が一枚で見える初心者向けの目安画像です。

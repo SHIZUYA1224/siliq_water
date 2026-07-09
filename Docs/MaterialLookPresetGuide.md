@@ -3,7 +3,7 @@
 Siliq Water は、ノーマルマップ単体ではなく「用途別の見た目プリセット」として使うことを前提にする。まず完成形を確認する場合は `PrebakedPack/Preview/preview_crystal_lagoon_complete.png`、美しさ最優先なら `PrebakedPack/Preview/preview_crystal_lagoon_hero_complete.png` で方向性を見てから、Hero は `PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Hero_Complete.prefab`、通常確認は `PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab`、透明プール確認は `PrebakedPack/Prefabs/PF_Siliq_SunlitPool_Complete.prefab` を Hierarchy にドラッグする。プレビューは線模様の見本ではなく、室内プールの水面反射、薄い床、透明な水、水底光が見える完成イメージとして扱う。Prefab には水面、薄いタイル感のある明るいプール床、床用 caustics overlay、確認用ライトが一体で入っている。
 
 アタッチだけで使う場合は `PrebakedPack/ReadyMaterials/` の `M_Siliq_*_Ready` を Renderer にドラッグする。これらは normal、色、透明度、反射、scroll、水底の光が設定済みで、`WaterSurfaceAnimator` なしでも shader 側で波が動く。美しさを最優先して確認する場合は `M_Siliq_CrystalLagoon_Hero_Ready` から始める。
-Hero / Crystal Lagoon / 透明プールは、置いた瞬間に水面が滑って見えないよう shader scroll と Animator speed をかなり低速にしている。`Speed` は 0.3 を静かな水面の中間操作値として扱い、もっと静止に近づけたい場合は `Speed` を 0.01 以下、または material の `_Scroll1` / `_Scroll2` を 0 にする。水底光まで速く見える場合は `_CausticsSpeed`、高さの動きが速い場合は `_DisplacementSpeed` を下げる。Hero の水底光は直線格子や白い線の密集ではなく、柔らかい床光の中に少数の焦点線が走る caustics として調整する。透明水の平板さが気になる場合は `_RefractionStrength` を 0.25-0.45、`_BottomVisibility` を 1.2-1.8、`_BottomGlowStrength` を 0.7-1.1、`_DepthTintStrength` を 0.25-0.4 の範囲で使い、水底、底の柔らかい明るさ、反射を薄く歪ませる。暗い部屋で水面だけ浮く場合は WaterSurfaceAnimator の暗所項目で `_DarkReflectionDamping` / `_DarkDetailDamping` を上げ、底光が沈む場合は `_MinLighting` を少し上げる。
+Hero / Crystal Lagoon / 透明プールは、置いた瞬間に水面が滑って見えないよう shader scroll と Animator speed をかなり低速にしている。`Speed` は 0.3 を静かな水面の中間操作値として扱い、もっと静止に近づけたい場合は `Speed` を 0.01 以下、または material の `_Scroll1` / `_Scroll2` を 0 にする。水底光まで速く見える場合は `_CausticsSpeed`、高さの動きが速い場合は `_DisplacementSpeed` を下げる。Hero の水底光は直線格子や白い線の密集ではなく、黒地の抜け、柔らかい床光、少数の焦点線が走る caustics として調整する。透明水の平板さが気になる場合は `_RefractionStrength` を 0.25-0.45、`_BottomVisibility` を 1.2-1.8、`_BottomGlowStrength` を 0.75-1.15、`_DepthTintStrength` を 0.25-0.4 の範囲で使い、水底、底の柔らかい明るさ、反射を薄く歪ませる。暗い部屋で水面だけ浮く場合は WaterSurfaceAnimator の暗所項目で `_DarkReflectionDamping` / `_DarkDetailDamping` を上げ、底光が沈む場合は `_MinLighting` を少し上げる。
 床に直接重ねる caustics overlay では `_Focus` で焦点線、`_SoftScatter` で柔らかい光膜、`_PrismStrength` で薄い色分散を調整する。Hero は通常版より少し高い値から始める。
 
 水面オブジェクトを選択して作成・再適用したい場合は、Hierarchy 右クリックから以下を適用する。
@@ -55,10 +55,10 @@ Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイ�
 - プール: `Normal Strength` を 0.25-0.5、`Opacity` を 0.38-0.55
 - 室内ブループール: `Normal Strength` を 0.35-0.6、`Opacity` を 0.35-0.5、`Reflection` は高め
 - フラッグシップ透明水: `Normal Strength` を 0.55-0.65、`Opacity` を 0.48-0.62、`Reflection` は高め、`Height` は 0.02 以下から始める
-- クリスタルラグーン: `Normal Strength` は 0.4 前後、`Clarity` は 0.9 以上、`Reflection Pattern` は 0.42 以上、`Transmission` と `Caustics` は高め、`Caustics Scatter` は 0.58 前後、`Bottom Visibility` は 1.55、`Bottom Light Strength` は 1.65 以上、`Height` は 0.01 以下に抑える
-- クリスタルラグーン Hero: `Normal Strength` は 0.36 前後、`Opacity` は 0.34 前後、`Clarity` は 0.98、`Reflection Pattern` は 0.58、`Transmission` は 0.98、`Caustics` は 0.84、`Caustics Focus` は 2.4、`Caustics Prism` は 0.24、`Caustics Scatter` は 0.74、`Bottom Visibility` は 1.75、`Bottom Light Strength` は 1.9 を基準にする
-- 水底の光: プールや浅い海では `Caustics Strength` を 0.3-0.65、暗い場所や深い水では 0.15 以下から始める
-- 床用 caustics overlay: `Intensity` は 0.4-0.7、`Tiling` は 1-2 から始める。床が発光しすぎる場合は `Floor Fade` を下げる。
+- クリスタルラグーン: `Normal Strength` は 0.4 前後、`Clarity` は 0.9 以上、`Reflection Pattern` は 0.42 以上、`Transmission` と `Caustics` は高め、`Caustics` は 0.82、`Caustics Scatter` は 0.64 前後、`Bottom Visibility` は 1.55、`Bottom Light Strength` は 1.65 以上、`Height` は 0.01 以下に抑える
+- クリスタルラグーン Hero: `Normal Strength` は 0.36 前後、`Opacity` は 0.34 前後、`Clarity` は 0.98、`Reflection Pattern` は 0.58、`Transmission` は 0.98、`Caustics` は 0.96、`Caustics Focus` は 2.4、`Caustics Prism` は 0.24、`Caustics Scatter` は 0.82、`Bottom Visibility` は 1.75、`Bottom Light Strength` は 1.9 を基準にする
+- 水底の光: プールや浅い海では `Caustics Strength` を 0.35-0.9、暗い場所や深い水では 0.15 以下から始める
+- 床用 caustics overlay: `Intensity` は 0.55-0.8、`Tiling` は 1-2 から始める。床が発光しすぎる場合は `Floor Fade` を下げる。
 - 氷割れや多角形模様に見える場合: フラッグシップ透明水の `Height Map Influence` は 0 付近、`Height` は 0.02 以下から始める
 - 血の海: `Opacity` を 0.6 以上、`Reflection` は控えめ
 - 液体金属: `Opacity` は 1、`Refl Strength` と `Smoothness` は高め

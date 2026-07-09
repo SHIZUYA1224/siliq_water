@@ -32,9 +32,9 @@ Material:
     m_Floats:
     - _FloorFade: 0.78
     - _Focus: 1.45
-    - _SoftScatter: 0.56
+    - _SoftScatter: 0.62
     - _PrismStrength: 0.08
-    - _Intensity: 0.52
+    - _Intensity: 0.60
     - _Tiling: 1.15
     m_Colors:
     - _Scroll1: {r: 0.000004, g: 0.0000015, b: 0, a: 0}

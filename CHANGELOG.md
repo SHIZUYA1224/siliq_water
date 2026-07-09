@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.82] - 2026-07-09
+
+### 改善: 水底光 caustics 素材を高品質黒地マスクへ再生成
+- `Water_Caustics_CrystalLagoon_01.png` / `Water_Caustics_CrystalLagoon_Hero_01.png` / `Water_Caustics_SunlitPool_01.png` / `Water_Caustics_Crystal_01.png` を Imagen 生成素材ベースで作り直し、白い板状の淡い模様ではなく黒地に細い焦点線と柔らかい散光が出るマスクへ変更
+- Repeat 境界の明度差、黒地余白、見える光筋、中間階調、焦点ハイライト、白飛び面積、線方向の偏りをテストで固定
+- Crystal Lagoon / Hero / ClearPool / IndoorBluePool と床用 caustics overlay の初期値を、新しい黒地 caustics に合わせて再調整
+
 ## [2.3.81] - 2026-07-09
 
 ### 改善: Mobile Water FX の素材品質を高品質版へ差し替え
