@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.87] - 2026-07-09
+
+### 修正: Samples~ の不要な root meta を削除
+- `Samples~.meta` を削除し、Unity が `Packages/com.siliq.water-normalmap/Samples~` のフォルダ欠落警告を出す状態を避けるようにした
+- URP sample 本体 (`Samples~/URP`) と `package.json` の Samples 定義は維持
+- root の `Samples~.meta` を再追加しない回帰テストを追加
+
 ## [2.3.86] - 2026-07-09
 
 ### 追加: ウォーターテーブル用の専用水面マップ

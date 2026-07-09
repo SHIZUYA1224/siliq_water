@@ -2584,6 +2584,28 @@ namespace Siliq.Water.Tests
             StringAssert.Contains("TextScriptImporter", File.ReadAllText(metaPath));
         }
 
+        [Test]
+        public void PackageSamplesRoot_DoesNotShipRootMetaFile()
+        {
+            const string packageJsonGuid = "0f4d17e00f5a4d638fbfdc4cb7483e2f";
+            string packageJsonPath = AssetDatabase.GUIDToAssetPath(packageJsonGuid);
+            Assert.IsNotEmpty(packageJsonPath, "package.json.meta の GUID が解決できない");
+
+            string packageRoot = Path.GetDirectoryName(packageJsonPath);
+            var packageInfo = UnityEditor.PackageManager.PackageInfo.FindForAssetPath(packageJsonPath);
+            if (packageInfo != null && !string.IsNullOrEmpty(packageInfo.resolvedPath))
+            {
+                packageRoot = packageInfo.resolvedPath;
+            }
+
+            string samplesRoot = Path.Combine(packageRoot, "Samples~");
+            Assert.IsTrue(Directory.Exists(samplesRoot), "Samples~/URP sample を提供するため Samples~ フォルダ本体は必要");
+            Assert.IsFalse(File.Exists(samplesRoot + ".meta"),
+                "Samples~.meta は Unity がフォルダ欠落警告を出す原因になるため root には同梱しない");
+            Assert.IsTrue(File.Exists(Path.Combine(samplesRoot, "URP", "SiliqWaterURP.shader")),
+                "URP sample shader は Samples~/URP に残す");
+        }
+
         // ---------------------------------------------------------------
         // ヘルパー
         // ---------------------------------------------------------------
