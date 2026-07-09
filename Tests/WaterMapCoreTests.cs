@@ -742,6 +742,57 @@ namespace Siliq.Water.Tests
             var importer = AssetImporter.GetAtPath(path) as TextureImporter;
             Assert.IsNotNull(importer, "Crystal Lagoon preview の import 設定が読めない");
             Assert.IsTrue(importer.sRGBTexture, "Preview 画像は見た目確認用なので sRGB で読み込む");
+
+            var readable = new Texture2D(2, 2, TextureFormat.RGB24, false);
+            try
+            {
+                Assert.IsTrue(readable.LoadImage(File.ReadAllBytes(path)), "Crystal Lagoon preview を PNG として読めない");
+                Assert.AreEqual(1024, readable.width, "Crystal Lagoon preview は横長の製品サムネイルとして固定する");
+                Assert.AreEqual(512, readable.height, "Crystal Lagoon preview は水面と室内反射が読める高さで固定する");
+                var pixels = readable.GetPixels32();
+                int blueWaterPixels = 0;
+                int brightReflectionPixels = 0;
+                int indoorPoolPixels = 0;
+                int darkBlueReflectionPixels = 0;
+                int saturatedWhitePixels = 0;
+                float luminanceSum = 0f;
+                byte minLum = byte.MaxValue;
+                byte maxLum = 0;
+
+                for (int i = 0; i < pixels.Length; i++)
+                {
+                    var p = pixels[i];
+                    int y = i / readable.width;
+                    byte lum = (byte)((p.r + p.g + p.b) / 3);
+                    luminanceSum += lum;
+                    if (lum < minLum) minLum = lum;
+                    if (lum > maxLum) maxLum = lum;
+                    if (p.b > p.r + 18 && p.g > p.r + 8) blueWaterPixels++;
+                    if (p.r > 185 && p.g > 215 && p.b > 205) brightReflectionPixels++;
+                    if (y > readable.height * 2 / 3 && p.r > 150 && p.g > 210 && p.b > 220) indoorPoolPixels++;
+                    if (y < readable.height * 2 / 3 && p.r < 95 && p.g < 180 && p.b > 110) darkBlueReflectionPixels++;
+                    if (p.r > 235 && p.g > 245 && p.b > 245) saturatedWhitePixels++;
+                }
+
+                float averageLuminance = luminanceSum / pixels.Length;
+                Assert.Greater(blueWaterPixels, pixels.Length * 0.65f,
+                    "Crystal Lagoon preview は透明な青系の水面として読める必要がある");
+                Assert.Greater(brightReflectionPixels, pixels.Length * 0.035f,
+                    "Crystal Lagoon preview は水面の明るい反射と水底光を含む必要がある");
+                Assert.Greater(indoorPoolPixels, pixels.Length * 0.20f,
+                    "Crystal Lagoon preview を単なる青い抽象画像に戻してはならない");
+                Assert.Greater(darkBlueReflectionPixels, pixels.Length * 0.10f,
+                    "Crystal Lagoon preview は窓や壁の暗い反射が水面に揺れて見える必要がある");
+                Assert.Less(saturatedWhitePixels, pixels.Length * 0.02f,
+                    "Crystal Lagoon preview は白飛びした線画にしてはならない");
+                Assert.Greater(averageLuminance, 150f, "Crystal Lagoon preview は暗く沈みすぎてはいけない");
+                Assert.Less(averageLuminance, 220f, "Crystal Lagoon preview は白飛びした単色に近づけない");
+                Assert.Greater(maxLum - minLum, 130, "Crystal Lagoon preview は水面、床、反射の明暗差が必要");
+            }
+            finally
+            {
+                Object.DestroyImmediate(readable);
+            }
         }
 
         [Test]
