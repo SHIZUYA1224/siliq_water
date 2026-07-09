@@ -15,10 +15,6 @@ namespace Siliq.Water.Editor
         const string GameObjectRootMenu = "GameObject/Siliq Water/かんたん作成/";
         const string GeneratedRoot = "Assets/SiliqWater";
         const string GeneratedMeshFolder = GeneratedRoot + "/GeneratedMeshes";
-        const string FlagshipMenuPath = "GameObject/Siliq Water/用途別マテリアルを適用/フラッグシップ透明水 (Flagship Crystal)";
-        const string CrystalLagoonMenuPath = "GameObject/Siliq Water/用途別マテリアルを適用/クリスタルラグーン (Crystal Lagoon)";
-        const string CrystalLagoonHeroMenuPath = "GameObject/Siliq Water/用途別マテリアルを適用/クリスタルラグーン Hero (Crystal Lagoon Hero)";
-        const string WaterTableMenuPath = "GameObject/Siliq Water/用途別マテリアルを適用/ウォーターテーブル (Water Table)";
         internal const string CrystalLagoonHeroCompletePrefabPackagePath = "Packages/com.siliq.water-normalmap/PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Hero_Complete.prefab";
         internal const string SunlitPoolCompletePrefabPackagePath = "Packages/com.siliq.water-normalmap/PrebakedPack/Prefabs/PF_Siliq_SunlitPool_Complete.prefab";
         const int PremiumGridSegments = 96;
@@ -74,8 +70,6 @@ namespace Siliq.Water.Editor
             instance.transform.localPosition = Vector3.zero;
             instance.transform.localRotation = Quaternion.identity;
             Selection.activeGameObject = instance;
-            EnsurePreviewLight();
-            EnsurePreviewCamera(instance.transform.position);
             if (SceneView.lastActiveSceneView != null)
             {
                 SceneView.lastActiveSceneView.FrameSelected();
@@ -91,7 +85,7 @@ namespace Siliq.Water.Editor
             CreatePremiumWater(
                 "Siliq Water - Crystal Lagoon Hero",
                 "Siliq 最高品質 Hero 水面を作成",
-                CrystalLagoonHeroMenuPath,
+                WaterPackQuickApply.ReadyLook.CrystalLagoonHero,
                 "最高品質 Hero 水面を作成しました。\n\n" +
                 "Hero 専用 normal / height を使う、透明感と反射を優先した水面です。\n" +
                 "水底の光は水面ではなく、完成セット内の床/caustics overlay など別メッシュへ付けてください。\n" +
@@ -105,7 +99,7 @@ namespace Siliq.Water.Editor
             CreatePremiumWater(
                 "Siliq Water - Water Table",
                 "Siliq ウォーターテーブル水面を作成",
-                WaterTableMenuPath,
+                WaterPackQuickApply.ReadyLook.WaterTable,
                 "ウォーターテーブル水面を作成しました。\n\n" +
                 "中央から広がる浅いリング波、黒青い水面、強い反射を持つテーブル向け水面です。\n" +
                 "飛沫や粒子、塩のような後付け表現は入れていません。\n" +
@@ -119,7 +113,7 @@ namespace Siliq.Water.Editor
             CreatePremiumWater(
                 "Siliq Water - Crystal Lagoon",
                 "Siliq クリスタルラグーン水面を作成",
-                CrystalLagoonMenuPath,
+                WaterPackQuickApply.ReadyLook.CrystalLagoon,
                 "クリスタルラグーン水面を作成しました。\n\n" +
                 "透き通った美しさを優先した水面です。最初はこのまま Play / Scene View で確認してください。\n" +
                 "水底の光は床や水底用の別メッシュへ caustics overlay material を貼って作ります。\n" +
@@ -133,14 +127,18 @@ namespace Siliq.Water.Editor
             CreatePremiumWater(
                 "Siliq Water - Flagship Crystal",
                 "Siliq フラッグシップ水面を作成",
-                FlagshipMenuPath,
+                WaterPackQuickApply.ReadyLook.FlagshipCrystal,
                 "フラッグシップ水面を作成しました。\n\n" +
                 "最初はこのまま Play / Scene View で確認してください。\n" +
                 "高さが見えない場合は、この水面メッシュのまま使ってください。1枚 Quad では実高さが出ません。\n" +
-                "VRChat Quest / iOS では、透明や反射を重くしすぎず、必要なら Studio で Normal PNG だけを書き出してください。");
+                "VRChat Quest / iOS では、完成Material画面で対象プラットフォームを選んでください。");
         }
 
-        static void CreatePremiumWater(string objectName, string undoName, string menuPath, string dialogBody)
+        static void CreatePremiumWater(
+            string objectName,
+            string undoName,
+            WaterPackQuickApply.ReadyLook readyLook,
+            string dialogBody)
         {
             var parent = Selection.activeTransform;
             var go = new GameObject(objectName);
@@ -163,14 +161,8 @@ namespace Siliq.Water.Editor
             renderer.receiveShadows = false;
 
             Selection.activeGameObject = go;
-            bool applied = EditorApplication.ExecuteMenuItem(menuPath);
-            if (!applied)
-            {
-                ApplyMinimalFallback(go);
-            }
+            WaterPackQuickApply.ApplyReadyLookToSelection(readyLook, WaterPackQuickApply.TargetForActiveBuild());
 
-            EnsurePreviewLight();
-            EnsurePreviewCamera(go.transform.position);
             if (SceneView.lastActiveSceneView != null)
             {
                 SceneView.lastActiveSceneView.FrameSelected();
@@ -249,11 +241,9 @@ namespace Siliq.Water.Editor
             if (NeedsWaterMaterialRepair(renderer.sharedMaterial))
             {
                 Selection.activeGameObject = go;
-                bool applied = EditorApplication.ExecuteMenuItem(CrystalLagoonMenuPath);
-                if (!applied)
-                {
-                    ApplyMinimalFallback(go);
-                }
+                WaterPackQuickApply.ApplyReadyLookToSelection(
+                    WaterPackQuickApply.ReadyLook.CrystalLagoon,
+                    WaterPackQuickApply.TargetForActiveBuild());
                 report?.Add($"・{go.name}: 安全なクリスタルラグーン水マテリアルを適用");
                 changed = true;
             }
@@ -273,12 +263,6 @@ namespace Siliq.Water.Editor
                 animator.texturePropertyName = mat != null && mat.HasProperty("_NormalMap") ? "_NormalMap" : "_BumpMap";
                 animator.SyncLookFromMaterial();
                 if (animator.speed <= 0f) animator.speed = 0.16f;
-                if (animator.opacity < 0.35f) animator.opacity = 0.52f;
-                if (animator.reflectionStrength < 0.8f) animator.reflectionStrength = 1f;
-                if (animator.edgeReflection < 0.65f) animator.edgeReflection = 0.88f;
-                if (animator.displacementStrength <= 0f) animator.displacementStrength = 0.012f;
-                if (animator.displacementSpeed > 0.00008f) animator.displacementSpeed = 0.00008f;
-                if (animator.causticsSpeed > 0.000012f) animator.causticsSpeed = 0.000012f;
                 animator.ApplyImmediate(0f);
                 EditorUtility.SetDirty(animator);
             }
@@ -290,6 +274,13 @@ namespace Siliq.Water.Editor
         {
             if (mat == null || mat.shader == null) return true;
             if (!WaterShaderUtility.IsUsableShaderForCurrentPipeline(mat.shader)) return true;
+            string assetPath = AssetDatabase.GetAssetPath(mat);
+            if (!string.IsNullOrEmpty(assetPath) &&
+                assetPath.StartsWith("Assets/SiliqWater/GeneratedMaterials/", System.StringComparison.Ordinal))
+            {
+                return true;
+            }
+            if (mat.name.StartsWith("M_Water_Look_", System.StringComparison.Ordinal)) return true;
             if (mat.shader.name.StartsWith("Siliq/Water", System.StringComparison.Ordinal))
             {
                 return IsUnsafeFlagshipMaterial(mat);
@@ -385,66 +376,6 @@ namespace Siliq.Water.Editor
             mesh.triangles = triangles;
             mesh.RecalculateBounds();
             return mesh;
-        }
-
-        static void ApplyMinimalFallback(GameObject go)
-        {
-            var renderer = go.GetComponent<Renderer>();
-            if (renderer == null) return;
-
-            int shaderIndex = WaterShaderUtility.BestSiliqMaterialShaderIndex();
-            if (shaderIndex == WaterShaderUtility.NoMaterialIndex)
-            {
-                shaderIndex = WaterShaderUtility.BestFallbackMaterialShaderIndex();
-            }
-            string shaderName = WaterShaderUtility.ShaderNameForMaterialIndex(shaderIndex);
-            var shader = WaterShaderUtility.FindUsableShaderForCurrentPipeline(shaderName);
-            if (shader == null) return;
-
-            var mat = new Material(shader) { name = "M_Water_Beginner_Flagship" };
-            if (mat.HasProperty("_Color")) mat.SetColor("_Color", new Color(0.24f, 0.92f, 1f, 0.52f));
-            if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", new Color(0.24f, 0.92f, 1f, 0.52f));
-            if (mat.HasProperty("_Opacity")) mat.SetFloat("_Opacity", 0.52f);
-            if (mat.HasProperty("_Clarity")) mat.SetFloat("_Clarity", 0.72f);
-            if (mat.HasProperty("_RefractionStrength")) mat.SetFloat("_RefractionStrength", 0.28f);
-            if (mat.HasProperty("_CausticsStrength")) mat.SetFloat("_CausticsStrength", 0f);
-            if (mat.HasProperty("_CausticsSpeed")) mat.SetFloat("_CausticsSpeed", 0f);
-            if (mat.HasProperty("_CausticsPrismStrength")) mat.SetFloat("_CausticsPrismStrength", 0f);
-            if (mat.HasProperty("_CausticsScatterStrength")) mat.SetFloat("_CausticsScatterStrength", 0f);
-            if (mat.HasProperty("_BottomVisibility")) mat.SetFloat("_BottomVisibility", 0f);
-            if (mat.HasProperty("_BottomLightStrength")) mat.SetFloat("_BottomLightStrength", 0f);
-            if (mat.HasProperty("_BottomGlowStrength")) mat.SetFloat("_BottomGlowStrength", 0f);
-            if (mat.HasProperty("_DepthTintStrength")) mat.SetFloat("_DepthTintStrength", 0.28f);
-            if (mat.HasProperty("_TransmissionStrength")) mat.SetFloat("_TransmissionStrength", 0.72f);
-            if (mat.HasProperty("_ReflStrength")) mat.SetFloat("_ReflStrength", 0.92f);
-            renderer.sharedMaterial = mat;
-        }
-
-        static void EnsurePreviewLight()
-        {
-            if (Object.FindObjectOfType<Light>() != null) return;
-
-            var lightGo = new GameObject("Siliq Water Preview Light");
-            Undo.RegisterCreatedObjectUndo(lightGo, "Siliq プレビューライトを作成");
-            var light = lightGo.AddComponent<Light>();
-            light.type = LightType.Directional;
-            light.intensity = 1.25f;
-            light.color = new Color(0.92f, 0.98f, 1f, 1f);
-            lightGo.transform.rotation = Quaternion.Euler(50f, -28f, 0f);
-        }
-
-        static void EnsurePreviewCamera(Vector3 target)
-        {
-            if (Camera.main != null || Object.FindObjectOfType<Camera>() != null) return;
-
-            var cameraGo = new GameObject("Siliq Water Preview Camera");
-            Undo.RegisterCreatedObjectUndo(cameraGo, "Siliq プレビューカメラを作成");
-            var camera = cameraGo.AddComponent<Camera>();
-            camera.clearFlags = CameraClearFlags.Skybox;
-            camera.fieldOfView = 45f;
-            cameraGo.tag = "MainCamera";
-            cameraGo.transform.position = target + new Vector3(0f, 5.5f, -8f);
-            cameraGo.transform.rotation = Quaternion.Euler(58f, 0f, 0f);
         }
 
         static void EnsureFolder(string parent, string child)

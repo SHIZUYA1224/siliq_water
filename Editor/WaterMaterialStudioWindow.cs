@@ -4,22 +4,21 @@ using UnityEngine;
 namespace Siliq.Water.Editor
 {
     /// <summary>
-    /// Lightweight product-facing studio: choose target platform, choose a polished ready look, apply.
-    /// The procedural generator remains under the Advanced menu.
+    /// Product-facing ready material browser. It never creates textures or materials.
     /// </summary>
     public sealed class WaterMaterialStudioWindow : EditorWindow
     {
-        internal const string MenuPath = "Tools/Siliq Water/水面マップスタジオ";
+        internal const string MenuPath = "Tools/Siliq Water/完成マテリアル";
 
         static readonly string[] TargetLabels = { "PC", "Quest", "iOS" };
         static readonly WaterPackQuickApply.ReadyLook[] Looks =
         {
-            WaterPackQuickApply.ReadyLook.WaterTable,
             WaterPackQuickApply.ReadyLook.CrystalLagoonHero,
             WaterPackQuickApply.ReadyLook.CrystalLagoon,
-            WaterPackQuickApply.ReadyLook.ClearSea,
             WaterPackQuickApply.ReadyLook.ClearPool,
             WaterPackQuickApply.ReadyLook.IndoorBluePool,
+            WaterPackQuickApply.ReadyLook.ClearSea,
+            WaterPackQuickApply.ReadyLook.WaterTable,
             WaterPackQuickApply.ReadyLook.FlagshipCrystal,
             WaterPackQuickApply.ReadyLook.BloodSea,
             WaterPackQuickApply.ReadyLook.LiquidMetal,
@@ -29,11 +28,27 @@ namespace Siliq.Water.Editor
         int lookIndex;
         Vector2 scroll;
 
+        void OnEnable()
+        {
+            switch (WaterPackQuickApply.TargetForActiveBuild())
+            {
+                case WaterPackQuickApply.TargetPlatform.Quest:
+                    targetIndex = 1;
+                    break;
+                case WaterPackQuickApply.TargetPlatform.Ios:
+                    targetIndex = 2;
+                    break;
+                default:
+                    targetIndex = 0;
+                    break;
+            }
+        }
+
         [MenuItem(MenuPath, false, -90)]
         public static void Open()
         {
             var window = GetWindow<WaterMaterialStudioWindow>("Siliq Water");
-            window.minSize = new Vector2(420f, 420f);
+            window.minSize = new Vector2(440f, 390f);
             window.Show();
         }
 
@@ -43,17 +58,17 @@ namespace Siliq.Water.Editor
             DrawHeader();
             DrawTarget();
             DrawLook();
+            DrawReadyMaterial();
             DrawApply();
-            DrawAdvanced();
             EditorGUILayout.EndScrollView();
         }
 
         void DrawHeader()
         {
             GUILayout.Space(10);
-            EditorGUILayout.LabelField("水面マップスタジオ", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("完成マテリアル", EditorStyles.boldLabel);
             EditorGUILayout.LabelField(
-                "選択中の水面に、完成Materialを貼って反映します。水底の光は床や水底用の別メッシュに分けます。",
+                "用途を選び、同梱済みの完成Materialをそのまま水面へ設定します。TextureやMaterialは自動生成しません。",
                 EditorStyles.wordWrappedLabel);
             GUILayout.Space(8);
         }
@@ -80,34 +95,59 @@ namespace Siliq.Water.Editor
             GUILayout.Space(8);
         }
 
+        void DrawReadyMaterial()
+        {
+            Material material = SelectedReadyMaterial;
+            EditorGUILayout.LabelField("使用するMaterial", EditorStyles.boldLabel);
+            using (new EditorGUI.DisabledScope(true))
+            {
+                EditorGUILayout.ObjectField(material, typeof(Material), false);
+            }
+
+            using (new EditorGUI.DisabledScope(material == null))
+            {
+                if (GUILayout.Button("Projectで表示", GUILayout.Height(26)))
+                {
+                    Selection.activeObject = material;
+                    EditorGUIUtility.PingObject(material);
+                }
+            }
+
+            GUILayout.Space(8);
+        }
+
         void DrawApply()
         {
-            bool canApply = WaterPackQuickApply.HasRendererSelection();
+            Material material = SelectedReadyMaterial;
+            bool compatible = material != null && WaterShaderUtility.IsMaterialCompatibleWithCurrentPipeline(material);
+            bool canApply = WaterPackQuickApply.HasRendererSelection() && compatible;
             using (new EditorGUI.DisabledScope(!canApply))
             {
-                if (GUILayout.Button("選択中の水面へ反映", GUILayout.Height(42)))
+                if (GUILayout.Button("選択中の水面へ設定", GUILayout.Height(42)))
                 {
                     ApplySelected();
                 }
             }
 
-            if (!canApply)
+            if (material == null)
+            {
+                EditorGUILayout.HelpBox("同梱の完成Materialが見つかりません。Packageを再導入してください。", MessageType.Error);
+            }
+            else if (!compatible)
+            {
+                EditorGUILayout.HelpBox(
+                    "現在のRender Pipelineではこの完成Materialを使用できません。URPの場合はPackage ManagerからURP Shader SampleをImportしてください。",
+                    MessageType.Error);
+            }
+            else if (!WaterPackQuickApply.HasRendererSelection())
             {
                 EditorGUILayout.HelpBox("Renderer を持つ水面オブジェクトを選択してください。", MessageType.Warning);
             }
             else
             {
-                EditorGUILayout.HelpBox("共有Materialは直接汚さず、必要なMaterialを生成してAnimatorも設定します。", MessageType.Info);
-            }
-        }
-
-        void DrawAdvanced()
-        {
-            GUILayout.Space(12);
-            EditorGUILayout.LabelField("上級者向け", EditorStyles.boldLabel);
-            if (GUILayout.Button("手続き生成スタジオを開く", GUILayout.Height(28)))
-            {
-                WaterMapStudioWindow.Open();
+                EditorGUILayout.HelpBox(
+                    "Package内の完成Materialを直接割り当てます。PC / Quest / iOS差分はMaterialを複製せず、対象Rendererの設定として反映します。",
+                    MessageType.Info);
             }
         }
 
@@ -126,16 +166,18 @@ namespace Siliq.Water.Editor
             }
         }
 
+        Material SelectedReadyMaterial => WaterPackQuickApply.ReadyMaterialForLook(Looks[lookIndex]);
+
         static string TargetDescription(WaterPackQuickApply.TargetPlatform target)
         {
             switch (target)
             {
                 case WaterPackQuickApply.TargetPlatform.Quest:
-                    return "Quest向け: 高さ、反射パターン、細かい光を抑えた軽量設定。ワールド用の最初の基準です。";
+                    return "Quest向け: 完成Materialは共通の軽量1パスを使い、高さ・反射・細部を対象水面だけ抑えます。";
                 case WaterPackQuickApply.TargetPlatform.Ios:
-                    return "iOS向け: 透明感を残しつつ、実高さと強い反射を抑えた軽量設定。";
+                    return "iOS向け: 透明感を残し、実高さと強い反射を対象水面だけ抑えます。";
                 default:
-                    return "PC向け: 反射、透明感、ゆるい実高さを優先した見た目重視設定。";
+                    return "PC向け: 完成Material本来の反射、透明感、ゆるい実高さを使います。";
             }
         }
 

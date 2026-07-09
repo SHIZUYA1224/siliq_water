@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.3.88] - 2026-07-10
+
+### 改善: 完成Materialを直接使う製品導線へ統一
+- Hierarchy右クリックを `Siliq Water > 完成水面を適用` に整理し、Calm / Cyber / 透明Material自動生成など旧メニューを通常導線から削除
+- Quick Apply、完成Material画面、かんたん作成、自動修復が `PrebakedPack/ReadyMaterials` の手調整済みMaterialを直接参照するよう変更
+- PC / Quest / iOS差分は共有Materialを複製・書き換えず、選択中Rendererの `WaterSurfaceAnimator` 設定として反映
+- 手続き生成Studio、Runtime Map Applier、Water Map Profile、開発用再生成を通常メニューから非表示化し、既存APIだけを互換用に維持
+- 自動修復が完成Materialの透明度・反射・高さを低品質な固定値へ上書きする処理と、水面作成時にCamera / Lightを勝手に追加する処理を削除
+- 旧版の `M_Water_Look_*` / `Assets/SiliqWater/GeneratedMaterials` を診断修復時に検出し、完成Materialへ置換
+- 全9種の用途別Ready MaterialがPackage内アセットを直接参照し、自動生成Materialへ戻らない回帰テストを追加
+
 ## [2.3.87] - 2026-07-09
 
 ### 修正: Samples~ の不要な root meta を削除

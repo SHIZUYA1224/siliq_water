@@ -9,6 +9,7 @@ namespace Siliq.Water.Editor
     public sealed class WaterBeginnerGuideWindow : EditorWindow
     {
         internal const string MenuPath = "Tools/Siliq Water/はじめてガイド";
+        internal const string OpenReadyMaterialsActionLabel = "完成Materialを選んで適用";
         internal const string PlaceCrystalLagoonHeroCompleteActionLabel = "最高品質 Hero 完成セットを配置";
         internal const string PlaceSunlitPoolCompleteActionLabel = "透明プール完成セットを配置";
         internal const string CreateCrystalLagoonHeroActionLabel = "最高品質 Hero 水面を作成";
@@ -51,7 +52,7 @@ namespace Siliq.Water.Editor
             GUILayout.Space(10);
             EditorGUILayout.LabelField("Siliq Water はじめてガイド", EditorStyles.boldLabel);
             EditorGUILayout.LabelField(
-                "迷ったら上から順に押してください。水面作成、ピンク修復、動かない/高さが出ない問題をこの画面から処理できます。",
+                "基本は完成Materialを選んで水面へ設定するだけです。床と水底光まで必要な場合だけ完成セットを配置します。",
                 EditorStyles.wordWrappedLabel);
             GUILayout.Space(8);
         }
@@ -59,7 +60,12 @@ namespace Siliq.Water.Editor
         static void DrawQuickActions()
         {
             EditorGUILayout.LabelField("まずやること", EditorStyles.boldLabel);
-            if (GUILayout.Button(PlaceCrystalLagoonHeroCompleteActionLabel, GUILayout.Height(38)))
+            if (GUILayout.Button(OpenReadyMaterialsActionLabel, GUILayout.Height(42)))
+            {
+                WaterMaterialStudioWindow.Open();
+            }
+
+            if (GUILayout.Button(PlaceCrystalLagoonHeroCompleteActionLabel, GUILayout.Height(34)))
             {
                 WaterBeginnerSetup.PlaceCrystalLagoonHeroCompletePrefab();
             }
@@ -67,26 +73,6 @@ namespace Siliq.Water.Editor
             if (GUILayout.Button(PlaceSunlitPoolCompleteActionLabel, GUILayout.Height(34)))
             {
                 WaterBeginnerSetup.PlaceSunlitPoolCompletePrefab();
-            }
-
-            if (GUILayout.Button(CreateCrystalLagoonHeroActionLabel, GUILayout.Height(34)))
-            {
-                WaterBeginnerSetup.CreateCrystalLagoonHeroWater();
-            }
-
-            if (GUILayout.Button(CreateWaterTableActionLabel, GUILayout.Height(34)))
-            {
-                WaterBeginnerSetup.CreateWaterTableWater();
-            }
-
-            if (GUILayout.Button(CreateCrystalLagoonActionLabel, GUILayout.Height(34)))
-            {
-                WaterBeginnerSetup.CreateCrystalLagoonWater();
-            }
-
-            if (GUILayout.Button(CreateFlagshipActionLabel, GUILayout.Height(30)))
-            {
-                WaterBeginnerSetup.CreateFlagshipWater();
             }
 
             using (new EditorGUI.DisabledScope(Selection.gameObjects == null || Selection.gameObjects.Length == 0))
@@ -110,7 +96,7 @@ namespace Siliq.Water.Editor
             Bullet("美しさを最優先する場合は Hero 完成セット、プール用途なら透明プール完成セットを配置します。水面、明るい床、水底用 caustics overlay が別メッシュで入っています。");
             Bullet("水テーブルやガラス水盤は M_Siliq_WaterTable_Ready を水面メッシュに貼ります。ガラス板、LEDライン、ベースは別オブジェクトで作ります。");
             Bullet("水底やプール床の模様は水面ではなく、床や水底用の別メッシュに caustics overlay material を貼って作ります。");
-            Bullet("normal だけでは透明感は出ません。ReadyMaterials か用途別マテリアルで色、透明度、反射、ハイライトも設定します。");
+            Bullet("normalだけでは透明感は出ません。完成Materialで色、透明度、反射、ハイライトまでまとめて設定します。");
             Bullet("高さはメッシュの頂点変位です。1 枚 Quad では見えないため、分割メッシュを使います。");
             Bullet("ピンク material は shader 不一致です。診断修復で現在の Render Pipeline に合う material へ差し替えます。");
             Bullet("編集中に重い場合は WaterSurfaceAnimator の Animate In Edit Mode を OFF、または Preview FPS を下げます。");
@@ -120,10 +106,10 @@ namespace Siliq.Water.Editor
         static void DrawVrChatNotes()
         {
             EditorGUILayout.LabelField("VRChat / Quest / iOS", EditorStyles.boldLabel);
-            Bullet("Quest アバターはカスタムシェーダー不可です。生成 normal PNG を VRChat/Mobile/Standard Lite の Normal Map に入れます。");
+            Bullet("Questアバターはカスタムシェーダー不可です。このPackageの完成MaterialはVRChatワールド用です。");
             Bullet("ワールドでは Siliq/Water Mobile (Quest) を優先します。透明・反射を強くしすぎると重くなります。");
             Bullet("水底の光を使う場合は、Quest/iOS でも水面 material に混ぜず、床や水底側の別メッシュを薄く重ねます。");
-            Bullet("PC 専用の見た目を作る場合は用途別プリセット、Quest/iOS では normal 解像度と透明描画を控えめにします。");
+            Bullet("完成Material画面でPC / Quest / iOSを選ぶと、共有Materialを壊さず対象水面だけを調整します。");
             GUILayout.Space(8);
         }
 

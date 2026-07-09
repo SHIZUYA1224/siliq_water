@@ -869,7 +869,7 @@ namespace Siliq.Water.Tests
         }
 
         [Test]
-        public void WaterMapStudio_DefaultMenuIsSimpleMaterialApplicator()
+        public void ReadyMaterialCatalog_IsTheOnlyProductFacingStudio()
         {
             var simpleOpen = typeof(WaterMaterialStudioWindow).GetMethod(
                 nameof(WaterMaterialStudioWindow.Open),
@@ -883,21 +883,29 @@ namespace Siliq.Water.Tests
                 if (menuItem.menuItem == WaterMaterialStudioWindow.MenuPath) hasSimpleMenu = true;
             }
             Assert.IsTrue(hasSimpleMenu,
-                "通常の水面マップスタジオは重い自由生成ではなく軽いMaterial適用画面にする");
+                "通常入口は完成Materialの軽い適用画面にする");
+            Assert.AreEqual("完成Materialを選んで適用", WaterBeginnerGuideWindow.OpenReadyMaterialsActionLabel,
+                "はじめてガイドの最初の導線は完成Material選択にする");
+
+            var looksField = typeof(WaterMaterialStudioWindow).GetField("Looks", BindingFlags.Static | BindingFlags.NonPublic);
+            Assert.IsNotNull(looksField, "完成Material一覧が見つからない");
+            var looks = looksField.GetValue(null) as WaterPackQuickApply.ReadyLook[];
+            Assert.IsNotNull(looks);
+            Assert.AreEqual(WaterPackQuickApply.ReadyLook.CrystalLagoonHero, looks[0],
+                "初回表示は用途限定のWaterTableではなく最高品質Heroから始める");
 
             var advancedOpen = typeof(WaterMapStudioWindow).GetMethod(
                 nameof(WaterMapStudioWindow.Open),
                 BindingFlags.Public | BindingFlags.Static);
-            Assert.IsNotNull(advancedOpen, "上級者向けの手続き生成スタジオが残っていない");
+            Assert.IsNotNull(advancedOpen, "既存APIとの互換用Open entry pointが残っていない");
 
             bool hasAdvancedMenu = false;
             foreach (var attribute in advancedOpen.GetCustomAttributes(typeof(MenuItem), false))
             {
-                var menuItem = (MenuItem)attribute;
-                if (menuItem.menuItem == "Tools/Siliq Water/上級者向け/水面マップ生成スタジオ") hasAdvancedMenu = true;
+                if (attribute is MenuItem) hasAdvancedMenu = true;
             }
-            Assert.IsTrue(hasAdvancedMenu,
-                "手続き生成スタジオは通常入口ではなく上級者向けメニューへ下げる");
+            Assert.IsFalse(hasAdvancedMenu,
+                "低品質な手続き生成スタジオを製品メニューへ再公開しない");
         }
 
         [Test]
@@ -918,31 +926,68 @@ namespace Siliq.Water.Tests
                 var animator = go.GetComponent<WaterSurfaceAnimator>();
                 Assert.IsNotNull(mat, "シンプルStudioの適用で material が設定されていない");
                 Assert.IsNotNull(animator, "シンプルStudioの適用で WaterSurfaceAnimator が追加されていない");
-                StringAssert.EndsWith("_Ios", mat.name,
-                    "iOS向けはPC用Materialを上書きせず、専用の軽量Materialを生成する");
+                Assert.AreEqual(
+                    "Packages/com.siliq.water-normalmap/PrebakedPack/ReadyMaterials/M_Siliq_CrystalLagoon_Hero_Ready.mat",
+                    AssetDatabase.GetAssetPath(mat),
+                    "iOS向けでも品質の異なるMaterialを自動生成せず、完成Materialを直接使う");
                 AssertSurfaceBottomDefaultsOff(mat, "シンプルStudio iOS material");
 
-                if (mat.HasProperty("_Opacity"))
-                {
-                    Assert.LessOrEqual(mat.GetFloat("_Opacity"), 0.38f,
-                        "iOS向けは透明感を残しつつ濃すぎる初期値にしない");
-                }
-                if (mat.HasProperty("_DisplacementStrength"))
-                {
-                    Assert.AreEqual(0f, mat.GetFloat("_DisplacementStrength"), 1e-6f,
-                        "iOS向けは重い実高さを初期OFFにする");
-                }
-                if (mat.HasProperty("_ReflectionPatternStrength"))
-                {
-                    Assert.LessOrEqual(mat.GetFloat("_ReflectionPatternStrength"), 0.18f,
-                        "iOS向けは反射パターンを重くしすぎない");
-                }
+                Assert.AreEqual(0f, animator.displacementStrength, 1e-6f,
+                    "iOS向けは対象Rendererの実高さを初期OFFにする");
+                Assert.LessOrEqual(animator.opacity, 0.38f,
+                    "iOS向けは透明感を残しつつ濃すぎる初期値にしない");
+                Assert.LessOrEqual(animator.reflectionPatternStrength, 0.18f,
+                    "iOS向けは対象Rendererの反射パターンを重くしすぎない");
+                Assert.AreEqual(0.004f, mat.GetFloat("_DisplacementStrength"), 1e-6f,
+                    "プラットフォーム調整でPackage内の共有Materialを書き換えない");
             }
             finally
             {
                 Selection.activeGameObject = null;
                 if (go != null) Object.DestroyImmediate(go);
             }
+        }
+
+        [Test]
+        public void ReadyMaterialCatalog_AllLooksResolveToBundledAssets()
+        {
+            foreach (WaterPackQuickApply.ReadyLook look in System.Enum.GetValues(typeof(WaterPackQuickApply.ReadyLook)))
+            {
+                Material material = WaterPackQuickApply.ReadyMaterialForLook(look);
+                Assert.IsNotNull(material, $"{look} の完成Materialが見つからない");
+                string path = AssetDatabase.GetAssetPath(material);
+                StringAssert.StartsWith(
+                    "Packages/com.siliq.water-normalmap/PrebakedPack/ReadyMaterials/",
+                    path,
+                    $"{look} が自動生成Materialを参照している");
+                StringAssert.EndsWith("_Ready.mat", path, $"{look} は完成Materialを参照する");
+            }
+        }
+
+        [Test]
+        public void QuickApply_ProductMenuDoesNotExposeLegacyGenerators()
+        {
+            var productPaths = new System.Collections.Generic.HashSet<string>();
+            foreach (MethodInfo method in typeof(WaterPackQuickApply).GetMethods(BindingFlags.Static | BindingFlags.NonPublic))
+            {
+                foreach (object attribute in method.GetCustomAttributes(typeof(MenuItem), false))
+                {
+                    var menu = attribute as MenuItem;
+                    if (menu == null) continue;
+
+                    StringAssert.DoesNotContain("水マテリアルを適用/", menu.menuItem,
+                        "旧Calm/Pool/Cyber素材を通常右クリックへ戻さない");
+                    StringAssert.DoesNotContain("透明な水マテリアルを適用", menu.menuItem,
+                        "品質の異なる透明Material生成メニューを戻さない");
+                    if (menu.menuItem.StartsWith(WaterPackQuickApply.ReadyMenuRoot))
+                    {
+                        productPaths.Add(menu.menuItem);
+                    }
+                }
+            }
+
+            Assert.AreEqual(9, productPaths.Count,
+                "完成水面の右クリックメニューは9つの用途別Ready Materialだけに固定する");
         }
 
         [Test]
@@ -1754,7 +1799,7 @@ namespace Siliq.Water.Tests
                 Selection.activeGameObject = go;
 
                 bool executed = EditorApplication.ExecuteMenuItem(
-                    "GameObject/Siliq Water/用途別マテリアルを適用/フラッグシップ透明水 (Flagship Crystal)");
+                    WaterPackQuickApply.ReadyMenuRoot + "フラッグシップ透明水");
                 Assert.IsTrue(executed, "フラッグシップ透明水の Quick Apply menu を実行できない");
 
                 var renderer = go.GetComponent<Renderer>();
@@ -1910,7 +1955,7 @@ namespace Siliq.Water.Tests
                 Selection.activeGameObject = go;
 
                 bool executed = EditorApplication.ExecuteMenuItem(
-                    "GameObject/Siliq Water/用途別マテリアルを適用/クリスタルラグーン (Crystal Lagoon)");
+                    WaterPackQuickApply.ReadyMenuRoot + "クリスタルラグーン");
                 Assert.IsTrue(executed, "Crystal Lagoon の Quick Apply menu を実行できない");
 
                 var renderer = go.GetComponent<Renderer>();
@@ -1953,7 +1998,7 @@ namespace Siliq.Water.Tests
                 Selection.activeGameObject = go;
 
                 bool executed = EditorApplication.ExecuteMenuItem(
-                    "GameObject/Siliq Water/用途別マテリアルを適用/クリスタルラグーン Hero (Crystal Lagoon Hero)");
+                    WaterPackQuickApply.ReadyMenuRoot + "最高品質 クリスタルラグーン Hero");
                 Assert.IsTrue(executed, "Crystal Lagoon Hero の Quick Apply menu を実行できない");
 
                 var renderer = go.GetComponent<Renderer>();
@@ -2070,6 +2115,37 @@ namespace Siliq.Water.Tests
         }
 
         [Test]
+        public void BeginnerSetup_ReplacesLegacyGeneratedMaterialWithReadyAsset()
+        {
+            GameObject go = null;
+            Material legacy = null;
+            try
+            {
+                Shader shader = Shader.Find("Siliq/Water Mobile (Quest)");
+                Assert.IsNotNull(shader, "Siliq水shaderが見つからない");
+
+                go = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                legacy = new Material(shader) { name = "M_Water_Look_ClearPool_Ios" };
+                go.GetComponent<Renderer>().sharedMaterial = legacy;
+
+                var report = new System.Collections.Generic.List<string>();
+                Assert.IsTrue(WaterBeginnerSetup.RepairWaterObject(go, report),
+                    "旧自動生成Materialを修復対象として検出できていない");
+
+                Material repaired = go.GetComponent<Renderer>().sharedMaterial;
+                Assert.AreEqual(
+                    "Packages/com.siliq.water-normalmap/PrebakedPack/ReadyMaterials/M_Siliq_CrystalLagoon_Ready.mat",
+                    AssetDatabase.GetAssetPath(repaired),
+                    "旧自動生成MaterialをPackageの完成Materialへ置換していない");
+            }
+            finally
+            {
+                if (go != null) Object.DestroyImmediate(go);
+                if (legacy != null) Object.DestroyImmediate(legacy);
+            }
+        }
+
+        [Test]
         public void BeginnerSetup_BuildsDenseWaterGridMesh()
         {
             Mesh mesh = null;
@@ -2119,6 +2195,8 @@ namespace Siliq.Water.Tests
             GameObject go = null;
             try
             {
+                int cameraCount = Resources.FindObjectsOfTypeAll<Camera>().Length;
+                int lightCount = Resources.FindObjectsOfTypeAll<Light>().Length;
                 go = GameObject.CreatePrimitive(PrimitiveType.Plane);
                 var report = new System.Collections.Generic.List<string>();
 
@@ -2130,6 +2208,10 @@ namespace Siliq.Water.Tests
                 Assert.IsNotNull(mat, "水マテリアルが適用されていない");
                 Assert.IsNotNull(mat.shader, "水マテリアルの shader がない");
                 Assert.AreNotEqual("Hidden/InternalErrorShader", mat.shader.name, "ピンク shader が適用されている");
+                Assert.AreEqual(
+                    "Packages/com.siliq.water-normalmap/PrebakedPack/ReadyMaterials/M_Siliq_CrystalLagoon_Ready.mat",
+                    AssetDatabase.GetAssetPath(mat),
+                    "自動修復は簡易Materialを作らず、完成Materialを直接使う");
                 Assert.IsTrue(mat.shader.name.StartsWith("Siliq/Water") || mat.HasProperty("_BumpMap"),
                     "水向けのマテリアルへ差し替わっていない");
                 if (mat.HasProperty("_TransmissionStrength"))
@@ -2138,6 +2220,10 @@ namespace Siliq.Water.Tests
                         "初心者向け修復は Crystal Lagoon の透明感を優先する");
                 }
                 Assert.IsNotNull(go.GetComponent<WaterSurfaceAnimator>(), "Animator が追加されていない");
+                Assert.AreEqual(cameraCount, Resources.FindObjectsOfTypeAll<Camera>().Length,
+                    "水面修復だけでCameraを勝手に追加しない");
+                Assert.AreEqual(lightCount, Resources.FindObjectsOfTypeAll<Light>().Length,
+                    "水面修復だけでLightを勝手に追加しない");
             }
             finally
             {

@@ -7,7 +7,6 @@ namespace Siliq.Water
     /// エディタウィンドウから保存 / 読み込みできるほか、
     /// ランタイムで参照して WaterMapCore.BakeTexture に渡すこともできる。
     /// </summary>
-    [CreateAssetMenu(fileName = "WaterMapProfile", menuName = "Siliq Water/水面マッププロファイル")]
     public class WaterMapProfile : ScriptableObject
     {
         public WaterMapSettings settings = new WaterMapSettings();

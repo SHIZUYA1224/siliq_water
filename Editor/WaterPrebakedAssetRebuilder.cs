@@ -9,7 +9,6 @@ namespace Siliq.Water.Editor
     {
         const string TextureRoot = "Packages/com.siliq.water-normalmap/PrebakedPack/Textures";
 
-        [MenuItem("Tools/Siliq Water/開発/Crystal Lagoon 水底光を再生成")]
         public static void RebuildCrystalLagoonCaustics()
         {
             WriteCaustics(WaterMapPresets.CrystalLagoonCaustics(), $"{TextureRoot}/Water_Caustics_CrystalLagoon_01.png");

@@ -1,49 +1,22 @@
-# Siliq Water Maps Studio
+# Siliq Water
 
-Unity エディタ上(またはランタイム)で、水面・流体表現向けの **PBR テクスチャ一式を手続き生成**するツールです。
+Unity / VRChat向けの、**完成済み水面Materialをそのまま使う**水表現パッケージです。
+通常利用ではTextureもMaterialも生成しません。海、透明プール、室内水面、ウォーターテーブル、血の海、液体金属から用途を選び、Rendererへドラッグするだけで動きます。
 
-- **VRChat モバイル (Quest / Android / iOS)** — 生成物はただの PNG テクスチャなのでそのまま使用可
-- **最新の Unity (ビルトイン / URP)** — フォーム・フロー・ラフネスマップまで含む本格的な水表現に対応。URP シェーダーは任意 Sample として導入
-- **ランタイム API** — ビルドにテクスチャを含めず、ロード時に動的生成することも可能
-- **触れたら波紋が広がるインタラクティブな水面** — アバターが水に入った位置から波紋が実時間で広がる (同梱シェーダー限定)
+- **ドラッグ&ドロップ**: `PrebakedPack/ReadyMaterials/M_Siliq_*_Ready` をRendererへ貼る
+- **右クリック一発設定**: Hierarchyで水面を選択し、`Siliq Water > 完成水面を適用` から用途を選ぶ
+- **PC / Quest / iOS**: `Tools > Siliq Water > 完成マテリアル` で対象を選ぶ。共有Materialは複製・書き換えない
+- **水面と水底を分離**: 水面は `M_Siliq_*_Ready`、水底光は床側の `M_Siliq_*_CausticsOverlay` を別メッシュへ貼る
+- **完成Prefab**: 水面、分割メッシュ、床、水底光まで含む確認用セットをHierarchyへ置ける
+- **広がる波紋**: 必要な場合だけ `WaterRippleSource` を使い、接触位置からリングを外側へ広げる
 
-対応: Unity 2019.4 以降 / ビルトイン RP・URP (URP シェーダーは Package Manager Sample)
+対応: Unity 2019.4以降 / Built-in RP / VRChat Quest・iOS。URP shaderはPackage Managerの任意Sampleです。
 
-## 生成できるマップ (7 種類)
+## 製品方針
 
-| マップ | 用途 |
-|---|---|
-| **ノーマルマップ** | 波の凹凸。あらゆる水シェーダーの基本 |
-| **ハイトマップ** | 頂点ディスプレイスメント、視差、他ツール連携 |
-| **フォームマスク** | 波頭・砕け波の白泡(しきい値・砕け波ブースト調整可) |
-| **ラフネス / スムースネス** | 傾斜とフォームから物理的に妥当な粗さを合成 |
-| **フローマップ** | RG = 流れベクトル。レイヤーの進行方向と渦成分を合成 |
-| **DUDV マップ** | 屈折・ディストーション用オフセット |
-| **コースティクス (近似)** | 光の収束(負のラプラシアン)から水底の光模様を生成 |
+製品の入口は `ReadyMaterials` と完成Prefabです。旧Standard確認Material、手続きマップ生成コア、ランタイム生成APIは既存プロジェクトとの互換用に残していますが、通常メニューには出しません。自動生成結果を完成Materialの代わりには使いません。
 
-すべて同一のハイトフィールドから導出されるため、**マップ間の整合性が完全に取れています**(フォームの位置とノーマルの波頭が一致する等)。
-
-## 特徴
-
-- **必ずシームレスにタイリング** — 全ノイズをトーラス上で定義。継ぎ目は一切出ません
-- **6 種類の波レイヤー** を自由に重ねる(加算 / 乗算 / 最大 / 最小)
-  - 揺らぎノイズ (パーリン fBm) / 尖ったうねり (リッジ) / ボロノイ泡 / ボロノイ網目 / 指向性の波 (最大 64 波のスペクトル合成) / 雨の波紋
-- **ドメインワープ** — 模様を有機的に歪ませるプロ品質のノイズ加工
-- **マスクむら** — 低周波ノイズでレイヤーの効きに自然なムラを付与
-- **完全ループするアニメーション書き出し** — 連番 / フリップブックアトラス。全レイヤー速度が整数設計のため最終フレームが先頭へ正確に繋がります
-- **16bit EXR 書き出し** — 穏やかな水面で目立つ 8bit のバンディング (縞) を根絶
-- **スーパーサンプリング (2×)** — 鋭いエッジのジャギーを抑えた滑らかな出力
-- **Sobel 勾配のノーマル変換** — 中心差分より硬さが出にくく、細波と反射が滑らか
-- **プリセット 12 種** — 湖 / 海 / 外洋 (スペクトル) / 川 / 雨 / さざ波 / トゥーン / 溶岩 / プール / サイバー / 室内ブループール / フラッグシップ透明水
-- **プロファイル (ScriptableObject)** — 設定をアセットとして保存・共有。JSON コピー & ペーストにも対応
-- **マテリアル自動作成** — 書き出したマップを Standard / URP Lit / 同梱水シェーダーへ割り当て済みのマテリアルを生成
-- **モバイル向けインポート設定の自動適用** — Repeat / NormalMap タイプ / Android・iOS=ASTC 6x6
-
-共通 Editor ツール UI の設計方針は [Docs/CommonEditorToolLayoutSpec.md](Docs/CommonEditorToolLayoutSpec.md) にまとめています。
-用途別マテリアルプリセットの使い分けは [Docs/MaterialLookPresetGuide.md](Docs/MaterialLookPresetGuide.md) を参照してください。
-通常の水面マップスタジオは、PC / Quest / iOS を選び、完成済みの高品質 Material を選択中の水面へ貼って反映する軽い画面です。
-重い自由生成は `Tools > Siliq Water > 上級者向け > 水面マップ生成スタジオ` に移しました。
-公開・リリース前の確認項目は [Docs/PublicReleaseChecklist.md](Docs/PublicReleaseChecklist.md) にまとめています。
+用途別Materialの選び方は [Docs/MaterialLookPresetGuide.md](Docs/MaterialLookPresetGuide.md)、公開前の確認項目は [Docs/PublicReleaseChecklist.md](Docs/PublicReleaseChecklist.md) を参照してください。
 
 ## 初心者はまずこれ
 
@@ -132,31 +105,14 @@ Renderer にドラッグ&ドロップするだけで水として動きます。`
 床そのものに光を出したい場合は、水底の少し上に薄い Plane を置き、`M_Siliq_CrystalLagoon_CausticsOverlay`、Hero では `M_Siliq_CrystalLagoon_Hero_CausticsOverlay`、透明プールでは `M_Siliq_SunlitPool_CausticsOverlay` を貼ります。これは `Siliq/Caustics Overlay Mobile` を使う軽量な加算 material で、専用 caustics を床に重ねます。床用 overlay は `_Focus` / `_SoftScatter` / `_PrismStrength` を持ち、焦点線、柔らかい散光、薄い色分散を調整できます。
 既存の `PrebakedPack/Materials/M_Water_*` は Standard シェーダーの互換・確認用です。
 
-### 一瞬で水面にする 5 つの方法
+### 一瞬で水面にする4つの方法
 
-1. **完成 Prefab を置く**: 最高品質確認は `PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Hero_Complete.prefab`、通常確認は `PF_Siliq_CrystalLagoon_Complete.prefab`、透明プール確認は `PF_Siliq_SunlitPool_Complete.prefab` を Hierarchy へドラッグ。
-   水面、薄いタイル感のある明るい床、床用 caustics overlay、ライトが一体なので、初心者でも組み立てずに Crystal Lagoon の完成形を確認できます。
-2. **ドラッグ & ドロップ**: `PrebakedPack/ReadyMaterials/` の `M_Siliq_*_Ready` をシーンのオブジェクトへドラッグ。
-   同梱 Siliq shader の scroll が最初から入っているため、material だけで波が動きます。
-3. **水底を別メッシュで足す**: 床や水底の少し上へ薄い Plane を置き、用途に合う `M_Siliq_*_CausticsOverlay` を貼ります。
-   水面 material には水底光を混ぜません。
-4. **右クリック一発**: Hierarchy でオブジェクトを選択 → 右クリック →
-   `Siliq Water > 水マテリアルを適用 > 好きな水` — マテリアル適用と同時に
-   `WaterSurfaceAnimator` コンポーネントも自動で付き、**再生すると波が流れます**
-   `波紋 (Ripple)` だけは例外で、ノーマルを横へ流さず、
-   `WaterRippleEmitter` を自動で付けて発生点から外へ広がるリングを作ります。
-   PC 向けに透ける水が欲しい場合は
-   `Siliq Water > 透明な水マテリアルを適用 (PC) > 好きな水` を使ってください。
-   `Assets/SiliqWater/GeneratedMaterials/` に透明設定済みのマテリアルを生成して適用します。
-   通常は `Siliq/Water Mobile (Quest)` を使い、Fresnel で斜め視線の反射と不透明感が戻る設定になります。
-   iOS / モバイル向けに軽い透明水が欲しい場合は
-   `Siliq Water > 透明な水マテリアルを適用 (iOS/Mobile) > 好きな水` を使ってください。
-   同梱の `Siliq/Water Mobile (Quest)` を alpha blend 設定にしたマテリアルを生成します。
-   正面は透け、斜め視線では Fresnel で反射と不透明感が増え、透過光・細い光・きらめきで水らしさが出るように調整済みです。
-   暗い部屋では反射ときらめきを自動で抑えるため、黒背景で水面だけ銀色に浮きにくくなります。
-5. **Crystal Lagoon を確認する**: `PrebakedPack/SampleScene/SC_CrystalLagoon_Showcase.unity` を開くと
-   分割済み水面、Crystal Lagoon ready material、明るい床、床用 caustics overlay、ライト、カメラが入った状態で透明感と水底光を確認できます。
-   基本 5 種を見比べる場合は `SC_WaterNormalMap_Preview.unity` を使います。
+1. **Materialを貼る**: `PrebakedPack/ReadyMaterials/` の `M_Siliq_*_Ready` をRendererへドラッグする。Material内のscrollで、そのまま波が動きます。
+2. **右クリックで設定する**: Hierarchyで水面を選択し、`Siliq Water > 完成水面を適用` から用途を選ぶ。Package内の同じ完成Materialを直接割り当て、調整用 `WaterSurfaceAnimator` を追加します。`GeneratedMaterials` は作りません。
+3. **完成Prefabを置く**: 最高品質確認は `PF_Siliq_CrystalLagoon_Hero_Complete.prefab`、通常確認は `PF_Siliq_CrystalLagoon_Complete.prefab`、透明プール確認は `PF_Siliq_SunlitPool_Complete.prefab` をHierarchyへドラッグする。
+4. **水底光を別に足す**: 床や水底の少し上へ薄いPlaneを置き、用途に合う `M_Siliq_*_CausticsOverlay` を貼る。水面Materialへ白線や発光模様を混ぜません。
+
+`PrebakedPack/SampleScene/SC_CrystalLagoon_Showcase.unity` では、分割済み水面、明るい床、床用caustics overlay、ライト、カメラを含む完成状態を確認できます。
 
 ### 水面を動かす (WaterSurfaceAnimator)
 
@@ -206,8 +162,7 @@ Standard / URP Lit / VRChat Mobile 系では `_BumpMap` の UV、`_BumpScale`、
 PC の発熱を避けるため、編集モードの連続プレビューは**選択中の水面だけ**最大 10fps で更新されます。
 重い場合は `Animate In Edit Mode` を OFF にするか、`Edit Mode Preview Fps` を下げてください。
 右クリック適用時は、水の種類ごとに低速の初期値が入ります。Hero / Crystal Lagoon / 透明プールは 0.14-0.16 前後から始まり、止まって見えないが速く滑らない基準です。速く見える場合はまず **速さ** を 0.05-0.12、**高さの速度** を 0.00008 以下、**水底の光の速度** を 0.000012 以下まで下げてください。
-ただし `波紋 (Ripple)` はスライドさせると水滴の波紋として不自然なので、
-このコンポーネントの速度は 0 にし、下記の `WaterRippleEmitter` で同心円が広がる表現にしています。
+水滴や接触の波紋は通常の水面スクロールとは別機能です。必要な場合だけ、下記の `WaterRippleEmitter` / `WaterRippleSource` で同心円が広がる表現を追加します。
 
 より本格的な (2 レイヤースクロール・反射・岸辺フォームなどを含む) 動く水面が欲しい場合は、
 下記の `Siliq/Water Mobile (Quest)` を使ってください。URP プロジェクトでは
@@ -234,32 +189,22 @@ Compression  : Normal Quality (Quest は Android オーバーライドで ASTC 6
 
 ### 改変方法
 
-各パック画像は本ツールのプリセットと 1:1 対応しています。上級者向けの水面マップ生成スタジオで
-「プール (光の網目)」「サイバー (細いデータ流)」等のプリセットを適用 → パラメータやシードを
-変更して書き出せば、同系統のバリエーションを自作できます。
-プールは強い法線凹凸ではなく、浅く細い光の揺らぎとして見せる想定です。
-Hero の水底光は太い格子や線の密集ではなく、柔らかい床光の中に少数の焦点線が走る caustics として使う想定です。
-`WaterSurfaceAnimator` の **強さ** を上げすぎると、光網ではなく太い凹凸に見えます。
-サイバーは太い格子模様やセル境界ではなく、細いデータ流と斜めスキャン光の SF 水面として使う想定です。
+まず完成Materialをそのまま使い、調整が必要な場合だけProject内へ複製してください。Package内の共有Materialは右クリック適用やPC / Quest / iOS切り替えでは書き換えません。
+プールは強い法線凹凸ではなく、浅い波面、反射、透明感、水底側のcausticsで見せます。Heroの水底光も水面へ混ぜず、柔らかい床光と少数の焦点線を別メッシュへ重ねます。
+`WaterSurfaceAnimator` の **強さ** や **高さ** を上げすぎると、波ではなく固い模様や多角形に見えるため、同梱値を基準に少しずつ調整してください。
 
 ### 透明な水にしたい場合 (PC 向け)
 
-Quest / モバイルでは不透明のまま使うことを推奨します。PC 専用で透明にする場合は
-右クリックメニューの `透明な水マテリアルを適用 (PC)` / `透明な水マテリアルを適用 (iOS/Mobile)` を使うか、通常の水面マップスタジオで PC / Quest / iOS を選んで用途別 Material を反映してください。
-綺麗な海、透明プール、室内ブループール、ウォーターテーブル、フラッグシップ透明水、血の海、液体金属のような用途が決まっている場合は、
-`Siliq Water > 用途別マテリアルを適用` から見た目プリセットを選ぶと、
-ノーマル、色、不透明度、反射、動きまでまとめて設定できます。
-最高品質確認は `クリスタルラグーン Hero (Crystal Lagoon Hero)` を選んでください。
+`M_Siliq_ClearSea_Ready`、`M_Siliq_ClearPool_Ready`、`M_Siliq_CrystalLagoon_Ready`、`M_Siliq_CrystalLagoon_Hero_Ready` は透明設定済みです。別の透明Materialを自動生成する必要はありません。
+Hierarchy右クリックの `Siliq Water > 完成水面を適用`、または `Tools > Siliq Water > 完成マテリアル` から選ぶと、同梱Materialを直接設定します。最高品質確認は `最高品質 クリスタルラグーン Hero` を選んでください。
 ノーマルマップ単体は凹凸だけを表すため、透明感はマテリアルの Blend / Alpha / `_Opacity`
 と Fresnel 連動の `_AlphaFresnel` / `_EdgeReflection` で作ります。
 一枚の Plane を明るい Scene View 背景に置くだけだと、水の厚みや底面色が無いため薄く見えやすいです。
 薄すぎる場合は用途別の `クリスタルラグーン Hero` / `クリスタルラグーン` / `美しい海` / `透明プール` / `室内ブループール` / `ウォーターテーブル` / `フラッグシップ透明水` を使ってください。
-製品デモやメインビジュアル用に素材を作り直したい場合だけ、上級者向けの水面マップ生成スタジオで 4096px、48 フレーム、Height / Flow / DUDV / Caustics 付きの重めの設定を使います。
-iOS 透明版はさらに `_TransmissionStrength` / `_GlimmerIntensity` / `_GlintIntensity` で
-透過光、細い光の揺らぎ、強いハイライトを足し、透明なだけの板に見えにくい設定にしています。
+Quest / iOSを選んだ場合はMaterialを作り直さず、対象Rendererの高さ、反射、細部だけを軽量側へ調整します。
 暗い場所で水面だけ明るく浮く場合は、WaterSurfaceAnimator の **暗所の反射抑制** と **暗所の細部抑制** を上げると、
 空反射と細かい光が暗さに追従しやすくなります。暗すぎて水底光が沈む場合は **暗所の最低明るさ** を少し上げます。
-iOS 透明版は GrabPass や深度依存なしの alpha blend なので軽量ですが、
+iOS向け完成MaterialはGrabPassや深度依存なしのalpha blendなので軽量ですが、
 透明描画はソート順と重なりに弱い点に注意してください。Quest 用の不透明運用と混ぜないこと。
 
 ## インストール
@@ -278,15 +223,15 @@ https://github.com/shizuya1224/siliq_water.git
 
 ## 使い方
 
-1. メニューの **Tools > Siliq Water > 水面マップスタジオ** を開く
+1. メニューの **Tools > Siliq Water > 完成マテリアル** を開く
 2. **PC / Quest / iOS** を選ぶ
 3. **見た目**から、ウォーターテーブル / クリスタルラグーン Hero / クリスタルラグーン / 美しい海 / 透明プールなどを選ぶ
-4. **選択中の水面へ反映** を押す
+4. **選択中の水面へ設定** を押す
 5. 水底光が必要なら、床や水底用の別メッシュに `M_Siliq_*_CausticsOverlay` を貼る
 
-手続き生成で PNG を作り直したい場合だけ、`Tools > Siliq Water > 上級者向け > 水面マップ生成スタジオ` を開きます。
+Hierarchyで対象を右クリックし、`Siliq Water > 完成水面を適用` から用途を選ぶだけでも同じ設定になります。
 
-## ランタイム生成 API
+## 互換用ランタイム生成 API
 
 コアは UnityEditor 非依存 (`Siliq.Water.Runtime`) なので、実行時に生成できます。
 
@@ -302,8 +247,7 @@ settings.globalSeed = Random.Range(0, 999999); // 起動ごとに違う水面
 Texture2D foam = WaterMapCore.BakeTexture(settings, WaterMapType.Foam, 512);
 ```
 
-`RuntimeWaterMapApplier` コンポーネントを Renderer に付ければ、コード無しで
-「起動時にプロファイルからベイクしてマテリアルへ適用」まで行えます(シードのランダム化対応)。
+`RuntimeWaterMapApplier` は既存シーンとの互換用APIです。新規シーンの標準導線にはせず、必要な場合だけコードから追加して使います。
 起動時の停止を避けたい場合は `generateAsync` を ON にすると、色計算をバックグラウンドで行い、
 同じ設定・解像度の生成結果は `useTextureCache` によりシーン内で使い回されます。
 
@@ -316,7 +260,7 @@ Built-in / VRChat / Quest / iOS 向けの通常導入ではコンパイル対象
 
 導入:
 
-`Package Manager > Siliq Water Maps Studio > Samples > URP Shader > Import`
+`Package Manager > Siliq Water > Samples > URP Shader > Import`
 
 - ノーマルマップ 2 レイヤースクロール、または**フローマップ駆動**の流れ(生成したフローマップをそのまま活用)
 - リフレクションプローブによる映り込み + フレネル + スペキュラ
@@ -353,7 +297,7 @@ Built-in / VRChat / Quest / iOS 向けの通常導入ではコンパイル対象
 
 `Runtime/Components/WaterRippleEmitter.cs` を水面 Renderer にアタッチすると、
 Renderer の範囲内へ波紋発生点を自動で作ります。Play 中、各点からリングが外側へ広がります。
-右クリックメニューの `波紋 (Ripple)` はこの方式を自動設定します。
+通常の完成Materialメニューでは勝手に追加しません。環境演出として必要な水面だけに手動で追加してください。
 
 調整項目:
 
@@ -426,7 +370,7 @@ VRChat の iOS 版クライアント自体の対応状況はアプリ側の仕�
 
 対処:
 
-1. Package Manager から `Siliq Water Maps Studio` を Remove
+1. Package Manager から `Siliq Water` を Remove
 2. プロジェクトの `Packages/packages-lock.json` から古い `com.siliq.water-normalmap` の参照を更新、または削除して再解決
 3. 必要なら `Library/PackageCache/com.siliq.water-normalmap*` を削除
 4. Git URL を最新 commit で Add し直す
@@ -438,16 +382,13 @@ Built-in / VRChat プロジェクトに URP package が入っていない状態�
 - Built-in / VRChat / Quest / iOS: `Siliq/Water Mobile (Quest)` を使う
 - URP: Universal Render Pipeline を導入した上で `Samples > URP Shader` を Import する
 
-### Tool から作成したマテリアルがピンクになる
+### Materialがピンクになる
 
 ピンクは Unity がその shader を現在の Render Pipeline でコンパイル・表示できない時に出ます。
-`2.3.22` 以降は、水面マップスタジオと Quick Apply の両方で Render Pipeline 互換性を確認します。
-URP では Built-in 用の `Standard` / `Siliq/Water Mobile (Quest)` を直接貼らず、
-`Siliq/Water URP` が使える場合はそれを、使えない場合は `Universal Render Pipeline/Lit` へ自動 fallback します。
-Built-in / VRChat では `Siliq/Water Mobile (Quest)` または `Standard` を使います。
+`2.3.88` 以降の完成Material画面と右クリック適用はRender Pipeline互換性を先に確認し、品質の異なるfallback Materialを自動生成しません。
+Built-in / VRChatでは `Siliq/Water Mobile (Quest)` を使います。URPではUniversal Render Pipelineを導入した上で、Package Managerの `Samples > URP Shader` をImportしてください。
 
-既に作成済みのピンク material は、最新 package に更新してから同じ Quick Apply または水面マップスタジオで再適用してください。
-`Assets/SiliqWater/GeneratedMaterials/` の既存 material も安全な shader へ上書きされます。
+古い `Assets/SiliqWater/GeneratedMaterials/` は旧版が作ったMaterialです。最新の `PrebakedPack/ReadyMaterials/M_Siliq_*_Ready` へ差し替えてください。
 
 ### フラッグシップ水面が氷割れ・多角形模様に見える
 
@@ -462,7 +403,7 @@ Built-in / VRChat では `Siliq/Water Mobile (Quest)` または `Standard` を�
 ### 波紋や波がピクピクする
 
 `2.3.31` 以降では、モバイル向け shader の時間計算と波紋計算を高精度化し、波紋の出現/消滅を滑らかなフェードに変更しています。
-古い波紋マテリアルを使っている場合は、対象の水面を選択して `GameObject > Siliq Water > 水面マテリアルを適用 > 波紋 (Ripple)` を再適用してください。
+古い波紋Materialを使っている場合は完成Materialへ差し替え、波紋が必要な水面だけに `WaterRippleEmitter` または `WaterRippleSource` を追加してください。
 強くしたい場合も、まず `Ripple Amplitude` は 0.4-0.7、`Ripple Width` は 0.4 以上、`Ripple Lifetime` は 3.5 秒以上から調整してください。
 
 ## 構成

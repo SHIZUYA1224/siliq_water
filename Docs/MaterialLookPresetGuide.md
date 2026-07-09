@@ -8,11 +8,11 @@ Hero / Crystal Lagoon / 透明プールは、置いた瞬間に水面が滑っ�
 
 水面オブジェクトを選択して作成・再適用したい場合は、Hierarchy 右クリックから以下を適用する。
 
-`Siliq Water > 用途別マテリアルを適用`
+`Siliq Water > 完成水面を適用`
 
-最高品質確認は `クリスタルラグーン Hero (Crystal Lagoon Hero)` を選ぶ。通常の水面マップスタジオは、PC / Quest / iOS を選び、完成済み Material を選択中の水面へ貼る軽い画面にする。自由生成でレイヤーや書き出しを細かく触る画面は `Tools > Siliq Water > 上級者向け > 水面マップ生成スタジオ` に残す。
+最高品質確認は `最高品質 クリスタルラグーン Hero` を選ぶ。`Tools > Siliq Water > 完成マテリアル` ではPC / Quest / iOSと用途を選び、同じ完成Materialを選択中の水面へ直接設定する。通常操作ではTextureやMaterialを自動生成しない。
 
-Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイド` または `Tools > Siliq Water > 水面マップスタジオ` を開く。そこから Hero 完成セット配置、透明プール完成セット配置、Hero 水面作成、WaterTable 水面作成、既存水面の診断修復、README / 用途別ガイド / PrebakedPack の確認に進める。見た目を最優先で確認する場合は `Tools > Siliq Water > かんたん作成 > 最高品質 Hero 完成セットを配置` を使う。プール用途なら `透明プール完成セットを配置` を使う。水面、明るい床、caustics overlay、確認用ライトが一括で置かれる。水テーブル用途は `ウォーターテーブル水面を作成` を使う。水面だけを作る場合は `最高品質 Hero 水面を作成`、既存の水面がピンク、動かない、高さが出ない場合は `選択中の水面を診断して自動修復` を実行する。
+Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイド` または `Tools > Siliq Water > 完成マテリアル` を開く。そこから Hero 完成セット配置、透明プール完成セット配置、Hero 水面作成、WaterTable 水面作成、既存水面の診断修復、README / 用途別ガイド / PrebakedPack の確認に進める。見た目を最優先で確認する場合は `Tools > Siliq Water > かんたん作成 > 最高品質 Hero 完成セットを配置` を使う。プール用途なら `透明プール完成セットを配置` を使う。水面、明るい床、caustics overlay、確認用ライトが一括で置かれる。水テーブル用途は `ウォーターテーブル水面を作成` を使う。水面だけを作る場合は `最高品質 Hero 水面を作成`、既存の水面がピンク、動かない、高さが出ない場合は `選択中の水面を診断して自動修復` を実行する。
 
 ## プリセット
 
@@ -32,7 +32,7 @@ Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイ�
 
 プリセット適用時に以下をまとめて行う。
 
-- 適したノーマルマップを割り当てる
+- 用途ごとに手調整済みの `M_Siliq_*_Ready` をPackageから直接割り当てる
 - フラッグシップ透明水では専用 2048px normal map と height map を割り当てる
 - クリスタルラグーンでは水面に専用 2048px normal map、height map を割り当て、`Water_Caustics_CrystalLagoon_01.png` は床/水底用 caustics overlay で使う
 - `M_Siliq_CrystalLagoon_Hero_Ready` は `Water_Normal_CrystalLagoon_Hero_01.png`、`Water_Height_CrystalLagoon_Hero_01.png` を使い、通常 Crystal Lagoon texture の流用に戻さない。水面側の `Bottom Visibility`、`Bottom Light Strength`、`Caustics Strength` は初期値 0 にし、`Water_Caustics_CrystalLagoon_Hero_01.png` は `M_Siliq_CrystalLagoon_Hero_CausticsOverlay` で使う
@@ -45,8 +45,8 @@ Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイ�
 - `Clarity`、`Reflection Pattern`、`Refraction`、`Depth Tint` を用途ごとに設定し、Crystal Lagoon では水色の濁りを抑え、空や窓の帯状反射が見える状態から始める
 - `WaterSurfaceAnimator` を追加または更新し、動きを付ける
 - Built-in / iOS 系では `Siliq/Water Mobile (Quest)` を使う
-- URP プロジェクトでは、`URP Shader` Sample が Import 済みなら `Siliq/Water URP` を優先して使う
-- URP Sample が未導入、または Built-in / VRChat / iOS 系では `Siliq/Water Mobile (Quest)` を使う
+- Built-in / VRChat / Quest / iOSでは `Siliq/Water Mobile (Quest)` の完成Materialを使う
+- URPではUniversal Render Pipeline導入後に `URP Shader` SampleをImportする。Built-in完成Materialから品質の異なるfallbackを自動生成しない
 
 ## 調整の目安
 

@@ -10,7 +10,6 @@ namespace Siliq.Water
     /// テクスチャをビルドに含めず、ロード時に生成したい場合や、
     /// 起動ごとにシード違いの水面にしたい場合に使う。
     /// </summary>
-    [AddComponentMenu("Siliq Water/Runtime Water Map Applier")]
     [RequireComponent(typeof(Renderer))]
     public class RuntimeWaterMapApplier : MonoBehaviour
     {

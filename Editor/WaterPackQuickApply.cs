@@ -630,7 +630,7 @@ namespace Siliq.Water.Editor
             causticsTint = Color.white,
         };
 
-        // PrebakedPack/Materials/*.mat.meta の固定 GUID
+        // PrebakedPack/Materials/*.mat.meta の固定 GUID (旧互換用)
         const string CalmGuid = "a171aabb01c34e01a1b2c3d4e5f60201";
         const string RippleGuid = "a171aabb01c34e01a1b2c3d4e5f60202";
         const string StreamGuid = "a171aabb01c34e01a1b2c3d4e5f60203";
@@ -650,110 +650,58 @@ namespace Siliq.Water.Editor
         const string WaterTableHeightGuid = "a171aabb01c34e01a1b2c3d4e5f60309";
         const string CrystalCausticsGuid = "00e6b1e9a23c24df69fe9558209de596";
 
-        const string MenuRoot = "GameObject/Siliq Water/水マテリアルを適用/";
-        const string TransparentMenuRoot = "GameObject/Siliq Water/透明な水マテリアルを適用 (PC)/";
-        const string MobileTransparentMenuRoot = "GameObject/Siliq Water/透明な水マテリアルを適用 (iOS/Mobile)/";
-        const string LookMenuRoot = "GameObject/Siliq Water/用途別マテリアルを適用/";
+        // PrebakedPack/ReadyMaterials/*.mat.meta の固定 GUID。
+        // 通常の製品導線は、この手調整済み Material を直接割り当てる。
+        const string ClearSeaReadyGuid = "2b8547535812946fd8151123f0afeda5";
+        const string ClearPoolReadyGuid = "0d11aad9d06714851b748d978793f0ad";
+        const string IndoorBluePoolReadyGuid = "ad71efef756f9480dabc5a3c73c8a927";
+        const string FlagshipCrystalReadyGuid = "1216010767daa46eeaf0b35c759962e3";
+        const string CrystalLagoonReadyGuid = "f2c657c8bc4a4c7080e6a1327818890d";
+        const string CrystalLagoonHeroReadyGuid = "a171aabb01c34e01a1b2c3d4e5f60807";
+        const string BloodSeaReadyGuid = "480c4411cd37646b19d1d097d9cb688c";
+        const string LiquidMetalReadyGuid = "c14c01736dc8a4ddc97ceefa809d21da";
+
+        internal const string ReadyMenuRoot = "GameObject/Siliq Water/完成水面を適用/";
         const float PcSiliqTransparentOpacity = 0.46f;
         const float StandardTransparentFallbackOpacity = 0.68f;
         const float MobileTransparentOpacity = 0.34f;
 
-        [MenuItem(MenuRoot + "静かな水面 (Calm)", false, 10)]
-        static void ApplyCalm() => Apply(CalmGuid, "Calm", CalmMotion);
+        [MenuItem(ReadyMenuRoot + "最高品質 クリスタルラグーン Hero", false, 10)]
+        static void ApplyCrystalLagoonHeroLook() => ApplyReadyLook(ReadyLook.CrystalLagoonHero, TargetForActiveBuild());
 
-        [MenuItem(MenuRoot + "波紋 (Ripple)", false, 11)]
-        static void ApplyRipple() => ApplyRipplePreset(false, false);
+        [MenuItem(ReadyMenuRoot + "クリスタルラグーン", false, 11)]
+        static void ApplyCrystalLagoonLook() => ApplyReadyLook(ReadyLook.CrystalLagoon, TargetForActiveBuild());
 
-        [MenuItem(MenuRoot + "流れ (Stream)", false, 12)]
-        static void ApplyStream() => Apply(StreamGuid, "Stream", StreamMotion);
+        [MenuItem(ReadyMenuRoot + "透明プール", false, 12)]
+        static void ApplyClearPoolLook() => ApplyReadyLook(ReadyLook.ClearPool, TargetForActiveBuild());
 
-        [MenuItem(MenuRoot + "プール (Pool)", false, 13)]
-        static void ApplyPool() => Apply(PoolGuid, "Pool", PoolMotion);
+        [MenuItem(ReadyMenuRoot + "室内ブループール", false, 13)]
+        static void ApplyIndoorBluePoolLook() => ApplyReadyLook(ReadyLook.IndoorBluePool, TargetForActiveBuild());
 
-        [MenuItem(MenuRoot + "サイバー (Cyber)", false, 14)]
-        static void ApplyCyber() => Apply(CyberGuid, "Cyber", CyberMotion);
+        [MenuItem(ReadyMenuRoot + "美しい海", false, 14)]
+        static void ApplyClearSeaLook() => ApplyReadyLook(ReadyLook.ClearSea, TargetForActiveBuild());
 
-        [MenuItem(TransparentMenuRoot + "静かな水面 (Calm)", false, 20)]
-        static void ApplyTransparentCalm() => Apply(CalmGuid, "Calm", CalmMotion, true);
+        [MenuItem(ReadyMenuRoot + "ウォーターテーブル", false, 15)]
+        static void ApplyWaterTableLook() => ApplyReadyLook(ReadyLook.WaterTable, TargetForActiveBuild());
 
-        [MenuItem(TransparentMenuRoot + "波紋 (Ripple)", false, 21)]
-        static void ApplyTransparentRipple() => ApplyRipplePreset(true, false);
+        [MenuItem(ReadyMenuRoot + "フラッグシップ透明水", false, 16)]
+        static void ApplyFlagshipCrystalLook() => ApplyReadyLook(ReadyLook.FlagshipCrystal, TargetForActiveBuild());
 
-        [MenuItem(TransparentMenuRoot + "流れ (Stream)", false, 22)]
-        static void ApplyTransparentStream() => Apply(StreamGuid, "Stream", StreamMotion, true);
+        [MenuItem(ReadyMenuRoot + "特殊液体/血の海", false, 30)]
+        static void ApplyBloodSeaLook() => ApplyReadyLook(ReadyLook.BloodSea, TargetForActiveBuild());
 
-        [MenuItem(TransparentMenuRoot + "プール (Pool)", false, 23)]
-        static void ApplyTransparentPool() => Apply(PoolGuid, "Pool", PoolMotion, true);
+        [MenuItem(ReadyMenuRoot + "特殊液体/液体金属", false, 31)]
+        static void ApplyLiquidMetalLook() => ApplyReadyLook(ReadyLook.LiquidMetal, TargetForActiveBuild());
 
-        [MenuItem(TransparentMenuRoot + "サイバー (Cyber)", false, 24)]
-        static void ApplyTransparentCyber() => Apply(CyberGuid, "Cyber", CyberMotion, true);
-
-        [MenuItem(MobileTransparentMenuRoot + "静かな水面 (Calm)", false, 30)]
-        static void ApplyMobileTransparentCalm() => ApplyMobileTransparent(CalmGuid, "Calm", CalmMotion);
-
-        [MenuItem(MobileTransparentMenuRoot + "波紋 (Ripple)", false, 31)]
-        static void ApplyMobileTransparentRipple() => ApplyRipplePreset(true, true);
-
-        [MenuItem(MobileTransparentMenuRoot + "流れ (Stream)", false, 32)]
-        static void ApplyMobileTransparentStream() => ApplyMobileTransparent(StreamGuid, "Stream", StreamMotion);
-
-        [MenuItem(MobileTransparentMenuRoot + "プール (Pool)", false, 33)]
-        static void ApplyMobileTransparentPool() => ApplyMobileTransparent(PoolGuid, "Pool", PoolMotion);
-
-        [MenuItem(MobileTransparentMenuRoot + "サイバー (Cyber)", false, 34)]
-        static void ApplyMobileTransparentCyber() => ApplyMobileTransparent(CyberGuid, "Cyber", CyberMotion);
-
-        [MenuItem(LookMenuRoot + "美しい海 (Clear Sea)", false, 40)]
-        static void ApplyClearSeaLook() => ApplyLook(ClearSeaLook);
-
-        [MenuItem(LookMenuRoot + "透明プール (Clear Pool)", false, 41)]
-        static void ApplyClearPoolLook() => ApplyLook(ClearPoolLook);
-
-        [MenuItem(LookMenuRoot + "室内ブループール (Indoor Blue Pool)", false, 42)]
-        static void ApplyIndoorBluePoolLook() => ApplyLook(IndoorBluePoolLook);
-
-        [MenuItem(LookMenuRoot + "ウォーターテーブル (Water Table)", false, 43)]
-        static void ApplyWaterTableLook() => ApplyLook(WaterTableLook);
-
-        [MenuItem(LookMenuRoot + "フラッグシップ透明水 (Flagship Crystal)", false, 44)]
-        static void ApplyFlagshipCrystalLook() => ApplyLook(FlagshipCrystalLook);
-
-        [MenuItem(LookMenuRoot + "クリスタルラグーン (Crystal Lagoon)", false, 45)]
-        static void ApplyCrystalLagoonLook() => ApplyLook(CrystalLagoonLook);
-
-        [MenuItem(LookMenuRoot + "クリスタルラグーン Hero (Crystal Lagoon Hero)", false, 46)]
-        static void ApplyCrystalLagoonHeroLook() => ApplyLook(CrystalLagoonHeroLook);
-
-        [MenuItem(LookMenuRoot + "血の海 (Blood Sea)", false, 47)]
-        static void ApplyBloodSeaLook() => ApplyLook(BloodSeaLook);
-
-        [MenuItem(LookMenuRoot + "液体金属 (Liquid Metal)", false, 48)]
-        static void ApplyLiquidMetalLook() => ApplyLook(LiquidMetalLook);
-
-        [MenuItem(MenuRoot + "静かな水面 (Calm)", true)]
-        [MenuItem(MenuRoot + "波紋 (Ripple)", true)]
-        [MenuItem(MenuRoot + "流れ (Stream)", true)]
-        [MenuItem(MenuRoot + "プール (Pool)", true)]
-        [MenuItem(MenuRoot + "サイバー (Cyber)", true)]
-        [MenuItem(TransparentMenuRoot + "静かな水面 (Calm)", true)]
-        [MenuItem(TransparentMenuRoot + "波紋 (Ripple)", true)]
-        [MenuItem(TransparentMenuRoot + "流れ (Stream)", true)]
-        [MenuItem(TransparentMenuRoot + "プール (Pool)", true)]
-        [MenuItem(TransparentMenuRoot + "サイバー (Cyber)", true)]
-        [MenuItem(MobileTransparentMenuRoot + "静かな水面 (Calm)", true)]
-        [MenuItem(MobileTransparentMenuRoot + "波紋 (Ripple)", true)]
-        [MenuItem(MobileTransparentMenuRoot + "流れ (Stream)", true)]
-        [MenuItem(MobileTransparentMenuRoot + "プール (Pool)", true)]
-        [MenuItem(MobileTransparentMenuRoot + "サイバー (Cyber)", true)]
-        [MenuItem(LookMenuRoot + "美しい海 (Clear Sea)", true)]
-        [MenuItem(LookMenuRoot + "透明プール (Clear Pool)", true)]
-        [MenuItem(LookMenuRoot + "室内ブループール (Indoor Blue Pool)", true)]
-        [MenuItem(LookMenuRoot + "ウォーターテーブル (Water Table)", true)]
-        [MenuItem(LookMenuRoot + "フラッグシップ透明水 (Flagship Crystal)", true)]
-        [MenuItem(LookMenuRoot + "クリスタルラグーン (Crystal Lagoon)", true)]
-        [MenuItem(LookMenuRoot + "クリスタルラグーン Hero (Crystal Lagoon Hero)", true)]
-        [MenuItem(LookMenuRoot + "血の海 (Blood Sea)", true)]
-        [MenuItem(LookMenuRoot + "液体金属 (Liquid Metal)", true)]
+        [MenuItem(ReadyMenuRoot + "最高品質 クリスタルラグーン Hero", true)]
+        [MenuItem(ReadyMenuRoot + "クリスタルラグーン", true)]
+        [MenuItem(ReadyMenuRoot + "透明プール", true)]
+        [MenuItem(ReadyMenuRoot + "室内ブループール", true)]
+        [MenuItem(ReadyMenuRoot + "美しい海", true)]
+        [MenuItem(ReadyMenuRoot + "ウォーターテーブル", true)]
+        [MenuItem(ReadyMenuRoot + "フラッグシップ透明水", true)]
+        [MenuItem(ReadyMenuRoot + "特殊液体/血の海", true)]
+        [MenuItem(ReadyMenuRoot + "特殊液体/液体金属", true)]
         static bool ValidateSelection()
         {
             return HasRendererSelection();
@@ -773,9 +721,59 @@ namespace Siliq.Water.Editor
             return GetLookPreset(look).displayName;
         }
 
+        internal static string ReadyMaterialNameForLook(ReadyLook look)
+        {
+            switch (look)
+            {
+                case ReadyLook.ClearSea: return "M_Siliq_ClearSea_Ready";
+                case ReadyLook.ClearPool: return "M_Siliq_ClearPool_Ready";
+                case ReadyLook.IndoorBluePool: return "M_Siliq_IndoorBluePool_Ready";
+                case ReadyLook.WaterTable: return "M_Siliq_WaterTable_Ready";
+                case ReadyLook.FlagshipCrystal: return "M_Siliq_FlagshipCrystal_Ready";
+                case ReadyLook.CrystalLagoon: return "M_Siliq_CrystalLagoon_Ready";
+                case ReadyLook.CrystalLagoonHero: return "M_Siliq_CrystalLagoon_Hero_Ready";
+                case ReadyLook.BloodSea: return "M_Siliq_BloodSea_Ready";
+                case ReadyLook.LiquidMetal: return "M_Siliq_LiquidMetal_Ready";
+                default: return "M_Siliq_CrystalLagoon_Hero_Ready";
+            }
+        }
+
+        internal static Material ReadyMaterialForLook(ReadyLook look)
+        {
+            string guid;
+            switch (look)
+            {
+                case ReadyLook.ClearSea: guid = ClearSeaReadyGuid; break;
+                case ReadyLook.ClearPool: guid = ClearPoolReadyGuid; break;
+                case ReadyLook.IndoorBluePool: guid = IndoorBluePoolReadyGuid; break;
+                case ReadyLook.WaterTable: guid = WaterTableReadyGuid; break;
+                case ReadyLook.FlagshipCrystal: guid = FlagshipCrystalReadyGuid; break;
+                case ReadyLook.CrystalLagoon: guid = CrystalLagoonReadyGuid; break;
+                case ReadyLook.CrystalLagoonHero: guid = CrystalLagoonHeroReadyGuid; break;
+                case ReadyLook.BloodSea: guid = BloodSeaReadyGuid; break;
+                case ReadyLook.LiquidMetal: guid = LiquidMetalReadyGuid; break;
+                default: guid = CrystalLagoonHeroReadyGuid; break;
+            }
+
+            return LoadPrebakedMaterial(guid, ReadyMaterialNameForLook(look));
+        }
+
+        internal static TargetPlatform TargetForActiveBuild()
+        {
+            switch (EditorUserBuildSettings.activeBuildTarget)
+            {
+                case BuildTarget.Android:
+                    return TargetPlatform.Quest;
+                case BuildTarget.iOS:
+                    return TargetPlatform.Ios;
+                default:
+                    return TargetPlatform.PC;
+            }
+        }
+
         internal static void ApplyReadyLookToSelection(ReadyLook look, TargetPlatform target)
         {
-            ApplyLook(GetLookPreset(look), target);
+            ApplyReadyLook(look, target);
         }
 
         static LookPreset GetLookPreset(ReadyLook look)
@@ -864,29 +862,37 @@ namespace Siliq.Water.Editor
             ApplyMaterialToSelection(mat, motion, texturePropertyName);
         }
 
-        static void ApplyLook(LookPreset preset, TargetPlatform target = TargetPlatform.PC)
+        static void ApplyReadyLook(ReadyLook look, TargetPlatform target)
         {
-            var source = LoadPrebakedMaterial(preset.sourceGuid, $"M_Water_{preset.sourceLabel}");
-            if (source == null)
-            {
-                EditorUtility.DisplayDialog("Siliq Water",
-                    $"M_Water_{preset.sourceLabel} が見つかりませんでした。\nPrebakedPack フォルダがプロジェクトに含まれているか確認してください。", "OK");
-                return;
-            }
-
-            var mat = GetOrCreateLookMaterial(preset, source, target);
+            LookPreset preset = GetLookPreset(look);
+            Material mat = ReadyMaterialForLook(look);
             if (mat == null)
             {
                 EditorUtility.DisplayDialog("Siliq Water",
-                    "Siliq 水シェーダーが見つかりませんでした。パッケージが正しく読み込まれているか確認してください。", "OK");
+                    $"{ReadyMaterialNameForLook(look)} が見つかりませんでした。\nPackage の PrebakedPack/ReadyMaterials を確認してください。", "OK");
+                return;
+            }
+
+            if (!WaterShaderUtility.IsMaterialCompatibleWithCurrentPipeline(mat))
+            {
+                string pipelineHelp = WaterShaderUtility.IsUniversalPipelineActive()
+                    ? "この完成Materialは Built-in / VRChat 用です。URPでは Package Manager の Samples から URP Shader をImportしてください。品質の異なる自動変換Materialは作成しません。"
+                    : "現在のRender Pipelineでは同梱の完成Materialを使用できません。Built-in / VRChat環境、または対応するURP Sampleを使用してください。";
+                EditorUtility.DisplayDialog("Siliq Water",
+                    pipelineHelp, "OK");
                 return;
             }
 
             string texturePropertyName = mat.HasProperty("_NormalMap") ? "_NormalMap" : "_BumpMap";
-            ApplyMaterialToSelection(mat, preset.motion, texturePropertyName);
+            ApplyMaterialToSelection(mat, preset.motion, texturePropertyName, false, target);
         }
 
-        static void ApplyMaterialToSelection(Material mat, MotionPreset motion, string texturePropertyName, bool expandingRipples = false)
+        static void ApplyMaterialToSelection(
+            Material mat,
+            MotionPreset motion,
+            string texturePropertyName,
+            bool expandingRipples = false,
+            TargetPlatform target = TargetPlatform.PC)
         {
             int applied = 0;
             foreach (var go in Selection.gameObjects)
@@ -911,6 +917,7 @@ namespace Siliq.Water.Editor
                 animator.speed = motion.speed;
                 animator.strength = motion.strength;
                 animator.tiling = motion.tiling;
+                TuneAnimatorForTarget(animator, mat, target);
                 animator.ApplyImmediate(0f);
                 EditorUtility.SetDirty(animator);
 
@@ -922,6 +929,29 @@ namespace Siliq.Water.Editor
             {
                 EditorUtility.DisplayDialog("Siliq Water",
                     "Renderer を持つオブジェクトを選択してから実行してください。", "OK");
+            }
+        }
+
+        static void TuneAnimatorForTarget(WaterSurfaceAnimator animator, Material mat, TargetPlatform target)
+        {
+            if (animator == null || target == TargetPlatform.PC) return;
+
+            bool opaqueLiquid = mat != null && mat.HasProperty("_Opacity") && mat.GetFloat("_Opacity") >= 0.99f;
+            bool quest = target == TargetPlatform.Quest;
+
+            animator.displacementStrength = Mathf.Min(animator.displacementStrength, quest ? 0.004f : 0f);
+            animator.heightMapInfluence = 0f;
+            animator.reflectionStrength = Mathf.Min(animator.reflectionStrength, quest ? 0.74f : 0.68f);
+            animator.reflectionPatternStrength = Mathf.Min(animator.reflectionPatternStrength, quest ? 0.22f : 0.18f);
+            animator.sparkle = Mathf.Min(animator.sparkle, quest ? 0.20f : 0.18f);
+            animator.highlightStrength = Mathf.Min(animator.highlightStrength, quest ? 1.35f : 1.20f);
+            animator.strength = Mathf.Min(animator.strength, quest ? 0.50f : 0.42f);
+
+            if (!opaqueLiquid)
+            {
+                animator.opacity = quest
+                    ? Mathf.Clamp(animator.opacity, 0.42f, 0.58f)
+                    : Mathf.Min(animator.opacity, 0.38f);
             }
         }
 
