@@ -731,6 +731,170 @@ namespace Siliq.Water.Tests
         }
 
         [Test]
+        public void MobileWaterFxShader_IsBuiltInCompatibleForIosVrchat()
+        {
+            const string path = "Packages/com.siliq.water-normalmap/Runtime/Shaders/SiliqWaterFxMobile.shader";
+            Assert.IsTrue(File.Exists(path), "iOS/VRChat 向け水エフェクト shader が同梱されていない");
+
+            var shader = Shader.Find("Siliq/Water FX Mobile (iOS VRChat)");
+            Assert.IsNotNull(shader, "iOS/VRChat 向け水エフェクト shader が Unity に import されていない");
+
+            string text = File.ReadAllText(path);
+            StringAssert.Contains("Shader \"Siliq/Water FX Mobile (iOS VRChat)\"", text);
+            StringAssert.Contains("#include \"UnityCG.cginc\"", text,
+                "Mobile FX shader は Built-in だけで読める UnityCG ベースにする");
+            StringAssert.Contains("Blend [_SrcBlend] [_DstBlend]", text,
+                "Material ごとに加算/透明を切り替えられる必要がある");
+            StringAssert.Contains("#pragma target 2.0", text,
+                "iOS/VRChat 向けの軽量 shader target を維持する");
+            Assert.IsFalse(text.Contains("Packages/com.unity.render-pipelines.universal"),
+                "Mobile FX shader は URP package に依存してはいけない");
+            Assert.IsFalse(text.Contains("Core.hlsl"),
+                "Mobile FX shader は URP Core.hlsl を include してはいけない");
+            Assert.IsFalse(text.Contains("GrabPass"),
+                "iOS/VRChat 向け FX に GrabPass を戻してはいけない");
+            Assert.IsFalse(text.Contains("_CameraDepthTexture"),
+                "iOS/VRChat 向け FX は CameraDepthTexture 前提にしない");
+            Assert.IsFalse(text.Contains("ComputeShader"),
+                "Mobile FX は compute shader を使わない");
+        }
+
+        [Test]
+        public void MobileWaterFxTextures_AreBundledForRequestedEffectSet()
+        {
+            AssertMobileFxTextureImport("WaterFX_SplashSpray_01.png", "水しぶき");
+            AssertMobileFxTextureImport("WaterFX_FoamBubbles_01.png", "泡");
+            AssertMobileFxTextureImport("WaterFX_SurfaceGlint_01.png", "水面の光反射風");
+            AssertMobileFxTextureImport("WaterFX_UnderwaterParticles_01.png", "水中の粒子");
+            AssertMobileFxTextureImport("WaterFX_ShoreFoam_01.png", "岸の白い泡");
+            AssertMobileFxTextureImport("WaterFX_RainRipple_01.png", "雨粒が落ちた波紋");
+        }
+
+        [Test]
+        public void MobileWaterFxReadyMaterials_CoverRequestedEffects()
+        {
+            AssertMobileFxMaterial("M_Siliq_FX_SplashSpray_Mobile", "WaterFX_SplashSpray_01.png", BlendMode.One, BlendMode.One, "水しぶき");
+            AssertMobileFxMaterial("M_Siliq_FX_FoamBubbles_Mobile", "WaterFX_FoamBubbles_01.png", BlendMode.SrcAlpha, BlendMode.OneMinusSrcAlpha, "泡");
+            AssertMobileFxMaterial("M_Siliq_FX_SurfaceGlint_Mobile", "WaterFX_SurfaceGlint_01.png", BlendMode.One, BlendMode.One, "水面の光反射風");
+            AssertMobileFxMaterial("M_Siliq_FX_UnderwaterParticles_Mobile", "WaterFX_UnderwaterParticles_01.png", BlendMode.One, BlendMode.One, "水中の粒子");
+            AssertMobileFxMaterial("M_Siliq_FX_ShoreFoam_Mobile", "WaterFX_ShoreFoam_01.png", BlendMode.SrcAlpha, BlendMode.OneMinusSrcAlpha, "岸の白い泡");
+            AssertMobileFxMaterial("M_Siliq_FX_RainRipple_Mobile", "WaterFX_RainRipple_01.png", BlendMode.One, BlendMode.One, "雨粒が落ちた波紋");
+        }
+
+        [Test]
+        public void BeginnerGuide_ProvidesMobileWaterFxPlacement()
+        {
+            var method = typeof(WaterBeginnerSetup).GetMethod(
+                nameof(WaterBeginnerSetup.PlaceMobileWaterFxSet),
+                BindingFlags.Public | BindingFlags.Static);
+            Assert.IsNotNull(method, "初心者向けの iOS/VRChat 水エフェクト配置メニューがない");
+
+            bool hasToolsMenu = false;
+            bool hasGameObjectMenu = false;
+            foreach (var attribute in method.GetCustomAttributes(typeof(MenuItem), false))
+            {
+                var menuItem = (MenuItem)attribute;
+                if (menuItem.menuItem == "Tools/Siliq Water/かんたん作成/iOS/VRChat 水エフェクトセットを配置") hasToolsMenu = true;
+                if (menuItem.menuItem == "GameObject/Siliq Water/かんたん作成/iOS/VRChat 水エフェクトセットを配置") hasGameObjectMenu = true;
+            }
+
+            Assert.IsTrue(hasToolsMenu, "Tools menu から水エフェクトセットを配置できる必要がある");
+            Assert.IsTrue(hasGameObjectMenu, "GameObject menu から水エフェクトセットを配置できる必要がある");
+            Assert.AreEqual("iOS/VRChat 水エフェクトセットを配置", WaterBeginnerGuideWindow.PlaceMobileFxSetActionLabel);
+            Assert.AreEqual(6, WaterBeginnerSetup.MobileFxMaterialRelativePaths.Length,
+                "水しぶき、泡、光反射、粒子、岸泡、雨波紋の6つを初心者導線に含める");
+
+            foreach (string relativePath in WaterBeginnerSetup.MobileFxMaterialRelativePaths)
+            {
+                string packagePath = "Packages/com.siliq.water-normalmap/" + relativePath;
+                Assert.IsNotNull(AssetDatabase.LoadAssetAtPath<Material>(packagePath),
+                    $"{packagePath} が初心者メニュー用に同梱されていない");
+            }
+        }
+
+        static void AssertMobileFxTextureImport(string filename, string label)
+        {
+            string path = $"Packages/com.siliq.water-normalmap/PrebakedPack/Textures/{filename}";
+            var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+            Assert.IsNotNull(texture, $"{label}: {path} が同梱されていない");
+            Assert.GreaterOrEqual(texture.width, 1024, $"{label}: 水エフェクト素材は 1024px 以上を維持する");
+            Assert.GreaterOrEqual(texture.height, 1024, $"{label}: 水エフェクト素材は 1024px 以上を維持する");
+
+            var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            Assert.IsNotNull(importer, $"{label}: import 設定が読めない");
+            Assert.IsFalse(importer.sRGBTexture, $"{label}: FX mask は sRGB OFF で扱う");
+            Assert.IsTrue(importer.mipmapEnabled, $"{label}: 遠景でチラつかないよう mipmap を使う");
+            Assert.AreEqual(TextureWrapMode.Repeat, importer.wrapMode, $"{label}: Plane の tiling に使える Repeat 設定が必要");
+
+            var android = importer.GetPlatformTextureSettings("Android");
+            Assert.IsTrue(android.overridden, $"{label}: Android/Quest 向け import override が必要");
+            Assert.AreEqual(1024, android.maxTextureSize, $"{label}: mobile FX は 1024px を上限にする");
+            Assert.AreEqual(TextureImporterFormat.ASTC_6x6, android.format, $"{label}: Android/Quest は ASTC 6x6 にする");
+
+            var iphone = importer.GetPlatformTextureSettings("iPhone");
+            Assert.IsTrue(iphone.overridden, $"{label}: iPhone/iOS 向け import override が必要");
+            Assert.AreEqual(1024, iphone.maxTextureSize, $"{label}: iOS FX は 1024px を上限にする");
+            Assert.AreEqual(TextureImporterFormat.ASTC_6x6, iphone.format, $"{label}: iOS は ASTC 6x6 にする");
+
+            AssertMaskTextureHasUsableContrast(path, label);
+        }
+
+        static void AssertMaskTextureHasUsableContrast(string path, string label)
+        {
+            var readable = new Texture2D(2, 2, TextureFormat.RGB24, false);
+            try
+            {
+                Assert.IsTrue(readable.LoadImage(File.ReadAllBytes(path)), $"{label}: PNG として読めない");
+                var pixels = readable.GetPixels32();
+                int darkPixels = 0;
+                int visiblePixels = 0;
+                int brightPixels = 0;
+                foreach (var p in pixels)
+                {
+                    int v = Mathf.Max(p.r, Mathf.Max(p.g, p.b));
+                    if (v <= 4) darkPixels++;
+                    if (v >= 18) visiblePixels++;
+                    if (v >= 96) brightPixels++;
+                }
+
+                Assert.Greater(darkPixels, pixels.Length * 0.25f,
+                    $"{label}: 黒地マスクでないと透明/加算Planeとして使いにくい");
+                Assert.Greater(visiblePixels, pixels.Length * 0.002f,
+                    $"{label}: エフェクトが薄すぎて見えない");
+                Assert.Greater(brightPixels, pixels.Length * 0.0003f,
+                    $"{label}: 明るい焦点がなく水表現として弱い");
+                Assert.Less(brightPixels, pixels.Length * 0.45f,
+                    $"{label}: 白い板状の素材に戻してはいけない");
+            }
+            finally
+            {
+                Object.DestroyImmediate(readable);
+            }
+        }
+
+        static void AssertMobileFxMaterial(string name, string textureFile, BlendMode srcBlend, BlendMode dstBlend, string label)
+        {
+            var mat = LoadReadyMaterial(name);
+            Assert.AreEqual("Siliq/Water FX Mobile (iOS VRChat)", mat.shader.name,
+                $"{label}: iOS/VRChat 向けの軽量 FX shader を使う");
+            Assert.AreEqual($"Packages/com.siliq.water-normalmap/PrebakedPack/Textures/{textureFile}", AssetDatabase.GetAssetPath(mat.GetTexture("_MainTex")),
+                $"{label}: 専用の FX mask texture を参照する");
+            Assert.AreEqual((float)srcBlend, mat.GetFloat("_SrcBlend"), 1e-5f,
+                $"{label}: blend source が用途と違う");
+            Assert.AreEqual((float)dstBlend, mat.GetFloat("_DstBlend"), 1e-5f,
+                $"{label}: blend destination が用途と違う");
+            Assert.AreEqual(0f, mat.GetFloat("_ZWrite"), 1e-5f,
+                $"{label}: 透明FXはZWriteを切る");
+            Assert.AreEqual((int)RenderQueue.Transparent, mat.renderQueue,
+                $"{label}: 水面上へ重ねるため Transparent queue にする");
+            Assert.Greater(mat.GetFloat("_Intensity"), 0.15f, $"{label}: 見えない初期値にしない");
+            Assert.Greater(mat.GetFloat("_Alpha"), 0.20f, $"{label}: 透明すぎる初期値にしない");
+            Assert.LessOrEqual(mat.GetFloat("_Alpha"), 0.85f, $"{label}: 白い板に見える alpha にしない");
+            Assert.IsTrue(mat.HasProperty("_PulseSpeed"), $"{label}: 低負荷な時間変化を調整できる必要がある");
+            Assert.IsTrue(mat.HasProperty("_MaskPower"), $"{label}: mask の締まりを調整できる必要がある");
+        }
+
+        [Test]
         public void CrystalLagoonPreview_IsBundledForBeautyFirstSelection()
         {
             const string path = "Packages/com.siliq.water-normalmap/PrebakedPack/Preview/preview_crystal_lagoon.png";

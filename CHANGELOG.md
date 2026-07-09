@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.80] - 2026-07-09
+
+### 追加: iOS/VRChat 向け Mobile Water FX セット
+- `Siliq/Water FX Mobile (iOS VRChat)` を追加し、URP / GrabPass / Depth / Compute に依存しない透明・加算の水エフェクトPlaneを作れるようにした
+- Imagen生成素材をもとに、水しぶき、泡、水面の光反射風、水中粒子、岸の白い泡、雨粒の波紋の6種類の1024pxマスクとReady Materialを同梱
+- `Tools > Siliq Water > かんたん作成 > iOS/VRChat 水エフェクトセットを配置` と はじめてガイドのボタンを追加し、初心者でも6つの演出レイヤーを一括配置できるようにした
+- テストとドキュメントを更新し、Mobile FX shader の軽量性、iOS/Android ASTC設定、Ready Material参照、初心者導線を固定
+
 ## [2.3.79] - 2026-07-09
 
 ### 修正: Crystal Lagoon 入口 preview を抽象的な青画像から完成サムネイルへ差し替え

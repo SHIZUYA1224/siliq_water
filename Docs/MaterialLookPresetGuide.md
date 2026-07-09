@@ -12,7 +12,9 @@ Hero / Crystal Lagoon / 透明プールは、置いた瞬間に水面が滑っ�
 
 最高品質確認は `クリスタルラグーン Hero (Crystal Lagoon Hero)` を選ぶ。水面マップスタジオでは `目的から始める` のボタンから同じ用途を選べる。ここでは生成レシピ、解像度、スーパーサンプリング、出力マップ、透明マテリアル作成までまとめて推奨値に変わる。
 
-Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイド` を開く。そこから Hero 完成セット配置、透明プール完成セット配置、Hero 水面作成、既存水面の診断修復、README / 用途別ガイド / PrebakedPack の確認に進める。見た目を最優先で確認する場合は `Tools > Siliq Water > かんたん作成 > 最高品質 Hero 完成セットを配置` を使う。プール用途なら `透明プール完成セットを配置` を使う。水面、明るい床、caustics overlay、確認用ライトが一括で置かれる。水面だけを作る場合は `最高品質 Hero 水面を作成`、既存の水面がピンク、動かない、高さが出ない場合は `選択中の水面を診断して自動修復` を実行する。
+Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイド` を開く。そこから Hero 完成セット配置、透明プール完成セット配置、iOS/VRChat 水エフェクトセット配置、Hero 水面作成、既存水面の診断修復、README / 用途別ガイド / PrebakedPack の確認に進める。見た目を最優先で確認する場合は `Tools > Siliq Water > かんたん作成 > 最高品質 Hero 完成セットを配置` を使う。プール用途なら `透明プール完成セットを配置` を使う。水面、明るい床、caustics overlay、確認用ライトが一括で置かれる。水面だけを作る場合は `最高品質 Hero 水面を作成`、既存の水面がピンク、動かない、高さが出ない場合は `選択中の水面を診断して自動修復` を実行する。
+
+水しぶき、泡、水面の光反射風、波紋、水中の粒子、岸の白い泡、雨粒が落ちた波紋は、水面本体とは別に `Tools > Siliq Water > かんたん作成 > iOS/VRChat 水エフェクトセットを配置` で追加する。これは `Siliq/Water FX Mobile (iOS VRChat)` を使う透明/加算Planeのセットで、URP、深度、GrabPass、Compute Shaderに依存しない。水面Materialだけでは出せない飛沫や岸泡は、このFXレイヤーを水面・岸・水中・衝突点へ移動して使う。
 
 ## プリセット
 
@@ -37,6 +39,7 @@ Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイ�
 - `M_Siliq_CrystalLagoon_Hero_Ready` は `Water_Normal_CrystalLagoon_Hero_01.png`、`Water_Height_CrystalLagoon_Hero_01.png`、`Water_Caustics_CrystalLagoon_Hero_01.png` を使い、通常 Crystal Lagoon texture の流用に戻さない。`Clarity`、`Reflection Pattern`、`Transmission`、`Bottom Visibility`、`Bottom Light Strength`、`Caustics Focus`、`Caustics Prism`、`Caustics Scatter` を強めた最高品質確認用として同梱する
 - 完成形をすぐ確認できるよう、`PF_Siliq_CrystalLagoon_Complete.prefab` には水面、`Siliq/Pale Pool Floor Mobile` の薄いタイル床、`M_Siliq_CrystalLagoon_CausticsOverlay` の床用光を同梱する。`PF_Siliq_CrystalLagoon_Hero_Complete.prefab` では Hero water material と `M_Siliq_CrystalLagoon_Hero_CausticsOverlay` を使う。`PF_Siliq_SunlitPool_Complete.prefab` では ClearPool material と `M_Siliq_SunlitPool_CausticsOverlay` を使う
 - 床に直接光を出したい場合は、床の少し上に薄い Plane を置いて用途に合う caustics overlay material を貼る
+- iOS/VRChat 水エフェクトセットでは `M_Siliq_FX_SplashSpray_Mobile`、`M_Siliq_FX_FoamBubbles_Mobile`、`M_Siliq_FX_SurfaceGlint_Mobile`、`M_Siliq_FX_UnderwaterParticles_Mobile`、`M_Siliq_FX_ShoreFoam_Mobile`、`M_Siliq_FX_RainRipple_Mobile` を6枚のPlaneへ割り当てる
 - 透明プール / 室内ブループールでは `Water_Caustics_SunlitPool_01.png` を水底の光として割り当て、`M_Siliq_SunlitPool_CausticsOverlay` で床にも重ねられる。広い床光と柔らかい光リボンから始める
 - 透明な海・フラッグシップ水では `Water_Caustics_Crystal_01.png` を水底の光として割り当てる
 - 色、透明度、反射、透過光、きらめきを設定する
@@ -67,5 +70,6 @@ Unity / VRChat 初心者は、まず `Tools > Siliq Water > はじめてガイ�
 - フラッグシップ透明水は Calm の流用ではなく、`Water_Normal_FlagshipCrystal_01.png` と `Water_Height_FlagshipCrystal_01.png` を前提にする。
 - クリスタルラグーンは Flagship の流用ではなく、`Water_Normal_CrystalLagoon_01.png`、`Water_Height_CrystalLagoon_01.png`、`Water_Caustics_CrystalLagoon_01.png` を前提にする。Hero では `Water_Normal_CrystalLagoon_Hero_01.png`、`Water_Height_CrystalLagoon_Hero_01.png`、`Water_Caustics_CrystalLagoon_Hero_01.png` を使う。
 - `M_Siliq_CrystalLagoon_CausticsOverlay`、`M_Siliq_CrystalLagoon_Hero_CausticsOverlay`、`M_Siliq_SunlitPool_CausticsOverlay` は水面 material ではなく床用の加算 overlay。水面には用途別の `M_Siliq_*_Ready` を使う。
+- `M_Siliq_FX_*_Mobile` は水面 material ではなく演出用Plane material。水しぶき、泡、岸泡、雨波紋、水中粒子、光反射の追加パーツとして使う。
 - 血や金属液体は「水」ではなく特殊液体なので、色だけでなく反射と凹凸の強さを変える。
 - 液体金属は透過させず、不透明で反射を強くした方が破綻しにくい。

@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: M_Siliq_FX_RainRipple_Mobile
+  m_Shader: {fileID: 4800000, guid: a171aabb01c34e01a1b2c3d4e5f60801, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 1
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3000
+  stringTagMap:
+    RenderType: Transparent
+  disabledShaderPasses: []
+  m_LockedProperties:
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: a171aabb01c34e01a1b2c3d4e5f60816, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Intensity: 0.95
+    - _Alpha: 0.62
+    - _Tiling: 1
+    - _MaskPower: 1.2
+    - _PulseSpeed: 1.4
+    - _PulseAmount: 0.18
+    - _SrcBlend: 1
+    - _DstBlend: 1
+    - _ZWrite: 0
+    m_Colors:
+    - _Scroll1: {r: 0.000001, g: 0.0000008, b: 0, a: 0}
+    - _Scroll2: {r: -0.0000007, g: 0.0000011, b: 0, a: 0}
+    - _Tint: {r: 0.76, g: 0.95, b: 1, a: 1}
+  m_BuildTextureStacks: []

@@ -19,6 +19,21 @@ namespace Siliq.Water.Editor
         const string CrystalLagoonHeroMenuPath = "GameObject/Siliq Water/用途別マテリアルを適用/クリスタルラグーン Hero (Crystal Lagoon Hero)";
         internal const string CrystalLagoonHeroCompletePrefabPackagePath = "Packages/com.siliq.water-normalmap/PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Hero_Complete.prefab";
         internal const string SunlitPoolCompletePrefabPackagePath = "Packages/com.siliq.water-normalmap/PrebakedPack/Prefabs/PF_Siliq_SunlitPool_Complete.prefab";
+        internal const string SplashSprayMaterialRelativePath = "PrebakedPack/ReadyMaterials/M_Siliq_FX_SplashSpray_Mobile.mat";
+        internal const string FoamBubblesMaterialRelativePath = "PrebakedPack/ReadyMaterials/M_Siliq_FX_FoamBubbles_Mobile.mat";
+        internal const string SurfaceGlintMaterialRelativePath = "PrebakedPack/ReadyMaterials/M_Siliq_FX_SurfaceGlint_Mobile.mat";
+        internal const string UnderwaterParticlesMaterialRelativePath = "PrebakedPack/ReadyMaterials/M_Siliq_FX_UnderwaterParticles_Mobile.mat";
+        internal const string ShoreFoamMaterialRelativePath = "PrebakedPack/ReadyMaterials/M_Siliq_FX_ShoreFoam_Mobile.mat";
+        internal const string RainRippleMaterialRelativePath = "PrebakedPack/ReadyMaterials/M_Siliq_FX_RainRipple_Mobile.mat";
+        internal static readonly string[] MobileFxMaterialRelativePaths =
+        {
+            SplashSprayMaterialRelativePath,
+            FoamBubblesMaterialRelativePath,
+            SurfaceGlintMaterialRelativePath,
+            UnderwaterParticlesMaterialRelativePath,
+            ShoreFoamMaterialRelativePath,
+            RainRippleMaterialRelativePath,
+        };
         const int PremiumGridSegments = 96;
         const float PremiumGridSize = 20f;
 
@@ -46,6 +61,63 @@ namespace Siliq.Water.Editor
                 "透明プール完成セットを配置しました。\n\n" +
                 "透明プール水面、明るい床、SunlitPool 専用 caustics overlay、確認用ライトが一体です。\n" +
                 "室内プールや浅いプールで、水底の広い床光と柔らかい光リボンを確認できます。");
+        }
+
+        [MenuItem(RootMenu + "iOS/VRChat 水エフェクトセットを配置", false, 2)]
+        [MenuItem(GameObjectRootMenu + "iOS/VRChat 水エフェクトセットを配置", false, 2)]
+        public static void PlaceMobileWaterFxSet()
+        {
+            if (!MobileFxMaterialsAvailable()) return;
+
+            const string undoName = "Siliq iOS/VRChat 水エフェクトセットを配置";
+            var selectedParent = Selection.activeTransform;
+            var root = new GameObject("Siliq Water - iOS VRChat Mobile FX Set");
+            Undo.RegisterCreatedObjectUndo(root, undoName);
+            if (selectedParent != null)
+            {
+                Undo.SetTransformParent(root.transform, selectedParent, undoName);
+                root.transform.localPosition = Vector3.zero;
+            }
+            else
+            {
+                root.transform.position = Vector3.zero;
+            }
+            root.transform.localRotation = Quaternion.identity;
+            root.transform.localScale = Vector3.one;
+
+            CreateFxPlane("Surface glint - water reflection streaks", root.transform,
+                new Vector3(0f, 0.018f, 0f), new Vector3(90f, 0f, 0f), new Vector3(13f, 13f, 1f),
+                SurfaceGlintMaterialRelativePath, undoName);
+            CreateFxPlane("Rain drop ripples - expanding rings", root.transform,
+                new Vector3(2.8f, 0.024f, -1.4f), new Vector3(90f, 0f, 0f), new Vector3(7f, 7f, 1f),
+                RainRippleMaterialRelativePath, undoName);
+            CreateFxPlane("Foam bubbles - surface patch", root.transform,
+                new Vector3(-2.8f, 0.028f, 1.2f), new Vector3(90f, 0f, 0f), new Vector3(4.2f, 4.2f, 1f),
+                FoamBubblesMaterialRelativePath, undoName);
+            CreateFxPlane("Shore foam - move to water edge", root.transform,
+                new Vector3(0f, 0.026f, 6.2f), new Vector3(90f, 0f, 0f), new Vector3(9f, 2.5f, 1f),
+                ShoreFoamMaterialRelativePath, undoName);
+            CreateFxPlane("Underwater particles - place below surface", root.transform,
+                new Vector3(0f, -1.25f, 0.8f), new Vector3(0f, 0f, 0f), new Vector3(8f, 3.2f, 1f),
+                UnderwaterParticlesMaterialRelativePath, undoName);
+            CreateFxPlane("Splash spray - move to impact point", root.transform,
+                new Vector3(-4.5f, 1.05f, -1.6f), new Vector3(0f, 0f, 0f), new Vector3(2.6f, 2.3f, 1f),
+                SplashSprayMaterialRelativePath, undoName);
+
+            Selection.activeGameObject = root;
+            EnsurePreviewLight();
+            EnsurePreviewCamera(root.transform.position);
+            if (SceneView.lastActiveSceneView != null)
+            {
+                SceneView.lastActiveSceneView.FrameSelected();
+            }
+
+            EditorUtility.DisplayDialog(
+                "Siliq Water",
+                "iOS/VRChat 向け水エフェクトセットを配置しました。\n\n" +
+                "水面の光反射、雨粒の波紋、泡、岸の白泡、水中粒子、水しぶきの6レイヤーです。\n" +
+                "各Planeを水面、岸、水中、衝突位置へ移動して使ってください。ShaderはGrabPass/Depth/URPなしの軽量Unlitです。",
+                "OK");
         }
 
         static void PlaceCompletePrefab(string packagePath, string missingLabel, string undoName, string dialogBody)
@@ -80,6 +152,68 @@ namespace Siliq.Water.Editor
             }
 
             EditorUtility.DisplayDialog("Siliq Water", dialogBody, "OK");
+        }
+
+        static bool MobileFxMaterialsAvailable()
+        {
+            var missing = new List<string>();
+            foreach (string relativePath in MobileFxMaterialRelativePaths)
+            {
+                if (LoadPackageAsset<Material>(relativePath) == null)
+                {
+                    missing.Add(relativePath);
+                }
+            }
+
+            if (missing.Count == 0) return true;
+
+            EditorUtility.DisplayDialog(
+                "Siliq Water",
+                "水エフェクト用 Material が見つかりません。\n\n" + string.Join("\n", missing),
+                "OK");
+            return false;
+        }
+
+        static GameObject CreateFxPlane(
+            string name,
+            Transform parent,
+            Vector3 localPosition,
+            Vector3 localEulerAngles,
+            Vector3 localScale,
+            string materialRelativePath,
+            string undoName)
+        {
+            var go = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            Undo.RegisterCreatedObjectUndo(go, undoName);
+            Undo.SetTransformParent(go.transform, parent, undoName);
+            go.name = name;
+            go.transform.localPosition = localPosition;
+            go.transform.localRotation = Quaternion.Euler(localEulerAngles);
+            go.transform.localScale = localScale;
+
+            var collider = go.GetComponent<Collider>();
+            if (collider != null)
+            {
+                Undo.DestroyObjectImmediate(collider);
+            }
+
+            var renderer = go.GetComponent<MeshRenderer>();
+            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            renderer.receiveShadows = false;
+            renderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
+            renderer.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.Off;
+            renderer.sharedMaterial = LoadPackageAsset<Material>(materialRelativePath);
+            return go;
+        }
+
+        static T LoadPackageAsset<T>(string relativePath) where T : Object
+        {
+            string packagePath = "Packages/com.siliq.water-normalmap/" + relativePath;
+            var asset = AssetDatabase.LoadAssetAtPath<T>(packagePath);
+            if (asset != null) return asset;
+
+            string assetPath = "Assets/SiliqWater/" + relativePath;
+            return AssetDatabase.LoadAssetAtPath<T>(assetPath);
         }
 
         [MenuItem(RootMenu + "最高品質 Hero 水面を作成", false, 2)]
