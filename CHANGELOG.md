@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.85] - 2026-07-09
+
+### 変更: 水底表現を別メッシュ前提へ分離し、後付けFXを削除
+- Ready Material と Quick Apply の水面側 `_CausticsStrength` / `_BottomVisibility` / `_BottomLightStrength` / `_BottomGlowStrength` を初期OFFにし、水底光は床/水底用 caustics overlay material で扱う構成へ整理
+- 完成 Prefab の水面 Animator も水底光を描かない値へ変更し、床と caustics overlay mesh だけが水底表現を担当するようにした
+- 飛沫、泡、水面グリント、岸泡、水中粒子、雨波紋の後付け Mobile FX shader / component / texture / material / menu / guide 導線を削除
+- 水面マップスタジオとはじめてガイドから重い追加FXオプションを外し、PC / Quest / iOS 向けの完成 Material 適用と完成 Prefab 導線に絞った
+
 ## [2.3.84] - 2026-07-09
 
 ### 修正: 完成 Material / Prefab の水面速度が止まって見える問題を修正

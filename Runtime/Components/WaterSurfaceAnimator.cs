@@ -120,32 +120,32 @@ namespace Siliq.Water
         [Range(0f, 1f)] public float darkDetailDamping = 0.70f;
 
         [Header("水底の光")]
-        [Tooltip("水底に揺れるコースティクス光の強さ。Siliq 水シェーダーで有効。")]
-        [Range(0f, 1f)] public float causticsStrength = 0.35f;
+        [Tooltip("水面マテリアルに水底光を直接描く強さ。通常は0。水底表現は別メッシュの caustics overlay に付けます。")]
+        [Range(0f, 1f)] public float causticsStrength = 0f;
 
         [Tooltip("水底の光模様の細かさ。大きいほど細かい光網になります。")]
         [Range(0.2f, 8f)] public float causticsScale = 2.0f;
 
-        [Tooltip("水底の光模様がゆっくり流れる速さ。")]
-        [Range(0f, 0.25f)] public float causticsSpeed = 0.000012f;
+        [Tooltip("水底の光模様がゆっくり流れる速さ。水面側では通常0。")]
+        [Range(0f, 0.25f)] public float causticsSpeed = 0f;
 
         [Tooltip("水底光の線の締まり。高いほど細い焦点線になり、低いほど柔らかく広がります。")]
         [Range(0.5f, 4f)] public float causticsFocus = 1.4f;
 
-        [Tooltip("水底光のごく薄い色分散。透明プールや浅い海で、白い模様だけに見えるのを防ぎます。")]
-        [Range(0f, 1f)] public float causticsPrismStrength = 0.12f;
+        [Tooltip("水底光のごく薄い色分散。水面側では通常0。")]
+        [Range(0f, 1f)] public float causticsPrismStrength = 0f;
 
-        [Tooltip("水底光の柔らかい広がり。細い焦点線だけでなく、透明水越しの光膜を作ります。")]
-        [Range(0f, 1f)] public float causticsScatterStrength = 0.25f;
+        [Tooltip("水底光の柔らかい広がり。水底用の別メッシュで調整します。")]
+        [Range(0f, 1f)] public float causticsScatterStrength = 0f;
 
-        [Tooltip("水底やプール床が水越しに見える量。高いほど透明な抜け感と床光が強く残ります。Siliq 水シェーダーで有効。")]
-        [Range(0f, 2f)] public float bottomVisibility = 1f;
+        [Tooltip("水面マテリアル側で水底を持ち上げて見せる量。通常は0。床や水底は別メッシュで見せます。")]
+        [Range(0f, 2f)] public float bottomVisibility = 0f;
 
-        [Tooltip("水底光が水を通して見える量。透明な浅いプールやラグーンでは高めにします。Siliq 水シェーダーで有効。")]
-        [Range(0f, 2f)] public float bottomLightStrength = 1f;
+        [Tooltip("水面マテリアル側に混ぜる水底光。通常は0。")]
+        [Range(0f, 2f)] public float bottomLightStrength = 0f;
 
-        [Tooltip("水底そのものが柔らかく明るく見える量。透明な浅い水の底光を作ります。Siliq 水シェーダーで有効。")]
-        [Range(0f, 2f)] public float bottomGlowStrength = 0.35f;
+        [Tooltip("水面マテリアル側の水底グロー。通常は0。")]
+        [Range(0f, 2f)] public float bottomGlowStrength = 0f;
 
         [Tooltip("水面に奥行きの青みを足す量。透明水が白っぽい板に見える時に上げます。Siliq 水シェーダーで有効。")]
         [Range(0f, 1f)] public float depthTintStrength = 0.25f;

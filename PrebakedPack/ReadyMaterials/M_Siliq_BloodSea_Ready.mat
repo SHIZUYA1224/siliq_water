@@ -25,7 +25,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _CausticsMap:
-        m_Texture: {fileID: 2800000, guid: 00e6b1e9a23c24df69fe9558209de596, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _HeightMap:
@@ -44,15 +44,15 @@ Material:
     m_Floats:
     - _AlphaFresnel: 0.18
     - _AlphaPower: 2.9
-    - _BottomGlowStrength: 0.10
-    - _BottomLightStrength: 0.35
-    - _BottomVisibility: 0.15
+    - _BottomGlowStrength: 0
+    - _BottomLightStrength: 0
+    - _BottomVisibility: 0
     - _CausticsScale: 1.4
-    - _CausticsSpeed: 0.0000055
+    - _CausticsSpeed: 0
     - _CausticsFocus: 1.1
-    - _CausticsPrismStrength: 0.02
-    - _CausticsScatterStrength: 0.04
-    - _CausticsStrength: 0.06
+    - _CausticsPrismStrength: 0
+    - _CausticsScatterStrength: 0
+    - _CausticsStrength: 0
     - _Clarity: 0.1
     - _DarkDetailDamping: 0.7
     - _DarkReflectionDamping: 0.72

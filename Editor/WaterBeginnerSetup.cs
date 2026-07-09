@@ -20,31 +20,6 @@ namespace Siliq.Water.Editor
         const string CrystalLagoonHeroMenuPath = "GameObject/Siliq Water/用途別マテリアルを適用/クリスタルラグーン Hero (Crystal Lagoon Hero)";
         internal const string CrystalLagoonHeroCompletePrefabPackagePath = "Packages/com.siliq.water-normalmap/PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Hero_Complete.prefab";
         internal const string SunlitPoolCompletePrefabPackagePath = "Packages/com.siliq.water-normalmap/PrebakedPack/Prefabs/PF_Siliq_SunlitPool_Complete.prefab";
-        internal const string SplashSprayMaterialRelativePath = "PrebakedPack/ReadyMaterials/M_Siliq_FX_SplashSpray_Mobile.mat";
-        internal const string FoamBubblesMaterialRelativePath = "PrebakedPack/ReadyMaterials/M_Siliq_FX_FoamBubbles_Mobile.mat";
-        internal const string SurfaceGlintMaterialRelativePath = "PrebakedPack/ReadyMaterials/M_Siliq_FX_SurfaceGlint_Mobile.mat";
-        internal const string UnderwaterParticlesMaterialRelativePath = "PrebakedPack/ReadyMaterials/M_Siliq_FX_UnderwaterParticles_Mobile.mat";
-        internal const string UnderwaterHazeMaterialRelativePath = "PrebakedPack/ReadyMaterials/M_Siliq_FX_UnderwaterHaze_Mobile.mat";
-        internal const string UnderwaterLightShaftsMaterialRelativePath = "PrebakedPack/ReadyMaterials/M_Siliq_FX_UnderwaterLightShafts_Mobile.mat";
-        internal const string BubbleColumnMaterialRelativePath = "PrebakedPack/ReadyMaterials/M_Siliq_FX_BubbleColumn_Mobile.mat";
-        internal const string ShoreFoamMaterialRelativePath = "PrebakedPack/ReadyMaterials/M_Siliq_FX_ShoreFoam_Mobile.mat";
-        internal const string RainRippleMaterialRelativePath = "PrebakedPack/ReadyMaterials/M_Siliq_FX_RainRipple_Mobile.mat";
-        internal static readonly string[] MobileFxMaterialRelativePaths =
-        {
-            SplashSprayMaterialRelativePath,
-            FoamBubblesMaterialRelativePath,
-            SurfaceGlintMaterialRelativePath,
-            UnderwaterParticlesMaterialRelativePath,
-            ShoreFoamMaterialRelativePath,
-            RainRippleMaterialRelativePath,
-        };
-        internal static readonly string[] UnderwaterFxMaterialRelativePaths =
-        {
-            UnderwaterParticlesMaterialRelativePath,
-            UnderwaterHazeMaterialRelativePath,
-            UnderwaterLightShaftsMaterialRelativePath,
-            BubbleColumnMaterialRelativePath,
-        };
         const int PremiumGridSegments = 96;
         const float PremiumGridSize = 20f;
 
@@ -72,123 +47,6 @@ namespace Siliq.Water.Editor
                 "透明プール完成セットを配置しました。\n\n" +
                 "透明プール水面、明るい床、SunlitPool 専用 caustics overlay、確認用ライトが一体です。\n" +
                 "室内プールや浅いプールで、水底の広い床光と柔らかい光リボンを確認できます。");
-        }
-
-        [MenuItem(RootMenu + "iOS/VRChat 水エフェクトセットを配置", false, 2)]
-        [MenuItem(GameObjectRootMenu + "iOS/VRChat 水エフェクトセットを配置", false, 2)]
-        public static void PlaceMobileWaterFxSet()
-        {
-            if (!MobileFxMaterialsAvailable()) return;
-
-            const string undoName = "Siliq iOS/VRChat 水エフェクトセットを配置";
-            var selectedParent = Selection.activeTransform;
-            var root = new GameObject("Siliq Water - iOS VRChat Mobile FX Set");
-            Undo.RegisterCreatedObjectUndo(root, undoName);
-            if (selectedParent != null)
-            {
-                Undo.SetTransformParent(root.transform, selectedParent, undoName);
-                root.transform.localPosition = Vector3.zero;
-            }
-            else
-            {
-                root.transform.position = Vector3.zero;
-            }
-            root.transform.localRotation = Quaternion.identity;
-            root.transform.localScale = Vector3.one;
-
-            CreateFxPlane("Surface glint - water reflection streaks", root.transform,
-                new Vector3(0f, 0.018f, 0f), new Vector3(90f, 0f, 0f), new Vector3(13f, 13f, 1f),
-                SurfaceGlintMaterialRelativePath, undoName, 0.8f, 0.1f);
-            CreateFxPlane("Rain drop ripples - expanding rings", root.transform,
-                new Vector3(2.8f, 0.024f, -1.4f), new Vector3(90f, 0f, 0f), new Vector3(7f, 7f, 1f),
-                RainRippleMaterialRelativePath, undoName, 1f, 1.7f);
-            CreateFxPlane("Foam bubbles - surface patch", root.transform,
-                new Vector3(-2.8f, 0.028f, 1.2f), new Vector3(90f, 0f, 0f), new Vector3(4.2f, 4.2f, 1f),
-                FoamBubblesMaterialRelativePath, undoName, 0.45f, 3.2f);
-            CreateFxPlane("Shore foam - move to water edge", root.transform,
-                new Vector3(0f, 0.026f, 6.2f), new Vector3(90f, 0f, 0f), new Vector3(9f, 2.5f, 1f),
-                ShoreFoamMaterialRelativePath, undoName, 0.35f, 4.6f);
-            CreateFxPlane("Underwater particles - place below surface", root.transform,
-                new Vector3(0f, -1.25f, 0.8f), new Vector3(0f, 0f, 0f), new Vector3(8f, 3.2f, 1f),
-                UnderwaterParticlesMaterialRelativePath, undoName, 0.55f, 2.4f);
-            CreateFxPlane("Splash spray - move to impact point", root.transform,
-                new Vector3(-4.5f, 1.05f, -1.6f), new Vector3(0f, 0f, 0f), new Vector3(2.6f, 2.3f, 1f),
-                SplashSprayMaterialRelativePath, undoName, 0.8f, 0f);
-
-            Selection.activeGameObject = root;
-            EnsurePreviewLight();
-            EnsurePreviewCamera(root.transform.position);
-            if (SceneView.lastActiveSceneView != null)
-            {
-                SceneView.lastActiveSceneView.FrameSelected();
-            }
-
-            EditorUtility.DisplayDialog(
-                "Siliq Water",
-                "iOS/VRChat 向け水エフェクトセットを配置しました。\n\n" +
-                "水面の光反射、雨粒の波紋、泡、岸の白泡、水中粒子、水しぶきの6レイヤーです。\n" +
-                "各Planeを水面、岸、水中、衝突位置へ移動して使ってください。ShaderはGrabPass/Depth/URPなしの軽量Unlitです。",
-                "OK");
-        }
-
-        [MenuItem(RootMenu + "水中・水槽 FX 空間を配置", false, 3)]
-        [MenuItem(GameObjectRootMenu + "水中・水槽 FX 空間を配置", false, 3)]
-        public static void PlaceUnderwaterFxVolumeSet()
-        {
-            if (!UnderwaterFxMaterialsAvailable()) return;
-
-            const string undoName = "Siliq 水中・水槽 FX 空間を配置";
-            var selectedParent = Selection.activeTransform;
-            var root = new GameObject("Siliq Water - Underwater Aquarium FX Volume");
-            Undo.RegisterCreatedObjectUndo(root, undoName);
-            if (selectedParent != null)
-            {
-                Undo.SetTransformParent(root.transform, selectedParent, undoName);
-                root.transform.localPosition = Vector3.zero;
-            }
-            else
-            {
-                root.transform.position = Vector3.zero;
-            }
-            root.transform.localRotation = Quaternion.identity;
-            root.transform.localScale = Vector3.one;
-
-            CreateFxPlane("Underwater haze - rear water volume", root.transform,
-                new Vector3(0f, 0.55f, 4.2f), new Vector3(0f, 0f, 0f), new Vector3(12f, 4.2f, 1f),
-                UnderwaterHazeMaterialRelativePath, undoName, 0.28f, 0f, 12);
-            CreateFxPlane("Underwater haze - angled side volume", root.transform,
-                new Vector3(-3.4f, 0.45f, 1.8f), new Vector3(0f, 22f, 0f), new Vector3(8.5f, 3.8f, 1f),
-                UnderwaterHazeMaterialRelativePath, undoName, 0.24f, 8.3f, 12);
-            CreateFxPlane("Suspended particles - near drift", root.transform,
-                new Vector3(1.2f, 0.25f, 1.2f), new Vector3(0f, -12f, 0f), new Vector3(8.5f, 3.3f, 1f),
-                UnderwaterParticlesMaterialRelativePath, undoName, 0.55f, 2.1f, 18);
-            CreateFxPlane("Suspended particles - far drift", root.transform,
-                new Vector3(-1.5f, 0.1f, 3.2f), new Vector3(0f, 15f, 0f), new Vector3(9.5f, 3.1f, 1f),
-                UnderwaterParticlesMaterialRelativePath, undoName, 0.38f, 6.8f, 18);
-            CreateFxPlane("Aquarium light shafts - side shimmer", root.transform,
-                new Vector3(-2.8f, 1.2f, 0.9f), new Vector3(0f, -18f, -7f), new Vector3(5.2f, 4.8f, 1f),
-                UnderwaterLightShaftsMaterialRelativePath, undoName, 0.42f, 1.4f, 15);
-            CreateFxPlane("Aquarium light shafts - ceiling shimmer", root.transform,
-                new Vector3(0f, 1.95f, 0.6f), new Vector3(90f, 0f, 0f), new Vector3(10.5f, 6.8f, 1f),
-                UnderwaterLightShaftsMaterialRelativePath, undoName, 0.36f, 5.4f, 15);
-            CreateFxPlane("Bubble column - rising detail", root.transform,
-                new Vector3(3.4f, 0.2f, 0.6f), new Vector3(0f, -8f, 0f), new Vector3(2.4f, 4.2f, 1f),
-                BubbleColumnMaterialRelativePath, undoName, 0.75f, 0.6f, 20);
-
-            Selection.activeGameObject = root;
-            EnsurePreviewLight();
-            EnsurePreviewCamera(root.transform.position);
-            if (SceneView.lastActiveSceneView != null)
-            {
-                SceneView.lastActiveSceneView.FrameSelected();
-            }
-
-            EditorUtility.DisplayDialog(
-                "Siliq Water",
-                "水中・水槽 FX 空間を配置しました。\n\n" +
-                "奥行き用の水中霞、漂う粒子、斜め光筋、泡柱を複数Planeで配置しています。\n" +
-                "水槽、室内プールの水中カメラ、水中通路では、このRootを水面の下へ移動して不要なPlaneを消してください。",
-                "OK");
         }
 
         static void PlaceCompletePrefab(string packagePath, string missingLabel, string undoName, string dialogBody)
@@ -225,88 +83,6 @@ namespace Siliq.Water.Editor
             EditorUtility.DisplayDialog("Siliq Water", dialogBody, "OK");
         }
 
-        static bool MobileFxMaterialsAvailable()
-        {
-            return MaterialsAvailable(MobileFxMaterialRelativePaths, "水エフェクト用 Material");
-        }
-
-        static bool UnderwaterFxMaterialsAvailable()
-        {
-            return MaterialsAvailable(UnderwaterFxMaterialRelativePaths, "水中・水槽 FX 用 Material");
-        }
-
-        static bool MaterialsAvailable(IEnumerable<string> relativePaths, string label)
-        {
-            var missing = new List<string>();
-            foreach (string relativePath in relativePaths)
-            {
-                if (LoadPackageAsset<Material>(relativePath) == null)
-                {
-                    missing.Add(relativePath);
-                }
-            }
-
-            if (missing.Count == 0) return true;
-
-            EditorUtility.DisplayDialog(
-                "Siliq Water",
-                label + " が見つかりません。\n\n" + string.Join("\n", missing),
-                "OK");
-            return false;
-        }
-
-        static GameObject CreateFxPlane(
-            string name,
-            Transform parent,
-            Vector3 localPosition,
-            Vector3 localEulerAngles,
-            Vector3 localScale,
-            string materialRelativePath,
-            string undoName,
-            float previewTimeScale = 1f,
-            float previewTimeOffset = 0f,
-            int editModePreviewFps = 18)
-        {
-            var go = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            Undo.RegisterCreatedObjectUndo(go, undoName);
-            Undo.SetTransformParent(go.transform, parent, undoName);
-            go.name = name;
-            go.transform.localPosition = localPosition;
-            go.transform.localRotation = Quaternion.Euler(localEulerAngles);
-            go.transform.localScale = localScale;
-
-            var collider = go.GetComponent<Collider>();
-            if (collider != null)
-            {
-                Undo.DestroyObjectImmediate(collider);
-            }
-
-            var renderer = go.GetComponent<MeshRenderer>();
-            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            renderer.receiveShadows = false;
-            renderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
-            renderer.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.Off;
-            renderer.sharedMaterial = LoadPackageAsset<Material>(materialRelativePath);
-
-            var animator = Undo.AddComponent<WaterFxLayerAnimator>(go);
-            animator.targetRenderer = renderer;
-            animator.previewTimeScale = previewTimeScale;
-            animator.previewTimeOffset = previewTimeOffset;
-            animator.editModePreviewFps = editModePreviewFps;
-            animator.ApplyImmediate(previewTimeOffset);
-            return go;
-        }
-
-        static T LoadPackageAsset<T>(string relativePath) where T : Object
-        {
-            string packagePath = "Packages/com.siliq.water-normalmap/" + relativePath;
-            var asset = AssetDatabase.LoadAssetAtPath<T>(packagePath);
-            if (asset != null) return asset;
-
-            string assetPath = "Assets/SiliqWater/" + relativePath;
-            return AssetDatabase.LoadAssetAtPath<T>(assetPath);
-        }
-
         [MenuItem(RootMenu + "最高品質 Hero 水面を作成", false, 2)]
         [MenuItem(GameObjectRootMenu + "最高品質 Hero 水面を作成", false, 2)]
         public static void CreateCrystalLagoonHeroWater()
@@ -316,9 +92,9 @@ namespace Siliq.Water.Editor
                 "Siliq 最高品質 Hero 水面を作成",
                 CrystalLagoonHeroMenuPath,
                 "最高品質 Hero 水面を作成しました。\n\n" +
-                "Hero 専用 normal / height / caustics を使う、透明感と水底光を最優先した水面です。\n" +
-                "まずはこのまま Scene View で、斜めからの反射と水底光を確認してください。\n" +
-                "水底の光が強すぎる場合は WaterSurfaceAnimator の「水底の光」を下げてください。");
+                "Hero 専用 normal / height を使う、透明感と反射を優先した水面です。\n" +
+                "水底の光は水面ではなく、完成セット内の床/caustics overlay など別メッシュへ付けてください。\n" +
+                "高さが見えない場合は、この水面メッシュのまま使ってください。1枚 Quad では実高さが出ません。");
         }
 
         [MenuItem(RootMenu + "クリスタルラグーン水面を作成", false, 3)]
@@ -331,7 +107,7 @@ namespace Siliq.Water.Editor
                 CrystalLagoonMenuPath,
                 "クリスタルラグーン水面を作成しました。\n\n" +
                 "透き通った美しさを優先した水面です。最初はこのまま Play / Scene View で確認してください。\n" +
-                "水底の光が強すぎる場合は WaterSurfaceAnimator の「水底の光」を下げてください。\n" +
+                "水底の光は床や水底用の別メッシュへ caustics overlay material を貼って作ります。\n" +
                 "高さが見えない場合は、この水面メッシュのまま使ってください。1枚 Quad では実高さが出ません。");
         }
 
@@ -616,7 +392,13 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_Opacity")) mat.SetFloat("_Opacity", 0.52f);
             if (mat.HasProperty("_Clarity")) mat.SetFloat("_Clarity", 0.72f);
             if (mat.HasProperty("_RefractionStrength")) mat.SetFloat("_RefractionStrength", 0.28f);
-            if (mat.HasProperty("_BottomGlowStrength")) mat.SetFloat("_BottomGlowStrength", 0.55f);
+            if (mat.HasProperty("_CausticsStrength")) mat.SetFloat("_CausticsStrength", 0f);
+            if (mat.HasProperty("_CausticsSpeed")) mat.SetFloat("_CausticsSpeed", 0f);
+            if (mat.HasProperty("_CausticsPrismStrength")) mat.SetFloat("_CausticsPrismStrength", 0f);
+            if (mat.HasProperty("_CausticsScatterStrength")) mat.SetFloat("_CausticsScatterStrength", 0f);
+            if (mat.HasProperty("_BottomVisibility")) mat.SetFloat("_BottomVisibility", 0f);
+            if (mat.HasProperty("_BottomLightStrength")) mat.SetFloat("_BottomLightStrength", 0f);
+            if (mat.HasProperty("_BottomGlowStrength")) mat.SetFloat("_BottomGlowStrength", 0f);
             if (mat.HasProperty("_DepthTintStrength")) mat.SetFloat("_DepthTintStrength", 0.28f);
             if (mat.HasProperty("_TransmissionStrength")) mat.SetFloat("_TransmissionStrength", 0.72f);
             if (mat.HasProperty("_ReflStrength")) mat.SetFloat("_ReflStrength", 0.92f);

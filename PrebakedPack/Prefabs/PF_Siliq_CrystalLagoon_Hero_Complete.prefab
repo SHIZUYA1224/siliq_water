@@ -317,15 +317,15 @@ MonoBehaviour:
   transmissionStrength: 0.98
   sparkle: 0.44
   highlightStrength: 2
-  causticsStrength: 0.84
+  causticsStrength: 0
   causticsScale: 2.1
-  causticsSpeed: 0.0000045
+  causticsSpeed: 0
   causticsFocus: 2.4
-  causticsPrismStrength: 0.24
-  causticsScatterStrength: 0.74
-  bottomVisibility: 1.75
-  bottomLightStrength: 1.9
-  bottomGlowStrength: 1.05
+  causticsPrismStrength: 0
+  causticsScatterStrength: 0
+  bottomVisibility: 0
+  bottomLightStrength: 0
+  bottomGlowStrength: 0
   depthTintStrength: 0.34
   causticsTint: {r: 0.88, g: 1, b: 0.97, a: 1}
 --- !u!1 &8641218449220747125

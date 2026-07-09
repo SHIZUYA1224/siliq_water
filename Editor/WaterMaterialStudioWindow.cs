@@ -26,8 +26,6 @@ namespace Siliq.Water.Editor
 
         int targetIndex;
         int lookIndex;
-        bool addSurfaceFx;
-        bool addUnderwaterFx;
         Vector2 scroll;
 
         [MenuItem(MenuPath, false, -90)]
@@ -44,7 +42,6 @@ namespace Siliq.Water.Editor
             DrawHeader();
             DrawTarget();
             DrawLook();
-            DrawOptions();
             DrawApply();
             DrawAdvanced();
             EditorGUILayout.EndScrollView();
@@ -55,7 +52,7 @@ namespace Siliq.Water.Editor
             GUILayout.Space(10);
             EditorGUILayout.LabelField("水面マップスタジオ", EditorStyles.boldLabel);
             EditorGUILayout.LabelField(
-                "選択中の水面に、完成Materialを貼って反映します。重い自由生成は通常使いません。",
+                "選択中の水面に、完成Materialを貼って反映します。水底の光は床や水底用の別メッシュに分けます。",
                 EditorStyles.wordWrappedLabel);
             GUILayout.Space(8);
         }
@@ -79,14 +76,6 @@ namespace Siliq.Water.Editor
 
             lookIndex = EditorGUILayout.Popup(lookIndex, labels);
             EditorGUILayout.HelpBox(LookDescription(Looks[lookIndex]), MessageType.None);
-            GUILayout.Space(8);
-        }
-
-        void DrawOptions()
-        {
-            EditorGUILayout.LabelField("追加オプション", EditorStyles.boldLabel);
-            addSurfaceFx = EditorGUILayout.ToggleLeft("水面FXを追加する（水しぶき、泡、光、広がる雨波紋）", addSurfaceFx);
-            addUnderwaterFx = EditorGUILayout.ToggleLeft("水中・水槽FX空間を追加する（霞、粒子、光筋、泡柱）", addUnderwaterFx);
             GUILayout.Space(8);
         }
 
@@ -123,18 +112,7 @@ namespace Siliq.Water.Editor
 
         void ApplySelected()
         {
-            var originalSelection = Selection.objects;
             WaterPackQuickApply.ApplyReadyLookToSelection(Looks[lookIndex], TargetPlatform);
-            if (addSurfaceFx)
-            {
-                Selection.objects = originalSelection;
-                WaterBeginnerSetup.PlaceMobileWaterFxSet();
-            }
-            if (addUnderwaterFx)
-            {
-                Selection.objects = originalSelection;
-                WaterBeginnerSetup.PlaceUnderwaterFxVolumeSet();
-            }
         }
 
         WaterPackQuickApply.TargetPlatform TargetPlatform
@@ -156,7 +134,7 @@ namespace Siliq.Water.Editor
                 case WaterPackQuickApply.TargetPlatform.Ios:
                     return "iOS向け: 透明感を残しつつ、実高さと強い反射を抑えた軽量設定。";
                 default:
-                    return "PC向け: 反射、水底光、透明感を優先した見た目重視設定。";
+                    return "PC向け: 反射、透明感、ゆるい実高さを優先した見た目重視設定。";
             }
         }
 
@@ -171,7 +149,7 @@ namespace Siliq.Water.Editor
                 case WaterPackQuickApply.ReadyLook.ClearSea:
                     return "綺麗な海向け。海らしい青緑、反射、奥行きを持たせます。";
                 case WaterPackQuickApply.ReadyLook.ClearPool:
-                    return "透明プール向け。凹凸を抑え、水底光と抜け感を優先します。";
+                    return "透明プール向け。凹凸を抑え、抜け感を優先します。水底光は別メッシュで足します。";
                 case WaterPackQuickApply.ReadyLook.IndoorBluePool:
                     return "室内プール向け。窓反射と明るい青い水面を強めます。";
                 case WaterPackQuickApply.ReadyLook.FlagshipCrystal:

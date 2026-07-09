@@ -51,32 +51,21 @@ Unity / VRChat 初心者は、最初にこのメニューを使ってくださ�
 
 `Tools > Siliq Water > はじめてガイド`
 
-ガイド内のボタンから、最高品質 Hero 完成セットの配置、透明プール完成セットの配置、iOS/VRChat 水エフェクトセットの配置、水中・水槽 FX 空間の配置、最高品質 Hero 水面の作成、クリスタルラグーン水面の作成、選択中の水面の診断修復、
+ガイド内のボタンから、最高品質 Hero 完成セットの配置、透明プール完成セットの配置、最高品質 Hero 水面の作成、クリスタルラグーン水面の作成、選択中の水面の診断修復、
 README / 用途別ガイド / PrebakedPack の確認に進めます。
 
 見た目を最優先で確認する場合は、床と水底光まで入った完成セットを先に配置してください。
 
 `Tools > Siliq Water > かんたん作成 > 最高品質 Hero 完成セットを配置`
 
-これだけで、分割済み水面メッシュ、Hero 専用 normal / height / caustics を使う透明水マテリアル、明るい床、
+これだけで、分割済み水面メッシュ、Hero 専用 normal / height を使う透明水マテリアル、明るい床、
 床用 Hero caustics overlay、確認用ライトをまとめて配置します。水面だけを作りたい場合は
 `Tools > Siliq Water > かんたん作成 > 最高品質 Hero 水面を作成` を使います。1 枚 Quad では実高さが見えないため、
 この完成セットまたは分割メッシュを基準にしてください。
-このフローは専用の 2048px Hero normal map / height map / caustics map を使うため、Calm や通常 Crystal Lagoon の素材を流用しません。
+このフローは専用の 2048px Hero normal map / height map を水面に使い、水底光は床用 caustics overlay の別メッシュで表現するため、Calm や通常 Crystal Lagoon の素材を流用しません。
 プール用途で自然な透明感から始める場合は `Tools > Siliq Water > かんたん作成 > 透明プール完成セットを配置` を使います。ClearPool 水面、明るい床、SunlitPool 専用 caustics overlay、確認用ライトをまとめて配置します。
 
-水しぶき、泡、水面の光反射、水中の粒子、岸の白い泡、雨粒の波紋を足す場合は次を使います。
-
-`Tools > Siliq Water > かんたん作成 > iOS/VRChat 水エフェクトセットを配置`
-
-これは水面本体ではなく、既存の水面や完成 Prefab に重ねる軽量な演出レイヤーです。6つの薄い Plane に `Siliq/Water FX Mobile (iOS VRChat)` の Ready Material が割り当たります。GrabPass、深度テクスチャ、URP include、Compute Shader は使いません。
-雨波紋は横へスライドせず、中心から広がる設定です。各Planeには編集時プレビューAnimatorが付くため、Play前でも動きが確認できます。
-
-水槽、水中カメラ、水中通路のようにカメラが水中へ入る表現は次を使います。
-
-`Tools > Siliq Water > かんたん作成 > 水中・水槽 FX 空間を配置`
-
-水中の霞、漂う粒子、斜め光筋、泡柱を複数の縦Planeで配置します。海・プールの水面表現に追加するオプションとして使います。
+水底、プール床、水槽底の光は水面とは別のメッシュに付けます。床や水底の少し上へ薄い Plane を置き、`M_Siliq_CrystalLagoon_CausticsOverlay`、Hero では `M_Siliq_CrystalLagoon_Hero_CausticsOverlay`、透明プールでは `M_Siliq_SunlitPool_CausticsOverlay` を貼ってください。水面 Ready material は水面だけを担当します。
 
 すでに作った水面がピンク、透明すぎる、動かない、高さが出ない場合は、対象を選択して次を実行します。
 
@@ -93,9 +82,9 @@ README / 用途別ガイド / PrebakedPack の確認に進めます。
 - `CONTRIBUTING.md`: 変更時の品質基準と検証手順。
 - `.gitignore` / `.gitattributes`: Unity 生成物の混入防止と text/binary 管理。
 
-## 焼き済みパック (PrebakedPack) — ツール不要ですぐ使える基本 5 種 + 旗艦 + Mobile FX
+## 焼き済みパック (PrebakedPack) — ツール不要ですぐ使える基本 5 種 + 旗艦 + 完成 Prefab
 
-ツールを触らなくても、`PrebakedPack/` に**すぐ使える水ノーマルマップ基本 5 種 + フラッグシップ専用 normal / height + アタッチ用完成マテリアル + Mobile FX マスク + Crystal Lagoon / SunlitPool 完成 Prefab + サンプルシーン**が入っています。
+ツールを触らなくても、`PrebakedPack/` に**すぐ使える水ノーマルマップ基本 5 種 + フラッグシップ専用 normal / height + アタッチ用完成マテリアル + 水底用 caustics overlay + Crystal Lagoon / SunlitPool 完成 Prefab + サンプルシーン**が入っています。
 
 | ファイル | 用途 | 確認用マテリアル |
 |---|---|---|
@@ -105,22 +94,16 @@ README / 用途別ガイド / PrebakedPack の確認に進めます。
 | `Water_Normal_Pool_01.png` | プール・浅い水 (控えめな光の網目) | `M_Water_Pool` |
 | `Water_Normal_Cyber_01.png` | 近未来・ホログラム水面 (細いデータ流) | `M_Water_Cyber` |
 | `Water_Normal_FlagshipCrystal_01.png` + `Water_Height_FlagshipCrystal_01.png` | 製品デモ向けの透明水・高反射・実高さ | `M_Water_FlagshipCrystal` |
-| `Water_Normal_CrystalLagoon_01.png` + `Water_Height_CrystalLagoon_01.png` + `Water_Caustics_CrystalLagoon_01.png` | 透き通った浅い水・美しさ特化 | `M_Siliq_CrystalLagoon_Ready` |
-| `Water_Normal_CrystalLagoon_Hero_01.png` + `Water_Height_CrystalLagoon_Hero_01.png` + `Water_Caustics_CrystalLagoon_Hero_01.png` | 最高品質確認用の透明水・柔らかい波面・強い水底光 | `M_Siliq_CrystalLagoon_Hero_Ready` |
-| `WaterFX_SplashSpray_01.png` | 水しぶき・衝突点の飛沫 | `M_Siliq_FX_SplashSpray_Mobile` |
-| `WaterFX_FoamBubbles_01.png` | 水面の泡・泡だまり | `M_Siliq_FX_FoamBubbles_Mobile` |
-| `WaterFX_SurfaceGlint_01.png` | 水面の光反射風の細い帯 | `M_Siliq_FX_SurfaceGlint_Mobile` |
-| `WaterFX_UnderwaterParticles_01.png` | 水中の粒子・小さな気泡 | `M_Siliq_FX_UnderwaterParticles_Mobile` / `M_Siliq_FX_UnderwaterHaze_Mobile` / `M_Siliq_FX_BubbleColumn_Mobile` |
-| `WaterFX_SurfaceGlint_01.png` | 水中の光筋・水面の光反射風 | `M_Siliq_FX_SurfaceGlint_Mobile` / `M_Siliq_FX_UnderwaterLightShafts_Mobile` |
-| `WaterFX_ShoreFoam_01.png` | 岸の白い泡・水際の泡帯 | `M_Siliq_FX_ShoreFoam_Mobile` |
-| `WaterFX_RainRipple_01.png` | 雨粒が落ちた波紋・環境リング | `M_Siliq_FX_RainRipple_Mobile` |
+| `Water_Normal_CrystalLagoon_01.png` + `Water_Height_CrystalLagoon_01.png` | 透き通った浅い水・美しさ特化 | `M_Siliq_CrystalLagoon_Ready` |
+| `Water_Normal_CrystalLagoon_Hero_01.png` + `Water_Height_CrystalLagoon_Hero_01.png` | 最高品質確認用の透明水・柔らかい波面 | `M_Siliq_CrystalLagoon_Hero_Ready` |
+| `Water_Caustics_CrystalLagoon_01.png` | 水底/床メッシュに重ねる Crystal Lagoon 専用 caustics | `M_Siliq_CrystalLagoon_CausticsOverlay` |
+| `Water_Caustics_CrystalLagoon_Hero_01.png` | 水底/床メッシュに重ねる Hero 専用 caustics | `M_Siliq_CrystalLagoon_Hero_CausticsOverlay` |
+| `Water_Caustics_SunlitPool_01.png` | 透明プール/室内プールの床に重ねる柔らかい caustics | `M_Siliq_SunlitPool_CausticsOverlay` |
 
 基本 5 種は **1024×1024 PNG / シームレス / インポート設定済み (NormalMap・Repeat・Android/iOS は ASTC 6x6)**。
-Mobile FX 6 種は **1024×1024 PNG / 個別生成の黒地高品質マスク / sRGB Off / Repeat / Android・iOS は ASTC 6x6**。1枚のアトラスから雑に切り出した素材ではなく、水しぶき、泡、反射、粒子、岸泡、雨波紋それぞれに密度と余白を調整しています。
 フラッグシップ透明水と Crystal Lagoon は専用 **2048×2048 normal map + 2048×2048 height map** を同梱し、用途別 Quick Apply では両方を Siliq 水シェーダーへ割り当てます。
-Crystal Lagoon は水底光も専用 **2048×2048 `Water_Caustics_CrystalLagoon_01.png`** を使い、透明な浅い水の床に黒地から細い焦点線と柔らかい散光が出るようにしています。Hero material は normal / height / caustics すべてを専用 texture にし、さらに明るい焦点線と柔らかい水底光を増やした **2048×2048 `Water_Caustics_CrystalLagoon_Hero_01.png`** を使います。
-透明プール / 室内ブループールには、黒地余白を残しつつ広い床光と柔らかい光リボンを持つ **2048×2048 `Water_Caustics_SunlitPool_01.png`** を割り当てています。
-さらに共通の `Water_Caustics_Crystal_01.png` を同梱し、透明な海・フラッグシップ水では水底に揺れる光模様として使います。これは白い板や強い多角形セルではなく、暗部の抜けを持つ細い光の筋として調整しています。
+Crystal Lagoon / Hero / SunlitPool の caustics は水面 material ではなく、床や水底用の別メッシュへ貼る overlay material で使います。水面に白い線や塩のような模様を混ぜないため、Ready material 側の `_CausticsStrength` / `_BottomVisibility` / `_BottomLightStrength` / `_BottomGlowStrength` は初期値 0 です。
+共通の `Water_Caustics_Crystal_01.png` も同梱していますが、水面に直接混ぜる用途ではなく、必要な時だけ別メッシュ/別material側で使う前提です。
 `PrebakedPack/ReadyMaterials/` には `Siliq/Water Mobile (Quest)` 設定済みの完成マテリアルが入っています。
 `PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab` は、分割済み水面、明るいプール床、床用 caustics overlay、確認用ライトを一体化した完成セットです。さらに `PF_Siliq_CrystalLagoon_Hero_Complete.prefab` は Hero material と Hero caustics overlay を貼った最高品質確認用です。`PF_Siliq_SunlitPool_Complete.prefab` は ClearPool material と SunlitPool caustics overlay を使う、透明プール / 室内プール向けの完成セットです。Prefab を Hierarchy へ置くだけで、透明感と水底光を同時に確認できます。
 完成形の方向性は `PrebakedPack/Preview/preview_crystal_lagoon_complete.png`、最高品質寄りは `PrebakedPack/Preview/preview_crystal_lagoon_hero_complete.png` で確認できます。薄い床、透明な水面、窓の揺れる反射、水底光が一枚で見える初心者向けの目安画像です。
@@ -132,41 +115,29 @@ Crystal Lagoon は水底光も専用 **2048×2048 `Water_Caustics_CrystalLagoon_
 | `M_Siliq_IndoorBluePool_Ready` | 明るい室内プール |
 | `M_Siliq_FlagshipCrystal_Ready` | 製品デモ向けのフラッグシップ透明水 |
 | `M_Siliq_CrystalLagoon_Ready` | 透き通った美しさ特化の水面 |
-| `M_Siliq_CrystalLagoon_Hero_Ready` | 専用 Hero normal / height / caustics で透明感・反射・水底光を強めた最高品質確認用の水面 |
+| `M_Siliq_CrystalLagoon_Hero_Ready` | 専用 Hero normal / height で透明感・反射を強めた最高品質確認用の水面 |
 | `M_Siliq_PalePoolFloor` | Crystal Lagoon 完成 Prefab 用の明るい床。薄いタイル感と水底光の受け皿を持つ |
 | `M_Siliq_CrystalLagoon_CausticsOverlay` | プール床・浅い海底に重ねる Crystal Lagoon 専用の水底光 |
 | `M_Siliq_CrystalLagoon_Hero_CausticsOverlay` | Hero 完成 Prefab 用の強めの床用水底光 |
 | `M_Siliq_SunlitPool_CausticsOverlay` | 透明プール / 室内プールの床に重ねる柔らかい SunlitPool 水底光 |
-| `M_Siliq_FX_SplashSpray_Mobile` | 水しぶき用の加算Plane。衝突点や噴水位置へ置く |
-| `M_Siliq_FX_FoamBubbles_Mobile` | 水面の泡だまり用の透明Plane |
-| `M_Siliq_FX_SurfaceGlint_Mobile` | 水面の光反射風の細い帯を足す加算Plane |
-| `M_Siliq_FX_UnderwaterParticles_Mobile` | 水中の粒子・小さな気泡を足す加算Plane |
-| `M_Siliq_FX_UnderwaterHaze_Mobile` | 水槽や水中カメラ用の薄い霞を足す透明Plane |
-| `M_Siliq_FX_UnderwaterLightShafts_Mobile` | 水中の斜め光筋、天井反射の揺らぎを足す加算Plane |
-| `M_Siliq_FX_BubbleColumn_Mobile` | 水中の泡柱、上昇する細かい泡を足す加算Plane |
-| `M_Siliq_FX_ShoreFoam_Mobile` | 岸やプール端の白泡用の透明Plane |
-| `M_Siliq_FX_RainRipple_Mobile` | 雨粒が落ちた波紋を足す加算Plane。インタラクティブ波紋とは別の軽量演出 |
 | `M_Siliq_BloodSea_Ready` | 血の海・赤い液体 |
 | `M_Siliq_LiquidMetal_Ready` | 液体金属 |
 
 美しさを最優先する場合は、まず `PF_Siliq_CrystalLagoon_Hero_Complete.prefab` か `M_Siliq_CrystalLagoon_Hero_Ready` から確認してください。
-これらは normal map、色、透明度、反射、scroll、実高さ、水底の光の初期値まで設定済みなので、
+これらは normal map、色、透明度、反射、scroll、実高さの初期値まで設定済みなので、
 Renderer にドラッグ&ドロップするだけで水として動きます。`WaterSurfaceAnimator` は必須ではありません。
-床そのものに光を出したい場合は、水底の少し上に薄い Plane を置き、`M_Siliq_CrystalLagoon_CausticsOverlay`、Hero では `M_Siliq_CrystalLagoon_Hero_CausticsOverlay`、透明プールでは `M_Siliq_SunlitPool_CausticsOverlay` を貼ります。これは `Siliq/Caustics Overlay Mobile` を使う軽量な加算 material で、専用 caustics を床に重ねます。床用 overlay も `_Focus` / `_SoftScatter` / `_PrismStrength` を持ち、焦点線、柔らかい散光、薄い色分散を調整できます。水面 material 側にも `_BottomVisibility`、`_BottomGlowStrength`、`_DepthTintStrength` があり、水底や床が水越しに見える量、水底そのものの柔らかい明るさ、奥行きの青みを足せます。
+床そのものに光を出したい場合は、水底の少し上に薄い Plane を置き、`M_Siliq_CrystalLagoon_CausticsOverlay`、Hero では `M_Siliq_CrystalLagoon_Hero_CausticsOverlay`、透明プールでは `M_Siliq_SunlitPool_CausticsOverlay` を貼ります。これは `Siliq/Caustics Overlay Mobile` を使う軽量な加算 material で、専用 caustics を床に重ねます。床用 overlay は `_Focus` / `_SoftScatter` / `_PrismStrength` を持ち、焦点線、柔らかい散光、薄い色分散を調整できます。
 既存の `PrebakedPack/Materials/M_Water_*` は Standard シェーダーの互換・確認用です。
 
-### 一瞬で水面にする 6 つの方法
+### 一瞬で水面にする 5 つの方法
 
 1. **完成 Prefab を置く**: 最高品質確認は `PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Hero_Complete.prefab`、通常確認は `PF_Siliq_CrystalLagoon_Complete.prefab`、透明プール確認は `PF_Siliq_SunlitPool_Complete.prefab` を Hierarchy へドラッグ。
    水面、薄いタイル感のある明るい床、床用 caustics overlay、ライトが一体なので、初心者でも組み立てずに Crystal Lagoon の完成形を確認できます。
-2. **水エフェクトを足す**: `Tools > Siliq Water > かんたん作成 > iOS/VRChat 水エフェクトセットを配置` を押す。
-   水しぶき、泡、水面の光反射、雨粒の波紋、岸の白泡、水中粒子が Plane と Material のセットで置かれます。
-   既存の水面、プール端、水中、衝突点へ必要なPlaneだけ移動して使います。
-3. **水中空間を足す**: 水槽、水中カメラ、水中通路では `Tools > Siliq Water > かんたん作成 > 水中・水槽 FX 空間を配置` を押す。
-   水中の霞、漂う粒子、斜め光筋、泡柱を複数Planeで置きます。
-4. **ドラッグ & ドロップ**: `PrebakedPack/ReadyMaterials/` の `M_Siliq_*_Ready` をシーンのオブジェクトへドラッグ。
+2. **ドラッグ & ドロップ**: `PrebakedPack/ReadyMaterials/` の `M_Siliq_*_Ready` をシーンのオブジェクトへドラッグ。
    同梱 Siliq shader の scroll が最初から入っているため、material だけで波が動きます。
-5. **右クリック一発**: Hierarchy でオブジェクトを選択 → 右クリック →
+3. **水底を別メッシュで足す**: 床や水底の少し上へ薄い Plane を置き、用途に合う `M_Siliq_*_CausticsOverlay` を貼ります。
+   水面 material には水底光を混ぜません。
+4. **右クリック一発**: Hierarchy でオブジェクトを選択 → 右クリック →
    `Siliq Water > 水マテリアルを適用 > 好きな水` — マテリアル適用と同時に
    `WaterSurfaceAnimator` コンポーネントも自動で付き、**再生すると波が流れます**
    `波紋 (Ripple)` だけは例外で、ノーマルを横へ流さず、
@@ -180,7 +151,7 @@ Renderer にドラッグ&ドロップするだけで水として動きます。`
    同梱の `Siliq/Water Mobile (Quest)` を alpha blend 設定にしたマテリアルを生成します。
    正面は透け、斜め視線では Fresnel で反射と不透明感が増え、透過光・細い光・きらめきで水らしさが出るように調整済みです。
    暗い部屋では反射ときらめきを自動で抑えるため、黒背景で水面だけ銀色に浮きにくくなります。
-6. **Crystal Lagoon を確認する**: `PrebakedPack/SampleScene/SC_CrystalLagoon_Showcase.unity` を開くと
+5. **Crystal Lagoon を確認する**: `PrebakedPack/SampleScene/SC_CrystalLagoon_Showcase.unity` を開くと
    分割済み水面、Crystal Lagoon ready material、明るい床、床用 caustics overlay、ライト、カメラが入った状態で透明感と水底光を確認できます。
    基本 5 種を見比べる場合は `SC_WaterNormalMap_Preview.unity` を使います。
 
@@ -194,7 +165,7 @@ Renderer にドラッグ&ドロップするだけで水として動きます。`
 対象プロパティ (`_BumpMap` 等) を持つシェーダーであれば動作します。
 
 インスペクタで動き、色、透明・反射を直接調整できます。
-初期値は低速ですが、止まって見えない値にしています。速く見える場合は `Speed` だけでなく、Siliq 水マテリアル側の `_Scroll1` / `_Scroll2`、高さの `_DisplacementSpeed`、水底光の `_CausticsSpeed` も下げてください。
+初期値は低速ですが、止まって見えない値にしています。速く見える場合は `Speed` だけでなく、Siliq 水マテリアル側の `_Scroll1` / `_Scroll2`、高さの `_DisplacementSpeed` も下げてください。水底光は別メッシュの overlay material 側で調整します。
 
 | 項目 | 内容 |
 |---|---|
@@ -209,15 +180,15 @@ Renderer にドラッグ&ドロップするだけで水として動きます。`
 | **明るい水色 / 深い水色** | 水面の基本色。Standard / URP Lit では明るい水色がベースカラーになる |
 | **反射色** | 空や環境が映り込む色 |
 | **透過光** | 透明水の内側から出る色。水の厚みと透明感を作る |
-| **透明な抜け感** | 水色の濁りを抑え、水底と透過光を見えやすくする |
+| **透明な抜け感** | 水色の濁りを抑え、透過光と奥行きを見えやすくする |
 | **不透明度** | 1 に近いほど濃く、低いほど透ける |
 | **輪郭反射 / 反射量** | 斜め視線の反射と全体の映り込み |
 | **反射パターン** | 空や窓の帯が水面に映る量と大きさ |
 | **透過光量 / ハイライト / きらめき** | 透明感、強い光、細い揺らぎの量 |
-| **暗所** | 暗い部屋や夜寄りのシーンで、水底光の最低明るさ、反射の浮き、細部の光りすぎを調整 |
-| **水底の光** | Caustics map の強さ、細かさ、速度、焦点、色分散、柔らかい広がり、水底の見え方、水底の柔らかい明るさ、奥行きの青み、色。透明プールや浅い海の床に揺れる光を作る |
-| **水底の見え方** | 透明度とは別に、床や水底が水越しに残る量。透明水がただの薄い板に見える時に上げる |
-| **水底光の透け** | 水底光が水面越しに見える量。Crystal Lagoon では高め |
+| **暗所** | 暗い部屋や夜寄りのシーンで、反射の浮き、細部の光りすぎを調整 |
+| **水底の光** | 通常は 0 のままにします。水底/床の caustics は別メッシュの overlay material で調整します |
+| **水底の見え方** | 通常は 0 のままにします。透明な抜け感は `Opacity` / `Clarity` / `Refraction` / `Depth Tint` で調整します |
+| **水底光の透け** | 通常は 0 のままにします。水面に塩のような白線を混ぜないための分離項目です |
 
 **Play ボタンを押さなくても、値を変えるとシーンビュー上でその場に反映**されます。
 Standard / URP Lit / VRChat Mobile 系では `_BumpMap` の UV、`_BumpScale`、色 alpha を、
@@ -307,8 +278,8 @@ https://github.com/shizuya1224/siliq_water.git
 1. メニューの **Tools > Siliq Water > 水面マップスタジオ** を開く
 2. **PC / Quest / iOS** を選ぶ
 3. **見た目**から、クリスタルラグーン Hero / クリスタルラグーン / 美しい海 / 透明プールなどを選ぶ
-4. 必要なら **水面FX** または **水中・水槽FX空間** を ON にする
-5. **選択中の水面へ反映** を押す
+4. **選択中の水面へ反映** を押す
+5. 水底光が必要なら、床や水底用の別メッシュに `M_Siliq_*_CausticsOverlay` を貼る
 
 手続き生成で PNG を作り直したい場合だけ、`Tools > Siliq Water > 上級者向け > 水面マップ生成スタジオ` を開きます。
 

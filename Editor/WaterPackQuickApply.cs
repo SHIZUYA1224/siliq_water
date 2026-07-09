@@ -157,15 +157,15 @@ namespace Siliq.Water.Editor
             macroDirectionBreakup = 0.40f,
             macroColorVariation = 0.18f,
             causticsGuid = SunlitPoolCausticsGuid,
-            causticsStrength = 0.28f,
+            causticsStrength = 0f,
             causticsScale = 1.9f,
-            causticsSpeed = 0.000007f,
+            causticsSpeed = 0f,
             causticsFocus = 1.35f,
-            causticsPrismStrength = 0.08f,
-            causticsScatterStrength = 0.28f,
-            bottomVisibility = 1.05f,
-            bottomLightStrength = 1.15f,
-            bottomGlowStrength = 0.55f,
+            causticsPrismStrength = 0f,
+            causticsScatterStrength = 0f,
+            bottomVisibility = 0f,
+            bottomLightStrength = 0f,
+            bottomGlowStrength = 0f,
             depthTintStrength = 0.38f,
             causticsTint = new Color(0.68f, 1f, 1f, 1f),
         };
@@ -213,15 +213,15 @@ namespace Siliq.Water.Editor
             macroDirectionBreakup = 0.22f,
             macroColorVariation = 0.10f,
             causticsGuid = SunlitPoolCausticsGuid,
-            causticsStrength = 0.46f,
+            causticsStrength = 0f,
             causticsScale = 2.4f,
-            causticsSpeed = 0.000007f,
+            causticsSpeed = 0f,
             causticsFocus = 1.55f,
-            causticsPrismStrength = 0.12f,
-            causticsScatterStrength = 0.36f,
-            bottomVisibility = 1.35f,
-            bottomLightStrength = 1.35f,
-            bottomGlowStrength = 0.70f,
+            causticsPrismStrength = 0f,
+            causticsScatterStrength = 0f,
+            bottomVisibility = 0f,
+            bottomLightStrength = 0f,
+            bottomGlowStrength = 0f,
             depthTintStrength = 0.24f,
             causticsTint = new Color(0.84f, 1f, 1f, 1f),
         };
@@ -269,15 +269,15 @@ namespace Siliq.Water.Editor
             macroDirectionBreakup = 0.18f,
             macroColorVariation = 0.10f,
             causticsGuid = CrystalCausticsGuid,
-            causticsStrength = 0.58f,
+            causticsStrength = 0f,
             causticsScale = 1.7f,
-            causticsSpeed = 0.000007f,
+            causticsSpeed = 0f,
             causticsFocus = 1.45f,
-            causticsPrismStrength = 0.14f,
-            causticsScatterStrength = 0.42f,
-            bottomVisibility = 1.30f,
-            bottomLightStrength = 1.35f,
-            bottomGlowStrength = 0.72f,
+            causticsPrismStrength = 0f,
+            causticsScatterStrength = 0f,
+            bottomVisibility = 0f,
+            bottomLightStrength = 0f,
+            bottomGlowStrength = 0f,
             depthTintStrength = 0.26f,
             causticsTint = new Color(0.82f, 0.98f, 1f, 1f),
         };
@@ -326,15 +326,15 @@ namespace Siliq.Water.Editor
             macroDirectionBreakup = 0.18f,
             macroColorVariation = 0.10f,
             causticsGuid = CrystalCausticsGuid,
-            causticsStrength = 0.64f,
+            causticsStrength = 0f,
             causticsScale = 2.1f,
-            causticsSpeed = 0.000007f,
+            causticsSpeed = 0f,
             causticsFocus = 1.75f,
-            causticsPrismStrength = 0.16f,
-            causticsScatterStrength = 0.48f,
-            bottomVisibility = 1.20f,
-            bottomLightStrength = 1.45f,
-            bottomGlowStrength = 0.76f,
+            causticsPrismStrength = 0f,
+            causticsScatterStrength = 0f,
+            bottomVisibility = 0f,
+            bottomLightStrength = 0f,
+            bottomGlowStrength = 0f,
             depthTintStrength = 0.32f,
             causticsTint = new Color(0.76f, 1f, 0.98f, 1f),
         };
@@ -384,15 +384,15 @@ namespace Siliq.Water.Editor
             macroDirectionBreakup = 0.14f,
             macroColorVariation = 0.08f,
             causticsGuid = CrystalLagoonCausticsGuid,
-            causticsStrength = 0.72f,
+            causticsStrength = 0f,
             causticsScale = 2.25f,
-            causticsSpeed = 0.0000055f,
+            causticsSpeed = 0f,
             causticsFocus = 2.0f,
-            causticsPrismStrength = 0.18f,
-            causticsScatterStrength = 0.58f,
-            bottomVisibility = 1.55f,
-            bottomLightStrength = 1.70f,
-            bottomGlowStrength = 0.82f,
+            causticsPrismStrength = 0f,
+            causticsScatterStrength = 0f,
+            bottomVisibility = 0f,
+            bottomLightStrength = 0f,
+            bottomGlowStrength = 0f,
             depthTintStrength = 0.30f,
             causticsTint = new Color(0.84f, 1f, 0.96f, 1f),
         };
@@ -442,15 +442,15 @@ namespace Siliq.Water.Editor
             macroDirectionBreakup = 0.16f,
             macroColorVariation = 0.07f,
             causticsGuid = CrystalLagoonHeroCausticsGuid,
-            causticsStrength = 0.84f,
+            causticsStrength = 0f,
             causticsScale = 2.1f,
-            causticsSpeed = 0.0000045f,
+            causticsSpeed = 0f,
             causticsFocus = 2.4f,
-            causticsPrismStrength = 0.24f,
-            causticsScatterStrength = 0.74f,
-            bottomVisibility = 1.75f,
-            bottomLightStrength = 1.90f,
-            bottomGlowStrength = 1.05f,
+            causticsPrismStrength = 0f,
+            causticsScatterStrength = 0f,
+            bottomVisibility = 0f,
+            bottomLightStrength = 0f,
+            bottomGlowStrength = 0f,
             depthTintStrength = 0.34f,
             causticsTint = new Color(0.88f, 1f, 0.97f, 1f),
         };
@@ -498,15 +498,15 @@ namespace Siliq.Water.Editor
             macroDirectionBreakup = 0.42f,
             macroColorVariation = 0.28f,
             causticsGuid = CrystalCausticsGuid,
-            causticsStrength = 0.06f,
+            causticsStrength = 0f,
             causticsScale = 1.4f,
-            causticsSpeed = 0.0000055f,
+            causticsSpeed = 0f,
             causticsFocus = 1.1f,
-            causticsPrismStrength = 0.02f,
-            causticsScatterStrength = 0.04f,
-            bottomVisibility = 0.15f,
-            bottomLightStrength = 0.35f,
-            bottomGlowStrength = 0.10f,
+            causticsPrismStrength = 0f,
+            causticsScatterStrength = 0f,
+            bottomVisibility = 0f,
+            bottomLightStrength = 0f,
+            bottomGlowStrength = 0f,
             depthTintStrength = 0.55f,
             causticsTint = new Color(1f, 0.22f, 0.16f, 1f),
         };
@@ -1033,7 +1033,7 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_GlimmerIntensity")) mat.SetFloat("_GlimmerIntensity", Mathf.Min(mat.GetFloat("_GlimmerIntensity"), target == TargetPlatform.Quest ? 0.20f : 0.18f));
             if (mat.HasProperty("_GlintIntensity")) mat.SetFloat("_GlintIntensity", Mathf.Min(mat.GetFloat("_GlintIntensity"), target == TargetPlatform.Quest ? 0.55f : 0.48f));
             if (mat.HasProperty("_NormalStrength")) mat.SetFloat("_NormalStrength", Mathf.Min(mat.GetFloat("_NormalStrength"), target == TargetPlatform.Quest ? 0.50f : 0.42f));
-            if (mat.HasProperty("_CausticsStrength")) mat.SetFloat("_CausticsStrength", Mathf.Min(mat.GetFloat("_CausticsStrength"), target == TargetPlatform.Quest ? 0.62f : 0.55f));
+            if (mat.HasProperty("_CausticsStrength")) mat.SetFloat("_CausticsStrength", 0f);
             if (mat.HasProperty("_CausticsSpeed")) mat.SetFloat("_CausticsSpeed", Mathf.Min(mat.GetFloat("_CausticsSpeed"), target == TargetPlatform.Quest ? 0.0000045f : 0.0000035f));
 
             if (!liquidMetal && mat.HasProperty("_Opacity"))
@@ -1259,7 +1259,13 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_EdgeReflection")) mat.SetFloat("_EdgeReflection", 0f);
             if (mat.HasProperty("_RefractionStrength")) mat.SetFloat("_RefractionStrength", 0f);
             if (mat.HasProperty("_ReflectionPatternStrength")) mat.SetFloat("_ReflectionPatternStrength", 0f);
+            if (mat.HasProperty("_CausticsMap")) mat.SetTexture("_CausticsMap", null);
+            if (mat.HasProperty("_CausticsStrength")) mat.SetFloat("_CausticsStrength", 0f);
+            if (mat.HasProperty("_CausticsSpeed")) mat.SetFloat("_CausticsSpeed", 0f);
+            if (mat.HasProperty("_CausticsPrismStrength")) mat.SetFloat("_CausticsPrismStrength", 0f);
+            if (mat.HasProperty("_CausticsScatterStrength")) mat.SetFloat("_CausticsScatterStrength", 0f);
             if (mat.HasProperty("_BottomVisibility")) mat.SetFloat("_BottomVisibility", 0f);
+            if (mat.HasProperty("_BottomLightStrength")) mat.SetFloat("_BottomLightStrength", 0f);
             if (mat.HasProperty("_BottomGlowStrength")) mat.SetFloat("_BottomGlowStrength", 0f);
             if (mat.HasProperty("_DepthTintStrength")) mat.SetFloat("_DepthTintStrength", 0f);
             if (mat.HasProperty("_SrcBlend")) mat.SetFloat("_SrcBlend", (float)BlendMode.One);
@@ -1281,7 +1287,7 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_AlphaPower")) mat.SetFloat("_AlphaPower", 2.05f);
             if (mat.HasProperty("_EdgeReflection")) mat.SetFloat("_EdgeReflection", 0.70f);
             if (mat.HasProperty("_RefractionStrength")) mat.SetFloat("_RefractionStrength", 0.28f);
-            if (mat.HasProperty("_BottomGlowStrength")) mat.SetFloat("_BottomGlowStrength", 0.55f);
+            if (mat.HasProperty("_BottomGlowStrength")) mat.SetFloat("_BottomGlowStrength", 0f);
             if (mat.HasProperty("_DepthTintStrength")) mat.SetFloat("_DepthTintStrength", 0.28f);
             if (mat.HasProperty("_TransmissionStrength")) mat.SetFloat("_TransmissionStrength", 0.70f);
             if (mat.HasProperty("_GlimmerIntensity")) mat.SetFloat("_GlimmerIntensity", 0.28f);
@@ -1298,20 +1304,16 @@ namespace Siliq.Water.Editor
             if (mat.HasProperty("_DisplacementScale")) mat.SetFloat("_DisplacementScale", 0.70f);
             if (mat.HasProperty("_DisplacementSpeed")) mat.SetFloat("_DisplacementSpeed", 0.000060f);
             if (mat.HasProperty("_HeightMapInfluence")) mat.SetFloat("_HeightMapInfluence", 0f);
-            if (mat.HasProperty("_CausticsMap"))
-            {
-                Texture caustics = LoadTexture(CrystalCausticsGuid, "Water_Caustics_Crystal_01");
-                if (caustics != null) mat.SetTexture("_CausticsMap", caustics);
-            }
-            if (mat.HasProperty("_CausticsStrength")) mat.SetFloat("_CausticsStrength", 0.30f);
+            if (mat.HasProperty("_CausticsMap")) mat.SetTexture("_CausticsMap", null);
+            if (mat.HasProperty("_CausticsStrength")) mat.SetFloat("_CausticsStrength", 0f);
             if (mat.HasProperty("_CausticsScale")) mat.SetFloat("_CausticsScale", 1.8f);
-            if (mat.HasProperty("_CausticsSpeed")) mat.SetFloat("_CausticsSpeed", 0.000007f);
+            if (mat.HasProperty("_CausticsSpeed")) mat.SetFloat("_CausticsSpeed", 0f);
             if (mat.HasProperty("_CausticsFocus")) mat.SetFloat("_CausticsFocus", 1.35f);
-            if (mat.HasProperty("_CausticsPrismStrength")) mat.SetFloat("_CausticsPrismStrength", 0.08f);
-            if (mat.HasProperty("_CausticsScatterStrength")) mat.SetFloat("_CausticsScatterStrength", 0.30f);
-            if (mat.HasProperty("_BottomVisibility")) mat.SetFloat("_BottomVisibility", 1.15f);
-            if (mat.HasProperty("_BottomLightStrength")) mat.SetFloat("_BottomLightStrength", 1.20f);
-            if (mat.HasProperty("_BottomGlowStrength")) mat.SetFloat("_BottomGlowStrength", 0.55f);
+            if (mat.HasProperty("_CausticsPrismStrength")) mat.SetFloat("_CausticsPrismStrength", 0f);
+            if (mat.HasProperty("_CausticsScatterStrength")) mat.SetFloat("_CausticsScatterStrength", 0f);
+            if (mat.HasProperty("_BottomVisibility")) mat.SetFloat("_BottomVisibility", 0f);
+            if (mat.HasProperty("_BottomLightStrength")) mat.SetFloat("_BottomLightStrength", 0f);
+            if (mat.HasProperty("_BottomGlowStrength")) mat.SetFloat("_BottomGlowStrength", 0f);
             if (mat.HasProperty("_DepthTintStrength")) mat.SetFloat("_DepthTintStrength", 0.28f);
             if (mat.HasProperty("_CausticsTint")) mat.SetColor("_CausticsTint", new Color(0.78f, 1f, 1f, 1f));
             if (mat.HasProperty("_SrcBlend")) mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
@@ -1449,7 +1451,12 @@ namespace Siliq.Water.Editor
 
         static void ApplySiliqCaustics(Material mat, LookPreset preset)
         {
-            if (mat == null || !mat.HasProperty("_CausticsMap") || string.IsNullOrEmpty(preset.causticsGuid)) return;
+            if (mat == null || !mat.HasProperty("_CausticsMap")) return;
+            if (string.IsNullOrEmpty(preset.causticsGuid) || preset.causticsStrength <= 0f)
+            {
+                mat.SetTexture("_CausticsMap", null);
+                return;
+            }
 
             Texture caustics = LoadTexture(preset.causticsGuid, "Water_Caustics_Crystal_01");
             if (caustics != null)

@@ -11,8 +11,6 @@ namespace Siliq.Water.Editor
         internal const string MenuPath = "Tools/Siliq Water/はじめてガイド";
         internal const string PlaceCrystalLagoonHeroCompleteActionLabel = "最高品質 Hero 完成セットを配置";
         internal const string PlaceSunlitPoolCompleteActionLabel = "透明プール完成セットを配置";
-        internal const string PlaceMobileFxSetActionLabel = "iOS/VRChat 水エフェクトセットを配置";
-        internal const string PlaceUnderwaterFxVolumeActionLabel = "水中・水槽 FX 空間を配置";
         internal const string CreateCrystalLagoonHeroActionLabel = "最高品質 Hero 水面を作成";
         internal const string CreateCrystalLagoonActionLabel = "クリスタルラグーン水面を作成";
         internal const string CreateFlagshipActionLabel = "フラッグシップ水面を作成";
@@ -69,16 +67,6 @@ namespace Siliq.Water.Editor
                 WaterBeginnerSetup.PlaceSunlitPoolCompletePrefab();
             }
 
-            if (GUILayout.Button(PlaceMobileFxSetActionLabel, GUILayout.Height(34)))
-            {
-                WaterBeginnerSetup.PlaceMobileWaterFxSet();
-            }
-
-            if (GUILayout.Button(PlaceUnderwaterFxVolumeActionLabel, GUILayout.Height(34)))
-            {
-                WaterBeginnerSetup.PlaceUnderwaterFxVolumeSet();
-            }
-
             if (GUILayout.Button(CreateCrystalLagoonHeroActionLabel, GUILayout.Height(34)))
             {
                 WaterBeginnerSetup.CreateCrystalLagoonHeroWater();
@@ -112,9 +100,8 @@ namespace Siliq.Water.Editor
         {
             EditorGUILayout.LabelField("水が安っぽく見える時の確認", EditorStyles.boldLabel);
             Bullet("すぐ使う場合は PrebakedPack/ReadyMaterials の M_Siliq_*_Ready をドラッグします。material だけで波が動きます。");
-            Bullet("美しさを最優先する場合は Hero 完成セット、プール用途なら透明プール完成セットを配置します。水面、明るい床、水底光 overlay が最初から入っています。");
-            Bullet("水しぶき、泡、水面の光反射、岸の白泡、水中粒子、雨波紋は iOS/VRChat 水エフェクトセットを配置して、必要なPlaneだけ動かします。");
-            Bullet("水槽、水中カメラ、水中通路は水中・水槽 FX 空間を配置します。奥行き用の霞、粒子、光筋、泡柱が最初から複数Planeで入ります。");
+            Bullet("美しさを最優先する場合は Hero 完成セット、プール用途なら透明プール完成セットを配置します。水面、明るい床、水底用 caustics overlay が別メッシュで入っています。");
+            Bullet("水底やプール床の模様は水面ではなく、床や水底用の別メッシュに caustics overlay material を貼って作ります。");
             Bullet("normal だけでは透明感は出ません。ReadyMaterials か用途別マテリアルで色、透明度、反射、ハイライトも設定します。");
             Bullet("高さはメッシュの頂点変位です。1 枚 Quad では見えないため、分割メッシュを使います。");
             Bullet("ピンク material は shader 不一致です。診断修復で現在の Render Pipeline に合う material へ差し替えます。");
@@ -127,8 +114,7 @@ namespace Siliq.Water.Editor
             EditorGUILayout.LabelField("VRChat / Quest / iOS", EditorStyles.boldLabel);
             Bullet("Quest アバターはカスタムシェーダー不可です。生成 normal PNG を VRChat/Mobile/Standard Lite の Normal Map に入れます。");
             Bullet("ワールドでは Siliq/Water Mobile (Quest) を優先します。透明・反射を強くしすぎると重くなります。");
-            Bullet("水エフェクトセットは GrabPass / Depth / URP なしの Unlit 透明/加算Planeです。iOS/VRChat向けの軽い演出から始められます。");
-            Bullet("水中・水槽 FX 空間も同じ軽量 shader です。Play前のScene Viewでも漂いが見えるよう、各Planeに編集時プレビューAnimatorが付きます。");
+            Bullet("水底の光を使う場合は、Quest/iOS でも水面 material に混ぜず、床や水底側の別メッシュを薄く重ねます。");
             Bullet("PC 専用の見た目を作る場合は用途別プリセット、Quest/iOS では normal 解像度と透明描画を控えめにします。");
             GUILayout.Space(8);
         }
