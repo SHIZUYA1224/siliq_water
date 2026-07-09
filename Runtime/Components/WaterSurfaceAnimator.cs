@@ -20,7 +20,7 @@ namespace Siliq.Water
     public class WaterSurfaceAnimator : MonoBehaviour
     {
         const float MaxSurfaceSpeed = 0.6f;
-        const float SurfaceSpeedToUvPerSecond = 0.000022f;
+        const float SurfaceSpeedToUvPerSecond = 0.016f;
         const int DefaultEditModePreviewFps = 10;
 
         [Tooltip("スクロールさせるテクスチャのプロパティ名。Standard/URP Lit/VRChat Mobile は _BumpMap、Siliq 独自シェーダーは _NormalMap。")]
@@ -40,7 +40,7 @@ namespace Siliq.Water
         [Range(0f, 360f)] public float directionDegrees = 30f;
 
         [Tooltip("流れる速さ。0で静止、0.3が静かな水面の中間。内部で強く減速し、透明水が速く滑って見えないようにしています。")]
-        [Range(0f, MaxSurfaceSpeed)] public float speed = 0.00025f;
+        [Range(0f, MaxSurfaceSpeed)] public float speed = 0.16f;
 
         [Header("見た目")]
         [Tooltip("凹凸の強さ。シェーダーに _BumpScale (Standard 等) がある場合のみ有効。")]
@@ -205,6 +205,7 @@ namespace Siliq.Water
         int bottomGlowStrengthPropertyId;
         int depthTintStrengthPropertyId;
         int causticsTintPropertyId;
+        int manualTimePropertyId;
         string cachedPropertyName;
         Vector2 baseTextureScale = Vector2.one;
         Vector2 baseTextureOffset = Vector2.zero;
@@ -220,6 +221,8 @@ namespace Siliq.Water
         bool hasColorProperty;
         bool hasBaseColorProperty;
         bool hasSiliqScrollControls;
+        bool hasManualPreviewTime;
+        float manualPreviewTime;
 
 #if UNITY_EDITOR
         double lastEditorTime;
@@ -305,6 +308,7 @@ namespace Siliq.Water
             bottomGlowStrengthPropertyId = Shader.PropertyToID("_BottomGlowStrength");
             depthTintStrengthPropertyId = Shader.PropertyToID("_DepthTintStrength");
             causticsTintPropertyId = Shader.PropertyToID("_CausticsTint");
+            manualTimePropertyId = Shader.PropertyToID("_ManualTime");
         }
 
         void Update()
@@ -573,6 +577,7 @@ namespace Siliq.Water
             hasColorProperty = false;
             hasBaseColorProperty = false;
             hasSiliqScrollControls = false;
+            hasManualPreviewTime = false;
             baseTextureScale = Vector2.one;
             baseTextureOffset = Vector2.zero;
             mainTexBaseScale = Vector2.one;
@@ -621,6 +626,7 @@ namespace Siliq.Water
                                      targetMaterial.HasProperty(scroll2PropertyId) ||
                                      targetMaterial.HasProperty(tiling1PropertyId) ||
                                      targetMaterial.HasProperty(normalStrengthPropertyId);
+            hasManualPreviewTime = targetMaterial.HasProperty(manualTimePropertyId);
         }
 
         bool TryCacheTextureTransform(string propertyName, int propertyId, out Vector2 scale, out Vector2 offset)
@@ -664,6 +670,10 @@ namespace Siliq.Water
             offset += dir * effectiveSpeed * dt;
             offset.x %= 1f;
             offset.y %= 1f;
+            if (!Application.isPlaying && dt > 0f)
+            {
+                manualPreviewTime = Mathf.Repeat(manualPreviewTime + dt, 10000f);
+            }
 
             EnsurePropertyBlock();
             var materials = targetRenderer.sharedMaterials;
@@ -708,6 +718,10 @@ namespace Siliq.Water
             if (targetMaterial.HasProperty(heightMapInfluencePropertyId))
             {
                 propertyBlock.SetFloat(heightMapInfluencePropertyId, Mathf.Clamp01(heightMapInfluence));
+            }
+            if (hasManualPreviewTime)
+            {
+                propertyBlock.SetFloat(manualTimePropertyId, Application.isPlaying ? 0f : manualPreviewTime);
             }
 
             ApplyLookControls();

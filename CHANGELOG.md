@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.84] - 2026-07-09
+
+### 修正: 完成 Material / Prefab の水面速度が止まって見える問題を修正
+- `WaterSurfaceAnimator` の `Speed` を 0-0.6 の操作値として扱い、0.3 が目で追える中間速度になるよう内部変換を修正
+- Ready Material と完成 Prefab の `speed` / `_Scroll1` / `_Scroll2` を極小値から見える低速値へ再調整
+- Siliq 水面 shader と URP sample shader に `_ManualTime` を追加し、Play 前の Scene View でも編集時プレビューが動くようにした
+- テストで `0.00001` 系の止まって見える水面速度へ戻らないよう固定
+
 ## [2.3.83] - 2026-07-09
 
 ### 改善: Studio を軽い完成 Material 適用画面へ整理

@@ -56,6 +56,8 @@ Shader "Siliq/Water URP"
         _RippleLifetime ("波紋の持続時間 (秒)", Range(0.5, 10)) = 4.2
         _RippleAmplitude ("波紋の強さ", Range(0, 3)) = 0.45
         _RippleChannel ("波紋チャンネル", Float) = 0
+
+        [HideInInspector] _ManualTime ("Manual Preview Time", Float) = 0
     }
 
     SubShader
@@ -136,11 +138,17 @@ Shader "Siliq/Water URP"
                 float _RippleLifetime;
                 float _RippleAmplitude;
                 float _RippleChannel;
+                float _ManualTime;
             CBUFFER_END
+
+            float SiliqAnimationTime()
+            {
+                return _Time.y + _ManualTime;
+            }
 
             float SiliqMacroNoise(float2 p)
             {
-                float time = _Time.y;
+                float time = SiliqAnimationTime();
                 float a = sin(dot(p, float2(1.27, 2.31)) + time * 0.07);
                 float b = sin(dot(p, float2(-2.14, 1.43)) - time * 0.05);
                 float c = sin(dot(p, float2(0.63, -1.19)) + time * 0.03);
@@ -239,7 +247,7 @@ Shader "Siliq/Water URP"
 
             half3 SampleWaterNormal(float2 uv, float3 positionWS, out half macroMask)
             {
-                float time = _Time.y;
+                float time = SiliqAnimationTime();
                 float macroScale = max(_MacroScale, 0.0001h);
                 half macroA = SiliqMacroNoise(positionWS.xz * macroScale);
                 half macroB = SiliqMacroNoise(positionWS.xz * macroScale * 1.71 + float2(13.1, 7.7));
@@ -344,9 +352,10 @@ Shader "Siliq/Water URP"
                 half3 visibleBottomCol = lerp(_ShallowColor.rgb, half3(0.82h, 1.0h, 1.0h), 0.42h);
                 baseCol = lerp(baseCol, visibleBottomCol, saturate(bottomVisibility * 0.24h));
                 half3 color = lerp(baseCol, reflection, fresnel) + spec;
+                float time = SiliqAnimationTime();
                 float causticsScale = max((float)_CausticsScale, 0.001);
-                float2 causticsUvA = input.positionWS.xz * causticsScale * 0.12 + normalWS.xz * (0.10 + refraction * 0.24) + _Time.y * _CausticsSpeed * float2(0.33, 0.21);
-                float2 causticsUvB = SiliqRotate2D(input.positionWS.xz + refractOffset * 0.42, 1.17) * causticsScale * 0.09 - normalWS.xz * (0.08 + refraction * 0.18) - _Time.y * _CausticsSpeed * float2(0.19, 0.29);
+                float2 causticsUvA = input.positionWS.xz * causticsScale * 0.12 + normalWS.xz * (0.10 + refraction * 0.24) + time * _CausticsSpeed * float2(0.33, 0.21);
+                float2 causticsUvB = SiliqRotate2D(input.positionWS.xz + refractOffset * 0.42, 1.17) * causticsScale * 0.09 - normalWS.xz * (0.08 + refraction * 0.18) - time * _CausticsSpeed * float2(0.19, 0.29);
                 half causticsA = SAMPLE_TEXTURE2D(_CausticsMap, sampler_CausticsMap, causticsUvA).r;
                 half causticsB = SAMPLE_TEXTURE2D(_CausticsMap, sampler_CausticsMap, causticsUvB).r;
                 half causticsPrismR = SAMPLE_TEXTURE2D(_CausticsMap, sampler_CausticsMap, causticsUvA + normalWS.xz * 0.013 + float2(0.004, -0.002)).r;
@@ -368,7 +377,7 @@ Shader "Siliq/Water URP"
 
                 #if defined(_SHORE_EFFECTS)
                 // 岸辺フォーム: フォームマスクを流しつつフォームラインで乗せる
-                half foamMask = SAMPLE_TEXTURE2D(_FoamMap, sampler_FoamMap, input.uv * _FoamTiling + _Scroll1.xy * _Time.y).r;
+                half foamMask = SAMPLE_TEXTURE2D(_FoamMap, sampler_FoamMap, input.uv * _FoamTiling + _Scroll1.xy * time).r;
                 half foam = saturate(foamLine * (0.6h + foamMask));
                 color = lerp(color, _FoamColor.rgb, foam * _FoamColor.a);
                 // 水際は透明に近づけてなじませる

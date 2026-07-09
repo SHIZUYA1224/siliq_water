@@ -194,12 +194,12 @@ Renderer にドラッグ&ドロップするだけで水として動きます。`
 対象プロパティ (`_BumpMap` 等) を持つシェーダーであれば動作します。
 
 インスペクタで動き、色、透明・反射を直接調整できます。
-初期値はかなり低速です。速く見える場合は `Speed` だけでなく、Siliq 水マテリアル側の `_Scroll1` / `_Scroll2`、高さの `_DisplacementSpeed`、水底光の `_CausticsSpeed` も下げてください。
+初期値は低速ですが、止まって見えない値にしています。速く見える場合は `Speed` だけでなく、Siliq 水マテリアル側の `_Scroll1` / `_Scroll2`、高さの `_DisplacementSpeed`、水底光の `_CausticsSpeed` も下げてください。
 
 | 項目 | 内容 |
 |---|---|
 | **方向 (度)** | 波が流れる向き。0=右、90=上、180=左、270=下 |
-| **速さ** | 流れる速さ。0 で静止。0.3 が静かな水面の中間操作値で、内部で非常に強く減速されるため 0.6 でも速く滑りにくい水面 |
+| **速さ** | 流れる速さ。0 で静止。0.3 が静かな水面の中間操作値。0.15-0.2 が完成Prefabの低速基準 |
 | **Edit Mode Preview Fps** | 編集中プレビューの更新回数。低いほど軽い |
 | **強さ** | 凹凸の強さ (シェーダーに `_BumpScale` / `_NormalStrength` がある場合) |
 | **模様の大きさ** | 1 が元のサイズ、大きいほど模様が細かく見える |
@@ -227,11 +227,11 @@ Standard / URP Lit / VRChat Mobile 系では `_BumpMap` の UV、`_BumpScale`、
 `_ShallowColor` / `_DeepColor` / `_HorizonColor` / `_TransmissionColor` /
 `_Opacity` / `_Clarity` / `_RefractionStrength` / `_EdgeReflection` / `_ReflStrength` / `_ReflectionPatternStrength` / `_ReflectionPatternScale` /
 `_MinLighting` / `_DarkReflectionDamping` / `_DarkDetailDamping` / `_CausticsTint` などと一緒に
-`MaterialPropertyBlock` 経由で動かすため、共有マテリアルを汚さずに調整できます。
+`MaterialPropertyBlock` 経由で動かすため、共有マテリアルを汚さずに調整できます。Siliq 水シェーダーは `_ManualTime` も受け取り、Unity の Scene View 更新設定に依存せず編集時プレビューを動かせます。
 実際の高さは頂点変位なので、1 枚ポリゴンの Quad では見えにくいです。Unity 標準の Plane や細分化された水面メッシュを使ってください。
 PC の発熱を避けるため、編集モードの連続プレビューは**選択中の水面だけ**最大 10fps で更新されます。
 重い場合は `Animate In Edit Mode` を OFF にするか、`Edit Mode Preview Fps` を下げてください。
-右クリック適用時は、水の種類ごとに微速の初期値が入ります。Hero / Crystal Lagoon / 透明プールは特に低速です。速く見える場合はまず **速さ** を 0.01 以下、**高さの速度** を 0.00008 以下、**水底の光の速度** を 0.000012 以下まで下げてください。
+右クリック適用時は、水の種類ごとに低速の初期値が入ります。Hero / Crystal Lagoon / 透明プールは 0.14-0.16 前後から始まり、止まって見えないが速く滑らない基準です。速く見える場合はまず **速さ** を 0.05-0.12、**高さの速度** を 0.00008 以下、**水底の光の速度** を 0.000012 以下まで下げてください。
 ただし `波紋 (Ripple)` はスライドさせると水滴の波紋として不自然なので、
 このコンポーネントの速度は 0 にし、下記の `WaterRippleEmitter` で同心円が広がる表現にしています。
 

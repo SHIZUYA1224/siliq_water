@@ -35,8 +35,8 @@ Shader "Siliq/Water Mobile (Quest)"
         _NormalStrength ("ノーマル強度", Range(0, 2)) = 1
         _Tiling1 ("レイヤー1 タイリング", Float) = 1
         _Tiling2 ("レイヤー2 タイリング", Float) = 2.7
-        _Scroll1 ("レイヤー1 スクロール (XY)", Vector) = (0.000040, 0.000015, 0, 0)
-        _Scroll2 ("レイヤー2 スクロール (XY)", Vector) = (-0.000012, 0.000028, 0, 0)
+        _Scroll1 ("レイヤー1 スクロール (XY)", Vector) = (0.0024, 0.0010, 0, 0)
+        _Scroll2 ("レイヤー2 スクロール (XY)", Vector) = (-0.0008, 0.0017, 0, 0)
         _MacroVariation ("大きなムラ", Range(0, 1)) = 0.35
         _MacroScale ("大きなムラのスケール", Range(0.01, 1)) = 0.12
         _MacroDirectionBreakup ("方向の崩し", Range(0, 1)) = 0.28
@@ -69,6 +69,7 @@ Shader "Siliq/Water Mobile (Quest)"
         _RippleAmplitude ("波紋の強さ", Range(0, 3)) = 0.45
         _RippleChannel ("波紋チャンネル", Float) = 0
 
+        [HideInInspector] _ManualTime ("Manual Preview Time", Float) = 0
         [HideInInspector] _SrcBlend ("Source Blend", Float) = 1
         [HideInInspector] _DstBlend ("Destination Blend", Float) = 0
         [HideInInspector] _ZWrite ("ZWrite", Float) = 1
@@ -148,13 +149,19 @@ Shader "Siliq/Water Mobile (Quest)"
             half _ReflStrength;
             half _ReflectionPatternStrength;
             half _ReflectionPatternScale;
+            float _ManualTime;
             #ifdef USE_REFLECTION_CUBE
             samplerCUBE _ReflCube;
             #endif
 
+            float SiliqAnimationTime()
+            {
+                return _Time.y + _ManualTime;
+            }
+
             float SiliqMacroNoise(float2 p)
             {
-                float time = _Time.y;
+                float time = SiliqAnimationTime();
                 float a = sin(dot(p, float2(1.27, 2.31)) + time * 0.07);
                 float b = sin(dot(p, float2(-2.14, 1.43)) - time * 0.05);
                 float c = sin(dot(p, float2(0.63, -1.19)) + time * 0.03);
@@ -170,7 +177,7 @@ Shader "Siliq/Water Mobile (Quest)"
 
             float SiliqVertexHeight(float3 localPos, float2 uv)
             {
-                float t = _Time.y * _DisplacementSpeed;
+                float t = SiliqAnimationTime() * _DisplacementSpeed;
                 float scale = max((float)_DisplacementScale, 0.001);
                 float2 p = localPos.xz * scale;
                 float waveA = sin(dot(p, float2(1.37, 0.41)) + t * 1.70);
@@ -283,6 +290,7 @@ Shader "Siliq/Water Mobile (Quest)"
                 float macroScale = max(_MacroScale, 0.0001h);
                 half macroA = SiliqMacroNoise(i.worldPos.xz * macroScale);
                 half macroB = SiliqMacroNoise(i.worldPos.xz * macroScale * 1.71 + float2(13.1, 7.7));
+                float time = SiliqAnimationTime();
                 half macro01 = saturate(0.5h + macroA * 0.5h);
                 float2 centeredUv = i.uv - 0.5;
                 float2 macroWarp = float2(macroA, macroB) * (_MacroVariation * 0.075h);
@@ -290,8 +298,8 @@ Shader "Siliq/Water Mobile (Quest)"
                 float tiling1 = _Tiling1 * (1.0 + macroA * _MacroVariation * 0.18);
                 float tiling2 = _Tiling2 * (1.0 + macroB * _MacroVariation * 0.22);
 
-                float2 uv1 = centeredUv * tiling1 + 0.5 + macroWarp + _Scroll1.xy * _Time.y;
-                float2 uv2 = SiliqRotate2D(centeredUv, layer2Angle) * tiling2 + 0.5 - macroWarp * 1.35 + _Scroll2.xy * _Time.y;
+                float2 uv1 = centeredUv * tiling1 + 0.5 + macroWarp + _Scroll1.xy * time;
+                float2 uv2 = SiliqRotate2D(centeredUv, layer2Angle) * tiling2 + 0.5 - macroWarp * 1.35 + _Scroll2.xy * time;
 
                 half3 n1 = UnpackNormal(tex2D(_NormalMap, uv1));
                 half3 n2 = UnpackNormal(tex2D(_NormalMap, uv2));
@@ -371,8 +379,8 @@ Shader "Siliq/Water Mobile (Quest)"
                 half glimmer = pow(interference, _GlimmerSharpness) * _GlimmerIntensity * saturate(0.35h + surfaceLight);
                 glimmer *= lerp(0.65h, 1.35h, macro01) * detailVisibility;
                 float causticsScale = max((float)_CausticsScale, 0.001);
-                float2 causticsUvA = i.worldPos.xz * causticsScale * 0.12 + worldN.xz * (0.10 + refraction * 0.24) + _Time.y * _CausticsSpeed * float2(0.33, 0.21);
-                float2 causticsUvB = SiliqRotate2D(i.worldPos.xz + refractOffset * 0.42, 1.17) * causticsScale * 0.09 - worldN.xz * (0.08 + refraction * 0.18) - _Time.y * _CausticsSpeed * float2(0.19, 0.29);
+                float2 causticsUvA = i.worldPos.xz * causticsScale * 0.12 + worldN.xz * (0.10 + refraction * 0.24) + time * _CausticsSpeed * float2(0.33, 0.21);
+                float2 causticsUvB = SiliqRotate2D(i.worldPos.xz + refractOffset * 0.42, 1.17) * causticsScale * 0.09 - worldN.xz * (0.08 + refraction * 0.18) - time * _CausticsSpeed * float2(0.19, 0.29);
                 half causticsA = tex2D(_CausticsMap, causticsUvA).r;
                 half causticsB = tex2D(_CausticsMap, causticsUvB).r;
                 half causticsPrismR = tex2D(_CausticsMap, causticsUvA + worldN.xz * 0.013 + float2(0.004, -0.002)).r;
