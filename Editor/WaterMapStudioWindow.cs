@@ -8,8 +8,8 @@ using UnityEngine.Rendering;
 namespace Siliq.Water.Editor
 {
     /// <summary>
-    /// 水面マップ生成スタジオ。
-    /// メニュー: Tools > Siliq Water > 水面マップスタジオ
+    /// 水面マップ生成スタジオ。通常入口は軽い Material Studio に譲り、これは上級者向けの手続き生成画面として残す。
+    /// メニュー: Tools > Siliq Water > 上級者向け > 水面マップ生成スタジオ
     /// </summary>
     public class WaterMapStudioWindow : EditorWindow
     {
@@ -73,10 +73,10 @@ namespace Siliq.Water.Editor
         readonly List<bool> layerFoldouts = new List<bool>();
         bool mapSettingsFoldout;
 
-        [MenuItem("Tools/Siliq Water/水面マップスタジオ")]
+        [MenuItem("Tools/Siliq Water/上級者向け/水面マップ生成スタジオ", false, 200)]
         public static void Open()
         {
-            var window = GetWindow<WaterMapStudioWindow>("水面マップスタジオ");
+            var window = GetWindow<WaterMapStudioWindow>("生成スタジオ Advanced");
             window.minSize = new Vector2(720f, 560f);
         }
 

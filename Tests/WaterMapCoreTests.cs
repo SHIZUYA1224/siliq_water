@@ -1,6 +1,7 @@
 using System.IO;
 using System.Reflection;
 using NUnit.Framework;
+using Siliq.Water;
 using Siliq.Water.Editor;
 using UnityEditor;
 using UnityEngine;
@@ -747,6 +748,12 @@ namespace Siliq.Water.Tests
                 "Material ごとに加算/透明を切り替えられる必要がある");
             StringAssert.Contains("#pragma target 2.0", text,
                 "iOS/VRChat 向けの軽量 shader target を維持する");
+            StringAssert.Contains("_ManualTime", text,
+                "Mobile FX は Play 前の Scene View でも動きが見える編集時プレビュー時間を持つ必要がある");
+            StringAssert.Contains("_RadialSpeed", text,
+                "雨波紋は横スライドではなく中心から広がる調整を持つ必要がある");
+            StringAssert.Contains("_RadialAmount", text,
+                "雨波紋の広がり量を material 側で調整できる必要がある");
             Assert.IsFalse(text.Contains("Packages/com.unity.render-pipelines.universal"),
                 "Mobile FX shader は URP package に依存してはいけない");
             Assert.IsFalse(text.Contains("Core.hlsl"),
@@ -779,6 +786,63 @@ namespace Siliq.Water.Tests
             AssertMobileFxMaterial("M_Siliq_FX_UnderwaterParticles_Mobile", "WaterFX_UnderwaterParticles_01.png", BlendMode.One, BlendMode.One, "水中の粒子");
             AssertMobileFxMaterial("M_Siliq_FX_ShoreFoam_Mobile", "WaterFX_ShoreFoam_01.png", BlendMode.SrcAlpha, BlendMode.OneMinusSrcAlpha, "岸の白い泡");
             AssertMobileFxMaterial("M_Siliq_FX_RainRipple_Mobile", "WaterFX_RainRipple_01.png", BlendMode.One, BlendMode.One, "雨粒が落ちた波紋");
+
+            var rain = LoadReadyMaterial("M_Siliq_FX_RainRipple_Mobile");
+            Assert.AreEqual(0f, rain.GetVector("_Scroll1").sqrMagnitude, 1e-8f,
+                "雨波紋は水面上を横へ滑らせず、中心拡大で見せる");
+            Assert.Greater(rain.GetFloat("_RadialSpeed"), 0.05f,
+                "雨波紋は広がりが目で分かる速度を持つ必要がある");
+            Assert.Greater(rain.GetFloat("_RadialAmount"), 0.5f,
+                "雨波紋は中心から外へ広がる量を持つ必要がある");
+        }
+
+        [Test]
+        public void UnderwaterFxReadyMaterials_CoverAquariumVolume()
+        {
+            AssertMobileFxMaterial("M_Siliq_FX_UnderwaterParticles_Mobile", "WaterFX_UnderwaterParticles_01.png", BlendMode.One, BlendMode.One, "水中の漂う粒子");
+            AssertMobileFxMaterial("M_Siliq_FX_UnderwaterHaze_Mobile", "WaterFX_UnderwaterParticles_01.png", BlendMode.SrcAlpha, BlendMode.OneMinusSrcAlpha, "水中の霞");
+            AssertMobileFxMaterial("M_Siliq_FX_UnderwaterLightShafts_Mobile", "WaterFX_SurfaceGlint_01.png", BlendMode.One, BlendMode.One, "水中の光筋");
+            AssertMobileFxMaterial("M_Siliq_FX_BubbleColumn_Mobile", "WaterFX_UnderwaterParticles_01.png", BlendMode.One, BlendMode.One, "水中の泡柱");
+
+            foreach (string relativePath in WaterBeginnerSetup.UnderwaterFxMaterialRelativePaths)
+            {
+                string packagePath = "Packages/com.siliq.water-normalmap/" + relativePath;
+                var mat = AssetDatabase.LoadAssetAtPath<Material>(packagePath);
+                Assert.IsNotNull(mat, $"{packagePath} が水中・水槽 FX 用に同梱されていない");
+                Assert.Greater(mat.GetVector("_Scroll1").magnitude, 0.0005f,
+                    $"{mat.name} は見た目上止まって見える極小スクロールに戻してはいけない");
+                Assert.LessOrEqual(mat.GetVector("_Scroll1").magnitude, 0.03f,
+                    $"{mat.name} は水中用途として速すぎてはいけない");
+            }
+        }
+
+        [Test]
+        public void WaterFxLayerAnimator_DrivesManualPreviewTime()
+        {
+            GameObject go = null;
+            try
+            {
+                go = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                var renderer = go.GetComponent<Renderer>();
+                var animator = go.AddComponent<WaterFxLayerAnimator>();
+                animator.targetRenderer = renderer;
+                animator.previewTimeScale = 0.5f;
+                animator.previewTimeOffset = 0.25f;
+                animator.ApplyImmediate(2f);
+
+                var block = new MaterialPropertyBlock();
+                renderer.GetPropertyBlock(block);
+                Assert.AreEqual(1.25f, block.GetFloat("_ManualTime"), 1e-5f,
+                    "FX 編集時プレビューは共有MaterialではなくPropertyBlockの手動時間で動かす");
+                Assert.IsTrue(animator.animateInEditMode,
+                    "配置直後にScene Viewで動きが見えるよう、編集時プレビューは初期ONにする");
+                Assert.GreaterOrEqual(animator.editModePreviewFps, 1,
+                    "編集時プレビューは重くならないようFPS制限を持つ");
+            }
+            finally
+            {
+                if (go != null) Object.DestroyImmediate(go);
+            }
         }
 
         [Test]
@@ -809,6 +873,113 @@ namespace Siliq.Water.Tests
                 string packagePath = "Packages/com.siliq.water-normalmap/" + relativePath;
                 Assert.IsNotNull(AssetDatabase.LoadAssetAtPath<Material>(packagePath),
                     $"{packagePath} が初心者メニュー用に同梱されていない");
+            }
+        }
+
+        [Test]
+        public void BeginnerGuide_ProvidesUnderwaterFxVolumePlacement()
+        {
+            var method = typeof(WaterBeginnerSetup).GetMethod(
+                nameof(WaterBeginnerSetup.PlaceUnderwaterFxVolumeSet),
+                BindingFlags.Public | BindingFlags.Static);
+            Assert.IsNotNull(method, "水中・水槽向けの FX 空間配置メニューがない");
+
+            bool hasToolsMenu = false;
+            bool hasGameObjectMenu = false;
+            foreach (var attribute in method.GetCustomAttributes(typeof(MenuItem), false))
+            {
+                var menuItem = (MenuItem)attribute;
+                if (menuItem.menuItem == "Tools/Siliq Water/かんたん作成/水中・水槽 FX 空間を配置") hasToolsMenu = true;
+                if (menuItem.menuItem == "GameObject/Siliq Water/かんたん作成/水中・水槽 FX 空間を配置") hasGameObjectMenu = true;
+            }
+
+            Assert.IsTrue(hasToolsMenu, "Tools menu から水中・水槽 FX 空間を配置できる必要がある");
+            Assert.IsTrue(hasGameObjectMenu, "GameObject menu から水中・水槽 FX 空間を配置できる必要がある");
+            Assert.AreEqual("水中・水槽 FX 空間を配置", WaterBeginnerGuideWindow.PlaceUnderwaterFxVolumeActionLabel);
+            Assert.AreEqual(4, WaterBeginnerSetup.UnderwaterFxMaterialRelativePaths.Length,
+                "水中・水槽用途は粒子、霞、光筋、泡柱の4種 material を初心者導線に含める");
+
+            foreach (string relativePath in WaterBeginnerSetup.UnderwaterFxMaterialRelativePaths)
+            {
+                string packagePath = "Packages/com.siliq.water-normalmap/" + relativePath;
+                Assert.IsNotNull(AssetDatabase.LoadAssetAtPath<Material>(packagePath),
+                    $"{packagePath} が水中・水槽 FX メニュー用に同梱されていない");
+            }
+        }
+
+        [Test]
+        public void WaterMapStudio_DefaultMenuIsSimpleMaterialApplicator()
+        {
+            var simpleOpen = typeof(WaterMaterialStudioWindow).GetMethod(
+                nameof(WaterMaterialStudioWindow.Open),
+                BindingFlags.Public | BindingFlags.Static);
+            Assert.IsNotNull(simpleOpen, "通常の水面マップスタジオ入口がない");
+
+            bool hasSimpleMenu = false;
+            foreach (var attribute in simpleOpen.GetCustomAttributes(typeof(MenuItem), false))
+            {
+                var menuItem = (MenuItem)attribute;
+                if (menuItem.menuItem == WaterMaterialStudioWindow.MenuPath) hasSimpleMenu = true;
+            }
+            Assert.IsTrue(hasSimpleMenu,
+                "通常の水面マップスタジオは重い自由生成ではなく軽いMaterial適用画面にする");
+
+            var advancedOpen = typeof(WaterMapStudioWindow).GetMethod(
+                nameof(WaterMapStudioWindow.Open),
+                BindingFlags.Public | BindingFlags.Static);
+            Assert.IsNotNull(advancedOpen, "上級者向けの手続き生成スタジオが残っていない");
+
+            bool hasAdvancedMenu = false;
+            foreach (var attribute in advancedOpen.GetCustomAttributes(typeof(MenuItem), false))
+            {
+                var menuItem = (MenuItem)attribute;
+                if (menuItem.menuItem == "Tools/Siliq Water/上級者向け/水面マップ生成スタジオ") hasAdvancedMenu = true;
+            }
+            Assert.IsTrue(hasAdvancedMenu,
+                "手続き生成スタジオは通常入口ではなく上級者向けメニューへ下げる");
+        }
+
+        [Test]
+        public void SimpleMaterialStudio_AppliesPlatformTunedReadyLooks()
+        {
+            GameObject go = null;
+            try
+            {
+                go = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                Selection.activeGameObject = go;
+
+                WaterPackQuickApply.ApplyReadyLookToSelection(
+                    WaterPackQuickApply.ReadyLook.CrystalLagoonHero,
+                    WaterPackQuickApply.TargetPlatform.Ios);
+
+                var renderer = go.GetComponent<Renderer>();
+                var mat = renderer != null ? renderer.sharedMaterial : null;
+                var animator = go.GetComponent<WaterSurfaceAnimator>();
+                Assert.IsNotNull(mat, "シンプルStudioの適用で material が設定されていない");
+                Assert.IsNotNull(animator, "シンプルStudioの適用で WaterSurfaceAnimator が追加されていない");
+                StringAssert.EndsWith("_Ios", mat.name,
+                    "iOS向けはPC用Materialを上書きせず、専用の軽量Materialを生成する");
+
+                if (mat.HasProperty("_Opacity"))
+                {
+                    Assert.LessOrEqual(mat.GetFloat("_Opacity"), 0.38f,
+                        "iOS向けは透明感を残しつつ濃すぎる初期値にしない");
+                }
+                if (mat.HasProperty("_DisplacementStrength"))
+                {
+                    Assert.AreEqual(0f, mat.GetFloat("_DisplacementStrength"), 1e-6f,
+                        "iOS向けは重い実高さを初期OFFにする");
+                }
+                if (mat.HasProperty("_ReflectionPatternStrength"))
+                {
+                    Assert.LessOrEqual(mat.GetFloat("_ReflectionPatternStrength"), 0.18f,
+                        "iOS向けは反射パターンを重くしすぎない");
+                }
+            }
+            finally
+            {
+                Selection.activeGameObject = null;
+                if (go != null) Object.DestroyImmediate(go);
             }
         }
 

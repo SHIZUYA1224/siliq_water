@@ -12,6 +12,25 @@ namespace Siliq.Water.Editor
     /// </summary>
     public static class WaterPackQuickApply
     {
+        internal enum ReadyLook
+        {
+            ClearSea,
+            ClearPool,
+            IndoorBluePool,
+            FlagshipCrystal,
+            CrystalLagoon,
+            CrystalLagoonHero,
+            BloodSea,
+            LiquidMetal,
+        }
+
+        internal enum TargetPlatform
+        {
+            PC,
+            Quest,
+            Ios,
+        }
+
         struct MotionPreset
         {
             public float dir;
@@ -664,11 +683,42 @@ namespace Siliq.Water.Editor
         [MenuItem(LookMenuRoot + "液体金属 (Liquid Metal)", true)]
         static bool ValidateSelection()
         {
+            return HasRendererSelection();
+        }
+
+        internal static bool HasRendererSelection()
+        {
             foreach (var go in Selection.gameObjects)
             {
                 if (go.GetComponent<Renderer>() != null) return true;
             }
             return false;
+        }
+
+        internal static string DisplayNameForLook(ReadyLook look)
+        {
+            return GetLookPreset(look).displayName;
+        }
+
+        internal static void ApplyReadyLookToSelection(ReadyLook look, TargetPlatform target)
+        {
+            ApplyLook(GetLookPreset(look), target);
+        }
+
+        static LookPreset GetLookPreset(ReadyLook look)
+        {
+            switch (look)
+            {
+                case ReadyLook.ClearSea: return ClearSeaLook;
+                case ReadyLook.ClearPool: return ClearPoolLook;
+                case ReadyLook.IndoorBluePool: return IndoorBluePoolLook;
+                case ReadyLook.FlagshipCrystal: return FlagshipCrystalLook;
+                case ReadyLook.CrystalLagoon: return CrystalLagoonLook;
+                case ReadyLook.CrystalLagoonHero: return CrystalLagoonHeroLook;
+                case ReadyLook.BloodSea: return BloodSeaLook;
+                case ReadyLook.LiquidMetal: return LiquidMetalLook;
+                default: return CrystalLagoonHeroLook;
+            }
         }
 
         static void Apply(string guid, string label, MotionPreset motion, bool transparent = false)
@@ -740,7 +790,7 @@ namespace Siliq.Water.Editor
             ApplyMaterialToSelection(mat, motion, texturePropertyName);
         }
 
-        static void ApplyLook(LookPreset preset)
+        static void ApplyLook(LookPreset preset, TargetPlatform target = TargetPlatform.PC)
         {
             var source = LoadPrebakedMaterial(preset.sourceGuid, $"M_Water_{preset.sourceLabel}");
             if (source == null)
@@ -750,7 +800,7 @@ namespace Siliq.Water.Editor
                 return;
             }
 
-            var mat = GetOrCreateLookMaterial(preset, source);
+            var mat = GetOrCreateLookMaterial(preset, source, target);
             if (mat == null)
             {
                 EditorUtility.DisplayDialog("Siliq Water",
@@ -919,7 +969,7 @@ namespace Siliq.Water.Editor
             return mat;
         }
 
-        static Material GetOrCreateLookMaterial(LookPreset preset, Material source)
+        static Material GetOrCreateLookMaterial(LookPreset preset, Material source, TargetPlatform target = TargetPlatform.PC)
         {
             int shaderIndex = WaterShaderUtility.BestSiliqMaterialShaderIndex();
             if (shaderIndex == WaterShaderUtility.NoMaterialIndex)
@@ -937,7 +987,8 @@ namespace Siliq.Water.Editor
             EnsureFolder("Assets", "SiliqWater");
             EnsureFolder(root, "GeneratedMaterials");
 
-            string path = $"{folder}/M_Water_Look_{preset.assetName}.mat";
+            string suffix = target == TargetPlatform.PC ? string.Empty : "_" + target;
+            string path = $"{folder}/M_Water_Look_{preset.assetName}{suffix}.mat";
             var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
             if (mat == null)
             {
@@ -949,7 +1000,7 @@ namespace Siliq.Water.Editor
                 mat.shader = shader;
             }
 
-            mat.name = $"M_Water_Look_{preset.assetName}";
+            mat.name = $"M_Water_Look_{preset.assetName}{suffix}";
             if (shaderIndex == WaterShaderUtility.SiliqMobileIndex || shaderIndex == WaterShaderUtility.SiliqUrpIndex)
             {
                 SetupSiliqLook(mat, preset, source);
@@ -958,9 +1009,38 @@ namespace Siliq.Water.Editor
             {
                 SetupFallbackLook(mat, preset, source, shaderIndex);
             }
+            TuneLookForTarget(mat, preset, target);
             EditorUtility.SetDirty(mat);
             AssetDatabase.SaveAssets();
             return mat;
+        }
+
+        static void TuneLookForTarget(Material mat, LookPreset preset, TargetPlatform target)
+        {
+            if (mat == null || target == TargetPlatform.PC) return;
+            bool liquidMetal = preset.assetName == "LiquidMetal";
+
+            if (mat.HasProperty("_DisplacementStrength"))
+            {
+                float limit = target == TargetPlatform.Quest ? 0.004f : 0f;
+                mat.SetFloat("_DisplacementStrength", Mathf.Min(mat.GetFloat("_DisplacementStrength"), limit));
+            }
+            if (mat.HasProperty("_HeightMapInfluence")) mat.SetFloat("_HeightMapInfluence", 0f);
+            if (mat.HasProperty("_ReflStrength")) mat.SetFloat("_ReflStrength", Mathf.Min(mat.GetFloat("_ReflStrength"), target == TargetPlatform.Quest ? 0.74f : 0.68f));
+            if (mat.HasProperty("_ReflectionPatternStrength")) mat.SetFloat("_ReflectionPatternStrength", Mathf.Min(mat.GetFloat("_ReflectionPatternStrength"), target == TargetPlatform.Quest ? 0.22f : 0.18f));
+            if (mat.HasProperty("_GlimmerIntensity")) mat.SetFloat("_GlimmerIntensity", Mathf.Min(mat.GetFloat("_GlimmerIntensity"), target == TargetPlatform.Quest ? 0.20f : 0.18f));
+            if (mat.HasProperty("_GlintIntensity")) mat.SetFloat("_GlintIntensity", Mathf.Min(mat.GetFloat("_GlintIntensity"), target == TargetPlatform.Quest ? 0.55f : 0.48f));
+            if (mat.HasProperty("_NormalStrength")) mat.SetFloat("_NormalStrength", Mathf.Min(mat.GetFloat("_NormalStrength"), target == TargetPlatform.Quest ? 0.50f : 0.42f));
+            if (mat.HasProperty("_CausticsStrength")) mat.SetFloat("_CausticsStrength", Mathf.Min(mat.GetFloat("_CausticsStrength"), target == TargetPlatform.Quest ? 0.62f : 0.55f));
+            if (mat.HasProperty("_CausticsSpeed")) mat.SetFloat("_CausticsSpeed", Mathf.Min(mat.GetFloat("_CausticsSpeed"), target == TargetPlatform.Quest ? 0.0000045f : 0.0000035f));
+
+            if (!liquidMetal && mat.HasProperty("_Opacity"))
+            {
+                float opacity = target == TargetPlatform.Quest
+                    ? Mathf.Clamp(mat.GetFloat("_Opacity"), 0.42f, 0.58f)
+                    : Mathf.Min(mat.GetFloat("_Opacity"), 0.38f);
+                mat.SetFloat("_Opacity", opacity);
+            }
         }
 
         static void EnsureFolder(string parent, string child)

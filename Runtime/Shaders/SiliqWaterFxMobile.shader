@@ -12,9 +12,12 @@ Shader "Siliq/Water FX Mobile (iOS VRChat)"
         _MaskPower ("Mask Focus", Range(0.25, 4)) = 1
         _PulseSpeed ("Pulse Speed", Range(0, 6)) = 0
         _PulseAmount ("Pulse Amount", Range(0, 0.8)) = 0
+        _RadialSpeed ("Radial Expansion Speed", Range(0, 2)) = 0
+        _RadialAmount ("Radial Expansion Amount", Range(0, 2)) = 0
         _Scroll1 ("Layer 1 Scroll", Vector) = (0, 0, 0, 0)
         _Scroll2 ("Layer 2 Scroll", Vector) = (0, 0, 0, 0)
 
+        [HideInInspector] _ManualTime ("Manual Preview Time", Float) = 0
         [HideInInspector] _SrcBlend ("Source Blend", Float) = 5
         [HideInInspector] _DstBlend ("Destination Blend", Float) = 10
         [HideInInspector] _ZWrite ("ZWrite", Float) = 0
@@ -47,6 +50,9 @@ Shader "Siliq/Water FX Mobile (iOS VRChat)"
             half _MaskPower;
             half _PulseSpeed;
             half _PulseAmount;
+            half _RadialSpeed;
+            half _RadialAmount;
+            float _ManualTime;
             float4 _Scroll1;
             float4 _Scroll2;
 
@@ -82,10 +88,15 @@ Shader "Siliq/Water FX Mobile (iOS VRChat)"
 
             fixed4 frag(v2f i) : SV_Target
             {
-                float t = _Time.y;
+                float t = _Time.y + _ManualTime;
                 float2 centered = i.uv - 0.5;
-                float2 uv1 = centered * _Tiling + 0.5 + _Scroll1.xy * t;
-                float2 uv2 = float2(centered.y, -centered.x) * (_Tiling * 1.17) + 0.5 + float2(0.23, 0.37) + _Scroll2.xy * t;
+                half radialEnabled = step(0.0001h, _RadialSpeed + _RadialAmount);
+                half radialPhase = frac(t * _RadialSpeed);
+                half radialScale = 1.0h + radialPhase * _RadialAmount * radialEnabled;
+                half radialFade = lerp(1.0h, saturate(1.0h - radialPhase), radialEnabled);
+                float2 radialCentered = centered / max(radialScale, 0.01h);
+                float2 uv1 = radialCentered * _Tiling + 0.5 + _Scroll1.xy * t;
+                float2 uv2 = float2(radialCentered.y, -radialCentered.x) * (_Tiling * 1.17) + 0.5 + float2(0.23, 0.37) + _Scroll2.xy * t;
 
                 half mask1 = SampleMask(uv1);
                 half mask2 = SampleMask(uv2);
@@ -95,8 +106,8 @@ Shader "Siliq/Water FX Mobile (iOS VRChat)"
                 mask = pow(mask, max(_MaskPower, 0.25h));
 
                 half pulse = 1.0h + sin(t * _PulseSpeed) * _PulseAmount;
-                half alpha = saturate(mask * _Alpha * pulse) * _Tint.a;
-                half3 color = _Tint.rgb * (mask * _Intensity * pulse);
+                half alpha = saturate(mask * _Alpha * pulse * radialFade) * _Tint.a;
+                half3 color = _Tint.rgb * (mask * _Intensity * pulse * radialFade);
                 return fixed4(color, alpha);
             }
             ENDCG

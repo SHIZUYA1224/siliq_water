@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: M_Siliq_FX_ShoreFoam_Mobile
+  m_Name: M_Siliq_FX_BubbleColumn_Mobile
   m_Shader: {fileID: 4800000, guid: a171aabb01c34e01a1b2c3d4e5f60801, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -25,24 +25,24 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: a171aabb01c34e01a1b2c3d4e5f60815, type: 3}
+        m_Texture: {fileID: 2800000, guid: a171aabb01c34e01a1b2c3d4e5f60814, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Intensity: 0.96
-    - _Alpha: 0.72
-    - _Tiling: 1
-    - _MaskPower: 1.25
-    - _PulseSpeed: 0.35
-    - _PulseAmount: 0.05
+    - _Intensity: 0.88
+    - _Alpha: 0.52
+    - _Tiling: 2.2
+    - _MaskPower: 1.35
+    - _PulseSpeed: 0.32
+    - _PulseAmount: 0.16
     - _RadialSpeed: 0
     - _RadialAmount: 0
-    - _SrcBlend: 5
-    - _DstBlend: 10
+    - _SrcBlend: 1
+    - _DstBlend: 1
     - _ZWrite: 0
     m_Colors:
-    - _Scroll1: {r: 0.004, g: 0.001, b: 0, a: 0}
-    - _Scroll2: {r: -0.0015, g: 0.001, b: 0, a: 0}
-    - _Tint: {r: 0.9, g: 1, b: 0.98, a: 1}
+    - _Scroll1: {r: 0.001, g: 0.018, b: 0, a: 0}
+    - _Scroll2: {r: -0.0015, g: 0.009, b: 0, a: 0}
+    - _Tint: {r: 0.72, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

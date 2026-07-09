@@ -36,11 +36,13 @@ Material:
     - _MaskPower: 0.9
     - _PulseSpeed: 0.18
     - _PulseAmount: 0.05
+    - _RadialSpeed: 0
+    - _RadialAmount: 0
     - _SrcBlend: 1
     - _DstBlend: 1
     - _ZWrite: 0
     m_Colors:
-    - _Scroll1: {r: 0, g: 0.0000035, b: 0, a: 0}
-    - _Scroll2: {r: 0.000002, g: -0.000001, b: 0, a: 0}
+    - _Scroll1: {r: 0.0015, g: 0.0055, b: 0, a: 0}
+    - _Scroll2: {r: 0.0025, g: -0.0012, b: 0, a: 0}
     - _Tint: {r: 0.55, g: 0.95, b: 1, a: 1}
   m_BuildTextureStacks: []
