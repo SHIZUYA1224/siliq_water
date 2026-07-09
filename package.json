@@ -1,7 +1,7 @@
 {
   "name": "com.siliq.water-normalmap",
   "displayName": "Siliq Water Maps Studio",
-  "version": "2.3.77",
+  "version": "2.3.78",
   "unity": "2019.4",
   "description": "水面・流体表現向けの PBR テクスチャ一式 (ノーマル / ハイト / フォーム / ラフネス / フローマップ / DUDV / コースティクス) を Unity エディタ上またはランタイムで手続き生成するツール。シームレスタイリング・完全ループアニメ保証。ビルトイン / Quest / iOS 向け水シェーダー、任意導入の URP サンプルシェーダー、VRChat モバイル向けインポート設定の自動適用付き。",
   "license": "SEE LICENSE IN LICENSE.md",

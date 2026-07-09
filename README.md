@@ -101,7 +101,7 @@ Crystal Lagoon は水底光も専用 **2048×2048 `Water_Caustics_CrystalLagoon_
 さらに共通の `Water_Caustics_Crystal_01.png` を同梱し、透明な海・フラッグシップ水では水底に揺れる光模様として使います。これは強い多角形セルではなく、淡く重なる光の筋として調整しています。
 `PrebakedPack/ReadyMaterials/` には `Siliq/Water Mobile (Quest)` 設定済みの完成マテリアルが入っています。
 `PrebakedPack/Prefabs/PF_Siliq_CrystalLagoon_Complete.prefab` は、分割済み水面、明るいプール床、床用 caustics overlay、確認用ライトを一体化した完成セットです。さらに `PF_Siliq_CrystalLagoon_Hero_Complete.prefab` は Hero material と Hero caustics overlay を貼った最高品質確認用です。`PF_Siliq_SunlitPool_Complete.prefab` は ClearPool material と SunlitPool caustics overlay を使う、透明プール / 室内プール向けの完成セットです。Prefab を Hierarchy へ置くだけで、透明感と水底光を同時に確認できます。
-完成形の方向性は `PrebakedPack/Preview/preview_crystal_lagoon_complete.png`、最高品質寄りは `PrebakedPack/Preview/preview_crystal_lagoon_hero_complete.png` で確認できます。薄い床、透明な水面、反射、水底光が一枚で見える初心者向けの目安画像です。
+完成形の方向性は `PrebakedPack/Preview/preview_crystal_lagoon_complete.png`、最高品質寄りは `PrebakedPack/Preview/preview_crystal_lagoon_hero_complete.png` で確認できます。薄い床、透明な水面、窓の揺れる反射、水底光が一枚で見える初心者向けの目安画像です。
 
 | Ready material | 用途 |
 |---|---|
@@ -228,7 +228,7 @@ Compression  : Normal Quality (Quest は Android オーバーライドで ASTC 6
 「プール (光の網目)」「サイバー (細いデータ流)」等のプリセットを適用 → パラメータやシードを
 変更して書き出せば、同系統のバリエーションを自作できます。
 プールは強い法線凹凸ではなく、浅く細い光の揺らぎとして見せる想定です。
-Hero の水底光は太い格子ではなく、柔らかく曲がる caustics の光筋として使う想定です。
+Hero の水底光は太い格子や線の密集ではなく、柔らかい床光の中に少数の焦点線が走る caustics として使う想定です。
 `WaterSurfaceAnimator` の **強さ** を上げすぎると、光網ではなく太い凹凸に見えます。
 サイバーは太い格子模様やセル境界ではなく、細いデータ流と斜めスキャン光の SF 水面として使う想定です。
 

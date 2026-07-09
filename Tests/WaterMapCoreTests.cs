@@ -768,12 +768,17 @@ namespace Siliq.Water.Tests
                 int blueWaterPixels = 0;
                 int brightCausticPixels = 0;
                 int darkerReflectionPixels = 0;
+                int indoorPoolPixels = 0;
+                int darkBlueReflectionPixels = 0;
+                int saturatedWhitePixels = 0;
                 float luminanceSum = 0f;
                 byte minLum = byte.MaxValue;
                 byte maxLum = 0;
 
-                foreach (var p in pixels)
+                for (int i = 0; i < pixels.Length; i++)
                 {
+                    var p = pixels[i];
+                    int y = i / readable.width;
                     byte lum = (byte)((p.r + p.g + p.b) / 3);
                     luminanceSum += lum;
                     if (lum < minLum) minLum = lum;
@@ -781,6 +786,9 @@ namespace Siliq.Water.Tests
                     if (p.b > p.r + 18 && p.g > p.r + 8) blueWaterPixels++;
                     if (lum > 225) brightCausticPixels++;
                     if (lum < 115) darkerReflectionPixels++;
+                    if (y > readable.height * 2 / 3 && p.r > 150 && p.g > 210 && p.b > 220) indoorPoolPixels++;
+                    if (y < readable.height * 2 / 3 && p.r < 95 && p.g < 180 && p.b > 110) darkBlueReflectionPixels++;
+                    if (p.r > 235 && p.g > 245 && p.b > 245) saturatedWhitePixels++;
                 }
 
                 float averageLuminance = luminanceSum / pixels.Length;
@@ -788,8 +796,16 @@ namespace Siliq.Water.Tests
                     "完成 preview は透明な青系の水面として読める色比率が必要");
                 Assert.Greater(brightCausticPixels, pixels.Length * 0.03f,
                     "完成 preview は水底光や反射の明るい筋を含む必要がある");
+                Assert.Less(brightCausticPixels, pixels.Length * 0.16f,
+                    "完成 preview が白い線や明るい帯だけで埋まっている状態へ戻してはならない");
                 Assert.Greater(darkerReflectionPixels, pixels.Length * 0.00005f,
                     "完成 preview は反射の濃淡がなく単調な水色だけに戻ってはいけない");
+                Assert.Greater(indoorPoolPixels, pixels.Length * 0.20f,
+                    "完成 preview は水面単体の模様ではなく、室内プールの完成イメージとして読める背景が必要");
+                Assert.Greater(darkBlueReflectionPixels, pixels.Length * 0.10f,
+                    "完成 preview は窓や壁の暗い反射が水面に揺れて見える必要がある");
+                Assert.Less(saturatedWhitePixels, pixels.Length * 0.025f,
+                    "完成 preview は白飛びした線画に戻してはならない");
                 Assert.Greater(averageLuminance, 150f, "完成 preview は暗く沈みすぎてはいけない");
                 Assert.Less(averageLuminance, 220f, "完成 preview は白飛びした単色に近づけない");
                 Assert.Greater(maxLum - minLum, 120, "完成 preview は床、光、反射の明暗差が必要");
@@ -825,12 +841,17 @@ namespace Siliq.Water.Tests
                 int brightCausticPixels = 0;
                 int whiteReflectionPixels = 0;
                 int darkerBluePixels = 0;
+                int indoorPoolPixels = 0;
+                int darkBlueReflectionPixels = 0;
+                int saturatedWhitePixels = 0;
                 float luminanceSum = 0f;
                 byte minLum = byte.MaxValue;
                 byte maxLum = 0;
 
-                foreach (var p in pixels)
+                for (int i = 0; i < pixels.Length; i++)
                 {
+                    var p = pixels[i];
+                    int y = i / readable.width;
                     byte lum = (byte)((p.r + p.g + p.b) / 3);
                     luminanceSum += lum;
                     if (lum < minLum) minLum = lum;
@@ -839,17 +860,28 @@ namespace Siliq.Water.Tests
                     if (p.r > 185 && p.g > 215 && p.b > 205) brightCausticPixels++;
                     if (p.r > 220 && p.g > 235 && p.b > 235) whiteReflectionPixels++;
                     if (p.b > 100 && p.r < 100 && p.g < 190) darkerBluePixels++;
+                    if (y > readable.height * 2 / 3 && p.r > 150 && p.g > 210 && p.b > 220) indoorPoolPixels++;
+                    if (y < readable.height * 2 / 3 && p.r < 95 && p.g < 180 && p.b > 110) darkBlueReflectionPixels++;
+                    if (p.r > 235 && p.g > 245 && p.b > 245) saturatedWhitePixels++;
                 }
 
                 float averageLuminance = luminanceSum / pixels.Length;
                 Assert.Greater(blueWaterPixels, pixels.Length * 0.55f,
                     "Hero preview は透明な青系の水面として読める色比率が必要");
-                Assert.Greater(brightCausticPixels, pixels.Length * 0.20f,
+                Assert.Greater(brightCausticPixels, pixels.Length * 0.07f,
                     "Hero preview は水底光と明るい反射を十分に含む必要がある");
+                Assert.Less(brightCausticPixels, pixels.Length * 0.16f,
+                    "Hero preview が白い線や明るい帯だけで埋まっている状態へ戻してはならない");
                 Assert.Greater(whiteReflectionPixels, pixels.Length * 0.02f,
                     "Hero preview は太い白帯ではなく、細い反射ハイライトが確認できる必要がある");
-                Assert.Greater(darkerBluePixels, pixels.Length * 0.004f,
+                Assert.Greater(darkerBluePixels, pixels.Length * 0.08f,
                     "Hero preview は濃淡がなく単調な水色だけに戻ってはいけない");
+                Assert.Greater(indoorPoolPixels, pixels.Length * 0.20f,
+                    "Hero preview は水面単体の模様ではなく、室内プールの完成イメージとして読める背景が必要");
+                Assert.Greater(darkBlueReflectionPixels, pixels.Length * 0.10f,
+                    "Hero preview は窓や壁の暗い反射が水面に揺れて見える必要がある");
+                Assert.Less(saturatedWhitePixels, pixels.Length * 0.025f,
+                    "Hero preview は白飛びした線画に戻してはならない");
                 Assert.Greater(averageLuminance, 180f, "Hero preview は暗く沈みすぎてはいけない");
                 Assert.Less(averageLuminance, 240f, "Hero preview は白飛びした単色に近づけない");
                 Assert.Greater(maxLum - minLum, 90, "Hero preview は床、光、反射の明暗差が必要");
@@ -941,6 +973,8 @@ namespace Siliq.Water.Tests
                     "Crystal Lagoon 水底光には床に見える柔らかい光筋の面積が必要");
                 Assert.Greater(brightLinePixels, pixels.Length * 0.001f,
                     "Crystal Lagoon 水底光には弱すぎない焦点線が必要");
+                Assert.Less(brightLinePixels, pixels.Length * 0.04f,
+                    "Crystal Lagoon 水底光の明るい線が多すぎると不自然な線画に見える");
 
                 int[] orientationBins = new int[18];
                 int orientationSamples = 0;
@@ -1025,7 +1059,7 @@ namespace Siliq.Water.Tests
                     "SunlitPool 水底光には細い線だけでなく広い柔らかい床光が必要");
                 Assert.Greater(brightRibbonPixels, pixels.Length * 0.004f,
                     "SunlitPool 水底光には弱すぎない光リボンが必要");
-                Assert.Less(brightRibbonPixels, pixels.Length * 0.12f,
+                Assert.Less(brightRibbonPixels, pixels.Length * 0.06f,
                     "SunlitPool 水底光の明るい線が多すぎると変な模様に見える");
                 Assert.AreEqual(0, blownOutPixels, "SunlitPool 水底光に飽和した白飛び線を戻してはならない");
             }
@@ -1051,6 +1085,7 @@ namespace Siliq.Water.Tests
                 var pixels = readable.GetPixels32();
                 int min = 255;
                 int max = 0;
+                int softFloorLightPixels = 0;
                 int brightPixels = 0;
                 long sum = 0;
                 foreach (var pixel in pixels)
@@ -1058,6 +1093,7 @@ namespace Siliq.Water.Tests
                     int v = pixel.r;
                     if (v < min) min = v;
                     if (v > max) max = v;
+                    if (v >= 60 && v <= 145) softFloorLightPixels++;
                     if (v >= 150) brightPixels++;
                     sum += v;
                 }
@@ -1068,10 +1104,12 @@ namespace Siliq.Water.Tests
                 Assert.LessOrEqual(max, 230, "Hero 水底光は texture 側で白飛びさせない");
                 Assert.GreaterOrEqual(average, 40f, "Hero 水底光が暗すぎる");
                 Assert.LessOrEqual(average, 80f, "Hero 水底光が全面発光のように強すぎる");
+                Assert.Greater(softFloorLightPixels, pixels.Length * 0.16f,
+                    "Hero 水底光には線だけでなく、水底に広がる柔らかい床光が必要");
                 Assert.Greater(brightPixels, pixels.Length * 0.01f,
                     "Hero 水底光には商品品質で見える明るい光筋が必要");
-                Assert.Less(brightPixels, pixels.Length * 0.20f,
-                    "Hero 水底光の明るい領域が広すぎると床が白い板になる");
+                Assert.Less(brightPixels, pixels.Length * 0.08f,
+                    "Hero 水底光の明るい線が多すぎると不自然な線画に見える");
 
                 int[] orientationBins = new int[18];
                 int orientationSamples = 0;

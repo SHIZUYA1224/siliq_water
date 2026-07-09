@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.78] - 2026-07-09
+
+### 改善: プレビュー画像と水底光を製品デモ品質へ再調整
+- `preview_crystal_lagoon_complete.png` / `preview_crystal_lagoon_hero_complete.png` を、線模様の説明画像ではなく室内プールの反射、水底、透明感が見える完成イメージへ作り直した
+- Crystal Lagoon / Hero / SunlitPool の caustics texture を、白い線が密集した模様ではなく、柔らかい床光と少数の焦点線に再調整した
+- プレビュー品質テストを強化し、室内背景、暗い窓反射、白飛びしすぎない反射、水底光の線密度上限を固定
+
 ## [2.3.77] - 2026-07-09
 
 ### 追加: 透明プール完成セットと SunlitPool 床光 overlay
