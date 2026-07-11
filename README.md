@@ -16,7 +16,7 @@ Unity / VRChat向けの、**完成済み水面Materialをそのまま使う**水
 
 製品の入口は `ReadyMaterials` と完成Prefabです。旧Standard確認Material、手続きマップ生成コア、ランタイム生成APIは既存プロジェクトとの互換用に残していますが、通常メニューには出しません。自動生成結果を完成Materialの代わりには使いません。
 
-用途別Materialの選び方は [Docs/MaterialLookPresetGuide.md](Docs/MaterialLookPresetGuide.md)、公開前の確認項目は [Docs/PublicReleaseChecklist.md](Docs/PublicReleaseChecklist.md) を参照してください。
+用途別Materialの選び方は [Docs/MaterialLookPresetGuide.md](Docs/MaterialLookPresetGuide.md)、normal素材の監査基準は [Docs/NormalTextureQualityAudit.md](Docs/NormalTextureQualityAudit.md)、公開前の確認項目は [Docs/PublicReleaseChecklist.md](Docs/PublicReleaseChecklist.md) を参照してください。
 
 ## 初心者はまずこれ
 
@@ -62,10 +62,10 @@ README / 用途別ガイド / PrebakedPack の確認に進めます。
 | ファイル | 用途 | 確認用マテリアル |
 |---|---|---|
 | `Water_Normal_Calm_01.png` | 静かな湖・穏やかな水面 | `M_Water_Calm` |
-| `Water_Normal_Ripple_01.png` | 雨の波紋 | `M_Water_Ripple` |
+| `Water_Normal_Ripple_01.png` | 雨天用の静かな基礎波。広がるリングは `WaterRippleEmitter` | `M_Water_Ripple` |
 | `Water_Normal_Stream_01.png` | 川・一方向に流れる水 | `M_Water_Stream` |
-| `Water_Normal_Pool_01.png` | プール・浅い水 (控えめな光の網目) | `M_Water_Pool` |
-| `Water_Normal_Cyber_01.png` | 近未来・ホログラム水面 (細いデータ流) | `M_Water_Cyber` |
+| `Water_Normal_Pool_01.png` | プール・浅い水 (硬いセル境界のない浅い交差波) | `M_Water_Pool` |
+| `Water_Normal_Cyber_01.png` | 液体金属・粘性のある特殊液体 (滑らかな広い折れ) | `M_Water_Cyber` |
 | `Water_Normal_FlagshipCrystal_01.png` + `Water_Height_FlagshipCrystal_01.png` | 製品デモ向けの透明水・高反射・実高さ | `M_Water_FlagshipCrystal` |
 | `Water_Normal_CrystalLagoon_01.png` + `Water_Height_CrystalLagoon_01.png` | 透き通った浅い水・美しさ特化 | `M_Siliq_CrystalLagoon_Ready` |
 | `Water_Normal_CrystalLagoon_Hero_01.png` + `Water_Height_CrystalLagoon_Hero_01.png` | 最高品質確認用の透明水・柔らかい波面 | `M_Siliq_CrystalLagoon_Hero_Ready` |
@@ -74,8 +74,8 @@ README / 用途別ガイド / PrebakedPack の確認に進めます。
 | `Water_Caustics_CrystalLagoon_Hero_01.png` | 水底/床メッシュに重ねる Hero 専用 caustics | `M_Siliq_CrystalLagoon_Hero_CausticsOverlay` |
 | `Water_Caustics_SunlitPool_01.png` | 透明プール/室内プールの床に重ねる柔らかい caustics | `M_Siliq_SunlitPool_CausticsOverlay` |
 
-基本 5 種は **1024×1024 PNG / シームレス / インポート設定済み (NormalMap・Repeat・Android/iOS は ASTC 6x6)**。
-フラッグシップ透明水、Crystal Lagoon、WaterTable は専用 **2048×2048 normal map + 2048×2048 height map** を同梱し、用途別 Quick Apply では両方を Siliq 水シェーダーへ割り当てます。
+normal map 9種はすべて **2048×2048 PNG / シームレス / 単位法線 / インポート設定済み** です。PCは2048px高品質圧縮、Android/iOSは発熱とメモリを抑える1024px ASTC 5x5を使用します。
+フラッグシップ透明水、Crystal Lagoon、WaterTable は専用 **2048×2048 height map** も同梱し、用途別 Quick Apply ではnormalとheightをSiliq水シェーダーへ割り当てます。
 WaterTable は水面専用です。ガラス天板、LED ライン、ベース、中央ノズルは別オブジェクトで作り、水面 material に飛沫や塩のような後付け要素は混ぜません。
 Crystal Lagoon / Hero / SunlitPool の caustics は水面 material ではなく、床や水底用の別メッシュへ貼る overlay material で使います。水面に白い線や塩のような模様を混ぜないため、Ready material 側の `_CausticsStrength` / `_BottomVisibility` / `_BottomLightStrength` / `_BottomGlowStrength` は初期値 0 です。
 共通の `Water_Caustics_Crystal_01.png` も同梱していますが、水面に直接混ぜる用途ではなく、必要な時だけ別メッシュ/別material側で使う前提です。

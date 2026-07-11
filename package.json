@@ -1,7 +1,7 @@
 {
   "name": "com.siliq.water-normalmap",
   "displayName": "Siliq Water",
-  "version": "2.3.88",
+  "version": "2.3.89",
   "unity": "2019.4",
   "description": "Unity / VRChat向けの完成済み高品質水面マテリアル集。海、透明プール、室内水面、ウォーターテーブル、特殊液体をドラッグ&ドロップまたはHierarchy右クリックだけで設定できます。Built-in / Quest / iOS向け軽量水シェーダーと任意導入のURPサンプルを同梱。",
   "license": "SEE LICENSE IN LICENSE.md",

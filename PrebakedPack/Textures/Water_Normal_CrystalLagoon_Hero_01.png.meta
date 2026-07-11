@@ -39,7 +39,7 @@ TextureImporter:
     wrapW: 0
   nPOTScale: 1
   lightmap: 0
-  compressionQuality: 60
+  compressionQuality: 100
   spriteMode: 0
   spriteExtrude: 1
   spriteMeshType: 1
@@ -64,8 +64,8 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 60
+    textureCompression: 2
+    compressionQuality: 100
     crunchedCompression: 0
     allowsAlphaSplitting: 0
     overridden: 0
@@ -75,9 +75,9 @@ TextureImporter:
     buildTarget: Android
     maxTextureSize: 1024
     resizeAlgorithm: 0
-    textureFormat: 50
-    textureCompression: 1
-    compressionQuality: 60
+    textureFormat: 49
+    textureCompression: 2
+    compressionQuality: 100
     crunchedCompression: 0
     allowsAlphaSplitting: 0
     overridden: 1
@@ -87,9 +87,9 @@ TextureImporter:
     buildTarget: iPhone
     maxTextureSize: 1024
     resizeAlgorithm: 0
-    textureFormat: 50
-    textureCompression: 1
-    compressionQuality: 60
+    textureFormat: 49
+    textureCompression: 2
+    compressionQuality: 100
     crunchedCompression: 0
     allowsAlphaSplitting: 0
     overridden: 1

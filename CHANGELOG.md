@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.3.89] - 2026-07-11
+
+### 改善: 全normal textureを用途別に再監査・再構成
+- `Water_Normal_*_01.png` 全9枚を2048pxへ統一し、自然な波形ソースを周期境界・単位法線・正Zへ技術補正した高品質版へ差し替え
+- PoolのVoronoi/氷割れ、Cyberの布目、Streamの格子、Flagshipの櫛状ノイズ、Heroの弱すぎる法線を用途別の連続波へ変更
+- Rippleの静止リングを弱め、実際の拡大波紋は `WaterRippleEmitter` / `WaterRippleSource` が担当する設計を明記
+- PCは2048px高品質圧縮、Android/iOSは1024px ASTC 5x5へ統一し、品質を保ちながらモバイルのメモリと発熱を抑制
+- 生PNGの法線長、Z、強度、方向偏り、周波数階層、局所変化、Repeat境界、1px段差とUnity import設定を全9枚一括で検証するEditMode testを追加
+- `Docs/NormalTextureQualityAudit.md` を追加し、各素材の用途、修正内容、品質ゲート、波紋・水底との責務分離を記録
+
 ## [2.3.88] - 2026-07-10
 
 ### 改善: 完成Materialを直接使う製品導線へ統一

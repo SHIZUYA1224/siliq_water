@@ -18,6 +18,19 @@ namespace Siliq.Water.Tests
         const float SeamTolerance = 1e-3f;   // 継ぎ目・ループの許容誤差 (値域 ±1 に対して)
         const int SampleCount = 64;
 
+        static readonly string[] BundledNormalTextureNames =
+        {
+            "Calm",
+            "CrystalLagoon",
+            "CrystalLagoon_Hero",
+            "Cyber",
+            "FlagshipCrystal",
+            "Pool",
+            "Ripple",
+            "Stream",
+            "WaterTable",
+        };
+
         static int PresetCount => WaterMapPresets.Names.Length;
 
         // ---------------------------------------------------------------
@@ -1741,6 +1754,56 @@ namespace Siliq.Water.Tests
         }
 
         [Test]
+        public void BundledNormalTextures_MeetProductQualityGates()
+        {
+            foreach (string name in BundledNormalTextureNames)
+            {
+                string path = $"Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Normal_{name}_01.png";
+                var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+                Assert.IsNotNull(texture, $"{name}: normal texture が package に含まれていない");
+                Assert.GreaterOrEqual(texture.width, 2048, $"{name}: PC原版は2048px以上にする");
+                Assert.GreaterOrEqual(texture.height, 2048, $"{name}: PC原版は2048px以上にする");
+                AssertRawNormalQuality(path, name);
+            }
+        }
+
+        [Test]
+        public void BundledNormalTextures_UseHighQualityPlatformImports()
+        {
+            foreach (string name in BundledNormalTextureNames)
+            {
+                string path = $"Packages/com.siliq.water-normalmap/PrebakedPack/Textures/Water_Normal_{name}_01.png";
+                var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+                Assert.IsNotNull(importer, $"{name}: TextureImporter を取得できない");
+                Assert.AreEqual(TextureImporterType.NormalMap, importer.textureType,
+                    $"{name}: NormalMap import でなければならない");
+                Assert.IsFalse(importer.sRGBTexture, $"{name}: 法線データをsRGB変換しない");
+                Assert.IsTrue(importer.mipmapEnabled, $"{name}: 遠景のちらつきを抑えるmipmapが必要");
+                Assert.AreEqual(TextureWrapMode.Repeat, importer.wrapMode, $"{name}: Repeat import が必要");
+                Assert.AreEqual(FilterMode.Trilinear, importer.filterMode, $"{name}: Trilinear filtering が必要");
+                Assert.GreaterOrEqual(importer.anisoLevel, 2, $"{name}: 斜め視点の水面で細部を潰さない");
+                Assert.GreaterOrEqual(importer.maxTextureSize, 2048, $"{name}: PC原版を1024pxへ縮小しない");
+                Assert.AreEqual(TextureImporterCompression.CompressedHQ, importer.textureCompression,
+                    $"{name}: PCは高品質圧縮を使う");
+                Assert.AreEqual(100, importer.compressionQuality, $"{name}: PC圧縮品質を下げない");
+
+                foreach (string platform in new[] { "Android", "iPhone" })
+                {
+                    TextureImporterPlatformSettings settings = importer.GetPlatformTextureSettings(platform);
+                    Assert.IsTrue(settings.overridden, $"{name}/{platform}: モバイル上限を明示する");
+                    Assert.AreEqual(1024, settings.maxTextureSize,
+                        $"{name}/{platform}: 品質と発熱のバランスとして1024pxを使う");
+                    Assert.AreEqual(TextureImporterFormat.ASTC_5x5, settings.format,
+                        $"{name}/{platform}: 法線のブロック劣化を抑えるASTC 5x5を使う");
+                    Assert.AreEqual(TextureImporterCompression.CompressedHQ, settings.textureCompression,
+                        $"{name}/{platform}: モバイルも高品質圧縮を使う");
+                    Assert.AreEqual(100, settings.compressionQuality,
+                        $"{name}/{platform}: モバイル圧縮品質を下げない");
+                }
+            }
+        }
+
+        [Test]
         public void FlagshipCrystalPrebakedAssets_AreDedicatedHighResolutionAssets()
         {
             const string normalGuid = "a171aabb01c34e01a1b2c3d4e5f60106";
@@ -2695,6 +2758,187 @@ namespace Siliq.Water.Tests
         // ---------------------------------------------------------------
         // ヘルパー
         // ---------------------------------------------------------------
+
+        static void AssertRawNormalQuality(string path, string label)
+        {
+            var readable = new Texture2D(2, 2, TextureFormat.RGB24, false, true);
+            try
+            {
+                Assert.IsTrue(readable.LoadImage(File.ReadAllBytes(path)), $"{label}: PNGとして読めない");
+                Assert.AreEqual(2048, readable.width, $"{label}: 生PNGの幅を2048pxに固定する");
+                Assert.AreEqual(2048, readable.height, $"{label}: 生PNGの高さを2048pxに固定する");
+
+                Color32[] pixels = readable.GetPixels32();
+                const int blockSize = 64;
+                int blocksX = readable.width / blockSize;
+                int blocksY = readable.height / blockSize;
+                var blockX = new double[blocksX * blocksY];
+                var blockY = new double[blocksX * blocksY];
+                var blockEnergy = new double[blocksX * blocksY];
+
+                double sumX = 0.0;
+                double sumY = 0.0;
+                double sumXX = 0.0;
+                double sumYY = 0.0;
+                double sumXY = 0.0;
+                double sumLengthError = 0.0;
+                double maxLengthError = 0.0;
+                double minZ = 1.0;
+                double adjacentX = 0.0;
+                double adjacentY = 0.0;
+                double seamX = 0.0;
+                double seamY = 0.0;
+                double maxNeighborDelta = 0.0;
+                long adjacentXCount = 0;
+                long adjacentYCount = 0;
+
+                for (int y = 0; y < readable.height; y++)
+                {
+                    for (int x = 0; x < readable.width; x++)
+                    {
+                        int index = y * readable.width + x;
+                        Color32 pixel = pixels[index];
+                        double nx = pixel.r / 127.5 - 1.0;
+                        double ny = pixel.g / 127.5 - 1.0;
+                        double nz = pixel.b / 127.5 - 1.0;
+                        double xySquared = nx * nx + ny * ny;
+                        double length = System.Math.Sqrt(xySquared + nz * nz);
+                        double lengthError = System.Math.Abs(length - 1.0);
+
+                        sumX += nx;
+                        sumY += ny;
+                        sumXX += nx * nx;
+                        sumYY += ny * ny;
+                        sumXY += nx * ny;
+                        sumLengthError += lengthError;
+                        maxLengthError = System.Math.Max(maxLengthError, lengthError);
+                        minZ = System.Math.Min(minZ, nz);
+
+                        int block = (y / blockSize) * blocksX + x / blockSize;
+                        blockX[block] += nx;
+                        blockY[block] += ny;
+                        blockEnergy[block] += System.Math.Sqrt(xySquared);
+
+                        if (x > 0)
+                        {
+                            Color32 previous = pixels[index - 1];
+                            double dx = (pixel.r - previous.r) / 127.5;
+                            double dy = (pixel.g - previous.g) / 127.5;
+                            adjacentX += System.Math.Abs(dx) + System.Math.Abs(dy);
+                            adjacentXCount++;
+                            maxNeighborDelta = System.Math.Max(maxNeighborDelta, System.Math.Sqrt(dx * dx + dy * dy));
+                        }
+                        if (y > 0)
+                        {
+                            Color32 previous = pixels[index - readable.width];
+                            double dx = (pixel.r - previous.r) / 127.5;
+                            double dy = (pixel.g - previous.g) / 127.5;
+                            adjacentY += System.Math.Abs(dx) + System.Math.Abs(dy);
+                            adjacentYCount++;
+                            maxNeighborDelta = System.Math.Max(maxNeighborDelta, System.Math.Sqrt(dx * dx + dy * dy));
+                        }
+                    }
+
+                    Color32 left = pixels[y * readable.width];
+                    Color32 right = pixels[y * readable.width + readable.width - 1];
+                    seamX += System.Math.Abs(left.r - right.r) + System.Math.Abs(left.g - right.g);
+                }
+
+                for (int x = 0; x < readable.width; x++)
+                {
+                    Color32 bottom = pixels[x];
+                    Color32 top = pixels[(readable.height - 1) * readable.width + x];
+                    seamY += System.Math.Abs(bottom.r - top.r) + System.Math.Abs(bottom.g - top.g);
+                }
+
+                double count = pixels.Length;
+                double meanX = sumX / count;
+                double meanY = sumY / count;
+                double slopeRms = System.Math.Sqrt((sumXX + sumYY) / count);
+                double varianceX = sumXX / count - meanX * meanX;
+                double varianceY = sumYY / count - meanY * meanY;
+                double covariance = sumXY / count - meanX * meanY;
+                double trace = varianceX + varianceY;
+                double discriminant = System.Math.Sqrt(
+                    System.Math.Max(0.0, (varianceX - varianceY) * (varianceX - varianceY) + 4.0 * covariance * covariance));
+                double minEigenvalue = 0.5 * (trace - discriminant);
+                double maxEigenvalue = 0.5 * (trace + discriminant);
+                double anisotropy = maxEigenvalue / System.Math.Max(minEigenvalue, 1e-12);
+
+                double blockPixelCount = blockSize * blockSize;
+                double coarseSquared = 0.0;
+                double energyMean = 0.0;
+                for (int i = 0; i < blockEnergy.Length; i++)
+                {
+                    double bx = blockX[i] / blockPixelCount;
+                    double by = blockY[i] / blockPixelCount;
+                    coarseSquared += bx * bx + by * by;
+                    blockEnergy[i] /= blockPixelCount;
+                    energyMean += blockEnergy[i];
+                }
+                energyMean /= blockEnergy.Length;
+                double energyVariance = 0.0;
+                foreach (double energy in blockEnergy)
+                {
+                    double delta = energy - energyMean;
+                    energyVariance += delta * delta;
+                }
+                energyVariance /= blockEnergy.Length;
+                double energyVariation = System.Math.Sqrt(energyVariance) / System.Math.Max(energyMean, 1e-12);
+                double coarseRms = System.Math.Sqrt(coarseSquared / blockEnergy.Length);
+                double coarseRatio = coarseRms / System.Math.Max(slopeRms, 1e-12);
+
+                double seamXRatio = (seamX / readable.height / 127.5) /
+                    System.Math.Max(adjacentX / adjacentXCount, 1e-12);
+                double seamYRatio = (seamY / readable.width / 127.5) /
+                    System.Math.Max(adjacentY / adjacentYCount, 1e-12);
+
+                Assert.LessOrEqual(sumLengthError / count, 0.0025, $"{label}: 平均法線長が単位ベクトルから外れている");
+                Assert.LessOrEqual(maxLengthError, 0.008, $"{label}: 単位化されていないピクセルがある");
+                Assert.Greater(minZ, 0.68, $"{label}: 接線空間Zが低すぎて強度を上げると破綻する");
+                Assert.LessOrEqual(System.Math.Abs(meanX), 0.002, $"{label}: X方向へ法線が偏っている");
+                Assert.LessOrEqual(System.Math.Abs(meanY), 0.002, $"{label}: Y方向へ法線が偏っている");
+                Assert.That(slopeRms, Is.InRange(0.09, 0.205), $"{label}: 水面として扱える強度範囲を外れている");
+                Assert.LessOrEqual(seamXRatio, 1.5, $"{label}: U方向Repeat境界が内部差分より大きい");
+                Assert.LessOrEqual(seamYRatio, 1.5, $"{label}: V方向Repeat境界が内部差分より大きい");
+                Assert.That(coarseRatio, Is.InRange(0.22, 0.82),
+                    $"{label}: マクロ波と微細波の両方が必要");
+                Assert.GreaterOrEqual(energyVariation, 0.20,
+                    $"{label}: 全面が均一すぎるため局所的な静けさと動きを作る");
+
+                if (label == "Stream")
+                {
+                    Assert.That(anisotropy, Is.InRange(3.0, 12.0),
+                        "Stream: 流向は必要だが直線格子にはしない");
+                    Assert.LessOrEqual(maxNeighborDelta, 0.17, "Stream: 1pxの硬いバーを入れない");
+                }
+                else
+                {
+                    Assert.LessOrEqual(anisotropy, 4.0, $"{label}: 一方向の櫛・布目・格子に戻っている");
+                    Assert.LessOrEqual(maxNeighborDelta, label == "FlagshipCrystal" ? 0.24 : 0.11,
+                        $"{label}: 1pxの割れ目や硬いセル境界を入れない");
+                }
+
+                if (label == "Pool")
+                {
+                    Assert.GreaterOrEqual(minZ, 0.88, "Pool: 強くしても氷・多角形面に見えない浅い勾配にする");
+                    Assert.LessOrEqual(maxNeighborDelta, 0.08, "Pool: Voronoi状の硬い境界へ戻さない");
+                }
+                if (label == "CrystalLagoon_Hero")
+                {
+                    Assert.GreaterOrEqual(slopeRms, 0.11, "Hero: 平坦で効果が見えない法線へ戻さない");
+                }
+                if (label == "Cyber" || label == "FlagshipCrystal" || label == "Stream")
+                {
+                    Assert.GreaterOrEqual(slopeRms, 0.155,
+                        $"{label}: 用途に必要な見える反射変化を保つ");
+                }
+            }
+            finally
+            {
+                Object.DestroyImmediate(readable);
+            }
+        }
 
         static float SumLayers(WaterMapSettings s, float u, float v, float t)
         {
