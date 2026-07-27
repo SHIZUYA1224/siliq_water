@@ -26,7 +26,7 @@ Shader "Siliq/Water URP"
         _Tiling2 ("レイヤー2 タイリング", Float) = 2.7
         _Scroll1 ("レイヤー1 スクロール (XY)", Vector) = (0.01, 0.004, 0, 0)
         _Scroll2 ("レイヤー2 スクロール (XY)", Vector) = (-0.003, 0.007, 0, 0)
-        _DetailStrength ("近くの細かい波", Range(0, 1)) = 0.55
+        _DetailStrength ("近くの細かい波", Range(0, 1)) = 0.25
         _DetailTiling ("細かい波の細かさ", Range(2, 24)) = 7.3
         _DetailDistance ("細かい波が消える距離", Range(1, 200)) = 24
         _SpecularAA ("遠景のちらつき防止", Range(0, 1)) = 0.9
@@ -56,7 +56,7 @@ Shader "Siliq/Water URP"
         _Smoothness ("スムースネス", Range(0, 1)) = 0.92
         _FresnelPower ("フレネルの鋭さ", Range(0.5, 8)) = 5
         _ReflStrength ("反射の強さ (リフレクションプローブ)", Range(0, 1)) = 0.8
-        _SunSheen ("太陽の広がる光沢", Range(0, 1)) = 0.32
+        _SunSheen ("太陽の広がる光沢", Range(0, 1)) = 0
         _SssStrength ("波の透過光 (SSS)", Range(0, 2)) = 0.55
 
         [Toggle(_USE_FLOWMAP)] _UseFlowMap ("フローマップを使う", Float) = 0
@@ -199,15 +199,13 @@ Shader "Siliq/Water URP"
                 return _Time.y + _ManualTime;
             }
 
-            // 低周波のうねり。4 波の非整数比で格子状の繰り返しを見えにくくする。
             float SiliqMacroNoise(float2 p)
             {
                 float time = SiliqAnimationTime();
                 float a = sin(dot(p, float2(1.27, 2.31)) + time * 0.07);
                 float b = sin(dot(p, float2(-2.14, 1.43)) - time * 0.05);
                 float c = sin(dot(p, float2(0.63, -1.19)) + time * 0.03);
-                float d = sin(dot(p, float2(3.11, -0.47)) - time * 0.023);
-                return a * 0.42 + b * 0.27 + c * 0.18 + d * 0.13;
+                return a * 0.5 + b * 0.32 + c * 0.18;
             }
 
             float2 SiliqRotate2D(float2 v, float angle)
@@ -245,7 +243,9 @@ Shader "Siliq/Water URP"
             {
                 float2 footprint = fwidth(uv) * _NormalMap_TexelSize.zw;
                 float span = max(footprint.x, footprint.y);
-                return saturate(log2(max(span, 1.0)) * 0.45);
+                // 2 テクセル/ピクセルまでは無視し、そこから緩やかに立ち上げる。
+                // 近〜中距離の見た目に触らず、本当にサンプリングが破綻する距離だけを対象にする。
+                return saturate((log2(max(span, 1.0)) - 1.0) * 0.30);
             }
 
             #ifdef _USE_RIPPLES
@@ -396,9 +396,12 @@ Shader "Siliq/Water URP"
                     n3 = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, uv3));
                 }
 
-                half3 blended = half3(n1.xy + n2.xy + n3.xy * detailWeight, n1.z * n2.z);
+                // 3 枚目を足した分だけ正規化し、_NormalStrength の意味を 2 レイヤー時代から変えない
+                half layerNorm = 2.0h / (2.0h + detailWeight);
+                half3 blended = half3((n1.xy + n2.xy + n3.xy * detailWeight) * layerNorm, n1.z * n2.z);
                 half macroStrength = lerp(1.0h - _MacroVariation * 0.45h, 1.0h + _MacroVariation * 0.55h, macroMask);
-                blended.xy *= _NormalStrength * macroStrength * lerp(1.0h, 0.30h, aliasing);
+                // 遠景の対策は roughness 側で行う。法線を潰すと近〜中距離まで平板になる。
+                blended.xy *= _NormalStrength * macroStrength * lerp(1.0h, 0.78h, aliasing);
                 return normalize(blended);
             }
 

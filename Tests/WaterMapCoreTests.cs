@@ -3030,13 +3030,84 @@ namespace Siliq.Water.Tests
                     $"{path}: サンプリング不足の量を法線とハイライトへ反映する必要がある");
             }
 
-            // 遠景では法線を寝かせ、ハイライトのローブを広げる (点の明滅を消す)
-            StringAssert.Contains("lerp(1.0h, 0.30h, aliasing)", ReadShader(MobileShaderPath),
-                "モバイル shader は遠景で法線を平坦化する必要がある");
-            StringAssert.Contains("lerp(28.0h, _SpecPower, sharpness)", ReadShader(MobileShaderPath),
+            // 対策の本命はハイライトのローブを広げること。法線を潰すのは補助にとどめる。
+            StringAssert.Contains("lerp(48.0h, _SpecPower, sharpness)", ReadShader(MobileShaderPath),
                 "モバイル shader は遠景でハイライトのローブを広げる必要がある");
             StringAssert.Contains("aliasing * 0.35h", ReadShader(UrpShaderPath),
                 "URP shader は遠景で roughness を上げてスペキュラをアンチエイリアスする必要がある");
+
+            // 近〜中距離まで平板にしてしまうと「品質が落ちた」に見える。
+            // 法線の減衰は控えめに保ち、判定の立ち上がりも 2 テクセル/ピクセル以降にする。
+            foreach (string path in WaterSurfaceShaderPaths)
+            {
+                string text = ReadShader(path);
+                StringAssert.Contains("lerp(1.0h, 0.78h, aliasing)", text,
+                    $"{path}: 遠景対策で法線を潰しすぎると近〜中距離まで平板になる");
+                StringAssert.Contains("(log2(max(span, 1.0)) - 1.0) * 0.30", text,
+                    $"{path}: サンプリング不足の判定は 2 テクセル/ピクセル以降から緩やかに立ち上げる");
+            }
+        }
+
+        [Test]
+        public void WaterShaders_KeepHandTunedLookWhenNewFeaturesAreIdle()
+        {
+            foreach (string path in WaterSurfaceShaderPaths)
+            {
+                string text = ReadShader(path);
+
+                // 3 枚目のレイヤーを足しただけで起伏が強くなると、
+                // 既存 material の _NormalStrength の意味が変わってしまう。
+                StringAssert.Contains("2.0h / (2.0h + detailWeight)", text,
+                    $"{path}: レイヤーを足した分は正規化して起伏の総量を保つ必要がある");
+                StringAssert.Contains("* layerNorm", text,
+                    $"{path}: 正規化係数を実際に掛ける必要がある");
+
+                // 広いローブは白い霞になりやすいので既定は 0 (opt-in)
+                StringAssert.Contains("_SunSheen (\"太陽の広がる光沢\", Range(0, 1)) = 0\n", text,
+                    $"{path}: _SunSheen の既定値は 0 にして手調整済みの見た目を変えない");
+            }
+
+            string mobile = ReadShader(MobileShaderPath);
+
+            // 空の階調は「色味の配分」だけを変える。輝度を落とすと手調整済み material が暗くなる。
+            StringAssert.Contains("_ZenithColor.rgb / zenithLum", mobile,
+                "真上の反射色は輝度 1 へ正規化し、反射の明るさを変えないこと");
+            Assert.IsFalse(mobile.Contains("lerp(half3(1, 1, 1), _ZenithColor.rgb"),
+                "生の _ZenithColor を掛けると反射が暗くなる");
+
+            // ハイライトと反射帯は material の見せ場。遠景でも消しすぎない。
+            StringAssert.Contains("lerp(0.72h, 1.0h, sharpness)", mobile,
+                "遠景でハイライトの強度まで大きく落とさない");
+            StringAssert.Contains("lerp(0.65h, 1.0h, sharpness)", mobile,
+                "遠景で反射帯を消しすぎない");
+        }
+
+        [Test]
+        public void ReadyMaterials_DoNotEnableWashOutProneEffects()
+        {
+            string[] waterMaterials =
+            {
+                "M_Siliq_ClearSea_Ready", "M_Siliq_ClearPool_Ready", "M_Siliq_IndoorBluePool_Ready",
+                "M_Siliq_FlagshipCrystal_Ready", "M_Siliq_CrystalLagoon_Ready", "M_Siliq_CrystalLagoon_Hero_Ready",
+                "M_Siliq_BloodSea_Ready", "M_Siliq_LiquidMetal_Ready", "M_Siliq_WaterTable_Ready",
+            };
+
+            foreach (string name in waterMaterials)
+            {
+                var mat = LoadReadyMaterial(name);
+
+                Assert.AreEqual(0f, mat.GetFloat("_SunSheen"), 1e-5f,
+                    $"{name}: 広いローブは白い霞になりやすいので完成 material では初期 OFF にする");
+                Assert.LessOrEqual(mat.GetFloat("_DetailStrength"), 0.35f,
+                    $"{name}: 微細波が強すぎると手調整済みの水面が騒がしくなる");
+                Assert.LessOrEqual(mat.GetFloat("_SkyGradient"), 0.55f,
+                    $"{name}: 空の階調が強すぎると指定した反射色から離れる");
+            }
+
+            // 透明感優先の material ほど微細波は抑える
+            Assert.Less(LoadReadyMaterial("M_Siliq_CrystalLagoon_Hero_Ready").GetFloat("_DetailStrength"),
+                LoadReadyMaterial("M_Siliq_ClearSea_Ready").GetFloat("_DetailStrength"),
+                "Hero は凹凸より透明感を優先するので微細波を海より弱くする");
         }
 
         [Test]

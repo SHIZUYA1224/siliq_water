@@ -58,7 +58,7 @@ Material:
     - _DarkReflectionDamping: 0.36
     - _DepthTintStrength: 0.44
     - _DetailDistance: 8
-    - _DetailStrength: 0.45
+    - _DetailStrength: 0.22
     - _DetailTiling: 6
     - _DisplacementScale: 0.72
     - _DisplacementSpeed: 0.000018
@@ -87,12 +87,12 @@ Material:
     - _RippleLifetime: 4.8
     - _RippleSpeed: 1.25
     - _RippleWidth: 0.58
-    - _SkyGradient: 0.4
+    - _SkyGradient: 0.26
     - _SpecIntensity: 2
     - _SpecPower: 460
     - _SpecularAA: 0.88
     - _SrcBlend: 5
-    - _SunSheen: 0.26
+    - _SunSheen: 0
     - _Tiling1: 1
     - _Tiling2: 1.08
     - _TransmissionStrength: 0.55

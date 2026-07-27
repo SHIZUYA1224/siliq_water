@@ -11,8 +11,8 @@ Shader "Siliq/Water Mobile (Quest)"
         _ShallowColor ("浅い水の色", Color) = (0.16, 0.55, 0.60, 1)
         _DeepColor ("深い水の色", Color) = (0.02, 0.15, 0.25, 1)
         _HorizonColor ("反射 (空) の色", Color) = (0.65, 0.80, 0.90, 1)
-        _ZenithColor ("反射 (真上) の色", Color) = (0.55, 0.72, 1, 1)
-        _SkyGradient ("空の階調と色味", Range(0, 1)) = 0.55
+        _ZenithColor ("反射 (真上) の色味", Color) = (0.55, 0.72, 1, 1)
+        _SkyGradient ("空の階調と色味", Range(0, 1)) = 0.4
         _MinLighting ("暗所の最低明るさ", Range(0, 0.5)) = 0.10
         _DarkReflectionDamping ("暗所の反射抑制", Range(0, 1)) = 0.72
         _DarkDetailDamping ("暗所のきらめき抑制", Range(0, 1)) = 0.70
@@ -40,11 +40,11 @@ Shader "Siliq/Water Mobile (Quest)"
         _Tiling2 ("レイヤー2 タイリング", Float) = 2.7
         _Scroll1 ("レイヤー1 スクロール (XY)", Vector) = (0.0024, 0.0010, 0, 0)
         _Scroll2 ("レイヤー2 スクロール (XY)", Vector) = (-0.0008, 0.0017, 0, 0)
-        _DetailStrength ("近くの細かい波", Range(0, 1)) = 0.55
+        _DetailStrength ("近くの細かい波", Range(0, 1)) = 0.25
         _DetailTiling ("細かい波の細かさ", Range(2, 24)) = 7.3
         _DetailDistance ("細かい波が消える距離", Range(1, 200)) = 22
         _SpecularAA ("遠景のちらつき防止", Range(0, 1)) = 0.9
-        _SunSheen ("太陽の広がる光沢", Range(0, 1)) = 0.32
+        _SunSheen ("太陽の広がる光沢", Range(0, 1)) = 0
         _MacroVariation ("大きなムラ", Range(0, 1)) = 0.35
         _MacroScale ("大きなムラのスケール", Range(0.01, 1)) = 0.12
         _MacroDirectionBreakup ("方向の崩し", Range(0, 1)) = 0.28
@@ -186,15 +186,13 @@ Shader "Siliq/Water Mobile (Quest)"
                 #endif
             }
 
-            // 低周波のうねり。4 波の非整数比で格子状の繰り返しを見えにくくする。
             float SiliqMacroNoise(float2 p)
             {
                 float time = SiliqAnimationTime();
                 float a = sin(dot(p, float2(1.27, 2.31)) + time * 0.07);
                 float b = sin(dot(p, float2(-2.14, 1.43)) - time * 0.05);
                 float c = sin(dot(p, float2(0.63, -1.19)) + time * 0.03);
-                float d = sin(dot(p, float2(3.11, -0.47)) - time * 0.023);
-                return a * 0.42 + b * 0.27 + c * 0.18 + d * 0.13;
+                return a * 0.5 + b * 0.32 + c * 0.18;
             }
 
             float2 SiliqRotate2D(float2 v, float angle)
@@ -210,7 +208,9 @@ Shader "Siliq/Water Mobile (Quest)"
             {
                 float2 footprint = fwidth(uv) * _NormalMap_TexelSize.zw;
                 float span = max(footprint.x, footprint.y);
-                return saturate(log2(max(span, 1.0)) * 0.45);
+                // 2 テクセル/ピクセルまでは無視し、そこから緩やかに立ち上げる。
+                // 近〜中距離の見た目に触らず、本当にサンプリングが破綻する距離だけを対象にする。
+                return saturate((log2(max(span, 1.0)) - 1.0) * 0.30);
             }
 
             float SiliqVertexHeight(float3 localPos, float2 uv)
@@ -371,10 +371,13 @@ Shader "Siliq/Water Mobile (Quest)"
                     n3 = UnpackNormal(tex2D(_NormalMap, uv3));
                 }
 
-                // whiteout blend: XY を足し Z を掛けることで、どのレイヤーの起伏も失われない
-                half3 tn = half3(n1.xy + n2.xy + n3.xy * detailWeight, n1.z * n2.z);
+                // whiteout blend: XY を足し Z を掛けることで、どのレイヤーの起伏も失われない。
+                // 3 枚目を足した分だけ正規化し、_NormalStrength の意味を 2 レイヤー時代から変えない。
+                half layerNorm = 2.0h / (2.0h + detailWeight);
+                half3 tn = half3((n1.xy + n2.xy + n3.xy * detailWeight) * layerNorm, n1.z * n2.z);
                 half macroStrength = lerp(1.0h - _MacroVariation * 0.45h, 1.0h + _MacroVariation * 0.55h, macro01);
-                tn.xy *= _NormalStrength * macroStrength * lerp(1.0h, 0.30h, aliasing);
+                // 遠景の対策はハイライトのローブ側で行う。法線を潰すと近〜中距離まで平板になる。
+                tn.xy *= _NormalStrength * macroStrength * lerp(1.0h, 0.78h, aliasing);
 
                 half rippleLight = 0;
                 #ifdef _USE_RIPPLES
@@ -435,8 +438,12 @@ Shader "Siliq/Water Mobile (Quest)"
                 half3 probeHue = skyProbe / probeLum;
                 // 環境光がほぼ真っ暗なシーンでは色味を借りず、指定色をそのまま使う
                 probeHue = lerp(half3(1, 1, 1), probeHue, saturate(probeLum * 8.0h));
+                // 真上の色も輝度 1 へ正規化する。階調は「色味の配分」だけを変え、
+                // 反射の明るさは _HorizonColor のまま保つ (手調整済み material を暗くしない)。
+                half zenithLum = max(dot(_ZenithColor.rgb, lumaWeights), 1e-3h);
+                half3 zenithHue = _ZenithColor.rgb / zenithLum;
                 half upness = pow(saturate(reflDir.y), 0.7h);
-                half3 reflCol = _HorizonColor.rgb * lerp(half3(1, 1, 1), _ZenithColor.rgb, _SkyGradient * upness);
+                half3 reflCol = _HorizonColor.rgb * lerp(half3(1, 1, 1), zenithHue, _SkyGradient * upness);
                 reflCol *= lerp(half3(1, 1, 1), probeHue, _SkyGradient * 0.75h);
                 #ifdef USE_REFLECTION_CUBE
                 reflCol = lerp(reflCol, texCUBE(_ReflCube, reflDir).rgb, _ReflStrength);
@@ -455,24 +462,26 @@ Shader "Siliq/Water Mobile (Quest)"
                 half reflectionBreakup = saturate(0.55h + 0.45h * sin(reflectionP.y * 2.3h + macroA * 2.2h));
                 half reflectionPattern = reflectionBand * reflectionBreakup * _ReflectionPatternStrength;
                 reflectionPattern *= reflectionVisibility * detailVisibility * saturate(0.25h + fresnel + _EdgeReflection * 0.35h);
-                reflectionPattern *= sharpness;
+                // 反射帯は material の見せ場なので、遠景でも消しすぎない
+                reflectionPattern *= lerp(0.65h, 1.0h, sharpness);
 
                 // --- 太陽 ---
                 // 遠景では 1 ピクセル内に多数の波が入るため、鋭いローブのままだと
-                // 白い点が明滅する。sharpness に応じてローブを広げつつ強度を落とす。
+                // 白い点が明滅する。ローブを広げるのが本命の対策で、強度はほとんど落とさない。
                 half ndh = saturate(dot(worldN, halfDir));
-                half specSharpness = lerp(28.0h, _SpecPower, sharpness);
-                half spec = pow(ndh, specSharpness) * _SpecIntensity * lerp(0.35h, 1.0h, sharpness);
+                half specSharpness = lerp(48.0h, _SpecPower, sharpness);
+                half spec = pow(ndh, specSharpness) * _SpecIntensity * lerp(0.72h, 1.0h, sharpness);
                 spec *= lerp(0.72h, 1.28h, macro01) * detailVisibility * mainLightLum;
-                // 広いローブを少量足すと、点ではなく海面に伸びる光の道に見える
-                half sheen = pow(ndh, max(8.0h, specSharpness * 0.06h)) * _SunSheen * 0.35h;
-                spec += sheen * _SpecIntensity * detailVisibility * mainLightLum * saturate(0.25h + fresnel);
+                // 広いローブを少量足すと、点ではなく海面に伸びる光の道に見える。
+                // 既定は 0。_SpecIntensity とは掛けず、フレネルで押さえて白飛びさせない。
+                half sheen = pow(ndh, max(12.0h, specSharpness * 0.08h)) * _SunSheen * 0.18h;
+                spec += sheen * detailVisibility * mainLightLum * saturate(0.15h + fresnel);
                 half glint = pow(saturate(dot(reflect(-lightDir, worldN), viewDir)), _GlintPower) * _GlintIntensity;
-                glint *= detailVisibility * mainLightLum * sharpness;
+                glint *= detailVisibility * mainLightLum * lerp(0.45h, 1.0h, sharpness);
 
                 half interference = saturate(1.0h - abs(n1.x * 0.72h + n1.y * 0.31h - n2.x * 0.46h + n2.y * 0.58h));
                 half glimmer = pow(interference, _GlimmerSharpness) * _GlimmerIntensity * saturate(0.35h + surfaceLight);
-                glimmer *= lerp(0.65h, 1.35h, macro01) * detailVisibility * sharpness;
+                glimmer *= lerp(0.65h, 1.35h, macro01) * detailVisibility * lerp(0.45h, 1.0h, sharpness);
 
                 // --- 水底 (初期状態では OFF。水底 overlay マテリアルを使う運用が既定) ---
                 half caustics = 0;
