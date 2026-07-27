@@ -2992,6 +2992,312 @@ namespace Siliq.Water.Tests
             }
         }
 
+        // ---------------------------------------------------------------
+        // 水の見た目の品質ゲート
+        // ---------------------------------------------------------------
+
+        static readonly string[] WaterSurfaceShaderPaths =
+        {
+            "Packages/com.siliq.water-normalmap/Runtime/Shaders/SiliqWaterMobile.shader",
+            "Packages/com.siliq.water-normalmap/Samples~/URP/SiliqWaterURP.shader",
+        };
+
+        const string MobileShaderPath = "Packages/com.siliq.water-normalmap/Runtime/Shaders/SiliqWaterMobile.shader";
+        const string UrpShaderPath = "Packages/com.siliq.water-normalmap/Samples~/URP/SiliqWaterURP.shader";
+
+        static string ReadShader(string path)
+        {
+            Assert.IsTrue(File.Exists(path), $"{path} が見つからない");
+            return File.ReadAllText(path);
+        }
+
+        [Test]
+        public void WaterShaders_SuppressDistantShimmer()
+        {
+            foreach (string path in WaterSurfaceShaderPaths)
+            {
+                string text = ReadShader(path);
+
+                StringAssert.Contains("_NormalMap_TexelSize", text,
+                    $"{path}: 1 ピクセルが跨ぐテクセル数を知るために texel size が要る");
+                StringAssert.Contains("fwidth(uv)", text,
+                    $"{path}: UV のスクリーン微分からサンプリング不足を測る必要がある");
+                StringAssert.Contains("SiliqUnderSampling", text,
+                    $"{path}: 遠景のチラつきを測る共通関数が要る");
+                StringAssert.Contains("_SpecularAA", text,
+                    $"{path}: 遠景のちらつき防止を調整できる必要がある");
+                StringAssert.Contains("aliasing", text,
+                    $"{path}: サンプリング不足の量を法線とハイライトへ反映する必要がある");
+            }
+
+            // 遠景では法線を寝かせ、ハイライトのローブを広げる (点の明滅を消す)
+            StringAssert.Contains("lerp(1.0h, 0.30h, aliasing)", ReadShader(MobileShaderPath),
+                "モバイル shader は遠景で法線を平坦化する必要がある");
+            StringAssert.Contains("lerp(28.0h, _SpecPower, sharpness)", ReadShader(MobileShaderPath),
+                "モバイル shader は遠景でハイライトのローブを広げる必要がある");
+            StringAssert.Contains("aliasing * 0.35h", ReadShader(UrpShaderPath),
+                "URP shader は遠景で roughness を上げてスペキュラをアンチエイリアスする必要がある");
+        }
+
+        [Test]
+        public void WaterShaders_LayerNearFieldDetailWithoutVaryingGradients()
+        {
+            foreach (string path in WaterSurfaceShaderPaths)
+            {
+                string text = ReadShader(path);
+
+                StringAssert.Contains("_DetailStrength", text,
+                    $"{path}: 近距離の微細波を調整できる必要がある");
+                StringAssert.Contains("_DetailDistance", text,
+                    $"{path}: 微細波が消える距離を調整できる必要がある");
+                StringAssert.Contains("_DetailTiling", text,
+                    $"{path}: 微細波の細かさを調整できる必要がある");
+
+                // テクスチャの暗黙微分はピクセルごとに分岐が変わる流れの中では未定義。
+                // 分岐条件はマテリアル定数だけにする。
+                StringAssert.Contains("if (_DetailStrength > 0.002h)", text,
+                    $"{path}: 微細波の分岐条件はマテリアル定数にする");
+                Assert.IsFalse(text.Contains("if (detailWeight"),
+                    $"{path}: 距離依存の値で分岐するとテクスチャ微分が未定義になる");
+
+                // 同じテクスチャを重ねるので、レイヤーごとに回して格子状の相関を消す
+                StringAssert.Contains("SiliqRotate2D(centeredUv, 2.31h", text,
+                    $"{path}: 微細波レイヤーは他レイヤーと別の角度に回す必要がある");
+            }
+        }
+
+        [Test]
+        public void SiliqMobileShader_UsesSceneAwareSkyReflection()
+        {
+            string text = ReadShader(MobileShaderPath);
+
+            StringAssert.Contains("_ZenithColor", text,
+                "空は一様ではないので、真上の反射色を持つ必要がある");
+            StringAssert.Contains("_SkyGradient", text,
+                "空の階調と色味の強さを調整できる必要がある");
+            StringAssert.Contains("ShadeSH9(half4(reflDir", text,
+                "反射方向の環境プローブを参照してシーンの空気感に馴染ませる必要がある");
+            StringAssert.Contains("_SunSheen", text,
+                "点ではなく水面に伸びる光の道を作る広いローブが要る");
+            StringAssert.Contains("unity_StereoWorldSpaceCameraPos", text,
+                "VR では両目の中点ではなく実際の目の位置でハイライトを計算する必要がある");
+            StringAssert.Contains("UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX", text,
+                "fragment で片眼のインデックスを確定させる必要がある");
+
+            // 水は正面でも約 2% 反射する。真上から見て反射が完全に消えてはいけない。
+            StringAssert.Contains("max(fresnel, 0.02h", text,
+                "フレネルに水の垂直入射反射率の下限が要る");
+        }
+
+        [Test]
+        public void SiliqUrpShader_IsLitRefractiveAndDepthAware()
+        {
+            string text = ReadShader(UrpShaderPath);
+
+            StringAssert.Contains("_MAIN_LIGHT_SHADOWS", text,
+                "URP 水面は影を受ける必要がある");
+            StringAssert.Contains("GetMainLight(shadowCoord)", text,
+                "影の減衰を取得する必要がある");
+            StringAssert.Contains("_ADDITIONAL_LIGHTS", text,
+                "室内プールの照明などの追加ライトに反応する必要がある");
+            StringAssert.Contains("SampleSH(normalWS)", text,
+                "環境光 (SH) を拾う必要がある");
+            Assert.IsFalse(text.Contains("ForwardUnlitWater"),
+                "URP 水面を unlit のままにしない");
+
+            StringAssert.Contains("_SCREEN_REFRACTION", text,
+                "本物のスクリーンスペース屈折を切り替えられる必要がある");
+            StringAssert.Contains("SampleSceneColor(refractUV)", text,
+                "_CameraOpaqueTexture から背景を取って歪ませる必要がある");
+            StringAssert.Contains("refractedSceneDepth < input.positionNDC.w", text,
+                "水面より手前の物体を吸い込まないよう深度で棄却する必要がある");
+
+            StringAssert.Contains("exp(-extinction * waterDepth)", text,
+                "水深による吸収は Beer-Lambert で計算する必要がある");
+            StringAssert.Contains("_AbsorptionDepth", text,
+                "水の透明距離を調整できる必要がある");
+            StringAssert.Contains("_SssStrength", text,
+                "波頭の透過光を調整できる必要がある");
+            StringAssert.Contains("_SwellNormalStrength", text,
+                "テクスチャに依存しない大きなうねりの傾きが要る");
+
+            // 水底の座標へ投影しないと、視点が動いた時にコースティクスが水面に貼り付いて滑る
+            StringAssert.Contains("floorWS", text,
+                "コースティクスは復元した水底のワールド座標へ投影する必要がある");
+            StringAssert.Contains("_CausticsDepthFade", text,
+                "深いところほど水底光が届かない減衰が要る");
+        }
+
+        [Test]
+        public void SiliqUrpShader_KeepsEveryMaterialConstantInsideUnityPerMaterial()
+        {
+            string text = ReadShader(UrpShaderPath);
+
+            int propsStart = text.IndexOf("Properties", System.StringComparison.Ordinal);
+            int propsEnd = text.IndexOf("SubShader", System.StringComparison.Ordinal);
+            Assert.Greater(propsEnd, propsStart, "Properties ブロックが見つからない");
+            string properties = text.Substring(propsStart, propsEnd - propsStart);
+
+            int cbStart = text.IndexOf("CBUFFER_START(UnityPerMaterial)", System.StringComparison.Ordinal);
+            int cbEnd = text.IndexOf("CBUFFER_END", System.StringComparison.Ordinal);
+            Assert.Greater(cbEnd, cbStart, "UnityPerMaterial ブロックが見つからない");
+            string constantBuffer = text.Substring(cbStart, cbEnd - cbStart);
+
+            foreach (string line in properties.Split('\n'))
+            {
+                var match = System.Text.RegularExpressions.Regex.Match(line, @"^\s*(?:\[[^\]]*\]\s*)*(_\w+)\s*\(");
+                if (!match.Success) continue;
+
+                // テクスチャは CBUFFER に入れられない (TEXTURE2D 宣言側で持つ)
+                bool isTexture = line.Contains(", 2D)") || line.Contains(", Cube)") || line.Contains(", 3D)");
+                if (isTexture) continue;
+
+                string property = match.Groups[1].Value;
+                StringAssert.Contains(property + ";", constantBuffer,
+                    $"{property} が UnityPerMaterial の外にあると SRP Batcher が無効になる");
+            }
+
+            StringAssert.Contains("_NormalMap_TexelSize;", constantBuffer,
+                "自動生成される _TexelSize も UnityPerMaterial に入れる必要がある");
+        }
+
+        [Test]
+        public void ReadyMaterials_CarryUpgradedWaterQualitySettings()
+        {
+            string[] waterMaterials =
+            {
+                "M_Siliq_ClearSea_Ready",
+                "M_Siliq_ClearPool_Ready",
+                "M_Siliq_IndoorBluePool_Ready",
+                "M_Siliq_FlagshipCrystal_Ready",
+                "M_Siliq_CrystalLagoon_Ready",
+                "M_Siliq_CrystalLagoon_Hero_Ready",
+                "M_Siliq_BloodSea_Ready",
+                "M_Siliq_LiquidMetal_Ready",
+                "M_Siliq_WaterTable_Ready",
+            };
+
+            foreach (string name in waterMaterials)
+            {
+                var mat = LoadReadyMaterial(name);
+
+                Assert.IsTrue(mat.HasProperty("_SpecularAA"), $"{name} は遠景のちらつき防止を持つ必要がある");
+                Assert.GreaterOrEqual(mat.GetFloat("_SpecularAA"), 0.80f,
+                    $"{name} は遠景で白い点が明滅しない程度のちらつき防止を持つ必要がある");
+
+                Assert.Greater(mat.GetFloat("_DetailStrength"), 0f,
+                    $"{name} は足元の情報量を増やす微細波を持つ必要がある");
+                Assert.Greater(mat.GetFloat("_DetailDistance"), 0f,
+                    $"{name} は微細波が消える距離を持つ必要がある");
+                Assert.GreaterOrEqual(mat.GetFloat("_DetailTiling"), 2f,
+                    $"{name} の微細波は基本レイヤーより細かい必要がある");
+
+                float skyGradient = mat.GetFloat("_SkyGradient");
+                Assert.That(skyGradient, Is.InRange(0f, 1f), $"{name} の空の階調が範囲外");
+                Assert.Greater(skyGradient, 0f,
+                    $"{name} は一様な板ではなく階調のある空を映す必要がある");
+
+                Color zenith = mat.GetColor("_ZenithColor");
+                Assert.Greater(zenith.maxColorComponent, 0f,
+                    $"{name} は真上の反射色を持つ必要がある");
+            }
+
+            // 屋内プールは空が見えないので階調を控えめに、海は空が支配的なので強めにする
+            Assert.Less(LoadReadyMaterial("M_Siliq_IndoorBluePool_Ready").GetFloat("_SkyGradient"),
+                LoadReadyMaterial("M_Siliq_ClearSea_Ready").GetFloat("_SkyGradient"),
+                "屋内プールが屋外の海より空の階調を強く出してはいけない");
+
+            // 小さなガラス水盤は近くしか見ないので、微細波が消える距離も短くてよい
+            Assert.Less(LoadReadyMaterial("M_Siliq_WaterTable_Ready").GetFloat("_DetailDistance"),
+                LoadReadyMaterial("M_Siliq_ClearSea_Ready").GetFloat("_DetailDistance"),
+                "ガラス水盤が海と同じ距離まで微細波を出す必要はない");
+        }
+
+        // ---------------------------------------------------------------
+        // 8bit 書き出しのバンディング対策
+        // ---------------------------------------------------------------
+
+        [Test]
+        public void Quantize_OrderedDither_PreservesLocalMeanBetweenLevels()
+        {
+            const int size = 16;
+            const float half = 128.5f / 255f; // ちょうど 2 つの階調の中間
+            var colors = new Color[size * size];
+            for (int i = 0; i < colors.Length; i++) colors[i] = new Color(half, half, half, 1f);
+
+            Color32[] plain = WaterMapCore.Quantize(colors, size, dither: false);
+            Color32[] dithered = WaterMapCore.Quantize(colors, size, dither: true);
+
+            Assert.AreEqual(128f, MeanRed(plain), 1e-3f,
+                "ディザなしでは中間値が片側の階調に丸まり、平面が縞になる");
+            Assert.AreEqual(128.5f, MeanRed(dithered), 0.05f,
+                "順序ディザは局所平均を保ってバンディングを均す必要がある");
+        }
+
+        [Test]
+        public void Quantize_OrderedDither_KeepsExtremesExact()
+        {
+            const int size = 8;
+            var black = new Color[size * size];
+            var white = new Color[size * size];
+            for (int i = 0; i < black.Length; i++)
+            {
+                black[i] = new Color(0f, 0f, 0f, 1f);
+                white[i] = new Color(1f, 1f, 1f, 1f);
+            }
+
+            foreach (Color32 c in WaterMapCore.Quantize(black, size, dither: true))
+            {
+                Assert.AreEqual(0, c.r, "ディザが黒を持ち上げてはいけない");
+            }
+            foreach (Color32 c in WaterMapCore.Quantize(white, size, dither: true))
+            {
+                Assert.AreEqual(255, c.r, "ディザが白を削ってはいけない");
+            }
+        }
+
+        [Test]
+        public void ShouldDither_SkipsNormalMapsToProtectVectorLength()
+        {
+            var s = WaterMapPresets.Create(0);
+            s.dither8Bit = true;
+
+            Assert.IsFalse(WaterMapCore.ShouldDither(s, WaterMapType.Normal),
+                "ノーマルマップは 1LSB が法線長の誤差になるためディザを掛けない");
+            Assert.IsTrue(WaterMapCore.ShouldDither(s, WaterMapType.Height));
+            Assert.IsTrue(WaterMapCore.ShouldDither(s, WaterMapType.Caustics));
+
+            s.dither8Bit = false;
+            Assert.IsFalse(WaterMapCore.ShouldDither(s, WaterMapType.Caustics),
+                "設定で切ったらディザを掛けない");
+        }
+
+        [Test]
+        public void EffectiveSupersample_DegradesToLargestFactorThatFits()
+        {
+            var s = new WaterMapSettings { supersample = 4 };
+            Assert.AreEqual(4, WaterMapCore.EffectiveSupersample(s, 1024), "1024 なら 4x が収まる");
+            Assert.AreEqual(2, WaterMapCore.EffectiveSupersample(s, 2048), "2048 は 1 ではなく 2x へ落とす");
+            Assert.AreEqual(1, WaterMapCore.EffectiveSupersample(s, 4096), "4096 は等倍に落とす");
+        }
+
+        [Test]
+        public void Supersampling_4x_ReturnsRequestedSize()
+        {
+            var s = WaterMapPresets.Create(0);
+            s.supersample = 4;
+            const int size = 32;
+            Color[] colors = WaterMapCore.GenerateColors(s, WaterMapType.Normal, size, 0f);
+            Assert.AreEqual(size * size, colors.Length);
+        }
+
+        static float MeanRed(Color32[] pixels)
+        {
+            double sum = 0;
+            foreach (Color32 c in pixels) sum += c.r;
+            return (float)(sum / pixels.Length);
+        }
+
         static void AssertColor(Color expected, Color actual, string label)
         {
             Assert.AreEqual(expected.r, actual.r, 1e-5f, $"{label}.r");

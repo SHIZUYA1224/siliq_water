@@ -561,9 +561,12 @@ namespace Siliq.Water.Editor
                     ApplyQualityShortcut(4096, 2, true);
                 }
             }
-            bool ss = EditorGUILayout.Toggle(new GUIContent("スーパーサンプリング (2×)", "2 倍解像度で生成してから縮小し、鋭いエッジのジャギーを抑えます。生成時間は約 4 倍。生成解像度が 4096 を超える場合は自動的に無効になります。"), settings.supersample > 1);
-            settings.supersample = ss ? 2 : 1;
+            int ssIndex = settings.supersample >= 4 ? 2 : (settings.supersample >= 2 ? 1 : 0);
+            ssIndex = EditorGUILayout.Popup(new GUIContent("スーパーサンプリング", "高い解像度で生成してから縮小し、鋭いエッジのジャギーを抑えます。生成時間は倍率の 2 乗に比例します。生成解像度が 4096 を超える場合は自動的に倍率が下がります。"),
+                ssIndex, new[] { new GUIContent("なし (1×)"), new GUIContent("2×"), new GUIContent("4× (最高品質)") });
+            settings.supersample = ssIndex == 2 ? 4 : (ssIndex == 1 ? 2 : 1);
             settings.exportExr = EditorGUILayout.Toggle(new GUIContent("16bit EXR で書き出し", "PNG (8bit) の代わりに EXR (16bit float) で書き出します。穏やかな水面のバンディング (縞) を根絶できます。"), settings.exportExr);
+            settings.dither8Bit = EditorGUILayout.Toggle(new GUIContent("8bit のバンディングを均す", "PNG (8bit) 書き出し時、緩やかなグラデーションに ±0.5LSB の順序ディザを掛けて縞を消します。ノーマルマップには法線精度を守るため掛けません。"), settings.dither8Bit);
         }
 
         void ApplyQualityShortcut(int resolution, int supersample, bool exportExr)
@@ -967,7 +970,7 @@ namespace Siliq.Water.Editor
                     Color[] colors = WaterMapCore.ColorsFromHeights(heights, settings, MapTypes[i], genSize);
                     colors = WaterMapCore.Downsample(colors, genSize, ss, MapTypes[i] == WaterMapType.Normal);
                     string mapPath = $"{dir}/{baseName}_{MapSuffixes[i]}.{FileExtension}";
-                    WriteImage(mapPath, colors, size, refresh: false);
+                    WriteImage(mapPath, colors, MapTypes[i], size, refresh: false);
                     exported.Add((mapPath, MapTypes[i]));
                 }
 
@@ -1021,7 +1024,7 @@ namespace Siliq.Water.Editor
                             Color[] colors = WaterMapCore.ColorsFromHeights(heights, settings, MapTypes[i], genSize);
                             colors = WaterMapCore.Downsample(colors, genSize, ss, MapTypes[i] == WaterMapType.Normal);
                             string framePath = $"{dir}/{baseName}_{MapSuffixes[i]}_{f:D3}.{FileExtension}";
-                            WriteImage(framePath, colors, size, refresh: false);
+                            WriteImage(framePath, colors, MapTypes[i], size, refresh: false);
                             exported.Add((framePath, MapTypes[i]));
                         }
                     }
@@ -1112,7 +1115,7 @@ namespace Siliq.Water.Editor
                 foreach (var kv in atlases)
                 {
                     string mapPath = $"{dir}/{baseName}_{MapSuffixes[kv.Key]}.{FileExtension}";
-                    WriteImage(mapPath, kv.Value, atlasW, atlasH, refresh: false);
+                    WriteImage(mapPath, kv.Value, MapTypes[kv.Key], atlasW, atlasH, refresh: false);
                     exported.Add((mapPath, MapTypes[kv.Key]));
                     firstPath = firstPath ?? mapPath;
                 }
@@ -1132,12 +1135,12 @@ namespace Siliq.Water.Editor
             }
         }
 
-        void WriteImage(string path, Color[] colors, int size, bool refresh = true)
+        void WriteImage(string path, Color[] colors, WaterMapType mapType, int size, bool refresh = true)
         {
-            WriteImage(path, colors, size, size, refresh);
+            WriteImage(path, colors, mapType, size, size, refresh);
         }
 
-        void WriteImage(string path, Color[] colors, int w, int h, bool refresh = true)
+        void WriteImage(string path, Color[] colors, WaterMapType mapType, int w, int h, bool refresh = true)
         {
             if (settings.exportExr)
             {
@@ -1150,7 +1153,7 @@ namespace Siliq.Water.Editor
             else
             {
                 var tex = new Texture2D(w, h, TextureFormat.RGBA32, false, true);
-                tex.SetPixels32(WaterMapCore.Quantize(colors));
+                tex.SetPixels32(WaterMapCore.Quantize(colors, w, WaterMapCore.ShouldDither(settings, mapType)));
                 tex.Apply(false, false);
                 File.WriteAllBytes(path, tex.EncodeToPNG());
                 DestroyImmediate(tex);

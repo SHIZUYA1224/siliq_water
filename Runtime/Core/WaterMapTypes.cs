@@ -112,8 +112,9 @@ namespace Siliq.Water
         public int globalSeed = 1234;
 
         // --- 品質 ---
-        [Range(1, 2)] public int supersample = 1;             // 2 でスーパーサンプリング (エッジのジャギー低減)
+        [Range(1, 4)] public int supersample = 1;             // 2 / 4 でスーパーサンプリング (エッジのジャギー低減)
         public bool exportExr = false;                        // 16bit EXR で書き出し (バンディング防止)
+        public bool dither8Bit = true;                        // 8bit 書き出し時に順序ディザでバンディングを均す
 
         // --- フォームマスク ---
         [Range(0f, 1f)] public float foamThreshold = 0.7f;    // この高さ以上の波頭にフォーム

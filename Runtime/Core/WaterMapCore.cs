@@ -410,7 +410,12 @@ namespace Siliq.Water
             dy = (h[yp * size + x] - h[ym * size + x]) * 0.5f;
         }
 
-        static void SobelGradientAt(float[] h, int size, int x, int y, out float dx, out float dy)
+        /// <summary>
+        /// Scharr 3x3 勾配。Sobel と同じスケール (中央差分相当) だが、
+        /// 重み (3, 10, 3) は回転対称性が最適化されているため、
+        /// 斜め方向の波で軸沿いのギザギザが出にくく、法線がなめらかになる。
+        /// </summary>
+        static void ScharrGradientAt(float[] h, int size, int x, int y, out float dx, out float dy)
         {
             int xm = (x - 1 + size) % size;
             int xp = (x + 1) % size;
@@ -426,8 +431,9 @@ namespace Siliq.Water
             float h12 = h[yp * size + x];
             float h22 = h[yp * size + xp];
 
-            dx = (h20 + h21 * 2f + h22 - h00 - h01 * 2f - h02) * 0.125f;
-            dy = (h02 + h12 * 2f + h22 - h00 - h10 * 2f - h20) * 0.125f;
+            const float inv = 1f / 32f; // 正の重み合計 16 → 中央差分と同じ 0.5 スケール
+            dx = (h20 * 3f + h21 * 10f + h22 * 3f - h00 * 3f - h01 * 10f - h02 * 3f) * inv;
+            dy = (h02 * 3f + h12 * 10f + h22 * 3f - h00 * 3f - h10 * 10f - h20 * 3f) * inv;
         }
 
         static float LaplacianAt(float[] h, int size, int x, int y)
@@ -454,7 +460,7 @@ namespace Siliq.Water
                 int row = y * size;
                 for (int x = 0; x < size; x++)
                 {
-                    SobelGradientAt(heights, size, x, y, out float dx, out float dy);
+                    ScharrGradientAt(heights, size, x, y, out float dx, out float dy);
                     dx *= k;
                     dy *= k;
                     if (flipY) dy = -dy;
@@ -511,10 +517,7 @@ namespace Siliq.Water
                 }
             });
 
-            for (int i = 0; i < s.foamBlur; i++)
-            {
-                BoxBlurWrapped(foam, size);
-            }
+            BlurWrapped(foam, size, s.foamBlur);
 
             return GrayscaleToColors(foam, size);
         }
@@ -637,10 +640,11 @@ namespace Siliq.Water
 
             Array.Copy(rawFocus, softFocus, rawFocus.Length);
             Array.Copy(rawFocus, wideScatter, rawFocus.Length);
-            BoxBlurWrapped(softFocus, size);
-            BoxBlurWrapped(wideScatter, size);
-            BoxBlurWrapped(wideScatter, size);
-            BoxBlurWrapped(wideScatter, size);
+            // 焦点線のすぐ外側のにじみと、広く柔らかい散光を別半径で作る。
+            // 半径は解像度に比例させ、512px でも 2048px でも同じ見た目になるようにする。
+            int blurUnit = Mathf.Max(1, Mathf.RoundToInt(size / 512f));
+            BlurWrapped(softFocus, size, blurUnit);
+            BlurWrapped(wideScatter, size, blurUnit * 4);
 
             Parallel.For(0, size, y =>
             {
@@ -686,25 +690,69 @@ namespace Siliq.Water
             return pixels;
         }
 
-        /// <summary>ラップありの 3x3 ボックスブラー (グレースケール値用)。</summary>
-        static void BoxBlurWrapped(float[] values, int size)
+        /// <summary>
+        /// ラップありの分離型ガウシアンブラー (グレースケール値用)。
+        /// 3x3 ボックスブラーの反復は十字状のにじみを残すが、二項係数の
+        /// 分離カーネルなら等方的にぼけるため、水底光の広がりが自然になる。
+        /// </summary>
+        static void BlurWrapped(float[] values, int size, int radius)
         {
-            var src = (float[])values.Clone();
+            radius = Mathf.Min(radius, size / 2);
+            if (radius < 1) return;
+            float[] kernel = BinomialKernel(radius);
+            var tmp = new float[values.Length];
+
+            // 横方向
             Parallel.For(0, size, y =>
             {
-                int ym = (y - 1 + size) % size;
-                int yp = (y + 1) % size;
+                int row = y * size;
                 for (int x = 0; x < size; x++)
                 {
-                    int xm = (x - 1 + size) % size;
-                    int xp = (x + 1) % size;
-                    float sum =
-                        src[ym * size + xm] + src[ym * size + x] + src[ym * size + xp] +
-                        src[y * size + xm] + src[y * size + x] + src[y * size + xp] +
-                        src[yp * size + xm] + src[yp * size + x] + src[yp * size + xp];
-                    values[y * size + x] = sum * (1f / 9f);
+                    float sum = 0f;
+                    for (int k = -radius; k <= radius; k++)
+                    {
+                        int sx = (x + k) % size;
+                        if (sx < 0) sx += size;
+                        sum += values[row + sx] * kernel[k + radius];
+                    }
+                    tmp[row + x] = sum;
                 }
             });
+
+            // 縦方向
+            Parallel.For(0, size, y =>
+            {
+                int row = y * size;
+                for (int x = 0; x < size; x++)
+                {
+                    float sum = 0f;
+                    for (int k = -radius; k <= radius; k++)
+                    {
+                        int sy = (y + k) % size;
+                        if (sy < 0) sy += size;
+                        sum += tmp[sy * size + x] * kernel[k + radius];
+                    }
+                    values[row + x] = sum;
+                }
+            });
+        }
+
+        /// <summary>正規化済みの二項係数カーネル (ガウシアン近似)。</summary>
+        static float[] BinomialKernel(int radius)
+        {
+            int n = radius * 2;
+            var kernel = new float[n + 1];
+            double c = 1.0;
+            double total = 0.0;
+            for (int i = 0; i <= n; i++)
+            {
+                kernel[i] = (float)c;
+                total += c;
+                c = c * (n - i) / (i + 1);
+            }
+            float inv = (float)(1.0 / total);
+            for (int i = 0; i <= n; i++) kernel[i] *= inv;
+            return kernel;
         }
 
         // ---------------------------------------------------------------
@@ -733,8 +781,10 @@ namespace Siliq.Water
         /// </summary>
         public static int EffectiveSupersample(WaterMapSettings settings, int size)
         {
-            int ss = Mathf.Clamp(settings.supersample, 1, 2);
-            return (long)size * ss > 4096 ? 1 : ss;
+            int ss = Mathf.Clamp(settings.supersample, 1, 4);
+            // 収まらない場合は 1 に落とすのではなく、収まる最大の係数まで下げる
+            while (ss > 1 && (long)size * ss > 4096) ss--;
+            return ss;
         }
 
         /// <summary>
@@ -797,6 +847,62 @@ namespace Siliq.Water
             return dst;
         }
 
+        // 4x4 Bayer 行列。4 の倍数の解像度ならタイリングを壊さず、
+        // 高周波の規則パターンなので mipmap でほぼ消える。
+        static readonly int[] BayerMatrix4x4 =
+        {
+             0,  8,  2, 10,
+            12,  4, 14,  6,
+             3, 11,  1,  9,
+            15,  7, 13,  5,
+        };
+
+        /// <summary>
+        /// 順序ディザ付きの 8bit 量子化。穏やかな水面のハイトマップや
+        /// 水底光のような緩やかなグラデーションは、素の丸めだと 1/255 刻みの
+        /// 縞 (バンディング) が出る。±0.5LSB のディザでそれを均す。
+        /// 0 と 255 はそのまま保たれる。
+        /// </summary>
+        public static Color32[] Quantize(Color[] src, int width, bool dither)
+        {
+            if (!dither || width <= 0) return Quantize(src);
+
+            var dst = new Color32[src.Length];
+            int height = src.Length / width;
+            Parallel.For(0, height, y =>
+            {
+                int row = y * width;
+                int bayerRow = (y & 3) * 4;
+                for (int x = 0; x < width; x++)
+                {
+                    // [-0.46875, +0.46875] の範囲に収まるので端の値は丸め先が変わらない
+                    float offset = (BayerMatrix4x4[bayerRow + (x & 3)] + 0.5f) / 16f - 0.5f;
+                    Color c = src[row + x];
+                    dst[row + x] = new Color32(
+                        DitherToByte(c.r, offset),
+                        DitherToByte(c.g, offset),
+                        DitherToByte(c.b, offset),
+                        255);
+                }
+            });
+            return dst;
+        }
+
+        static byte DitherToByte(float value, float offset)
+        {
+            int v = Mathf.RoundToInt(Mathf.Clamp01(value) * 255f + offset);
+            return (byte)Mathf.Clamp(v, 0, 255);
+        }
+
+        /// <summary>
+        /// ディザを掛けてよいマップ種か。ノーマルマップは 8bit の 1LSB が
+        /// そのまま法線長の誤差になるため、ディザは掛けずに 16bit / EXR で扱う。
+        /// </summary>
+        public static bool ShouldDither(WaterMapSettings settings, WaterMapType mapType)
+        {
+            return settings.dither8Bit && mapType != WaterMapType.Normal;
+        }
+
         /// <summary>
         /// 指定マップの float ピクセルを生成。settings.supersample に応じて
         /// 高解像度生成 → ブロック平均のスーパーサンプリングを行う。
@@ -813,7 +919,7 @@ namespace Siliq.Water
         /// <summary>指定マップ種の 8bit ピクセルを生成 (互換 API)。</summary>
         public static Color32[] GeneratePixels(WaterMapSettings settings, WaterMapType mapType, int size, float t)
         {
-            return Quantize(GenerateColors(settings, mapType, size, t));
+            return Quantize(GenerateColors(settings, mapType, size, t), size, ShouldDither(settings, mapType));
         }
 
         // ---------------------------------------------------------------
@@ -828,11 +934,11 @@ namespace Siliq.Water
         public static Texture2D BakeTexture(WaterMapSettings settings, WaterMapType mapType, int size, float t = 0f, bool highPrecision = false)
         {
             Color[] colors = GenerateColors(settings, mapType, size, t);
-            return CreateTexture(colors, mapType, size, highPrecision);
+            return CreateTexture(colors, mapType, size, highPrecision, ShouldDither(settings, mapType));
         }
 
         /// <summary>生成済み float ピクセルから Texture2D を作る。Texture2D 作成はメインスレッドで呼ぶこと。</summary>
-        public static Texture2D CreateTexture(Color[] colors, WaterMapType mapType, int size, bool highPrecision = false)
+        public static Texture2D CreateTexture(Color[] colors, WaterMapType mapType, int size, bool highPrecision = false, bool dither = false)
         {
             var format = highPrecision ? TextureFormat.RGBAHalf : TextureFormat.RGBA32;
             var tex = new Texture2D(size, size, format, true, true)
@@ -847,7 +953,7 @@ namespace Siliq.Water
             }
             else
             {
-                tex.SetPixels32(Quantize(colors));
+                tex.SetPixels32(Quantize(colors, size, dither));
             }
             tex.Apply(true, false);
             return tex;

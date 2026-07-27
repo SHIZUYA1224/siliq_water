@@ -164,7 +164,8 @@ namespace Siliq.Water
                         continue;
                     }
 
-                    Texture2D tex = WaterMapCore.CreateTexture(task.Result, request.mapType, size, request.highPrecision);
+                    Texture2D tex = WaterMapCore.CreateTexture(task.Result, request.mapType, size, request.highPrecision,
+                        WaterMapCore.ShouldDither(settings, request.mapType));
                     TextureHandle handle = StoreGeneratedTexture(key, tex);
                     pendingRequests.Add(request);
                     pendingHandles.Add(handle);

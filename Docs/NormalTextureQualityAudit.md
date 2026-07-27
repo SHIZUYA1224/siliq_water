@@ -42,3 +42,16 @@ EditMode test `BundledNormalTextures_MeetProductQualityGates` が次を生PNGか
 - 水底causticsは水面normalへ焼き込まず、床・水底の別メッシュへ貼る。
 - 波紋をUVスクロールで表現しない。接触位置と時刻から半径を増やす。
 - normalを差し替えた場合は9枚一括のEditMode testと2x2 Repeat表示を実行する。
+- 8bit書き出しの順序ディザ (`dither8Bit`) はnormalへ掛けない。1LSBがそのまま法線長の誤差になり、上記の品質ゲートを割る。normalの階調が足りない場合はEXR (16bit) で書き出す。
+
+## テクスチャ側で解けない問題はshaderで解く
+
+2.4.0 で、テクスチャ単体では解けない次の2点をshader側の責務として分離した。
+
+| 現象 | 原因 | 対処 |
+|---|---|---|
+| 遠景がザラザラ・チカチカする | 1ピクセルが多数のテクセルを覆い、鋭いハイライトがサンプリング不足で明滅する | shaderが `fwidth(uv) × texel size` からサンプリング不足を測り、法線を寝かせてハイライトのローブを広げる (`_SpecularAA`) |
+| 同じ模様が格子状に繰り返して見える | 2レイヤーが同じ向き・整数比のタイリングで相関する | レイヤーごとに回転と非整数比のタイリングを与え、近距離のみ第3の微細レイヤーを足す (`_DetailStrength` / `_DetailDistance`) |
+
+このため、normal textureの周波数階層テストは「低周波と微細波が両方存在すること」を引き続き要求するが、
+遠景の見え方はtexture単体ではなくshaderとの組み合わせで確認する。

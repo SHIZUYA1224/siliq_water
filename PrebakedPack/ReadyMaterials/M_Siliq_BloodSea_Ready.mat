@@ -57,6 +57,9 @@ Material:
     - _DarkDetailDamping: 0.7
     - _DarkReflectionDamping: 0.72
     - _DepthTintStrength: 0.55
+    - _DetailDistance: 30
+    - _DetailStrength: 0.55
+    - _DetailTiling: 7.3
     - _DisplacementScale: 0.65
     - _DisplacementSpeed: 0.000050
     - _DisplacementStrength: 0.035
@@ -84,9 +87,12 @@ Material:
     - _RippleLifetime: 4.2
     - _RippleSpeed: 1.85
     - _RippleWidth: 0.46
+    - _SkyGradient: 0.42
     - _SpecIntensity: 0.52
     - _SpecPower: 120
+    - _SpecularAA: 0.94
     - _SrcBlend: 5
+    - _SunSheen: 0.34
     - _Tiling1: 1.15
     - _Tiling2: 2.35
     - _TransmissionStrength: 0.18
@@ -102,4 +108,5 @@ Material:
     - _Scroll2: {r: -0.0005, g: 0.0016, b: 0, a: 0}
     - _ShallowColor: {r: 0.48, g: 0.02, b: 0.025, a: 1}
     - _TransmissionColor: {r: 0.72, g: 0.06, b: 0.035, a: 1}
+    - _ZenithColor: {r: 0.52, g: 0.26, b: 0.24, a: 1}
   m_BuildTextureStacks: []
