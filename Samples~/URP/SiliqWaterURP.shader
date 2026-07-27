@@ -24,9 +24,10 @@ Shader "Siliq/Water URP"
         _NormalStrength ("ノーマル強度", Range(0, 2)) = 1
         _Tiling1 ("レイヤー1 タイリング", Float) = 1
         _Tiling2 ("レイヤー2 タイリング", Float) = 2.7
+        _AnimationSpeed ("水面全体の速度倍率", Range(0, 4)) = 1
         _Scroll1 ("レイヤー1 スクロール (XY)", Vector) = (0.01, 0.004, 0, 0)
         _Scroll2 ("レイヤー2 スクロール (XY)", Vector) = (-0.003, 0.007, 0, 0)
-        _DetailStrength ("近くの細かい波", Range(0, 1)) = 0.25
+        _DetailStrength ("近くの細かい波 (高品質PC向け)", Range(0, 1)) = 0
         _DetailTiling ("細かい波の細かさ", Range(2, 24)) = 7.3
         _DetailDistance ("細かい波が消える距離", Range(1, 200)) = 24
         _SpecularAA ("遠景のちらつき防止", Range(0, 1)) = 0.9
@@ -148,6 +149,7 @@ Shader "Siliq/Water URP"
                 half _NormalStrength;
                 float _Tiling1;
                 float _Tiling2;
+                half _AnimationSpeed;
                 float4 _Scroll1;
                 float4 _Scroll2;
                 half _DetailStrength;
@@ -196,7 +198,7 @@ Shader "Siliq/Water URP"
 
             float SiliqAnimationTime()
             {
-                return _Time.y + _ManualTime;
+                return (_Time.y + _ManualTime) * max((float)_AnimationSpeed, 0.0);
             }
 
             float SiliqMacroNoise(float2 p)
@@ -340,8 +342,8 @@ Shader "Siliq/Water URP"
                 return output;
             }
 
-            // 3 レイヤーのノーマル合成。距離が遠いほど微細レイヤーを落とし、
-            // サンプリング不足の量だけ法線を平坦化してチラつきを断つ。
+            // 手調整済みの 2 層と任意の近距離微細層を合成する。
+            // サンプリング不足の量だけ roughness を上げて遠景のチラつきを断つ。
             half3 SampleWaterNormal(float2 uv, float3 positionWS, float viewDist,
                                     out half macroMask, out half aliasing)
             {

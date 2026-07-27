@@ -20,7 +20,7 @@ namespace Siliq.Water
     public class WaterSurfaceAnimator : MonoBehaviour
     {
         const float MaxSurfaceSpeed = 0.6f;
-        const float SurfaceSpeedToUvPerSecond = 0.016f;
+        const float SurfaceSpeedToUvPerSecond = 0.06f;
         const int DefaultEditModePreviewFps = 10;
 
         [Tooltip("スクロールさせるテクスチャのプロパティ名。Standard/URP Lit/VRChat Mobile は _BumpMap、Siliq 独自シェーダーは _NormalMap。")]
@@ -34,6 +34,9 @@ namespace Siliq.Water
 
         [Tooltip("編集モードでのプレビュー更新回数。低いほど軽く、10fps 前後で調整しやすい。Play中の速度には影響しません。")]
         [Range(1, 30)] public int editModePreviewFps = DefaultEditModePreviewFps;
+
+        [Tooltip("Renderer のマテリアルを差し替えた時、色・透明度・反射・波の強さと流れを自動で読み込みます。")]
+        public bool syncLookOnMaterialChange = true;
 
         [Header("動き")]
         [Tooltip("波が流れる向き (度)。0=右、90=上、180=左、270=下。")]
@@ -50,6 +53,8 @@ namespace Siliq.Water
         [Range(0.1f, 8f)] public float tiling = 1f;
 
         [HideInInspector] public float secondaryTilingMultiplier = 2.7f;
+        [HideInInspector] public float secondaryScrollSpeedMultiplier = 0.73f;
+        [HideInInspector] public float secondaryScrollAngleOffsetDegrees = 90f;
 
         [Header("高さ")]
         [Tooltip("水面メッシュを実際に上下させる量。Plane のように頂点があるメッシュで有効です。")]
@@ -58,8 +63,8 @@ namespace Siliq.Water
         [Tooltip("高さの波長。小さいほど大きなうねり、大きいほど細かい起伏になります。")]
         [Range(0.05f, 4f)] public float displacementScale = 0.75f;
 
-        [Tooltip("高さ変位の動く速さ。")]
-        [Range(0f, 1f)] public float displacementSpeed = 0.00008f;
+        [Tooltip("高さ変位の動く速さ。0.06 が穏やかな水面の基準です。")]
+        [Range(0f, 1f)] public float displacementSpeed = 0.06f;
 
         [Tooltip("書き出したハイトマップを高さに使う割合。0 なら手続き的なうねりのみ、1 ならハイトマップ中心。")]
         [Range(0f, 1f)] public float heightMapInfluence = 0f;
@@ -165,6 +170,7 @@ namespace Siliq.Water
         int normalStrengthPropertyId;
         int tiling1PropertyId;
         int tiling2PropertyId;
+        int animationSpeedPropertyId;
         int displacementStrengthPropertyId;
         int displacementScalePropertyId;
         int displacementSpeedPropertyId;
@@ -268,6 +274,7 @@ namespace Siliq.Water
             normalStrengthPropertyId = Shader.PropertyToID("_NormalStrength");
             tiling1PropertyId = Shader.PropertyToID("_Tiling1");
             tiling2PropertyId = Shader.PropertyToID("_Tiling2");
+            animationSpeedPropertyId = Shader.PropertyToID("_AnimationSpeed");
             displacementStrengthPropertyId = Shader.PropertyToID("_DisplacementStrength");
             displacementScalePropertyId = Shader.PropertyToID("_DisplacementScale");
             displacementSpeedPropertyId = Shader.PropertyToID("_DisplacementSpeed");
@@ -368,6 +375,9 @@ namespace Siliq.Water
             speed = Mathf.Clamp(speed, 0f, MaxSurfaceSpeed);
             editModePreviewFps = Mathf.Clamp(editModePreviewFps, 1, 30);
             secondaryTilingMultiplier = Mathf.Clamp(secondaryTilingMultiplier, 0.1f, 8f);
+            secondaryScrollSpeedMultiplier = Mathf.Clamp(secondaryScrollSpeedMultiplier, 0f, 4f);
+            secondaryScrollAngleOffsetDegrees =
+                Mathf.Repeat(secondaryScrollAngleOffsetDegrees + 180f, 360f) - 180f;
             displacementStrength = Mathf.Clamp(displacementStrength, 0f, 0.5f);
             displacementScale = Mathf.Clamp(displacementScale, 0.05f, 4f);
             displacementSpeed = Mathf.Clamp01(displacementSpeed);
@@ -403,7 +413,7 @@ namespace Siliq.Water
             Animate(deltaTime);
         }
 
-        /// <summary>現在のマテリアルから透明・反射系の初期値を読み取り、インスペクタ操作の開始点にする。</summary>
+        /// <summary>現在のマテリアルから見た目と流れを読み取り、インスペクタ操作の開始点にする。</summary>
         public void SyncLookFromMaterial()
         {
             RebindRendererAndMaterial();
@@ -474,11 +484,52 @@ namespace Siliq.Water
             {
                 clarity = Mathf.Clamp01(targetMaterial.GetFloat(clarityPropertyId));
             }
+            if (targetMaterial.HasProperty(normalStrengthPropertyId))
+            {
+                strength = Mathf.Clamp(targetMaterial.GetFloat(normalStrengthPropertyId), 0f, 3f);
+            }
             if (targetMaterial.HasProperty(tiling1PropertyId) && targetMaterial.HasProperty(tiling2PropertyId))
             {
                 float primaryTiling = Mathf.Max(0.1f, targetMaterial.GetFloat(tiling1PropertyId));
                 float secondaryTiling = Mathf.Max(0.1f, targetMaterial.GetFloat(tiling2PropertyId));
+                tiling = primaryTiling;
                 secondaryTilingMultiplier = Mathf.Clamp(secondaryTiling / primaryTiling, 0.1f, 8f);
+            }
+            if (targetMaterial.HasProperty(scroll1PropertyId))
+            {
+                float materialAnimationSpeed = targetMaterial.HasProperty(animationSpeedPropertyId)
+                    ? Mathf.Clamp(targetMaterial.GetFloat(animationSpeedPropertyId), 0f, 4f)
+                    : 1f;
+                Vector4 primaryValue = targetMaterial.GetVector(scroll1PropertyId);
+                Vector2 primaryScroll =
+                    new Vector2(primaryValue.x, primaryValue.y) * materialAnimationSpeed;
+                float primaryMagnitude = primaryScroll.magnitude;
+                speed = Mathf.Clamp(primaryMagnitude / SurfaceSpeedToUvPerSecond, 0f, MaxSurfaceSpeed);
+
+                if (primaryMagnitude > 1e-6f)
+                {
+                    directionDegrees = Mathf.Repeat(
+                        Mathf.Atan2(primaryScroll.y, primaryScroll.x) * Mathf.Rad2Deg,
+                        360f);
+
+                    if (targetMaterial.HasProperty(scroll2PropertyId))
+                    {
+                        Vector4 secondaryValue = targetMaterial.GetVector(scroll2PropertyId);
+                        Vector2 secondaryScroll =
+                            new Vector2(secondaryValue.x, secondaryValue.y) * materialAnimationSpeed;
+                        float secondaryMagnitude = secondaryScroll.magnitude;
+                        secondaryScrollSpeedMultiplier =
+                            Mathf.Clamp(secondaryMagnitude / primaryMagnitude, 0f, 4f);
+
+                        if (secondaryMagnitude > 1e-6f)
+                        {
+                            float secondaryAngle =
+                                Mathf.Atan2(secondaryScroll.y, secondaryScroll.x) * Mathf.Rad2Deg;
+                            secondaryScrollAngleOffsetDegrees =
+                                Mathf.Repeat(secondaryAngle - directionDegrees + 180f, 360f) - 180f;
+                        }
+                    }
+                }
             }
             if (targetMaterial.HasProperty(displacementStrengthPropertyId))
             {
@@ -490,7 +541,11 @@ namespace Siliq.Water
             }
             if (targetMaterial.HasProperty(displacementSpeedPropertyId))
             {
-                displacementSpeed = Mathf.Clamp(targetMaterial.GetFloat(displacementSpeedPropertyId), 0f, 2f);
+                float materialSpeed = targetMaterial.GetFloat(displacementSpeedPropertyId);
+                displacementSpeed = Mathf.Clamp(
+                    materialSpeed > 0f && materialSpeed < 0.001f ? materialSpeed * 1000f : materialSpeed,
+                    0f,
+                    1f);
             }
             if (targetMaterial.HasProperty(heightMapInfluencePropertyId))
             {
@@ -651,11 +706,17 @@ namespace Siliq.Water
 
         void Animate(float dt)
         {
+            Material currentMaterial = CurrentSharedMaterial();
+            bool materialChanged = currentMaterial != targetMaterial;
             if (targetRenderer == null || targetMaterial == null ||
                 cachedPropertyName != texturePropertyName ||
-                CurrentSharedMaterial() != targetMaterial)
+                materialChanged)
             {
                 RebindRendererAndMaterial();
+                if (materialChanged && syncLookOnMaterialChange && targetMaterial != null)
+                {
+                    SyncLookFromMaterial();
+                }
             }
             ApplyProperties(dt);
         }
@@ -728,6 +789,11 @@ namespace Siliq.Water
             {
                 propertyBlock.SetFloat(heightMapInfluencePropertyId, Mathf.Clamp01(heightMapInfluence));
             }
+            if (targetMaterial.HasProperty(animationSpeedPropertyId))
+            {
+                // Inspector の Speed が最終速度を表すため、Material 側倍率との二重適用を防ぐ。
+                propertyBlock.SetFloat(animationSpeedPropertyId, 1f);
+            }
             if (hasManualPreviewTime)
             {
                 propertyBlock.SetFloat(manualTimePropertyId, Application.isPlaying ? 0f : manualPreviewTime);
@@ -746,7 +812,9 @@ namespace Siliq.Water
                 }
                 if (targetMaterial.HasProperty(scroll2PropertyId))
                 {
-                    Vector2 second = new Vector2(-dir.y, dir.x) * effectiveSpeed * 0.73f;
+                    float secondaryRad = rad + secondaryScrollAngleOffsetDegrees * Mathf.Deg2Rad;
+                    Vector2 secondaryDir = new Vector2(Mathf.Cos(secondaryRad), Mathf.Sin(secondaryRad));
+                    Vector2 second = secondaryDir * effectiveSpeed * secondaryScrollSpeedMultiplier;
                     propertyBlock.SetVector(scroll2PropertyId, new Vector4(second.x, second.y, 0f, 0f));
                 }
                 if (targetMaterial.HasProperty(tiling1PropertyId))

@@ -151,7 +151,7 @@ Renderer にドラッグ&ドロップするだけで水として動きます。`
 
 **Play ボタンを押さなくても、値を変えるとシーンビュー上でその場に反映**されます。
 Standard / URP Lit / VRChat Mobile 系では `_BumpMap` の UV、`_BumpScale`、色 alpha を、
-同梱の Siliq 水シェーダーでは `_Scroll1` / `_Scroll2` / `_NormalStrength` / `_Tiling*` /
+同梱の Siliq 水シェーダーでは `_Scroll1` / `_Scroll2` / `_AnimationSpeed` / `_NormalStrength` / `_Tiling*` /
 `_DisplacementStrength` / `_DisplacementScale` / `_DisplacementSpeed` /
 `_CausticsStrength` / `_CausticsScale` / `_CausticsSpeed` / `_CausticsFocus` / `_CausticsPrismStrength` / `_CausticsScatterStrength` / `_BottomVisibility` / `_BottomLightStrength` / `_BottomGlowStrength` / `_DepthTintStrength` を
 `_ShallowColor` / `_DeepColor` / `_HorizonColor` / `_TransmissionColor` /
@@ -161,7 +161,7 @@ Standard / URP Lit / VRChat Mobile 系では `_BumpMap` の UV、`_BumpScale`、
 実際の高さは頂点変位なので、1 枚ポリゴンの Quad では見えにくいです。Unity 標準の Plane や細分化された水面メッシュを使ってください。
 PC の発熱を避けるため、編集モードの連続プレビューは**選択中の水面だけ**最大 10fps で更新されます。
 重い場合は `Animate In Edit Mode` を OFF にするか、`Edit Mode Preview Fps` を下げてください。
-右クリック適用時は、水の種類ごとに低速の初期値が入ります。Hero / Crystal Lagoon / 透明プールは 0.14-0.16 前後から始まり、止まって見えないが速く滑らない基準です。速く見える場合はまず **速さ** を 0.05-0.12、**高さの速度** を 0.00008 以下、**水底の光の速度** を 0.000012 以下まで下げてください。
+右クリック適用時は、水の種類ごとに低速の初期値が入ります。Hero / Crystal Lagoon / 透明プールは 0.14-0.16 前後から始まり、止まって見えないが速く滑らない基準です。速く見える場合はまず **速さ** を 0.05-0.12、**高さの速度** を 0.02-0.04、**水底の光の速度** を 0.000012 以下まで下げてください。
 水滴や接触の波紋は通常の水面スクロールとは別機能です。必要な場合だけ、下記の `WaterRippleEmitter` / `WaterRippleSource` で同心円が広がる表現を追加します。
 
 より本格的な (2 レイヤースクロール・反射・岸辺フォームなどを含む) 動く水面が欲しい場合は、
@@ -262,7 +262,7 @@ Built-in / VRChat / Quest / iOS 向けの通常導入ではコンパイル対象
 
 `Package Manager > Siliq Water > Samples > URP Shader > Import`
 
-- ノーマル **3 レイヤー**(大・中・微細)合成、または**フローマップ駆動**の流れ(生成したフローマップをそのまま活用)
+- ノーマル **2 レイヤー + 任意の近距離微細波**合成、または**フローマップ駆動**の流れ(生成したフローマップをそのまま活用)
 - **ライティング対応**: メインライトの影 (`_MAIN_LIGHT_SHADOWS`)、追加ライト、環境光 (SH) を受けます
 - **本物のスクリーンスペース屈折**: 「本物の屈折を使う」を ON にすると `_CameraOpaqueTexture` から背景を取得し、
   水面法線で歪ませて合成します。水面より手前の物体は深度で棄却するため、岸や柱を吸い込みません
@@ -283,14 +283,15 @@ Built-in / VRChat / Quest / iOS 向けの通常導入ではコンパイル対象
 `_Opacity` / `_AlphaFresnel` / `_EdgeReflection` / `_SrcBlend` / `_DstBlend` / `_ZWrite` を
 切り替えて iOS でも透ける水面にできます。
 
-- ノーマルマップ 1 枚を **3 レイヤー**(大・中・微細)でスクロールサンプリング。
-  レイヤーごとに回転と非整数比のタイリングを与えているため、同じテクスチャでも格子状の相関が出ません
+- ノーマルマップ 1 枚を、完成Materialでは手調整済みの **2 レイヤー**でスクロールサンプリング。
+  必要なPC表現だけ任意の微細レイヤーを追加できます
 - `_DetailStrength` / `_DetailTiling` / `_DetailDistance` による**近距離だけの微細波**。
-  距離で消えるのでモアレにならず、足元の情報量だけが増えます
+  ザラつきとモバイル負荷を避けるため初期値は 0 です。PCの接写で必要な時だけ少しずつ上げます
 - `_SpecularAA` による**遠景のちらつき防止**。1 ピクセルが跨ぐテクセル数を測り、
   サンプリングが足りない距離では法線を寝かせてハイライトのローブを広げます(白い点が明滅しなくなります)
 - `_ZenithColor` / `_SkyGradient` による**階調のある空の反射**。真上ほど濃く、水平線ほど明るくなります。
-  さらに反射方向の環境プローブ (ライトプローブ / スカイボックス SH) の**色味**を借りるので、シーンごとの空気感に馴染みます
+  さらにReflection Probe / SkyboxのHDR cubemapを直接サンプリングし、夕景、森、室内など周囲の色温度と明暗へ追従します。
+  Box Projectionにも対応し、固定の水色だけが風景から浮く状態を抑えます
 - `_SunSheen` による**水面に伸びる光の道**(鋭い点だけでなく広いローブを足します)。
   白い霞になりやすいため**初期値は 0** です。海の夕景などで使いたい時だけ 0.1-0.3 程度から上げてください
 - VR (single-pass instanced) では両目の中点ではなく**実際の目の位置**でハイライトを計算します
@@ -300,6 +301,7 @@ Built-in / VRChat / Quest / iOS 向けの通常導入ではコンパイル対象
 - `_RefractionStrength` による GrabPass なしの軽量な水越し揺らぎ
 - `_CausticsMap` / `_CausticsStrength` / `_CausticsScale` / `_CausticsSpeed` / `_CausticsFocus` / `_CausticsPrismStrength` / `_CausticsScatterStrength` / `_BottomVisibility` / `_BottomLightStrength` / `_CausticsTint` による水底の光模様
 - `_ReflStrength` はキューブマップ未使用時も反射量として効くため、反射が足りない時に直接上げられます
+- `_AnimationSpeed` はMaterial単体でnormal、macro、高さ、水底光をまとめて変速します。`1`が完成状態、`2`で2倍、`0`で静止です
 - `_MinLighting` / `_DarkReflectionDamping` / `_DarkDetailDamping` により、暗い部屋では反射ときらめきを減衰
 - `_MacroVariation` / `_MacroScale` / `_MacroDirectionBreakup` /
   `_MacroColorVariation` により、大きな面でも模様の密度・向き・光が均一になりすぎないよう調整
@@ -423,16 +425,21 @@ Built-in / VRChatでは `Siliq/Water Mobile (Quest)` を使います。URPでは
 
 ### 2.4.0 から水面の色や明るさが変わってしまった
 
-`2.4.1` で修正済みです。`2.4.0` は空の階調が反射を暗くし、`_SunSheen` の広いローブが白い霞になり、
-3 枚目のノーマルレイヤーが凹凸を増やしていました。`2.4.1` 以降は新機能を持ったまま既定値では
-`2.3.89` と同じ見た目になります。パッケージを更新した上で、Material を独自に触っている場合は
-`_SunSheen` を 0、`_DetailStrength` を 0.3 以下に戻してください。
+`2.4.3` で完成Materialを再調整しています。`2.4.0` は空の階調、広い光沢、3枚目の微細波、
+透過光の加算が重なり、白い霞とザラつきが出やすい状態でした。`2.4.3` では完成Materialの
+`_SunSheen` と `_DetailStrength` を 0 にし、透過と反射を加算せず混合するため、指定色と透明感が残ります。
+
+### 速度を上げても変化が分からない
+
+`2.4.4` で `WaterSurfaceAnimator` の速度換算を修正しました。Inspectorの **Speed 0.3** が中速、
+`0.6` が明確な高速として反映されます。Animatorを使わずMaterialだけを貼っている場合は、
+Materialの **水面全体の速度倍率** (`_AnimationSpeed`) を変更してください。`1`が完成状態、`2`で2倍です。
 
 ### 遠くの水面がザラザラ・チカチカする
 
 `2.4.0` 以降は距離に応じて自動で法線とハイライトを丸めます。まだ気になる場合は Material の
 `遠景のちらつき防止` (`_SpecularAA`) を 1.0 まで上げ、`細かい波が消える距離` (`_DetailDistance`) を下げてください。
-逆に足元がのっぺりする場合は `近くの細かい波` (`_DetailStrength`) と `_DetailDistance` を上げます。
+逆にPCの接写だけ情報量を増やしたい場合は `近くの細かい波` (`_DetailStrength`) を 0.05 前後から上げます。
 normal texture の import 設定で mipmap と Trilinear が ON になっていることも確認してください。
 
 ### 波紋や波がピクピクする

@@ -300,7 +300,7 @@ MonoBehaviour:
   tiling: 1
   displacementStrength: 0.018
   displacementScale: 1.1
-  displacementSpeed: 0.000045
+  displacementSpeed: 0.055
   heightMapInfluence: 0
   shallowColor: {r: 0.74, g: 0.99, b: 1, a: 1}
   deepColor: {r: 0.08, g: 0.42, b: 0.62, a: 1}

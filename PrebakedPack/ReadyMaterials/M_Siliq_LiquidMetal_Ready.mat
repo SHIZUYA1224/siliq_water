@@ -58,10 +58,10 @@ Material:
     - _DarkReflectionDamping: 0.72
     - _DepthTintStrength: 0.12
     - _DetailDistance: 18
-    - _DetailStrength: 0.16
+    - _DetailStrength: 0
     - _DetailTiling: 5.4
     - _DisplacementScale: 0.85
-    - _DisplacementSpeed: 0.000050
+    - _DisplacementSpeed: 0.04
     - _DisplacementStrength: 0.025
     - _DstBlend: 0
     - _EdgeReflection: 0.95
@@ -104,8 +104,8 @@ Material:
     - _DeepColor: {r: 0.16, g: 0.17, b: 0.18, a: 1}
     - _GlimmerColor: {r: 1, g: 1, b: 1, a: 1}
     - _HorizonColor: {r: 0.95, g: 0.97, b: 1, a: 1}
-    - _Scroll1: {r: 0.0028, g: 0.0009, b: 0, a: 0}
-    - _Scroll2: {r: -0.0009, g: 0.0020, b: 0, a: 0}
+    - _Scroll1: {r: 0.0070, g: 0.00225, b: 0, a: 0}
+    - _Scroll2: {r: -0.00225, g: 0.0050, b: 0, a: 0}
     - _ShallowColor: {r: 0.86, g: 0.88, b: 0.9, a: 1}
     - _TransmissionColor: {r: 0.7, g: 0.76, b: 0.82, a: 1}
     - _ZenithColor: {r: 0.34, g: 0.36, b: 0.42, a: 1}

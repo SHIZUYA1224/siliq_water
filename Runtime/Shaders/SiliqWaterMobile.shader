@@ -1,7 +1,7 @@
 // Quest (VRChat モバイル) ワールド向けの軽量水面シェーダー。
 // 1 パス / GrabPass なし。通常は不透明、透明マテリアル作成時だけ alpha blend へ
-// 切り替えます。1 枚のノーマルマップを 3 つのスケール / 回転でサンプリングし、
-// 距離に応じて細部を落とすことで、遠景でもチラつかない波の動きを作ります。
+// 切り替えます。1 枚のノーマルマップを手調整済みの 2 層で合成し、
+// PC 接写向けの任意の微細層と遠景 AA で、近景の密度と遠景の安定性を両立します。
 // ※ VRChat のモバイルアバターではカスタムシェーダーが使えないため、
 //    アバターでは VRChat/Mobile/Standard Lite にノーマルマップを設定してください。
 Shader "Siliq/Water Mobile (Quest)"
@@ -33,14 +33,15 @@ Shader "Siliq/Water Mobile (Quest)"
         [NoScaleOffset] _HeightMap ("水面ハイトマップ", 2D) = "gray" {}
         _DisplacementStrength ("実際の高さ", Range(0, 0.5)) = 0
         _DisplacementScale ("高さの波長", Range(0.05, 4)) = 0.75
-        _DisplacementSpeed ("高さの速度", Range(0, 1)) = 0.00008
+        _DisplacementSpeed ("高さの速度", Range(0, 1)) = 0.06
         _HeightMapInfluence ("ハイトマップの影響", Range(0, 1)) = 0
         _NormalStrength ("ノーマル強度", Range(0, 2)) = 1
         _Tiling1 ("レイヤー1 タイリング", Float) = 1
         _Tiling2 ("レイヤー2 タイリング", Float) = 2.7
+        _AnimationSpeed ("水面全体の速度倍率", Range(0, 4)) = 1
         _Scroll1 ("レイヤー1 スクロール (XY)", Vector) = (0.0024, 0.0010, 0, 0)
         _Scroll2 ("レイヤー2 スクロール (XY)", Vector) = (-0.0008, 0.0017, 0, 0)
-        _DetailStrength ("近くの細かい波", Range(0, 1)) = 0.25
+        _DetailStrength ("近くの細かい波 (高品質PC向け)", Range(0, 1)) = 0
         _DetailTiling ("細かい波の細かさ", Range(2, 24)) = 7.3
         _DetailDistance ("細かい波が消える距離", Range(1, 200)) = 22
         _SpecularAA ("遠景のちらつき防止", Range(0, 1)) = 0.9
@@ -104,6 +105,7 @@ Shader "Siliq/Water Mobile (Quest)"
             #pragma multi_compile_instancing
             #include "UnityCG.cginc"
             #include "Lighting.cginc"
+            #include "UnityStandardUtils.cginc"
 
             sampler2D _NormalMap;
             float4 _NormalMap_TexelSize;
@@ -137,6 +139,7 @@ Shader "Siliq/Water Mobile (Quest)"
             half _NormalStrength;
             float _Tiling1;
             float _Tiling2;
+            half _AnimationSpeed;
             float4 _Scroll1;
             float4 _Scroll2;
             half _DetailStrength;
@@ -172,7 +175,7 @@ Shader "Siliq/Water Mobile (Quest)"
 
             float SiliqAnimationTime()
             {
-                return _Time.y + _ManualTime;
+                return (_Time.y + _ManualTime) * max((float)_AnimationSpeed, 0.0);
             }
 
             // 単眼カメラ位置。VR (single-pass instanced) では両目の中点ではなく
@@ -213,16 +216,28 @@ Shader "Siliq/Water Mobile (Quest)"
                 return saturate((log2(max(span, 1.0)) - 1.0) * 0.30);
             }
 
+            float SiliqDisplacementSpeed()
+            {
+                // 2.4.2 以前の完成 Material は 0.000018〜0.000055 を保存していた。
+                // そのままでは一周期に何時間もかかるため、旧値だけを新しい秒基準へ移行する。
+                return _DisplacementSpeed > 0.0h && _DisplacementSpeed < 0.001h
+                    ? _DisplacementSpeed * 1000.0h
+                    : _DisplacementSpeed;
+            }
+
             float SiliqVertexHeight(float3 localPos, float2 uv)
             {
-                float t = SiliqAnimationTime() * _DisplacementSpeed;
+                float speed = SiliqDisplacementSpeed();
+                float seconds = SiliqAnimationTime();
+                float phase = seconds * speed * UNITY_TWO_PI;
                 float scale = max((float)_DisplacementScale, 0.001);
                 float2 p = localPos.xz * scale;
-                float waveA = sin(dot(p, float2(1.37, 0.41)) + t * 1.70);
-                float waveB = sin(dot(p, float2(-0.52, 1.19)) - t * 1.13);
-                float waveC = sin(dot(p, float2(0.31, 0.73)) + t * 0.61);
+                float waveA = sin(dot(p, float2(1.37, 0.41)) + phase * 1.70);
+                float waveB = sin(dot(p, float2(-0.52, 1.19)) - phase * 1.13);
+                float waveC = sin(dot(p, float2(0.31, 0.73)) + phase * 0.61);
                 float procedural = waveA * 0.52 + waveB * 0.33 + waveC * 0.15;
-                float heightMap = tex2Dlod(_HeightMap, float4(uv * scale + t * 0.035, 0, 0)).r * 2.0 - 1.0;
+                float2 heightScroll = seconds * speed * float2(0.030, 0.017);
+                float heightMap = tex2Dlod(_HeightMap, float4(uv * scale + heightScroll, 0, 0)).r * 2.0 - 1.0;
                 return lerp(procedural, heightMap, _HeightMapInfluence) * _DisplacementStrength;
             }
 
@@ -400,7 +415,7 @@ Shader "Siliq/Water Mobile (Quest)"
                 worldN = normalize(worldN);
 
                 half3 viewDir = normalize(cameraPos - i.worldPos);
-                half3 lightDir = normalize(_WorldSpaceLightPos0.xyz);
+                half3 lightDir = normalize(_WorldSpaceLightPos0.xyz - i.worldPos * _WorldSpaceLightPos0.w);
                 half3 halfDir = normalize(lightDir + viewDir);
 
                 half3 lumaWeights = half3(0.2126h, 0.7152h, 0.0722h);
@@ -452,20 +467,42 @@ Shader "Siliq/Water Mobile (Quest)"
                 // 環境の色味は「馴染ませる」程度にとどめる。強く借りると
                 // 指定した _HorizonColor から色が離れてしまう。
                 reflCol *= lerp(half3(1, 1, 1), probeHue, _SkyGradient * 0.35h);
+
+                // Reflection Probe / Skybox を直接読む。固定色だけでは夕景、森、室内などの
+                // 色温度と一致しないため、実景を主成分にして Material 色は補助へ回す。
+                float3 environmentReflDir = reflDir;
+                #if defined(UNITY_SPECCUBE_BOX_PROJECTION)
+                environmentReflDir = BoxProjectedCubemapDirection(
+                    environmentReflDir,
+                    i.worldPos,
+                    unity_SpecCube0_ProbePosition,
+                    unity_SpecCube0_BoxMin,
+                    unity_SpecCube0_BoxMax);
+                #endif
+                half reflectionMip = lerp(2.4h, 0.5h, sharpness);
+                half4 encodedEnvironment = UNITY_SAMPLE_TEXCUBE_LOD(
+                    unity_SpecCube0,
+                    environmentReflDir,
+                    reflectionMip);
+                half3 sceneReflection = DecodeHDR(encodedEnvironment, unity_SpecCube0_HDR);
+                sceneReflection = min(sceneReflection, half3(4.0h, 4.0h, 4.0h));
+                reflCol = lerp(reflCol, sceneReflection, saturate(_ReflStrength * 0.72h));
+
                 #ifdef USE_REFLECTION_CUBE
                 reflCol = lerp(reflCol, texCUBE(_ReflCube, reflDir).rgb, _ReflStrength);
                 #endif
-                half reflectionAmount = lerp(0.08h, 1.45h, _ReflStrength);
+                half reflectionAmount = lerp(0.18h, 1.0h, _ReflStrength);
                 reflCol *= reflectionVisibility * reflectionAmount;
 
-                // 水の実際の反射率は正面で約 2%。作家的な _FresnelPower は残しつつ、
-                // 真上から見ても反射が完全には消えない下限を持たせる。
+                // 水の正面反射率 (F0) を基準にした Schlick 型フレネル。
+                // 反射を強めても正面全体が白くならず、斜めだけが自然に反射へ移る。
                 half grazing = 1.0h - viewFacing;
-                half fresnel = pow(max(grazing, 1e-4h), _FresnelPower) * lerp(0.72h, 1.18h, _ReflStrength);
-                fresnel = saturate(max(fresnel, 0.02h + 0.06h * grazing * grazing));
+                half f0 = lerp(0.02h, 0.055h, _ReflStrength);
+                half fresnel = f0 + (1.0h - f0) * pow(max(grazing, 1e-4h), _FresnelPower);
                 half alphaFresnel = pow(max(grazing, 1e-4h), _AlphaPower);
                 float2 reflectionP = SiliqRotate2D(i.worldPos.xz + worldN.xz * (0.35 + refraction * 0.85), -0.38) * max((float)_ReflectionPatternScale, 0.1);
-                half reflectionBand = pow(saturate(sin(reflectionP.x * 3.14159) * 0.5h + 0.5h), 18.0h);
+                half reflectionWarp = n1.x * 3.2h + n2.y * 2.4h + macroA * 0.8h;
+                half reflectionBand = pow(saturate(sin(reflectionP.x * 3.14159 + reflectionWarp) * 0.5h + 0.5h), 18.0h);
                 half reflectionBreakup = saturate(0.55h + 0.45h * sin(reflectionP.y * 2.3h + macroA * 2.2h));
                 half reflectionPattern = reflectionBand * reflectionBreakup * _ReflectionPatternStrength;
                 reflectionPattern *= reflectionVisibility * detailVisibility * saturate(0.25h + fresnel + _EdgeReflection * 0.35h);
@@ -524,12 +561,17 @@ Shader "Siliq/Water Mobile (Quest)"
                 floorVisibilityGlow *= baseVisibility * saturate(0.35h + _TransmissionStrength * 0.55h + clarity * 0.35h);
                 floorVisibilityGlow *= lerp(0.84h, 1.18h, waterLens) * lerp(0.88h, 1.12h, depthNoise);
                 half3 floorVisibilityColor = lerp(_ShallowColor.rgb, _TransmissionColor.rgb, 0.62h);
-                half3 transmission = _TransmissionColor.rgb * _TransmissionStrength * viewFacing * saturate(0.2h + surfaceLight) * baseVisibility;
-                transmission *= lerp(1.0h, 1.38h, clarity);
+                // 透過光は加算しない。水色へ穏やかに混ぜることで、透明度を上げても
+                // RGB が白く飽和せず、背景との alpha blend に色と奥行きが残る。
+                half transmissionWeight = saturate(_TransmissionStrength * clarity * viewFacing);
+                transmissionWeight *= saturate(0.18h + surfaceLight * 0.42h);
+                half3 transmittedBody = _TransmissionColor.rgb * baseVisibility;
+                transmittedBody *= lerp(0.82h, 1.08h, waterLens * refraction);
+                half3 waterBody = lerp(baseCol, transmittedBody, transmissionWeight * 0.42h);
 
                 half4 col;
-                col.rgb = lerp(baseCol + transmission, reflCol, fresnel) + (spec + glint) * _LightColor0.rgb;
-                col.rgb += _HorizonColor.rgb * reflectionPattern;
+                col.rgb = lerp(waterBody, reflCol, fresnel) + (spec + glint) * _LightColor0.rgb;
+                col.rgb = lerp(col.rgb, reflCol, saturate(reflectionPattern * 0.55h));
                 col.rgb += floorVisibilityColor * floorVisibilityGlow;
                 col.rgb += bottomGlowColor * bottomGlowMask;
                 col.rgb += causticsColor * caustics;

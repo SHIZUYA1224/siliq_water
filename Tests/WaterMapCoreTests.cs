@@ -251,8 +251,8 @@ namespace Siliq.Water.Tests
                     "初期 speed は止まって見えない操作値にする");
                 Assert.LessOrEqual(animator.speed, 0.25f,
                     "初期 speed は見た瞬間に流れすぎない低速値にする");
-                Assert.LessOrEqual(animator.displacementSpeed, 0.00008f,
-                    "初期 height animation も速すぎない値にする");
+                Assert.That(animator.displacementSpeed, Is.InRange(0.04f, 0.08f),
+                    "初期 height animation は秒単位で見えるが忙しすぎない速度にする");
                 Assert.LessOrEqual(animator.causticsSpeed, 0.000012f,
                     "初期 caustics animation もプールで流れすぎない値にする");
             }
@@ -291,12 +291,12 @@ namespace Siliq.Water.Tests
 
                 Assert.AreEqual(2f, st.x, 1e-5f, "tiling が _BumpMap_ST.x に反映されていない");
                 Assert.AreEqual(2f, st.y, 1e-5f, "tiling が _BumpMap_ST.y に反映されていない");
-                Assert.Greater(st.z, 0.0020f, "speed / direction による X offset が見える量で反映されていない");
-                Assert.LessOrEqual(st.z, 0.0028f, "Speed 0.3 でも水面として速すぎない内部減速が必要");
+                Assert.Greater(st.z, 0.0085f, "Speed 0.3 が目視できる X offset として反映されていない");
+                Assert.LessOrEqual(st.z, 0.0095f, "Speed 0.3 は中速として扱い、速すぎる値にはしない");
                 Assert.AreEqual(2f, mainSt.x, 1e-5f, "Standard の normal UV 用 _MainTex_ST.x に tiling が反映されていない");
                 Assert.AreEqual(2f, mainSt.y, 1e-5f, "Standard の normal UV 用 _MainTex_ST.y に tiling が反映されていない");
-                Assert.Greater(mainSt.z, 0.0020f, "Standard の normal UV 用 _MainTex_ST に見える量の offset が反映されていない");
-                Assert.LessOrEqual(mainSt.z, 0.0028f, "Standard の normal UV も Speed 0.3 で速すぎてはいけない");
+                Assert.Greater(mainSt.z, 0.0085f, "Standard の Speed 0.3 が目視できる offset になっていない");
+                Assert.LessOrEqual(mainSt.z, 0.0095f, "Standard の Speed 0.3 は中速として扱う");
                 Assert.AreEqual(2f, block.GetFloat("_BumpScale"), 1e-5f, "strength が _BumpScale に反映されていない");
                 Color c = block.GetColor("_Color");
                 Assert.AreEqual(0.12f, c.r, 1e-5f, "shallowColor が Standard の _Color.r に反映されていない");
@@ -349,6 +349,71 @@ namespace Siliq.Water.Tests
             {
                 if (go != null) Object.DestroyImmediate(go);
                 if (mat != null) Object.DestroyImmediate(mat);
+            }
+        }
+
+        [Test]
+        public void WaterSurfaceAnimator_SyncsLookWhenReadyMaterialIsReplaced()
+        {
+            GameObject go = null;
+            Material first = null;
+            Material second = null;
+            try
+            {
+                Shader shader = Shader.Find("Siliq/Water Mobile (Quest)");
+                Assert.IsNotNull(shader);
+
+                go = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                first = new Material(shader);
+                second = new Material(shader);
+                first.SetColor("_ShallowColor", Color.red);
+                first.SetFloat("_Opacity", 0.8f);
+                second.SetColor("_ShallowColor", new Color(0.1f, 0.7f, 0.9f, 1f));
+                second.SetFloat("_Opacity", 0.42f);
+                second.SetFloat("_NormalStrength", 0.37f);
+                second.SetFloat("_Tiling1", 1.7f);
+                second.SetFloat("_Tiling2", 3.4f);
+                second.SetVector("_Scroll1", new Vector4(0.0012f, 0.0016f, 0f, 0f));
+                second.SetVector("_Scroll2", new Vector4(-0.001f, 0f, 0f, 0f));
+                second.SetFloat("_DisplacementSpeed", 0.000045f);
+
+                var renderer = go.GetComponent<Renderer>();
+                renderer.sharedMaterial = first;
+                var animator = go.AddComponent<WaterSurfaceAnimator>();
+                animator.SyncLookFromMaterial();
+
+                renderer.sharedMaterial = second;
+                animator.ApplyImmediate();
+
+                AssertColor(second.GetColor("_ShallowColor"), animator.shallowColor,
+                    "Materialを差し替えた後も前の色をPropertyBlockで上書きしてはいけない");
+                Assert.AreEqual(0.42f, animator.opacity, 1e-5f,
+                    "Materialを差し替えたら新しい透明度を自動で読み込む");
+                Assert.AreEqual(0.37f, animator.strength, 1e-5f,
+                    "完成Materialのnormal強度をAnimatorの既定値で上書きしてはいけない");
+                Assert.AreEqual(1.7f, animator.tiling, 1e-5f,
+                    "完成Materialのprimary tilingを維持する");
+                Assert.AreEqual(2f, animator.secondaryTilingMultiplier, 1e-5f,
+                    "完成Materialの2層目のtiling比を維持する");
+                Assert.AreEqual(0.033333f, animator.speed, 1e-4f,
+                    "完成Materialのscroll速度をInspectorの速度へ同期する");
+                Assert.AreEqual(0.045f, animator.displacementSpeed, 1e-5f,
+                    "旧Materialの高さ速度は秒基準へ移行してInspectorにも表示する");
+
+                var block = new MaterialPropertyBlock();
+                renderer.GetPropertyBlock(block, 0);
+                Vector4 primaryScroll = block.GetVector("_Scroll1");
+                Vector4 secondaryScroll = block.GetVector("_Scroll2");
+                Assert.AreEqual(0.0012f, primaryScroll.x, 1e-5f);
+                Assert.AreEqual(0.0016f, primaryScroll.y, 1e-5f);
+                Assert.AreEqual(-0.001f, secondaryScroll.x, 1e-5f);
+                Assert.AreEqual(0f, secondaryScroll.y, 1e-5f);
+            }
+            finally
+            {
+                if (go != null) Object.DestroyImmediate(go);
+                if (first != null) Object.DestroyImmediate(first);
+                if (second != null) Object.DestroyImmediate(second);
             }
         }
 
@@ -636,14 +701,14 @@ namespace Siliq.Water.Tests
                     $"{name} は水底や反射が平板に見えない程度の軽量屈折を持つ必要がある");
                 Assert.GreaterOrEqual(mat.GetFloat("_DepthTintStrength"), 0.20f,
                     $"{name} は透明水の奥行きが完全に消えた初期値ではいけない");
-                Assert.GreaterOrEqual(mat.GetVector("_Scroll1").magnitude, 0.0015f,
+                Assert.GreaterOrEqual(mat.GetVector("_Scroll1").magnitude, 0.0030f,
                     $"{name} は WaterSurfaceAnimator なしでも見える速度で波が動く scroll を持つ必要がある");
-                Assert.LessOrEqual(mat.GetVector("_Scroll1").magnitude, 0.0045f,
+                Assert.LessOrEqual(mat.GetVector("_Scroll1").magnitude, 0.012f,
                     $"{name} の shader scroll が速すぎる");
-                Assert.LessOrEqual(mat.GetVector("_Scroll2").magnitude, 0.0032f,
+                Assert.LessOrEqual(mat.GetVector("_Scroll2").magnitude, 0.009f,
                     $"{name} の shader scroll 2 が速すぎる");
-                Assert.LessOrEqual(mat.GetFloat("_DisplacementSpeed"), 0.00008f,
-                    $"{name} の高さアニメーションが速すぎる");
+                Assert.That(mat.GetFloat("_DisplacementSpeed"), Is.InRange(0.02f, 0.10f),
+                    $"{name} の高さアニメーションは止まって見えず、忙しすぎない秒基準の速度にする");
                 Assert.AreEqual((float)BlendMode.SrcAlpha, mat.GetFloat("_SrcBlend"), 1e-5f,
                     $"{name} は透明水としてすぐ使える blend 設定が必要");
                 Assert.AreEqual((float)BlendMode.OneMinusSrcAlpha, mat.GetFloat("_DstBlend"), 1e-5f);
@@ -656,10 +721,10 @@ namespace Siliq.Water.Tests
             var metal = LoadReadyMaterial("M_Siliq_LiquidMetal_Ready");
             Assert.AreEqual("Siliq/Water Mobile (Quest)", metal.shader.name);
             Assert.IsNotNull(metal.GetTexture("_NormalMap"));
-            Assert.GreaterOrEqual(metal.GetVector("_Scroll1").magnitude, 0.0015f);
-            Assert.LessOrEqual(metal.GetVector("_Scroll1").magnitude, 0.0045f);
-            Assert.LessOrEqual(metal.GetVector("_Scroll2").magnitude, 0.0032f);
-            Assert.LessOrEqual(metal.GetFloat("_DisplacementSpeed"), 0.00008f);
+            Assert.GreaterOrEqual(metal.GetVector("_Scroll1").magnitude, 0.0030f);
+            Assert.LessOrEqual(metal.GetVector("_Scroll1").magnitude, 0.012f);
+            Assert.LessOrEqual(metal.GetVector("_Scroll2").magnitude, 0.009f);
+            Assert.That(metal.GetFloat("_DisplacementSpeed"), Is.InRange(0.02f, 0.10f));
             AssertSurfaceBottomDefaultsOff(metal, "Liquid Metal");
             Assert.GreaterOrEqual(metal.GetFloat("_DepthTintStrength"), 0.10f,
                 "Liquid Metal も shader property 欠落を避けるため奥行き調整値を持つ");
@@ -731,12 +796,12 @@ namespace Siliq.Water.Tests
                 "Hero は凹凸を抑え、変な模様ではなく透明感を優先する");
             Assert.LessOrEqual(hero.GetFloat("_DisplacementStrength"), 0.006f,
                 "Hero は高さで板状の模様を出さない");
-            Assert.GreaterOrEqual(hero.GetVector("_Scroll1").magnitude, 0.0018f,
+            Assert.GreaterOrEqual(hero.GetVector("_Scroll1").magnitude, 0.0045f,
                 "Hero の shader scroll は止まって見えない速度にする");
-            Assert.LessOrEqual(hero.GetVector("_Scroll1").magnitude, 0.0030f,
+            Assert.LessOrEqual(hero.GetVector("_Scroll1").magnitude, 0.0070f,
                 "Hero の shader scroll が速すぎてはいけない");
-            Assert.LessOrEqual(hero.GetFloat("_DisplacementSpeed"), 0.000030f,
-                "Hero の高さアニメーションが速すぎてはいけない");
+            Assert.That(hero.GetFloat("_DisplacementSpeed"), Is.InRange(0.03f, 0.04f),
+                "Hero の高さアニメーションは穏やかでも停止して見えない速度にする");
             Assert.AreEqual((float)BlendMode.SrcAlpha, hero.GetFloat("_SrcBlend"), 1e-5f,
                 "Hero は透明水としてすぐ使える blend 設定にする");
             Assert.AreEqual((float)BlendMode.OneMinusSrcAlpha, hero.GetFloat("_DstBlend"), 1e-5f);
@@ -766,9 +831,9 @@ namespace Siliq.Water.Tests
                 "WaterTable は専用 height map の中央リングを実高さにも少し反映する");
             Assert.LessOrEqual(waterTable.GetFloat("_DisplacementStrength"), 0.008f,
                 "WaterTable は浅い水盤なので高さを大きくしすぎない");
-            Assert.GreaterOrEqual(waterTable.GetVector("_Scroll1").magnitude, 0.0010f,
+            Assert.GreaterOrEqual(waterTable.GetVector("_Scroll1").magnitude, 0.0030f,
                 "WaterTable は静止画に見えない最低限の水面 scroll を持つ");
-            Assert.LessOrEqual(waterTable.GetVector("_Scroll1").magnitude, 0.0022f,
+            Assert.LessOrEqual(waterTable.GetVector("_Scroll1").magnitude, 0.0045f,
                 "WaterTable は中央リングが速く滑らない低速 scroll にする");
         }
 
@@ -3065,6 +3130,8 @@ namespace Siliq.Water.Tests
                 // 広いローブは白い霞になりやすいので既定は 0 (opt-in)
                 StringAssert.Contains("_SunSheen (\"太陽の広がる光沢\", Range(0, 1)) = 0\n", text,
                     $"{path}: _SunSheen の既定値は 0 にして手調整済みの見た目を変えない");
+                StringAssert.Contains("_DetailStrength (\"近くの細かい波 (高品質PC向け)\", Range(0, 1)) = 0\n", text,
+                    $"{path}: 追加の微細波は完成Materialの見た目とモバイル負荷を変えないよう初期OFFにする");
             }
 
             string mobile = ReadShader(MobileShaderPath);
@@ -3102,16 +3169,13 @@ namespace Siliq.Water.Tests
 
                 Assert.AreEqual(0f, mat.GetFloat("_SunSheen"), 1e-5f,
                     $"{name}: 広いローブは白い霞になりやすいので完成 material では初期 OFF にする");
-                Assert.LessOrEqual(mat.GetFloat("_DetailStrength"), 0.35f,
-                    $"{name}: 微細波が強すぎると手調整済みの水面が騒がしくなる");
+                Assert.AreEqual(0f, mat.GetFloat("_DetailStrength"), 1e-5f,
+                    $"{name}: 3枚目の微細波はザラつきとモバイル負荷を増やすため完成Materialでは初期OFFにする");
                 Assert.LessOrEqual(mat.GetFloat("_SkyGradient"), 0.55f,
                     $"{name}: 空の階調が強すぎると指定した反射色から離れる");
             }
 
-            // 透明感優先の material ほど微細波は抑える
-            Assert.Less(LoadReadyMaterial("M_Siliq_CrystalLagoon_Hero_Ready").GetFloat("_DetailStrength"),
-                LoadReadyMaterial("M_Siliq_ClearSea_Ready").GetFloat("_DetailStrength"),
-                "Hero は凹凸より透明感を優先するので微細波を海より弱くする");
+            Assert.AreEqual(0f, LoadReadyMaterial("M_Siliq_CrystalLagoon_Hero_Ready").GetFloat("_DetailStrength"), 1e-5f);
         }
 
         [Test]
@@ -3168,9 +3232,11 @@ namespace Siliq.Water.Tests
             StringAssert.Contains("UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX", text,
                 "fragment で片眼のインデックスを確定させる必要がある");
 
-            // 水は正面でも約 2% 反射する。真上から見て反射が完全に消えてはいけない。
-            StringAssert.Contains("max(fresnel, 0.02h", text,
-                "フレネルに水の垂直入射反射率の下限が要る");
+            // 水は正面でも約 2% 反射する。F0 を基準に斜めだけが自然に反射へ移る。
+            StringAssert.Contains("half f0 = lerp(0.02h, 0.055h, _ReflStrength)", text,
+                "フレネルは水の垂直入射反射率を基準にする必要がある");
+            StringAssert.Contains("f0 + (1.0h - f0)", text,
+                "反射強度を上げても正面全体が白くならない Schlick 型フレネルを使う");
         }
 
         [Test]
@@ -3269,8 +3335,8 @@ namespace Siliq.Water.Tests
                 Assert.GreaterOrEqual(mat.GetFloat("_SpecularAA"), 0.80f,
                     $"{name} は遠景で白い点が明滅しない程度のちらつき防止を持つ必要がある");
 
-                Assert.Greater(mat.GetFloat("_DetailStrength"), 0f,
-                    $"{name} は足元の情報量を増やす微細波を持つ必要がある");
+                Assert.AreEqual(0f, mat.GetFloat("_DetailStrength"), 1e-5f,
+                    $"{name} は手調整済み2層normalを既定とし、追加の微細波を勝手に有効化しない");
                 Assert.Greater(mat.GetFloat("_DetailDistance"), 0f,
                     $"{name} は微細波が消える距離を持つ必要がある");
                 Assert.GreaterOrEqual(mat.GetFloat("_DetailTiling"), 2f,
@@ -3295,6 +3361,33 @@ namespace Siliq.Water.Tests
             Assert.Less(LoadReadyMaterial("M_Siliq_WaterTable_Ready").GetFloat("_DetailDistance"),
                 LoadReadyMaterial("M_Siliq_ClearSea_Ready").GetFloat("_DetailDistance"),
                 "ガラス水盤が海と同じ距離まで微細波を出す必要はない");
+        }
+
+        [Test]
+        public void SiliqMobileShader_ConservesOpticalEnergyAndUsesVisibleDisplacementTime()
+        {
+            string text = ReadShader(MobileShaderPath);
+
+            StringAssert.Contains("half3 waterBody = lerp(baseCol, transmittedBody", text,
+                "透過光は水色へ混ぜ、透明度を上げてもRGBを白く飽和させない");
+            Assert.IsFalse(text.Contains("baseCol + transmission"),
+                "透過光をベース色へ単純加算すると白い霞になる");
+            StringAssert.Contains("col.rgb = lerp(col.rgb, reflCol, saturate(reflectionPattern * 0.55h))", text,
+                "反射帯は加算で白く焼き付けず、反射色へ混ぜる");
+            StringAssert.Contains("SiliqDisplacementSpeed", text,
+                "旧Materialの極小速度を秒基準へ移行する互換処理が必要");
+            StringAssert.Contains("_DisplacementSpeed * 1000.0h", text,
+                "2.4.2以前の極小速度でも停止して見えない移行倍率が必要");
+            StringAssert.Contains("seconds * speed * UNITY_TWO_PI", text,
+                "高さアニメーションは秒単位の位相で進む必要がある");
+            StringAssert.Contains("_AnimationSpeed (\"水面全体の速度倍率\", Range(0, 4)) = 1", text,
+                "Material単体でも全アニメーション速度を明確に調整できる必要がある");
+            StringAssert.Contains("UNITY_SAMPLE_TEXCUBE_LOD", text,
+                "屋外のReflection Probe / Skyboxを直接反射へ取り込む必要がある");
+            StringAssert.Contains("DecodeHDR(encodedEnvironment, unity_SpecCube0_HDR)", text,
+                "HDRの環境反射を正しく復号する必要がある");
+            StringAssert.Contains("BoxProjectedCubemapDirection", text,
+                "室内Reflection Probeのbox projectionに対応する必要がある");
         }
 
         // ---------------------------------------------------------------

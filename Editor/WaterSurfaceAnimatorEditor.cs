@@ -12,6 +12,7 @@ namespace Siliq.Water.Editor
         SerializedProperty materialSlot;
         SerializedProperty animateInEditMode;
         SerializedProperty editModePreviewFps;
+        SerializedProperty syncLookOnMaterialChange;
         SerializedProperty directionDegrees;
         SerializedProperty speed;
         SerializedProperty strength;
@@ -56,6 +57,7 @@ namespace Siliq.Water.Editor
             materialSlot = serializedObject.FindProperty("materialSlot");
             animateInEditMode = serializedObject.FindProperty("animateInEditMode");
             editModePreviewFps = serializedObject.FindProperty("editModePreviewFps");
+            syncLookOnMaterialChange = serializedObject.FindProperty("syncLookOnMaterialChange");
             directionDegrees = serializedObject.FindProperty("directionDegrees");
             speed = serializedObject.FindProperty("speed");
             strength = serializedObject.FindProperty("strength");
@@ -141,6 +143,7 @@ namespace Siliq.Water.Editor
             {
                 EditorGUILayout.PropertyField(editModePreviewFps, new GUIContent("Edit Mode Preview Fps"));
             }
+            EditorGUILayout.PropertyField(syncLookOnMaterialChange, new GUIContent("Material変更時に見た目を同期"));
             EditorGUILayout.Space(4f);
         }
 
@@ -148,7 +151,9 @@ namespace Siliq.Water.Editor
         {
             EditorGUILayout.LabelField("動き", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(directionDegrees, new GUIContent("方向"));
-            EditorGUILayout.PropertyField(speed, new GUIContent("速さ"));
+            EditorGUILayout.PropertyField(speed, new GUIContent(
+                "速さ (0.3 = 中速)",
+                "0で静止、0.3で目視できる中速、0.6で高速。Play前のScene Viewにも反映されます。"));
             EditorGUILayout.PropertyField(strength, new GUIContent("凹凸"));
             EditorGUILayout.PropertyField(tiling, new GUIContent("模様の細かさ"));
             EditorGUILayout.Space(4f);
@@ -159,7 +164,9 @@ namespace Siliq.Water.Editor
             EditorGUILayout.LabelField("色", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(shallowColor, new GUIContent("明るい水色"));
             EditorGUILayout.PropertyField(deepColor, new GUIContent("深い水色"));
-            EditorGUILayout.PropertyField(reflectionColor, new GUIContent("反射色"));
+            EditorGUILayout.PropertyField(reflectionColor, new GUIContent(
+                "反射の色味",
+                "Reflection Probe / Skyboxの実景反射へ重ねる補助色です。"));
             EditorGUILayout.PropertyField(transmissionColor, new GUIContent("透過光"));
             EditorGUILayout.PropertyField(sparkleColor, new GUIContent("きらめき色"));
             EditorGUILayout.Space(4f);
@@ -182,7 +189,9 @@ namespace Siliq.Water.Editor
             EditorGUILayout.PropertyField(clarity, new GUIContent("透明な抜け感"));
             EditorGUILayout.PropertyField(edgeReflection, new GUIContent("輪郭反射"));
             EditorGUILayout.PropertyField(refractionStrength, new GUIContent("水越しの揺らぎ"));
-            EditorGUILayout.PropertyField(reflectionStrength, new GUIContent("反射量"));
+            EditorGUILayout.PropertyField(reflectionStrength, new GUIContent(
+                "環境反射量",
+                "UnityのReflection Probe / Skyboxが水面へ映る量です。"));
             EditorGUILayout.PropertyField(reflectionPatternStrength, new GUIContent("反射パターン"));
             EditorGUILayout.PropertyField(reflectionPatternScale, new GUIContent("反射パターンの大きさ"));
             EditorGUILayout.PropertyField(transmissionStrength, new GUIContent("透過光量"));
