@@ -340,7 +340,10 @@ Shader "Siliq/Water Mobile (Quest)"
                 half macro01 = saturate(0.5h + macroA * 0.5h);
                 float2 centeredUv = i.uv - 0.5;
                 float2 macroWarp = float2(macroA, macroB) * (_MacroVariation * 0.075h);
-                half layer2Angle = 0.61h + macroB * _MacroDirectionBreakup * 0.9h;
+                // レイヤー 2 の基準角は 0 のまま。ここを回すと n1/n2 の干渉 (glimmer の元) が
+                // 丸ごと変わり、手調整済みのきらめきがザラつきに化ける。
+                // 相関崩しは距離で消える微細レイヤー側だけで行う。
+                half layer2Angle = macroB * _MacroDirectionBreakup * 0.9h;
                 float tiling1 = _Tiling1 * (1.0 + macroA * _MacroVariation * 0.18);
                 float tiling2 = _Tiling2 * (1.0 + macroB * _MacroVariation * 0.22);
 
@@ -363,8 +366,10 @@ Shader "Siliq/Water Mobile (Quest)"
                 UNITY_BRANCH
                 if (_DetailStrength > 0.002h)
                 {
+                    // 3 乗で落として本当に足元だけに乗せる。画面全体に乗ると
+                    // 「情報量」ではなく単なるザラつきになる。
                     half detailFade = saturate(1.0h - viewDist / max(_DetailDistance, 1.0));
-                    detailWeight = _DetailStrength * detailFade * detailFade * sharpness;
+                    detailWeight = _DetailStrength * detailFade * detailFade * detailFade * sharpness;
                     float2 uv3 = SiliqRotate2D(centeredUv, 2.31h - macroA * _MacroDirectionBreakup * 0.6h) *
                                  (tiling1 * max(_DetailTiling, 2.0)) + 0.5 +
                                  (_Scroll2.xy * 1.9 - _Scroll1.xy * 1.3) * time;
@@ -444,7 +449,9 @@ Shader "Siliq/Water Mobile (Quest)"
                 half3 zenithHue = _ZenithColor.rgb / zenithLum;
                 half upness = pow(saturate(reflDir.y), 0.7h);
                 half3 reflCol = _HorizonColor.rgb * lerp(half3(1, 1, 1), zenithHue, _SkyGradient * upness);
-                reflCol *= lerp(half3(1, 1, 1), probeHue, _SkyGradient * 0.75h);
+                // 環境の色味は「馴染ませる」程度にとどめる。強く借りると
+                // 指定した _HorizonColor から色が離れてしまう。
+                reflCol *= lerp(half3(1, 1, 1), probeHue, _SkyGradient * 0.35h);
                 #ifdef USE_REFLECTION_CUBE
                 reflCol = lerp(reflCol, texCUBE(_ReflCube, reflDir).rgb, _ReflStrength);
                 #endif

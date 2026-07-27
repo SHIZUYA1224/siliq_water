@@ -352,7 +352,9 @@ Shader "Siliq/Water URP"
                 macroMask = saturate(0.5h + macroA * 0.5h);
                 float2 centeredUv = uv - 0.5;
                 float2 macroWarp = float2(macroA, macroB) * (_MacroVariation * 0.075h);
-                half layer2Angle = 0.61h + macroB * _MacroDirectionBreakup * 0.9h;
+                // レイヤー 2 の基準角は 0 のまま (n1/n2 の干渉パターンを変えない)。
+                // 相関崩しは距離で消える微細レイヤー側だけで行う。
+                half layer2Angle = macroB * _MacroDirectionBreakup * 0.9h;
                 float tiling1 = _Tiling1 * (1.0 + macroA * _MacroVariation * 0.18);
                 float tiling2 = _Tiling2 * (1.0 + macroB * _MacroVariation * 0.22);
                 float2 uv1 = centeredUv * tiling1 + 0.5 + macroWarp;
@@ -388,8 +390,10 @@ Shader "Siliq/Water URP"
                 UNITY_BRANCH
                 if (_DetailStrength > 0.002h)
                 {
+                    // 3 乗で落として本当に足元だけに乗せる。画面全体に乗ると
+                    // 「情報量」ではなく単なるザラつきになる。
                     half detailFade = saturate(1.0h - viewDist / max(_DetailDistance, 1.0));
-                    detailWeight = _DetailStrength * detailFade * detailFade * sharpness;
+                    detailWeight = _DetailStrength * detailFade * detailFade * detailFade * sharpness;
                     float2 uv3 = SiliqRotate2D(centeredUv, 2.31h - macroA * _MacroDirectionBreakup * 0.6h) *
                                  (tiling1 * max(_DetailTiling, 2.0)) + 0.5 +
                                  (_Scroll2.xy * 1.9 - _Scroll1.xy * 1.3) * time;

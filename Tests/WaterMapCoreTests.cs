@@ -3075,6 +3075,10 @@ namespace Siliq.Water.Tests
             Assert.IsFalse(mobile.Contains("lerp(half3(1, 1, 1), _ZenithColor.rgb"),
                 "生の _ZenithColor を掛けると反射が暗くなる");
 
+            // 環境プローブの色味を強く借りると、指定した _HorizonColor から色が離れる
+            StringAssert.Contains("probeHue, _SkyGradient * 0.35h", mobile,
+                "環境の色味は馴染ませる程度にとどめること");
+
             // ハイライトと反射帯は material の見せ場。遠景でも消しすぎない。
             StringAssert.Contains("lerp(0.72h, 1.0h, sharpness)", mobile,
                 "遠景でハイライトの強度まで大きく落とさない");
@@ -3131,9 +3135,18 @@ namespace Siliq.Water.Tests
                 Assert.IsFalse(text.Contains("if (detailWeight"),
                     $"{path}: 距離依存の値で分岐するとテクスチャ微分が未定義になる");
 
-                // 同じテクスチャを重ねるので、レイヤーごとに回して格子状の相関を消す
+                // 相関崩しは距離で消える微細レイヤー側だけで行う
                 StringAssert.Contains("SiliqRotate2D(centeredUv, 2.31h", text,
                     $"{path}: 微細波レイヤーは他レイヤーと別の角度に回す必要がある");
+
+                // 微細波が画面全体に乗ると「情報量」ではなくザラつきになる
+                StringAssert.Contains("detailFade * detailFade * detailFade", text,
+                    $"{path}: 微細波は 3 乗で落として足元だけに乗せる");
+
+                // レイヤー 2 の基準角を回すと n1/n2 の干渉 (glimmer の元) が丸ごと変わり、
+                // 手調整済みのきらめきがザラつきに化ける。基準は 0 のまま保つ。
+                StringAssert.Contains("half layer2Angle = macroB * _MacroDirectionBreakup * 0.9h;", text,
+                    $"{path}: レイヤー 2 の基準角に定数を足してはいけない");
             }
         }
 
